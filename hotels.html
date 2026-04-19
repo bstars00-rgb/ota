@@ -68,8 +68,10 @@
     .sf-dates{display:grid;grid-template-columns:1fr auto 1fr;padding:0;}
     .sf-dates > *{padding:12px 18px;display:flex;flex-direction:column;justify-content:center;gap:2px;}
     .sf-nights{background:var(--primary-soft);color:var(--primary);font-weight:900;font-size:12px;border-right:1px solid var(--line);border-left:1px solid var(--line);text-align:center;white-space:nowrap;padding:0 14px;display:flex;align-items:center;justify-content:center;}
-    .search-btn{padding:0 32px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:900;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+    .search-btn{padding:0 32px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:900;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:box-shadow .2s;}
     .search-btn:hover{background:var(--primary-dark);}
+    .search-btn.dirty{box-shadow:0 0 0 3px rgba(255,107,53,.25), 0 0 20px rgba(255,107,53,.4);animation:searchPulse 1.6s ease-in-out infinite;}
+    @keyframes searchPulse{0%,100%{box-shadow:0 0 0 3px rgba(255,107,53,.25), 0 0 20px rgba(255,107,53,.4);}50%{box-shadow:0 0 0 6px rgba(255,107,53,.15), 0 0 30px rgba(255,107,53,.55);}}
 
     /* Quick chips below search */
     .quick-chips{
@@ -816,10 +818,20 @@
      STATE
      ============================================================= */
   const STATE = {
+    // DRAFT — 검색창에서 편집 중인 상태 (결과에 즉시 반영되지 않음)
     destination: DESTINATIONS.find(d => d.id === 'osaka'),
     checkin: new Date(2026, 4, 10),   // 2026-05-10
     checkout: new Date(2026, 4, 13),  // 2026-05-13
     rooms: [{ adults: 2, children: [] }],
+
+    // APPLIED — "호텔 검색" 버튼 클릭으로 확정된 검색 조건 (결과 렌더에 사용)
+    applied: {
+      destination: DESTINATIONS.find(d => d.id === 'osaka'),
+      checkin: new Date(2026, 4, 10),
+      checkout: new Date(2026, 4, 13),
+      rooms: [{ adults: 2, children: [] }]
+    },
+
     filters: {
       priceMin: 0, priceMax: 1000000,
       deals: {}, minRating: 0,
@@ -831,6 +843,29 @@
     calTempCheckin: null, calTempCheckout: null,
     calViewMonth: { year: new Date().getFullYear(), month: new Date().getMonth() }
   };
+
+  // Helper: draft가 applied와 다른지 확인
+  function isDraftDirty(){
+    const a = STATE.applied;
+    if(STATE.destination?.id !== a.destination?.id || STATE.destination?.type !== a.destination?.type) return true;
+    if(dayKey(STATE.checkin) !== dayKey(a.checkin)) return true;
+    if(dayKey(STATE.checkout) !== dayKey(a.checkout)) return true;
+    if(JSON.stringify(STATE.rooms) !== JSON.stringify(a.rooms)) return true;
+    return false;
+  }
+
+  // 검색 버튼 상태 업데이트 (변경 사항 있으면 반짝이게)
+  function refreshSearchButton(){
+    const btn = document.querySelector('.search-btn');
+    if(!btn) return;
+    if(isDraftDirty()){
+      btn.classList.add('dirty');
+      btn.innerHTML = '🔍 호텔 검색 <span style="font-size:10px;background:rgba(255,255,255,.3);padding:2px 6px;border-radius:999px;margin-left:4px;">변경됨</span>';
+    } else {
+      btn.classList.remove('dirty');
+      btn.innerHTML = '🔍 호텔 검색';
+    }
+  }
 
   // Temporary draft for guests popup
   let roomsDraft = JSON.parse(JSON.stringify(STATE.rooms));
@@ -949,19 +984,24 @@
   }
 
   function selectDestination(d){
+    // Draft만 업데이트 — "호텔 검색" 버튼 클릭 시 실제 검색 실행
     STATE.destination = d;
     OMT.State.addSearchHistory(d.label);
     updateDestLabel();
     closePopups();
-    resetAreaFilter();
-    render();
+    refreshSearchButton();
   }
 
   function updateDestLabel(){
+    // 검색 바의 draft 목적지 표시
     const d = STATE.destination;
     document.getElementById('destLabel').textContent = d.label;
     document.getElementById('destSub').textContent = d.sub;
-    document.getElementById('destCountLabel').textContent = d.label;
+  }
+  function updateAppliedLabel(){
+    // 결과 섹션 상단의 실제 적용된 목적지 표시
+    const d = STATE.applied.destination;
+    document.getElementById('destCountLabel').textContent = d?.label || '';
   }
 
   function quickSet(cityId){
@@ -1084,11 +1124,12 @@
       alert('체크인/체크아웃 날짜를 모두 선택해주세요');
       return;
     }
+    // Draft만 업데이트 — "호텔 검색" 버튼 클릭 시 실제 검색 실행
     STATE.checkin = STATE.calTempCheckin;
     STATE.checkout = STATE.calTempCheckout;
     updateDateLabels();
     closePopups();
-    render();
+    refreshSearchButton();
   }
   function updateDateLabels(){
     const ci = STATE.checkin, co = STATE.checkout;
@@ -1171,9 +1212,11 @@
   };
   window.resetRooms = () => { roomsDraft = [{ adults: 2, children: [] }]; renderGuestsPopup(); };
   window.applyGuests = () => {
+    // Draft만 업데이트 — "호텔 검색" 버튼 클릭 시 실제 검색 실행
     STATE.rooms = JSON.parse(JSON.stringify(roomsDraft));
     updateGuestsLabel();
     closePopups();
+    refreshSearchButton();
   };
   function updateGuestsLabel(){
     const totalAdults = STATE.rooms.reduce((s,r) => s + r.adults, 0);
@@ -1224,7 +1267,7 @@
       <div class="f-row" onclick="toggleFilter('deals','${o.v}')">
         <span class="f-check ${STATE.filters.deals[o.v]?'checked':''}"></span>
         <span class="f-label-text">${o.label}</span>
-        <span class="f-count">${HOTELS.filter(h => h.deals?.includes(o.v) && h.city === STATE.destination?.id).length}</span>
+        <span class="f-count">${HOTELS.filter(h => h.deals?.includes(o.v) && h.city === STATE.applied.destination?.id).length}</span>
       </div>
     `).join('');
 
@@ -1249,12 +1292,12 @@
       <div class="f-row" onclick="toggleFilter('types','${o.v}')">
         <span class="f-check ${STATE.filters.types[o.v]?'checked':''}"></span>
         <span class="f-label-text">${o.icon} ${o.label}</span>
-        <span class="f-count">${HOTELS.filter(h => h.type === o.v && h.city === STATE.destination?.id).length}</span>
+        <span class="f-count">${HOTELS.filter(h => h.type === o.v && h.city === STATE.applied.destination?.id).length}</span>
       </div>
     `).join('');
 
     // Areas (dynamic by destination)
-    const relevant = HOTELS.filter(h => h.city === STATE.destination?.id);
+    const relevant = HOTELS.filter(h => h.city === STATE.applied.destination?.id);
     const areaSet = [...new Set(relevant.map(h => h.areaId))].map(id => ({
       id, label: relevant.find(h => h.areaId === id).area
     }));
@@ -1276,7 +1319,7 @@
     `).join('');
 
     // Chains
-    const chains = [...new Set(HOTELS.filter(h => h.city === STATE.destination?.id).map(h => h.chain))];
+    const chains = [...new Set(HOTELS.filter(h => h.city === STATE.applied.destination?.id).map(h => h.chain))];
     document.getElementById('filterChains').innerHTML = chains.length > 0 ? chains.map(c => `
       <div class="f-row" onclick="toggleFilter('chains','${c}')">
         <span class="f-check ${STATE.filters.chains[c]?'checked':''}"></span>
@@ -1384,7 +1427,8 @@
      APPLY FILTERS → render results
      ============================================================= */
   function applyFilters(){
-    const d = STATE.destination;
+    // Applied(확정된) destination 기준으로 필터 — draft 변경은 검색 버튼 전까지 무시
+    const d = STATE.applied.destination;
     return HOTELS.filter(h => {
       // Destination match
       if(d){
@@ -1469,7 +1513,9 @@
 
   function render(){
     const results = applyFilters();
-    const nights = diffNights(STATE.checkin, STATE.checkout);
+    // 결과는 applied 기준으로 계산
+    const nights = diffNights(STATE.applied.checkin, STATE.applied.checkout);
+    updateAppliedLabel();
     document.getElementById('resCount').textContent = results.length;
     document.getElementById('activeChips').innerHTML = activeChipsHTML();
 
@@ -1596,7 +1642,35 @@
 
   function runSearch(){
     closePopups();
+    // Draft → Applied 커밋 (실제 검색 실행 시점)
+    STATE.applied = {
+      destination: STATE.destination,
+      checkin: STATE.checkin,
+      checkout: STATE.checkout,
+      rooms: JSON.parse(JSON.stringify(STATE.rooms))
+    };
+    // 목적지가 바뀌면 지역 필터 초기화 (새 목적지 지역 옵션으로 갱신)
+    STATE.filters.areas = {};
+    updateAppliedLabel();
+    renderFilterUI();
     render();
+    refreshSearchButton();
+    // 검색 실행 토스트
+    showToast('검색 조건이 적용됐어요 ✓');
+  }
+
+  function showToast(msg){
+    let t = document.getElementById('_toast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = '_toast';
+      t.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;font-size:14px;z-index:200;transition:transform .3s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.25);';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._tid);
+    t._tid = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(100px)'; }, 1800);
   }
 
   /* =============================================================
@@ -1607,11 +1681,11 @@
   if(url.get('c')){
     const c = url.get('c');
     const d = DESTINATIONS.find(x => x.type==='country' && x.id === c);
-    if(d) STATE.destination = d;
+    if(d){ STATE.destination = d; STATE.applied.destination = d; }
   }
   if(url.get('city')){
     const d = DESTINATIONS.find(x => x.type==='city' && x.id === url.get('city'));
-    if(d) STATE.destination = d;
+    if(d){ STATE.destination = d; STATE.applied.destination = d; }
   }
 
   updateDestLabel();
@@ -1621,6 +1695,7 @@
   attachPriceDrag();
   renderFilterUI();
   render();
+  refreshSearchButton();
   </script>
 </body>
 </html>
