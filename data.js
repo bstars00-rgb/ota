@@ -18,9 +18,10 @@
      ===================================================================== */
   const COUNTRIES = {
     japan: {
-      slug:'japan', flag:'🇯🇵', name:'한국인의 일본',
-      tagline:'벚꽃부터 야경까지, 한국인이 가장 사랑하는 여행지',
+      slug:'japan', name:'일본', epithet:'미식의 나라',
+      tagline:'벚꽃부터 야경까지, 미식과 온천의 나라',
       accent:'#FFB7C5',
+      landmark:'https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?auto=format&fit=crop&w=240&h=240&q=80',
       heroImages:[
         'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?auto=format&fit=crop&w=1800&q=80',
@@ -28,27 +29,30 @@
       ]
     },
     vietnam: {
-      slug:'vietnam', flag:'🇻🇳', name:'한국인의 베트남',
+      slug:'vietnam', name:'베트남', epithet:'휴양의 나라',
       tagline:'에메랄드 해변과 따뜻한 미소',
       accent:'#E63946',
+      landmark:'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=240&h=240&q=80',
       heroImages:[
         'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=1800&q=80'
       ]
     },
     thailand: {
-      slug:'thailand', flag:'🇹🇭', name:'한국인의 태국',
-      tagline:'야시장부터 섬까지, 입맛 가득 태국 여행',
+      slug:'thailand', name:'태국', epithet:'미소의 나라',
+      tagline:'야시장부터 섬까지, 입맛 가득한 여행',
       accent:'#F4A261',
+      landmark:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=240&h=240&q=80',
       heroImages:[
         'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=1800&q=80'
       ]
     },
     philippines: {
-      slug:'philippines', flag:'🇵🇭', name:'한국인의 필리핀',
+      slug:'philippines', name:'필리핀', epithet:'섬의 나라',
       tagline:'에메랄드 바다와 호핑의 천국',
       accent:'#06A77D',
+      landmark:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=240&h=240&q=80',
       heroImages:[
         'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1800&q=80'

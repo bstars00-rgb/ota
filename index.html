@@ -289,10 +289,18 @@
     .country-card:hover{transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary);}
     .country-card:hover::before{opacity:1;}
     .country-card > *{position:relative;}
-    .country-flag{font-size: 36px; line-height:1; margin-bottom: 12px;}
-    .country-name{font-weight: 800; font-size: 17px; letter-spacing:-0.02em;}
-    .country-cities{font-size: 12px; color: var(--ink-3); margin: 4px 0 10px;}
-    .country-count{font-size: 12px; color: var(--primary); font-weight:700;}
+    .country-landmark{
+      width:64px;height:64px;border-radius:50%;
+      background-size:cover;background-position:center;background-color:#eee;
+      margin-bottom:14px;border:3px solid #fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.10);
+      transition:transform .25s;
+    }
+    .country-card:hover .country-landmark{transform:scale(1.05);}
+    .country-name{font-weight: 900; font-size: 18px; letter-spacing:-0.02em;}
+    .country-tagline{font-size: 12px; color: var(--ink-2); margin-top:3px; font-weight:600;}
+    .country-cities{font-size: 11px; color: var(--ink-3); margin: 3px 0 10px;}
+    .country-count{font-size: 12px; color: var(--primary); font-weight:800;}
 
     /* =========================================
        Originals
@@ -816,10 +824,10 @@
       </a>
 
       <nav class="gnb" aria-label="주요 메뉴">
-        <a href="country.html?c=japan">🇯🇵 일본</a>
-        <a href="country.html?c=vietnam">🇻🇳 베트남</a>
-        <a href="country.html?c=thailand">🇹🇭 태국</a>
-        <a href="country.html?c=philippines">🇵🇭 필리핀</a>
+        <a href="country.html?c=japan">일본</a>
+        <a href="country.html?c=vietnam">베트남</a>
+        <a href="country.html?c=thailand">태국</a>
+        <a href="country.html?c=philippines">필리핀</a>
         <a href="feed.html">▶ 피드</a>
         <a href="packages.html">📦 패키지</a>
       </nav>
@@ -858,10 +866,10 @@
       </button>
     </div>
     <nav class="drawer-list">
-      <a href="country.html?c=japan">🇯🇵 한국인의 일본</a>
-      <a href="country.html?c=vietnam">🇻🇳 한국인의 베트남</a>
-      <a href="country.html?c=thailand">🇹🇭 한국인의 태국</a>
-      <a href="country.html?c=philippines">🇵🇭 한국인의 필리핀</a>
+      <a href="country.html?c=japan">미식의 나라 · 일본</a>
+      <a href="country.html?c=vietnam">휴양의 나라 · 베트남</a>
+      <a href="country.html?c=thailand">미소의 나라 · 태국</a>
+      <a href="country.html?c=philippines">섬의 나라 · 필리핀</a>
       <a href="ai-planner.html">✦ AI 여행 플래너</a>
       <a href="feed.html">▶ 크리에이터 피드</a>
       <a href="packages.html">📦 다이나믹 패키지</a>
@@ -1049,9 +1057,9 @@
       </div>
 
       <div class="tabs" role="tablist">
-        <button class="tab active" data-tab="japan">🇯🇵 일본</button>
-        <button class="tab" data-tab="vietnam">🇻🇳 베트남</button>
-        <button class="tab" data-tab="thailand">🇹🇭 태국</button>
+        <button class="tab active" data-tab="japan">일본</button>
+        <button class="tab" data-tab="vietnam">베트남</button>
+        <button class="tab" data-tab="thailand">태국</button>
       </div>
 
       <div class="flights-grid" id="flightsGrid">
@@ -1184,12 +1192,24 @@
      ========================================= */
   // TODO: API 연동 필요 - GET /api/countries/sectors
   const COUNTRIES = [
-    { slug:'japan',        flag:'🇯🇵', name:'한국인의 일본',   cities:'도쿄·오사카·후쿠오카',     count:'2,847개 상품'  },
-    { slug:'vietnam',      flag:'🇻🇳', name:'한국인의 베트남', cities:'다낭·나트랑·푸꾸옥',       count:'1,923개 상품'  },
-    { slug:'thailand',     flag:'🇹🇭', name:'한국인의 태국',   cities:'방콕·치앙마이·푸켓',       count:'1,658개 상품'  },
-    { slug:'philippines',  flag:'🇵🇭', name:'한국인의 필리핀', cities:'세부·보홀·보라카이',       count:'1,204개 상품'  },
-    { slug:'southeast-asia', flag:'🌏', name:'동남아 기타',    cities:'싱가포르·말레이시아·인니', count:'986개 상품'    },
-    { slug:'world',        flag:'🌍', name:'전세계 호텔',     cities:'유럽·미주·오세아니아',     count:'12,340개 호텔' }
+    { slug:'japan',         name:'일본',         epithet:'미식의 나라',
+      landmark:'https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'도쿄 · 오사카 · 후쿠오카',   count:'2,847개 상품' },
+    { slug:'vietnam',       name:'베트남',       epithet:'휴양의 나라',
+      landmark:'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'다낭 · 나트랑 · 푸꾸옥',     count:'1,923개 상품' },
+    { slug:'thailand',      name:'태국',         epithet:'미소의 나라',
+      landmark:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'방콕 · 치앙마이 · 푸켓',     count:'1,658개 상품' },
+    { slug:'philippines',   name:'필리핀',       epithet:'섬의 나라',
+      landmark:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'세부 · 보홀 · 보라카이',     count:'1,204개 상품' },
+    { slug:'southeast-asia',name:'동남아 기타',  epithet:'아시아의 보석',
+      landmark:'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'싱가포르 · 말레이시아 · 인니', count:'986개 상품' },
+    { slug:'world',         name:'전세계 호텔', epithet:'세계의 명소',
+      landmark:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=240&h=240&q=80',
+      cities:'유럽 · 미주 · 오세아니아',    count:'12,340개 호텔' }
   ];
 
   // Originals — 중앙 data.js에서 동적 생성 (originalFlag=true 상품 중 4개)
@@ -1200,8 +1220,7 @@
     .map(p => ({
       id: p.id,
       img: p.images?.[0] || '',
-      country: (OMT.DATA.COUNTRIES[p.country]?.flag || '') + ' ' +
-               (OMT.DATA.COUNTRIES[p.country]?.name.replace('한국인의 ','') || p.country),
+      country: OMT.DATA.COUNTRIES[p.country]?.name || p.country,
       title: p.name,
       compo: p.subtitle,
       price: p.price,
@@ -1284,7 +1303,8 @@
     const el = document.getElementById('countriesGrid');
     el.innerHTML = COUNTRIES.map(c => `
       <a class="country-card" href="country.html?c=${c.slug}">
-        <div class="country-flag" aria-hidden="true">${c.flag}</div>
+        <div class="country-landmark" aria-hidden="true" style="background-image:url('${c.landmark}')"></div>
+        <div class="country-tagline">${c.epithet}</div>
         <div class="country-name">${c.name}</div>
         <div class="country-cities">${c.cities}</div>
         <div class="country-count">${c.count} →</div>

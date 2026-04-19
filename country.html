@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="오마이트립 국가 섹터 - 한국인 특화 여행 큐레이션" />
-  <title id="pageTitle">한국인의 일본 | 오마이트립</title>
+  <title id="pageTitle">일본 여행 | 오마이트립</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -132,9 +132,15 @@
       padding: 64px 24px 48px;
       display:flex; flex-direction:column; gap:24px;
     }
-    .c-hero-flag{
-      font-size: 52px; line-height:1;
-      filter: drop-shadow(0 4px 16px rgba(0,0,0,.3));
+    .c-hero-epithet{
+      display:inline-block;align-self:flex-start;
+      padding:7px 16px;border-radius:999px;
+      background:rgba(255,255,255,.18);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.32);
+      font-size:13px;font-weight:700;letter-spacing:.02em;
+      color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.2);
     }
     .c-hero h1{
       font-size: clamp(32px, 5vw, 48px); font-weight:900; letter-spacing:-0.03em;
@@ -555,7 +561,7 @@
 
       .c-hero{min-height: 360px;}
       .c-hero-inner{padding: 40px 16px 36px;}
-      .c-hero-flag{font-size: 40px;}
+      .c-hero-epithet{font-size:12px;padding:6px 14px;}
       .popular-cities{gap: 6px;}
       .city-chip{padding: 8px 14px; font-size: 13px;}
       .popular-cities .label{display:none;}
@@ -639,10 +645,10 @@
       </a>
 
       <nav class="gnb" id="headerNav" aria-label="주요 메뉴">
-        <a href="country.html?c=japan"       data-c="japan">🇯🇵 일본</a>
-        <a href="country.html?c=vietnam"     data-c="vietnam">🇻🇳 베트남</a>
-        <a href="country.html?c=thailand"    data-c="thailand">🇹🇭 태국</a>
-        <a href="country.html?c=philippines" data-c="philippines">🇵🇭 필리핀</a>
+        <a href="country.html?c=japan"       data-c="japan">일본</a>
+        <a href="country.html?c=vietnam"     data-c="vietnam">베트남</a>
+        <a href="country.html?c=thailand"    data-c="thailand">태국</a>
+        <a href="country.html?c=philippines" data-c="philippines">필리핀</a>
         <a href="country.html?c=southeast-asia" data-c="southeast-asia">🌏 동남아</a>
         <a href="country.html?c=world"       data-c="world">🌍 전세계 호텔</a>
       </nav>
@@ -678,10 +684,10 @@
       </button>
     </div>
     <nav class="drawer-list">
-      <a href="country.html?c=japan">🇯🇵 한국인의 일본</a>
-      <a href="country.html?c=vietnam">🇻🇳 한국인의 베트남</a>
-      <a href="country.html?c=thailand">🇹🇭 한국인의 태국</a>
-      <a href="country.html?c=philippines">🇵🇭 한국인의 필리핀</a>
+      <a href="country.html?c=japan">미식의 나라 · 일본</a>
+      <a href="country.html?c=vietnam">휴양의 나라 · 베트남</a>
+      <a href="country.html?c=thailand">미소의 나라 · 태국</a>
+      <a href="country.html?c=philippines">섬의 나라 · 필리핀</a>
       <a href="ai-planner.html">✦ AI 여행 플래너</a>
       <a href="feed.html">▶ 크리에이터 피드</a>
       <a href="mypage.html">👤 마이페이지</a>
@@ -702,7 +708,7 @@
       <span class="sep">›</span>
       <a href="#" id="bcParent">아시아</a>
       <span class="sep">›</span>
-      <span class="current" id="bcCurrent">한국인의 일본</span>
+      <span class="current" id="bcCurrent">일본</span>
     </div>
   </div>
 
@@ -714,9 +720,9 @@
       <!-- TODO: API 연동 필요 - /api/countries/{slug}/hero (큐레이션 배경 이미지) -->
     </div>
     <div class="c-hero-inner">
-      <span class="c-hero-flag" id="heroFlag">🇯🇵</span>
-      <h1 id="heroTitle">한국인의 일본</h1>
-      <p class="c-hero-tagline" id="heroTagline">벚꽃부터 야경까지, 한국인이 가장 사랑하는 여행지</p>
+      <span class="c-hero-epithet" id="heroEpithet">미식의 나라</span>
+      <h1 id="heroTitle">일본</h1>
+      <p class="c-hero-tagline" id="heroTagline">벚꽃부터 야경까지, 미식과 온천의 나라</p>
       <div class="popular-cities" id="popularCities" role="navigation" aria-label="인기 도시">
         <!-- Rendered by JS -->
       </div>
@@ -1004,7 +1010,7 @@
     japan: {
       slug: 'japan',
       flag: '🇯🇵',
-      name: '한국인의 일본',
+      name: '일본', epithet: '미식의 나라',
       tagline: '벚꽃부터 야경까지, 한국인이 가장 사랑하는 여행지',
       accentCountry: '#FFB7C5',          // sakura pink
       breadcrumbParent: '아시아',
@@ -1134,7 +1140,7 @@
     },
 
     vietnam: {
-      slug:'vietnam', flag:'🇻🇳', name:'한국인의 베트남',
+      slug:'vietnam', flag:'🇻🇳', name:'베트남', epithet:'휴양의 나라',
       tagline:'에메랄드 해변과 따뜻한 미소, 가성비로도 최고의 선택',
       accentCountry:'#E63946', breadcrumbParent:'동남아시아',
       heroImages: [
@@ -1263,7 +1269,7 @@
     },
 
     thailand: {
-      slug:'thailand', flag:'🇹🇭', name:'한국인의 태국',
+      slug:'thailand', flag:'🇹🇭', name:'태국', epithet:'미소의 나라',
       tagline:'야시장부터 섬까지, 입맛 가득 태국 여행',
       accentCountry:'#F4A261', breadcrumbParent:'동남아시아',
       heroImages: [
@@ -1392,7 +1398,7 @@
     },
 
     philippines: {
-      slug:'philippines', flag:'🇵🇭', name:'한국인의 필리핀',
+      slug:'philippines', flag:'🇵🇭', name:'필리핀', epithet:'섬의 나라',
       tagline:'에메랄드 바다와 호핑의 천국',
       accentCountry:'#06A77D', breadcrumbParent:'동남아시아',
       heroImages:[
@@ -1542,11 +1548,11 @@
     document.getElementById('pageTitle').textContent = `${cfg.name} | 오마이트립`;
     document.getElementById('bcParent').textContent = cfg.breadcrumbParent;
     document.getElementById('bcCurrent').textContent = cfg.name;
-    document.getElementById('heroFlag').textContent = cfg.flag;
+    document.getElementById('heroEpithet').textContent = cfg.epithet || '';
     document.getElementById('heroTitle').textContent = cfg.name;
     document.getElementById('heroTagline').textContent = cfg.tagline;
 
-    // Country name tokens in section titles
+    // Country name tokens in section titles (이미 "일본" 형식이므로 replace 불필요)
     const shortName = cfg.name.replace('한국인의 ', '');
     ['origCountry','flightCountry','shortsCountry','builderCountry'].forEach(id => {
       const el = document.getElementById(id);
@@ -1607,7 +1613,7 @@
   function renderSearchForm(){
     const sel = document.getElementById('arrCity');
     sel.innerHTML = cfg.cities
-      .map(c => `<option value="${c.id}">${cfg.flag} ${c.label}</option>`)
+      .map(c => `<option value="${c.id}">${c.label}</option>`)
       .join('');
 
     // Mode tabs
@@ -1674,7 +1680,7 @@
         <div class="product-thumb" style="background-image:url('${p.img}')">
           <div class="product-badges">
             <span class="badge original">ORIGINAL</span>
-            <span class="badge country">${cfg.flag}</span>
+            <span class="badge country">${cfg.name}</span>
           </div>
         </div>
         <div class="product-body">
