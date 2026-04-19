@@ -20,8 +20,64 @@
     points:        'omt_points_balance',
     searchHistory: 'omt_search_history',
     recentlyViewed:'omt_recently_viewed',
-    user:          'omt_user_session'
+    user:          'omt_user_session',
+    membership:    'omt_membership_v1'
   };
+
+  /* =====================================================================
+     MEMBERSHIP (Subscription) — 오마이트립 PASS
+     - 월 9,900원으로 호텔 최저가 (OTA 수수료 없는 실제 원가) 이용
+     - 호텔은 OTA 수수료 20% 절감, 고객은 절약분 그대로 수령
+     - 메인 BM: 구독료 / 부가: 단독 패키지 마진
+     ===================================================================== */
+  const MEMBER_DISCOUNT_RATE = 0.15;   // 15% 할인 (OTA 수수료 절감분 반영)
+  const MONTHLY_PRICE = 9900;
+  const ANNUAL_PRICE = 99000;          // 2개월 무료
+
+  function getMembership(){
+    return read(KEYS.membership, { active: false, plan: null, since: null, renewsAt: null, savedTotal: 0 });
+  }
+  function isMember(){
+    return !!getMembership().active;
+  }
+  function subscribeMembership(plan='monthly'){
+    const now = new Date();
+    const renew = new Date(now);
+    if(plan === 'annual') renew.setFullYear(renew.getFullYear() + 1);
+    else renew.setMonth(renew.getMonth() + 1);
+    const m = {
+      active: true,
+      plan,
+      since: now.toISOString(),
+      renewsAt: renew.toISOString(),
+      savedTotal: getMembership().savedTotal || 0
+    };
+    write(KEYS.membership, m);
+    notify('membership', m);
+    return m;
+  }
+  function cancelMembership(){
+    const m = getMembership();
+    m.active = false;
+    m.cancelledAt = new Date().toISOString();
+    write(KEYS.membership, m);
+    notify('membership', m);
+    return m;
+  }
+  function addMemberSavings(amount){
+    const m = getMembership();
+    m.savedTotal = (m.savedTotal || 0) + amount;
+    write(KEYS.membership, m);
+    notify('membership', m);
+    return m.savedTotal;
+  }
+  // 멤버 가격 계산 (15% 할인)
+  function memberPrice(originalPrice){
+    return Math.round(originalPrice * (1 - MEMBER_DISCOUNT_RATE) / 1000) * 1000;
+  }
+  function memberSavings(originalPrice){
+    return originalPrice - memberPrice(originalPrice);
+  }
 
   const read = (k, fallback=null) => {
     try { const raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : fallback; }
@@ -291,6 +347,10 @@
     getRecentlyViewed, addRecentlyViewed,
     // User
     getUser, setUser, logout,
+    // Membership (Subscription)
+    getMembership, isMember, subscribeMembership, cancelMembership, addMemberSavings,
+    memberPrice, memberSavings,
+    MEMBER_DISCOUNT_RATE, MONTHLY_PRICE, ANNUAL_PRICE,
     // Events
     on, off,
     // Utils

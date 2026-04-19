@@ -273,7 +273,7 @@
   function renderHead(){
     const wished = OMT.State.isWished(product.id);
     document.getElementById('productHead').innerHTML = `
-      ${product.originalFlag ? '<span class="tag orig">ORIGINAL</span>' : ''}
+      ${product.directRun ? '<span class="tag orig" style="background:linear-gradient(135deg,var(--primary),#FF9A6C);">🏠 OMT 직영</span>' : (product.originalFlag ? '<span class="tag orig">ORIGINAL</span>' : '')}
       <span class="tag country">${country.flag} ${country.name.replace('한국인의 ','')}</span>
       <span class="tag">${product.category === 'package' ? '패키지' : product.category}</span>
       <button class="heart-btn ${wished?'active':''}" onclick="toggleHeart()" aria-label="찜하기">${wished?'❤️':'🤍'}</button>
@@ -384,7 +384,7 @@
     document.getElementById('bookPanel').innerHTML = `
       <div class="bp-price-row"><span class="bp-lb">1인 최저가</span><span class="bp-old">${OMT.krw(product.oldPrice)}</span></div>
       <div class="bp-price">${priceFmt}<small>~</small></div>
-      <span class="bp-tag">${Math.round((1 - product.price/product.oldPrice)*100)}% 할인${product.originalFlag?' · 단독 특가':''}</span>
+      <span class="bp-tag">${Math.round((1 - product.price/product.oldPrice)*100)}% 할인${product.directRun?' · OMT 직영 최저가':(product.originalFlag?' · 단독 특가':'')}</span>
 
       <div class="bp-field"><label>출발 날짜</label>
         <select id="bpDate">

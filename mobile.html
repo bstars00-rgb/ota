@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>오마이트립 - 여행 크리에이터 플랫폼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --secondary:#1E88E5;--accent:#FFD23F;--success:#10B981;--danger:#EF4444;
+      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
+      --tab-h:56px;
+    }
+    *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+    body{
+      font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+      line-height:1.5;-webkit-font-smoothing:antialiased;user-select:none;
+      background:#111;
+    }
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,textarea{font-family:inherit;}
+    ul{list-style:none;margin:0;padding:0;}
+
+    /* ==========================================
+       Phone Frame (for desktop)
+       ========================================== */
+    .desktop-wrap{
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:20px;gap:40px;
+    }
+    .desktop-intro{
+      max-width:340px;color:#fff;display:none;
+    }
+    .desktop-intro h1{font-size:32px;font-weight:900;margin:0 0 10px;letter-spacing:-0.02em;line-height:1.2;}
+    .desktop-intro h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .desktop-intro p{font-size:14px;opacity:.75;line-height:1.7;margin:0 0 20px;}
+    .desktop-intro .features li{display:flex;gap:10px;padding:8px 0;font-size:13px;}
+    .desktop-intro .features .ic{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#FF9A6C);display:grid;place-items:center;font-size:16px;flex-shrink:0;}
+
+    .phone-frame{
+      width:390px;height:844px;
+      background:#000;border-radius:46px;padding:10px;
+      box-shadow:0 30px 80px rgba(255,107,53,.2), 0 20px 60px rgba(0,0,0,.6), inset 0 0 0 2px #333;
+      position:relative;
+    }
+    .phone-frame::before{
+      content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
+      width:120px;height:28px;background:#000;border-radius:0 0 18px 18px;z-index:1000;
+    }
+    .phone-frame::after{
+      content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      width:120px;height:4px;background:rgba(255,255,255,.4);border-radius:3px;z-index:1000;
+    }
+
+    /* Mobile app shell */
+    .app{
+      width:100%;height:100%;border-radius:36px;overflow:hidden;
+      background:#0A0A0A;color:#fff;position:relative;
+      display:flex;flex-direction:column;
+    }
+
+    /* ==========================================
+       Header
+       ========================================== */
+    .m-header{
+      flex-shrink:0;padding:calc(env(safe-area-inset-top) + 8px) 16px 10px;
+      display:flex;align-items:center;gap:10px;z-index:20;
+      position:absolute;top:0;left:0;right:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.7),transparent);
+      color:#fff;
+    }
+    .m-header.solid{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);position:relative;padding-top:calc(env(safe-area-inset-top) + 12px);}
+    .m-logo{display:inline-flex;align-items:center;gap:7px;font-weight:900;font-size:15px;letter-spacing:-0.02em;}
+    .m-logo-mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;}
+    .m-logo-mark::after{content:"O";}
+    .m-h-right{margin-left:auto;display:flex;gap:4px;}
+    .m-h-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;transition:background .15s;}
+    .m-h-btn:hover{background:rgba(255,255,255,.14);}
+    .m-header.solid .m-h-btn:hover{background:var(--bg-soft);}
+
+    /* ==========================================
+       Main (tab panels)
+       ========================================== */
+    .m-main{flex:1;min-height:0;position:relative;overflow:hidden;}
+    .tab-panel{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;}
+    .tab-panel.active{display:block;}
+    .tab-panel::-webkit-scrollbar{display:none;}
+
+    /* ==========================================
+       HOME TAB - Creator Feed (Shorts)
+       ========================================== */
+    #tab-home{
+      scroll-snap-type:y mandatory;background:#000;
+    }
+    .home-sub-tabs{
+      position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translateX(-50%);
+      display:flex;gap:22px;z-index:25;pointer-events:auto;
+    }
+    .home-sub-tab{
+      color:rgba(255,255,255,.65);font-size:15px;font-weight:700;padding:4px 0;
+    }
+    .home-sub-tab.active{color:#fff;position:relative;}
+    .home-sub-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-4px;height:2px;background:#fff;}
+
+    .short-slide{
+      height:100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;
+      position:relative;display:flex;align-items:center;justify-content:center;
+      background:#111;overflow:hidden;
+    }
+    .short-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.85);}
+    .short-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,transparent 20%,transparent 55%,rgba(0,0,0,.92) 100%);}
+
+    .short-top{
+      position:absolute;top:calc(env(safe-area-inset-top) + 52px);left:12px;right:70px;z-index:3;
+      display:flex;gap:5px;flex-wrap:wrap;
+    }
+    .s-chip{
+      padding:4px 9px;border-radius:999px;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+      color:#fff;font-size:10px;font-weight:800;
+    }
+    .s-chip.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);}
+
+    .short-bottom{
+      position:absolute;left:12px;right:70px;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 12px);
+      z-index:3;color:#fff;
+    }
+    .s-creator-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+    .s-avatar{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      border:2px solid #fff;display:grid;place-items:center;
+      font-weight:900;font-size:13px;color:#fff;flex-shrink:0;
+    }
+    .s-cname{font-weight:800;font-size:13px;}
+    .s-csubs{font-size:10px;opacity:.85;}
+    .s-follow{
+      padding:5px 11px;border-radius:999px;background:var(--primary);color:#fff;
+      font-weight:800;font-size:11px;margin-left:auto;
+    }
+    .s-follow.following{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);}
+
+    .s-title{font-weight:800;font-size:14px;line-height:1.4;margin-bottom:9px;text-shadow:0 2px 6px rgba(0,0,0,.3);}
+
+    .s-product{
+      background:rgba(255,255,255,.13);backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.2);border-radius:12px;
+      padding:8px;display:grid;grid-template-columns:48px 1fr;gap:9px;align-items:center;
+      margin-bottom:8px;cursor:pointer;
+    }
+    .s-p-img{width:48px;height:48px;border-radius:8px;background-size:cover;background-position:center;background-color:#333;flex-shrink:0;}
+    .s-p-info{min-width:0;}
+    .s-p-tag{display:inline-block;font-size:9px;font-weight:800;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.2);margin-bottom:2px;letter-spacing:.03em;}
+    .s-p-name{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .s-p-price{font-size:12px;font-weight:900;color:var(--accent);}
+    .s-p-price .strike{font-size:10px;opacity:.6;text-decoration:line-through;margin-left:3px;font-weight:600;color:#fff;}
+
+    .s-book{
+      width:100%;padding:10px;border-radius:10px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:12px;
+      box-shadow:0 4px 14px rgba(255,107,53,.5);
+    }
+
+    .s-side{
+      position:absolute;right:10px;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 78px);z-index:3;
+      display:flex;flex-direction:column;gap:14px;
+    }
+    .s-side-btn{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      color:#fff;
+    }
+    .s-side-btn .ico{
+      width:40px;height:40px;border-radius:50%;
+      background:rgba(0,0,0,.4);backdrop-filter:blur(8px);
+      display:grid;place-items:center;font-size:18px;
+    }
+    .s-side-btn.active .ico{background:#E63946;}
+    .s-side-btn.saved .ico{background:var(--primary);}
+    .s-side-btn .n{font-size:10px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+
+    /* ==========================================
+       EXPLORE TAB
+       ========================================== */
+    #tab-explore{background:#fff;color:var(--ink);padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));}
+    .explore-head{padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:#fff;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);}
+    .search-box{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 14px;background:var(--bg-soft);border-radius:999px;
+    }
+    .search-box input{flex:1;border:none;outline:none;background:transparent;font-size:14px;font-weight:600;}
+    .search-box::before{content:"🔍";font-size:14px;}
+
+    .section{padding:20px 16px 8px;}
+    .section-h{font-size:16px;font-weight:900;margin:0 0 12px;letter-spacing:-0.02em;}
+    .section-h small{font-size:11px;color:var(--ink-3);font-weight:600;margin-left:6px;}
+
+    .country-scroll{
+      display:flex;gap:10px;overflow-x:auto;padding:0 16px 8px;margin:0 -16px;
+      scroll-snap-type:x mandatory;
+    }
+    .country-scroll::-webkit-scrollbar{display:none;}
+    .country-chip-card{
+      flex-shrink:0;width:100px;scroll-snap-align:start;
+      text-align:center;
+    }
+    .country-chip-img{
+      width:72px;height:72px;border-radius:50%;margin:0 auto 6px;
+      background-size:cover;background-position:center;background-color:#eee;
+      border:2px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+    .country-chip-name{font-size:12px;font-weight:800;}
+    .country-chip-sub{font-size:10px;color:var(--ink-3);margin-top:1px;}
+
+    .theme-chips{display:flex;gap:6px;overflow-x:auto;padding:0 16px 4px;margin:0 -16px;}
+    .theme-chips::-webkit-scrollbar{display:none;}
+    .theme-chip{
+      flex-shrink:0;padding:8px 14px;border-radius:999px;background:var(--bg-soft);
+      font-size:12px;font-weight:700;color:var(--ink-2);
+    }
+    .theme-chip.active{background:var(--ink);color:#fff;}
+
+    .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .trend-card{
+      position:relative;aspect-ratio:9/16;border-radius:12px;overflow:hidden;
+      background-size:cover;background-position:center;
+    }
+    .trend-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.8));}
+    .trend-rank{
+      position:absolute;top:8px;left:8px;z-index:2;
+      background:rgba(0,0,0,.6);color:#fff;font-weight:900;font-size:10px;
+      padding:3px 7px;border-radius:5px;backdrop-filter:blur(6px);
+    }
+    .trend-title{position:absolute;left:8px;right:8px;bottom:8px;z-index:2;color:#fff;font-size:11px;font-weight:700;line-height:1.35;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+
+    .creator-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px;margin:0 -16px;}
+    .creator-scroll::-webkit-scrollbar{display:none;}
+    .creator-box{flex-shrink:0;width:72px;text-align:center;}
+    .creator-av{width:60px;height:60px;border-radius:50%;margin:0 auto 5px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+    .creator-name{font-size:11px;font-weight:700;}
+    .creator-subs{font-size:9px;color:var(--ink-3);}
+
+    .prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .prod-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;}
+    .prod-thumb{aspect-ratio:4/3;background-size:cover;background-position:center;background-color:#eee;position:relative;}
+    .prod-body{padding:8px 10px;}
+    .prod-name{font-size:12px;font-weight:800;line-height:1.3;}
+    .prod-price{font-size:14px;font-weight:900;color:var(--primary);margin-top:3px;letter-spacing:-0.02em;}
+    .prod-orig{position:absolute;top:6px;left:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;}
+
+    /* ==========================================
+       NOTIFICATIONS TAB
+       ========================================== */
+    #tab-notif{background:#fff;color:var(--ink);padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));}
+    .notif-filter-tabs{display:flex;gap:4px;padding:0 16px 8px;border-bottom:1px solid var(--line);overflow-x:auto;}
+    .notif-filter-tab{padding:10px 14px;font-weight:700;font-size:12px;color:var(--ink-3);white-space:nowrap;}
+    .notif-filter-tab.active{color:var(--primary);border-bottom:2px solid var(--primary);}
+
+    .notif-list{display:flex;flex-direction:column;}
+    .notif-item{
+      display:flex;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);
+      align-items:flex-start;
+    }
+    .notif-item.unread{background:linear-gradient(90deg,var(--primary-soft) 0%,transparent 8%);}
+    .notif-ico{
+      width:40px;height:40px;border-radius:50%;flex-shrink:0;
+      display:grid;place-items:center;font-size:18px;
+    }
+    .notif-ico.booking{background:#E8F5E9;}
+    .notif-ico.social{background:var(--primary-soft);}
+    .notif-ico.promo{background:#FFF3E0;}
+    .notif-ico.system{background:var(--bg-soft);}
+    .notif-body{flex:1;min-width:0;}
+    .notif-title{font-size:13px;font-weight:700;line-height:1.4;}
+    .notif-title strong{color:var(--primary);}
+    .notif-time{font-size:11px;color:var(--ink-3);margin-top:3px;}
+    .notif-action{
+      padding:6px 10px;border-radius:6px;
+      background:var(--primary-soft);color:var(--primary);
+      font-size:11px;font-weight:800;margin-top:6px;display:inline-block;
+    }
+
+    /* ==========================================
+       PROFILE TAB (inline mypage)
+       ========================================== */
+    #tab-profile{background:#fff;color:var(--ink);padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));}
+    .profile-hero{
+      background:linear-gradient(135deg,#1A1A1A 0%,#2C1810 60%,var(--primary) 100%);
+      color:#fff;padding:calc(env(safe-area-inset-top) + 54px) 20px 80px;
+      position:relative;overflow:hidden;
+    }
+    .profile-hero::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.25),transparent 70%);}
+    .profile-av-l{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:24px;color:#fff;border:3px solid rgba(255,255,255,.3);margin-bottom:10px;}
+    .profile-name-l{font-size:20px;font-weight:900;letter-spacing:-0.02em;margin-bottom:3px;}
+    .profile-grade-l{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:var(--accent);color:#1A1A1A;border-radius:999px;font-size:10px;font-weight:900;margin-bottom:12px;}
+
+    .profile-stats-bar{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+      margin:-50px 16px 0;position:relative;z-index:2;
+      background:#fff;border-radius:14px;padding:14px 10px;
+      box-shadow:0 10px 25px rgba(0,0,0,.1);
+    }
+    .p-stat-cell{text-align:center;padding:6px;}
+    .p-stat-cell .v{font-size:18px;font-weight:900;color:var(--ink);letter-spacing:-0.02em;}
+    .p-stat-cell .l{font-size:10px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+    .p-stat-cell + .p-stat-cell{border-left:1px solid var(--line);}
+
+    .profile-creator-cta{
+      margin:14px 16px;padding:14px;
+      background:linear-gradient(135deg,var(--ink),#2C2C2C);color:#fff;
+      border-radius:12px;display:flex;align-items:center;gap:12px;
+    }
+    .profile-creator-cta .ico{font-size:28px;}
+    .profile-creator-cta .info{flex:1;}
+    .profile-creator-cta .t{font-size:13px;font-weight:800;}
+    .profile-creator-cta .s{font-size:11px;opacity:.75;margin-top:2px;}
+    .profile-creator-cta .go{padding:6px 12px;background:var(--primary);color:#fff;border-radius:8px;font-weight:800;font-size:11px;}
+
+    .profile-menu{margin:14px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+    .pm-item{
+      display:flex;align-items:center;gap:12px;padding:13px 14px;
+      border-bottom:1px solid var(--line);
+    }
+    .pm-item:last-child{border-bottom:none;}
+    .pm-item:active{background:var(--bg-soft);}
+    .pm-ico{width:34px;height:34px;border-radius:9px;background:var(--bg-soft);display:grid;place-items:center;font-size:16px;flex-shrink:0;}
+    .pm-t{flex:1;font-size:13px;font-weight:700;}
+    .pm-badge{padding:2px 7px;background:var(--primary);color:#fff;border-radius:999px;font-size:10px;font-weight:900;}
+    .pm-arrow{color:var(--ink-3);font-size:16px;}
+
+    .profile-section-h{padding:10px 16px 8px;font-size:12px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;}
+
+    .booking-mini-list{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+    .booking-mini{
+      display:flex;gap:10px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px;align-items:center;
+    }
+    .bm-thumb{width:50px;height:50px;border-radius:8px;background-size:cover;background-position:center;flex-shrink:0;}
+    .bm-info{flex:1;min-width:0;}
+    .bm-status{display:inline-block;font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;margin-bottom:2px;}
+    .bm-status.confirmed{background:#E8F5E9;color:var(--success);}
+    .bm-status.pending{background:#FFF3E0;color:#F57C00;}
+    .bm-status.completed{background:var(--bg-soft);color:var(--ink-3);}
+    .bm-name{font-size:12px;font-weight:800;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bm-meta{font-size:10px;color:var(--ink-3);margin-top:2px;}
+    .bm-price{font-size:12px;font-weight:900;color:var(--primary);text-align:right;white-space:nowrap;}
+
+    /* ==========================================
+       BOTTOM TAB BAR
+       ========================================== */
+    .m-tabbar{
+      flex-shrink:0;height:var(--tab-h);
+      background:rgba(0,0,0,.96);backdrop-filter:blur(18px);
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-bottom:env(safe-area-inset-bottom);
+      display:flex;z-index:30;
+    }
+    .m-tabbar.light{background:#fff;border-top-color:var(--line);}
+    .m-tab{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;color:#888;font-size:10px;font-weight:700;transition:color .15s;
+      padding-top:2px;
+    }
+    .m-tabbar.light .m-tab{color:var(--ink-3);}
+    .m-tab.active{color:#fff;}
+    .m-tabbar.light .m-tab.active{color:var(--primary);}
+    .m-tab .ico{
+      width:24px;height:24px;display:grid;place-items:center;
+    }
+    .m-tab .ico svg{width:22px;height:22px;}
+    .m-tab.tab-create{position:relative;}
+    .m-tab.tab-create .ico-plus{
+      width:44px;height:30px;border-radius:8px;
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);
+      color:#fff;display:grid;place-items:center;font-weight:900;font-size:22px;line-height:1;
+      box-shadow:0 4px 12px rgba(255,107,53,.55);margin-bottom:2px;
+    }
+    .m-tab.tab-create .label{color:#fff;font-weight:800;}
+    .m-tabbar.light .m-tab.tab-create .label{color:var(--ink);}
+
+    /* ==========================================
+       CREATE (UPLOAD) MODAL
+       ========================================== */
+    .create-modal{
+      position:absolute;inset:0;z-index:200;
+      background:#0A0A0A;color:#fff;display:flex;flex-direction:column;
+      transform:translateY(100%);transition:transform .3s cubic-bezier(.4,1.1,.6,1);
+    }
+    .create-modal.open{transform:translateY(0);}
+    .cm-header{
+      padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+      display:flex;align-items:center;gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .cm-close{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;}
+    .cm-title{flex:1;text-align:center;font-weight:900;font-size:15px;margin-right:46px;}
+
+    .cm-body{flex:1;overflow-y:auto;padding:16px;}
+
+    /* Step 1: Source picker */
+    .source-options{display:flex;flex-direction:column;gap:10px;}
+    .source-opt{
+      display:flex;align-items:center;gap:14px;padding:16px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:14px;color:#fff;text-align:left;
+    }
+    .source-opt:active{background:rgba(255,255,255,.12);}
+    .source-opt-ico{
+      width:48px;height:48px;border-radius:12px;
+      display:grid;place-items:center;font-size:22px;flex-shrink:0;
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);
+    }
+    .source-opt-ico.alt{background:linear-gradient(135deg,var(--secondary),#64B5F6);}
+    .source-opt-ico.alt2{background:linear-gradient(135deg,var(--success),#34D399);}
+    .source-opt-ico.alt3{background:linear-gradient(135deg,#9333EA,#C084FC);}
+    .source-opt-info{flex:1;}
+    .source-opt-t{font-size:15px;font-weight:800;}
+    .source-opt-s{font-size:12px;opacity:.7;margin-top:3px;}
+
+    /* Step 2: Camera UI */
+    .camera-ui{
+      position:relative;height:70vh;border-radius:14px;overflow:hidden;background:#222;
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,.4);
+      background-image:linear-gradient(45deg,rgba(255,255,255,.02) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.02) 75%),linear-gradient(45deg,rgba(255,255,255,.02) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.02) 75%);
+      background-size:40px 40px;background-position:0 0, 20px 20px;
+    }
+    .camera-placeholder{text-align:center;}
+    .camera-placeholder .ico{font-size:56px;margin-bottom:10px;}
+    .camera-placeholder .t{font-size:14px;font-weight:700;}
+    .camera-placeholder .s{font-size:12px;margin-top:4px;opacity:.7;}
+    .camera-controls{
+      position:absolute;bottom:20px;left:0;right:0;
+      display:flex;align-items:center;justify-content:space-around;
+    }
+    .record-btn{
+      width:70px;height:70px;border-radius:50%;
+      background:#fff;border:5px solid rgba(255,255,255,.4);
+      display:grid;place-items:center;
+    }
+    .record-btn::after{
+      content:"";width:30px;height:30px;border-radius:50%;background:var(--primary);
+      transition:all .2s;
+    }
+    .record-btn.recording::after{border-radius:6px;width:24px;height:24px;}
+    .cam-ctrl-btn{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);display:grid;place-items:center;font-size:20px;}
+    .cam-top{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:2;}
+    .cam-top .chip{padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.5);font-size:11px;font-weight:700;color:#fff;backdrop-filter:blur(6px);}
+
+    /* Step 3: Edit/Caption */
+    .edit-area{display:flex;flex-direction:column;gap:14px;}
+    .preview-video{
+      aspect-ratio:9/16;max-height:55vh;border-radius:14px;overflow:hidden;
+      background:#222 center/cover no-repeat;
+      position:relative;margin:0 auto;
+    }
+    .preview-video::before{
+      content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.5);
+      display:grid;place-items:center;font-size:22px;color:#fff;backdrop-filter:blur(8px);
+    }
+    .edit-field{
+      display:flex;flex-direction:column;gap:5px;
+    }
+    .edit-field label{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;}
+    .edit-field input, .edit-field textarea, .edit-field select{
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;
+      font-family:inherit;outline:none;
+    }
+    .edit-field textarea{resize:vertical;min-height:80px;}
+    .edit-field .hint{font-size:11px;color:rgba(255,255,255,.45);}
+    .tag-input{display:flex;gap:5px;flex-wrap:wrap;padding:10px;background:rgba(255,255,255,.06);border-radius:10px;}
+    .tag-sel{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);font-size:11px;font-weight:700;color:#fff;}
+    .tag-sel.active{background:var(--primary);border-color:var(--primary);}
+
+    .cm-footer{
+      padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+      display:flex;gap:8px;border-top:1px solid rgba(255,255,255,.08);
+    }
+    .cm-footer button{flex:1;padding:13px;border-radius:10px;font-weight:800;font-size:13px;}
+    .cm-prev{background:rgba(255,255,255,.08);color:#fff;}
+    .cm-next{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(255,107,53,.4);}
+
+    /* Upload progress/success */
+    .upload-progress{text-align:center;padding:60px 20px;}
+    .up-spin{width:60px;height:60px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;margin:0 auto 20px;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .up-t{font-size:16px;font-weight:800;margin-bottom:6px;}
+    .up-s{font-size:12px;opacity:.6;}
+    .up-bar{width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:20px;overflow:hidden;}
+    .up-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),#FF9A6C);transition:width .3s;}
+
+    .success-card{text-align:center;padding:60px 20px;}
+    .success-ic{
+      width:80px;height:80px;border-radius:50%;margin:0 auto 16px;
+      background:linear-gradient(135deg,var(--success),#34D399);
+      display:grid;place-items:center;font-size:36px;color:#fff;
+      animation:pop .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes pop{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+
+    /* ==========================================
+       BOOKING BOTTOM SHEET
+       ========================================== */
+    .sheet-bd{position:absolute;inset:0;z-index:150;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s;}
+    .sheet-bd.open{opacity:1;pointer-events:auto;}
+    .book-sheet{
+      position:absolute;left:0;right:0;bottom:0;z-index:160;
+      background:#fff;color:var(--ink);border-radius:20px 20px 0 0;
+      transform:translateY(100%);transition:transform .3s cubic-bezier(.4,1.1,.6,1);
+      max-height:90%;overflow-y:auto;
+      padding-bottom:calc(16px + env(safe-area-inset-bottom));
+    }
+    .book-sheet.open{transform:translateY(0);}
+    .sh-handle{width:40px;height:4px;background:var(--line);border-radius:3px;margin:10px auto 4px;}
+    .sh-head{padding:8px 18px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);}
+    .sh-head h3{margin:0;font-size:16px;font-weight:900;}
+    .sh-close{width:30px;height:30px;border-radius:50%;background:var(--bg-soft);display:grid;place-items:center;font-size:16px;color:var(--ink-2);}
+    .sh-body{padding:14px 18px;}
+    .sh-product{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:10px;background:var(--bg-soft);border-radius:10px;margin-bottom:14px;}
+    .sh-prod-img{width:70px;height:70px;border-radius:8px;background-size:cover;background-position:center;}
+    .sh-prod-name{font-size:13px;font-weight:800;line-height:1.3;}
+    .sh-prod-meta{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .sh-prod-price{font-size:14px;font-weight:900;color:var(--primary);margin-top:4px;}
+    .sh-field{margin-bottom:12px;}
+    .sh-field label{font-size:10px;font-weight:800;color:var(--ink-2);margin-bottom:4px;display:block;letter-spacing:.04em;}
+    .sh-field input, .sh-field select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;outline:none;}
+    .sh-total{display:flex;justify-content:space-between;align-items:baseline;padding:12px;background:var(--ink);color:#fff;border-radius:10px;margin:10px 0;}
+    .sh-total .l{font-size:11px;opacity:.7;}
+    .sh-total .p{font-size:18px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+    .sh-cta{width:100%;padding:14px;border-radius:10px;background:var(--primary);color:#fff;font-weight:900;font-size:14px;}
+
+    /* Toast */
+    .toast{position:absolute;left:50%;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 16px);transform:translateX(-50%) translateY(40px);background:#fff;color:var(--ink);padding:10px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:180;opacity:0;transition:all .25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.3);}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ==========================================
+       Desktop enhancement
+       ========================================== */
+    @media (min-width:768px){
+      .desktop-intro{display:block;}
+    }
+    @media (max-width:767px){
+      .desktop-wrap{padding:0;gap:0;}
+      .phone-frame{width:100vw;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none;}
+      .phone-frame::before, .phone-frame::after{display:none;}
+      .app{border-radius:0;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="desktop-wrap">
+    <!-- Desktop-only sidebar intro -->
+    <aside class="desktop-intro">
+      <h1>여행 크리에이터 플랫폼<br><span>오마이트립 모바일</span></h1>
+      <p>유튜브 쇼츠처럼 쉬운 여행 영상 업로드.<br>영상 하나로 여행을 공유하고, 판매 수익까지.</p>
+      <ul class="features">
+        <li><span class="ic">▶</span><div><strong style="display:block;margin-bottom:2px;">쇼츠 홈 피드</strong><span style="opacity:.7;font-size:12px;">세로 스크롤로 영상 감상</span></div></li>
+        <li><span class="ic">+</span><div><strong style="display:block;margin-bottom:2px;">중앙 업로드 버튼</strong><span style="opacity:.7;font-size:12px;">3단계 업로드 플로우</span></div></li>
+        <li><span class="ic">🏨</span><div><strong style="display:block;margin-bottom:2px;">OTA 기능 통합</strong><span style="opacity:.7;font-size:12px;">영상 → 바로 예약</span></div></li>
+        <li><span class="ic">💰</span><div><strong style="display:block;margin-bottom:2px;">크리에이터 수익</strong><span style="opacity:.7;font-size:12px;">판매 커미션 즉시 정산</span></div></li>
+      </ul>
+      <p style="margin-top:20px;font-size:11px;opacity:.5;">← 모바일에서 더 잘 보여요</p>
+    </aside>
+
+    <!-- The phone -->
+    <div class="phone-frame">
+      <div class="app">
+
+        <!-- Header (overlay on home, solid on other tabs) -->
+        <header class="m-header" id="mHeader">
+          <a href="index.html" class="m-logo"><span class="m-logo-mark"></span><span>오마이트립</span></a>
+          <div class="m-h-right">
+            <button class="m-h-btn" aria-label="검색" onclick="switchTab('explore')">🔍</button>
+            <button class="m-h-btn" aria-label="알림" onclick="switchTab('notif')">🔔</button>
+          </div>
+        </header>
+
+        <!-- Main content -->
+        <main class="m-main">
+
+          <!-- HOME: Shorts Feed -->
+          <section id="tab-home" class="tab-panel active">
+            <!-- sub tabs overlay on feed -->
+            <div class="home-sub-tabs">
+              <button class="home-sub-tab" data-sub="following">팔로잉</button>
+              <button class="home-sub-tab active" data-sub="recommended">추천</button>
+              <button class="home-sub-tab" data-sub="live">LIVE</button>
+            </div>
+            <!-- Feed scroller populated by JS -->
+            <div id="feedScroller" style="height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;"></div>
+          </section>
+
+          <!-- EXPLORE -->
+          <section id="tab-explore" class="tab-panel">
+            <div class="explore-head">
+              <div class="search-box"><input type="text" placeholder="도시·호텔·크리에이터 검색" /></div>
+            </div>
+
+            <section class="section">
+              <h2 class="section-h">🌏 국가별 여행</h2>
+              <div class="country-scroll" id="exploreCountries"></div>
+            </section>
+
+            <section class="section" style="padding-top:8px;">
+              <h2 class="section-h">주제별 여행</h2>
+              <div class="theme-chips">
+                <button class="theme-chip active">전체</button>
+                <button class="theme-chip">⛳ 골프</button>
+                <button class="theme-chip">💕 허니문</button>
+                <button class="theme-chip">👨‍👩‍👧 가족여행</button>
+                <button class="theme-chip">🏖️ 휴양</button>
+                <button class="theme-chip">🍣 미식투어</button>
+                <button class="theme-chip">📸 인스타</button>
+              </div>
+            </section>
+
+            <section class="section">
+              <h2 class="section-h">🔥 실시간 인기 쇼츠<small>BEST 4</small></h2>
+              <div class="trend-grid" id="exploreTrends"></div>
+            </section>
+
+            <section class="section">
+              <h2 class="section-h">⭐ 인기 크리에이터</h2>
+              <div class="creator-scroll" id="exploreCreators"></div>
+            </section>
+
+            <section class="section">
+              <h2 class="section-h">💎 오마이트립 단독 특가</h2>
+              <div class="prod-grid" id="exploreProducts"></div>
+            </section>
+
+            <section class="section" style="padding-bottom:30px;">
+              <h2 class="section-h">✦ AI 여행 플래너</h2>
+              <div style="background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;padding:18px;border-radius:14px;display:flex;align-items:center;gap:12px;" onclick="location.href='ai-planner.html'">
+                <div style="font-size:28px;">✦</div>
+                <div style="flex:1;">
+                  <div style="font-weight:900;font-size:14px;">AI에게 여행 물어보기</div>
+                  <div style="font-size:11px;opacity:.9;margin-top:2px;">"일본 벚꽃 시즌 추천해줘"</div>
+                </div>
+                <div>→</div>
+              </div>
+            </section>
+          </section>
+
+          <!-- NOTIFICATIONS -->
+          <section id="tab-notif" class="tab-panel">
+            <div style="padding:calc(env(safe-area-inset-top) + 50px) 16px 0;">
+              <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;letter-spacing:-0.02em;">알림</h2>
+              <div class="notif-filter-tabs">
+                <button class="notif-filter-tab active">전체</button>
+                <button class="notif-filter-tab">🎫 예약</button>
+                <button class="notif-filter-tab">❤️ 소셜</button>
+                <button class="notif-filter-tab">🎁 특가</button>
+              </div>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+          </section>
+
+          <!-- PROFILE / MYPAGE -->
+          <section id="tab-profile" class="tab-panel">
+            <div class="profile-hero">
+              <div class="profile-av-l" id="profAv">홍</div>
+              <div class="profile-name-l" id="profName">홍길동 님</div>
+              <span class="profile-grade-l">⭐ GOLD · 다음 VIP까지 2회</span>
+              <div style="font-size:12px;opacity:.85;margin-top:4px;">gildong@ohmytrip.kr</div>
+            </div>
+            <div class="profile-stats-bar" id="profStats"></div>
+            <!-- PASS Membership CTA (dynamic) -->
+            <div id="passMembershipCTA"></div>
+
+            <div class="profile-creator-cta" onclick="location.href='creator.html'">
+              <div class="ico">💰</div>
+              <div class="info">
+                <div class="t">크리에이터가 되어 수익을 만들어보세요</div>
+                <div class="s">평균 월 수익 180만원 · 커미션 15%</div>
+              </div>
+              <div class="go">지원 →</div>
+            </div>
+            <div class="profile-section-h">내 예약</div>
+            <div class="booking-mini-list" id="profBookings"></div>
+            <div class="profile-section-h">여행 도구</div>
+            <div class="profile-menu">
+              <div class="pm-item" onclick="switchTab('explore')"><div class="pm-ico">🔍</div><div class="pm-t">호텔·항공 검색</div><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="location.href='packages.html'"><div class="pm-ico">📦</div><div class="pm-t">다이나믹 패키지 만들기</div><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="location.href='cart.html'"><div class="pm-ico">🛒</div><div class="pm-t">장바구니</div><span class="pm-badge" id="cartBadge">0</span><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="location.href='ai-planner.html'"><div class="pm-ico">✦</div><div class="pm-t">AI 여행 플래너</div><span class="pm-arrow">›</span></div>
+            </div>
+            <div class="profile-section-h">내 활동</div>
+            <div class="profile-menu">
+              <div class="pm-item" onclick="location.href='mypage.html#wishlist'"><div class="pm-ico">❤️</div><div class="pm-t">찜한 상품</div><span class="pm-badge" id="wishBadge">0</span><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="location.href='mypage.html#coupons'"><div class="pm-ico">🎟️</div><div class="pm-t">쿠폰함</div><span class="pm-badge" id="couponBadge">0</span><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="location.href='mypage.html#points'"><div class="pm-ico">💰</div><div class="pm-t">포인트</div><span class="pm-arrow" id="pointsSum">-</span></div>
+              <div class="pm-item" onclick="location.href='mypage.html#reviews'"><div class="pm-ico">✏️</div><div class="pm-t">작성한 리뷰</div><span class="pm-arrow">›</span></div>
+            </div>
+            <div class="profile-section-h">설정</div>
+            <div class="profile-menu" style="margin-bottom:30px;">
+              <div class="pm-item"><div class="pm-ico">👤</div><div class="pm-t">내 정보 수정</div><span class="pm-arrow">›</span></div>
+              <div class="pm-item"><div class="pm-ico">🔔</div><div class="pm-t">알림 설정</div><span class="pm-arrow">›</span></div>
+              <div class="pm-item"><div class="pm-ico">📞</div><div class="pm-t">고객센터</div><span class="pm-arrow">›</span></div>
+              <div class="pm-item" onclick="if(confirm('로그아웃할까요?')){OMT.State.logout();location.href='login.html';}"><div class="pm-ico">🚪</div><div class="pm-t">로그아웃</div><span class="pm-arrow">›</span></div>
+            </div>
+          </section>
+
+        </main>
+
+        <!-- Bottom Tab Bar -->
+        <nav class="m-tabbar" id="mTabbar">
+          <button class="m-tab active" data-tab="home">
+            <span class="ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+            </span>
+            <span class="label">홈</span>
+          </button>
+          <button class="m-tab" data-tab="explore">
+            <span class="ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+            </span>
+            <span class="label">탐색</span>
+          </button>
+          <button class="m-tab tab-create" onclick="openCreateModal()">
+            <span class="ico-plus">+</span>
+            <span class="label">업로드</span>
+          </button>
+          <button class="m-tab" data-tab="notif">
+            <span class="ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </span>
+            <span class="label">알림</span>
+          </button>
+          <button class="m-tab" data-tab="profile">
+            <span class="ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <span class="label">MY</span>
+          </button>
+        </nav>
+
+        <!-- Create/Upload Modal -->
+        <div class="create-modal" id="createModal">
+          <div class="cm-header">
+            <button class="cm-close" onclick="closeCreateModal()" aria-label="닫기">✕</button>
+            <div class="cm-title" id="cmTitle">새 콘텐츠 만들기</div>
+          </div>
+          <div class="cm-body" id="cmBody"></div>
+          <div class="cm-footer" id="cmFooter" style="display:none;">
+            <button class="cm-prev" onclick="cmPrevStep()">이전</button>
+            <button class="cm-next" onclick="cmNextStep()">다음</button>
+          </div>
+        </div>
+
+        <!-- Booking Sheet -->
+        <div class="sheet-bd" id="sheetBd" onclick="closeBookSheet()"></div>
+        <aside class="book-sheet" id="bookSheet">
+          <div class="sh-handle"></div>
+          <div class="sh-head">
+            <h3>바로 예약</h3>
+            <button class="sh-close" onclick="closeBookSheet()">✕</button>
+          </div>
+          <div class="sh-body" id="sheetBody"></div>
+        </aside>
+
+        <!-- Toast -->
+        <div class="toast" id="toast"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+  const krw = OMT.krw;
+  const toast = (msg) => { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); };
+
+  /* ========================================================================
+     TAB SWITCHING
+     ======================================================================== */
+  let currentTab = 'home';
+  function switchTab(tab){
+    currentTab = tab;
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+    document.querySelectorAll('.m-tab[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+
+    const header = document.getElementById('mHeader');
+    const tabbar = document.getElementById('mTabbar');
+    // Home = dark/overlay header, others = light
+    if(tab === 'home'){
+      header.classList.remove('solid');
+      tabbar.classList.remove('light');
+    } else {
+      header.classList.add('solid');
+      tabbar.classList.add('light');
+    }
+    // When switching to profile/explore/notif, hide the absolute header and let panel scroll over
+    if(tab === 'profile'){
+      header.style.display = 'none';
+    } else {
+      header.style.display = '';
+    }
+  }
+  document.querySelectorAll('.m-tab[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  /* ========================================================================
+     HOME FEED (Shorts)
+     ======================================================================== */
+  function renderFeed(){
+    const posts = OMT.DATA.FEED_POSTS;
+    const el = document.getElementById('feedScroller');
+    el.innerHTML = posts.map((p, idx) => {
+      const creator = OMT.getCreator(p.creatorId);
+      const product = OMT.getProduct(p.productId);
+      const isOrig = product?.originalFlag;
+      const liked = OMT.State.isPostLiked(p.id);
+      const saved = OMT.State.isPostSaved(p.id);
+      const following = OMT.State.isFollowing(creator?.name || '');
+
+      return `
+      <article class="short-slide" data-idx="${idx}" data-post-id="${p.id}">
+        <div class="short-bg" style="background-image:url('${p.bg}')"></div>
+        <div class="short-overlay"></div>
+
+        <div class="short-top">
+          ${isOrig ? '<span class="s-chip orig">ORIGINAL</span>' : ''}
+          ${p.tags.map(t => `<span class="s-chip">#${t}</span>`).join('')}
+        </div>
+
+        <div class="short-bottom">
+          <div class="s-creator-row">
+            <div class="s-avatar">${creator?.initial || '?'}</div>
+            <div>
+              <div class="s-cname">${creator?.name || 'Unknown'}</div>
+              <div class="s-csubs">${creator?.subs || ''} 구독자</div>
+            </div>
+            <button class="s-follow ${following?'following':''}" onclick="toggleFollowFeed(event,'${creator?.name}')">${following?'✓ 팔로잉':'+ 팔로우'}</button>
+          </div>
+          <div class="s-title">${p.title}</div>
+          ${product ? `
+            <div class="s-product" onclick="openBookSheet('${product.id}')">
+              <div class="s-p-img" style="background-image:url('${product.images?.[0]||''}')"></div>
+              <div class="s-p-info">
+                <span class="s-p-tag">${isOrig?'ORIGINAL':'패키지'}</span>
+                <div class="s-p-name">${product.name}</div>
+                <div class="s-p-price">${krw(product.price)}<span class="strike">${krw(product.oldPrice)}</span></div>
+              </div>
+            </div>
+            <button class="s-book" onclick="openBookSheet('${product.id}')">지금 예약하기 →</button>
+          ` : ''}
+        </div>
+
+        <div class="s-side">
+          <button class="s-side-btn ${liked?'active':''}" onclick="togglePostLike(event,'${p.id}')">
+            <span class="ico">${liked?'❤️':'🤍'}</span>
+            <span class="n">${p.stats.likes}</span>
+          </button>
+          <button class="s-side-btn" onclick="openComments('${p.id}')">
+            <span class="ico">💬</span>
+            <span class="n">${p.stats.comments}</span>
+          </button>
+          <button class="s-side-btn" onclick="sharePost('${p.id}')">
+            <span class="ico">🔗</span>
+            <span class="n">공유</span>
+          </button>
+          <button class="s-side-btn ${saved?'saved':''}" onclick="togglePostSaveFeed(event,'${p.id}')">
+            <span class="ico">${saved?'🔖':'📑'}</span>
+            <span class="n">${p.stats.saves}</span>
+          </button>
+        </div>
+      </article>
+      `;
+    }).join('');
+  }
+
+  window.toggleFollowFeed = (e, name) => { e.stopPropagation(); OMT.State.toggleFollow(name); renderFeed(); toast(OMT.State.isFollowing(name) ? '팔로우됨' : '팔로우 해제'); };
+  window.togglePostLike = (e, pid) => { e.stopPropagation(); OMT.State.togglePostLike(pid); renderFeed(); };
+  window.togglePostSaveFeed = (e, pid) => { e.stopPropagation(); OMT.State.togglePostSave(pid); renderFeed(); toast(OMT.State.isPostSaved(pid) ? '저장됨' : '저장 해제'); };
+  window.openComments = (pid) => { toast('댓글 기능은 곧 제공돼요'); };
+  window.sharePost = (pid) => { if(navigator.share){ navigator.share({title:'오마이트립',url:location.href}); } else { toast('링크 복사됨'); } };
+
+  /* ========================================================================
+     EXPLORE
+     ======================================================================== */
+  function renderExplore(){
+    // Countries with landmark images (from data.js)
+    const COUNTRIES_UI = [
+      { slug:'japan',   name:'일본',   epithet:'미식의 나라',
+        img:'https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?auto=format&fit=crop&w=160&q=80' },
+      { slug:'vietnam', name:'베트남', epithet:'휴양의 나라',
+        img:'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=160&q=80' },
+      { slug:'thailand',name:'태국',   epithet:'미소의 나라',
+        img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=160&q=80' },
+      { slug:'philippines',name:'필리핀',epithet:'섬의 나라',
+        img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=160&q=80' }
+    ];
+    document.getElementById('exploreCountries').innerHTML = COUNTRIES_UI.map(c => `
+      <a class="country-chip-card" href="country.html?c=${c.slug}">
+        <div class="country-chip-img" style="background-image:url('${c.img}')"></div>
+        <div class="country-chip-name">${c.name}</div>
+        <div class="country-chip-sub">${c.epithet}</div>
+      </a>
+    `).join('');
+
+    // Trending shorts
+    const trends = OMT.DATA.FEED_POSTS.slice(0, 4);
+    document.getElementById('exploreTrends').innerHTML = trends.map((p, i) => `
+      <a class="trend-card" href="feed.html" style="background-image:url('${p.bg}')">
+        <span class="trend-rank">#${i+1}</span>
+        <div class="trend-title">${p.title}</div>
+      </a>
+    `).join('');
+
+    // Creators
+    document.getElementById('exploreCreators').innerHTML = OMT.DATA.CREATORS.slice(0, 8).map(c => `
+      <a class="creator-box" href="feed.html">
+        <div class="creator-av">${c.initial}</div>
+        <div class="creator-name">${c.name}</div>
+        <div class="creator-subs">${c.subs}</div>
+      </a>
+    `).join('');
+
+    // Products (originals)
+    const origs = OMT.DATA.PRODUCTS.filter(p => p.originalFlag).slice(0, 4);
+    document.getElementById('exploreProducts').innerHTML = origs.map(p => `
+      <a class="prod-card" href="product.html?id=${p.id}">
+        <div class="prod-thumb" style="background-image:url('${p.images[0]}')">
+          <span class="prod-orig">ORIGINAL</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-price">${krw(p.price)}~</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  /* ========================================================================
+     NOTIFICATIONS
+     ======================================================================== */
+  function renderNotifications(){
+    const now = Date.now();
+    const NOTIFS = [
+      { type:'booking', unread:true, ic:'✈️', iconClass:'booking',
+        title:'<strong>오사카 패키지</strong> 예약이 확정되었습니다', time:'10분 전',
+        action:'예약 확인서 보기' },
+      { type:'social', unread:true, ic:'❤️', iconClass:'social',
+        title:'<strong>일본여행연구소</strong> 님이 회원님을 팔로우하기 시작했어요', time:'1시간 전' },
+      { type:'promo', unread:true, ic:'🎁', iconClass:'promo',
+        title:'봄 시즌 특가! 일본 패키지 <strong>최대 30% 할인</strong>', time:'3시간 전',
+        action:'지금 보기' },
+      { type:'booking', unread:false, ic:'📅', iconClass:'booking',
+        title:'다낭 여행 출발까지 <strong>D-7</strong>', time:'어제',
+        action:'준비물 체크' },
+      { type:'social', unread:false, ic:'💬', iconClass:'social',
+        title:'<strong>태국고수</strong> 님의 새 쇼츠가 업로드됐어요', time:'어제' },
+      { type:'system', unread:false, ic:'⭐', iconClass:'system',
+        title:'리뷰 작성 보너스 <strong>+5,000P</strong> 적립 완료', time:'2일 전' },
+      { type:'promo', unread:false, ic:'🎟️', iconClass:'promo',
+        title:'새 쿠폰 <strong>OMTSPRING25</strong>가 도착했어요 (-25,000원)', time:'3일 전' },
+      { type:'booking', unread:false, ic:'💳', iconClass:'booking',
+        title:'<strong>방콕 패키지</strong> 결제가 완료되었습니다', time:'5일 전' },
+      { type:'social', unread:false, ic:'🎬', iconClass:'social',
+        title:'내가 올린 쇼츠가 <strong>1,000 조회수</strong>를 돌파했어요', time:'1주 전' }
+    ];
+    document.getElementById('notifList').innerHTML = NOTIFS.map(n => `
+      <div class="notif-item ${n.unread?'unread':''}">
+        <div class="notif-ico ${n.iconClass}">${n.ic}</div>
+        <div class="notif-body">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-time">${n.time}</div>
+          ${n.action ? `<a class="notif-action">${n.action} →</a>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ========================================================================
+     PROFILE (MYPAGE LITE)
+     ======================================================================== */
+  function renderProfile(){
+    const user = OMT.State.getUser();
+    document.getElementById('profAv').textContent = user.name.charAt(0);
+    document.getElementById('profName').textContent = user.name + ' 님';
+
+    const bookings = OMT.State.getBookings();
+    const activeCount = bookings.filter(b => b.status==='confirmed'||b.status==='pending').length;
+    const wish = OMT.State.getWishlist();
+    const points = OMT.State.getPointsBalance();
+
+    document.getElementById('profStats').innerHTML = `
+      <div class="p-stat-cell"><div class="v">${bookings.length}</div><div class="l">전체 여행</div></div>
+      <div class="p-stat-cell"><div class="v">${activeCount}</div><div class="l">진행 중</div></div>
+      <div class="p-stat-cell"><div class="v">${Math.round(points/1000)}K</div><div class="l">포인트</div></div>
+    `;
+
+    // Booking mini list (top 3 active)
+    const active = bookings.filter(b => b.status !== 'cancelled').slice(0, 3);
+    document.getElementById('profBookings').innerHTML = active.length === 0
+      ? `<div style="padding:24px;text-align:center;color:var(--ink-3);font-size:12px;background:var(--bg-soft);border-radius:10px;">예약이 없어요. 여행을 계획해보세요!</div>`
+      : active.map(b => {
+        const p = b.productId ? OMT.getProduct(b.productId) : null;
+        const img = p?.images?.[0] || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=200&q=80';
+        const statusLabel = { confirmed:'● 확정', pending:'● 대기', completed:'● 완료' }[b.status];
+        return `
+          <div class="booking-mini" onclick="location.href='complete.html?bk=${b.bookingNumber}'">
+            <div class="bm-thumb" style="background-image:url('${img}')"></div>
+            <div class="bm-info">
+              <span class="bm-status ${b.status}">${statusLabel}</span>
+              <div class="bm-name">${p?.name || '예약 상품'}</div>
+              <div class="bm-meta">${b.dates}</div>
+            </div>
+            <div class="bm-price">${krw(b.total)}</div>
+          </div>
+        `;
+      }).join('');
+
+    document.getElementById('cartBadge').textContent = OMT.State.cartCount();
+    document.getElementById('wishBadge').textContent = wish.length;
+    document.getElementById('couponBadge').textContent = OMT.State.getAvailableCoupons().length;
+    document.getElementById('pointsSum').textContent = points.toLocaleString('ko-KR') + ' P ›';
+
+    // PASS Membership CTA
+    const passCTA = document.getElementById('passMembershipCTA');
+    if(OMT.State.isMember()){
+      const m = OMT.State.getMembership();
+      const saved = m.savedTotal || 0;
+      passCTA.innerHTML = `
+        <div style="margin:14px 16px;padding:16px;background:linear-gradient(135deg,#FFD23F,#F1CB5D);border-radius:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:9px;background:#0D1B3D;color:#FFD23F;display:grid;place-items:center;font-size:18px;font-weight:900;">✦</div>
+            <div style="flex:1;">
+              <div style="font-weight:900;font-size:14px;color:#0D1B3D;">PASS 멤버 활성</div>
+              <div style="font-size:10px;color:rgba(13,27,61,.7);font-weight:700;">${m.plan === 'annual' ? '연간' : '월간'} 플랜</div>
+            </div>
+            <div style="padding:5px 10px;background:#0D1B3D;color:#FFD23F;border-radius:999px;font-size:11px;font-weight:900;">✓ 최저가</div>
+          </div>
+          <div style="padding:10px 12px;background:rgba(13,27,61,.1);border-radius:8px;font-size:12px;color:#0D1B3D;font-weight:700;">
+            누적 절약 <strong style="font-size:15px;">${saved.toLocaleString('ko-KR')}원</strong>
+          </div>
+        </div>
+      `;
+    } else {
+      passCTA.innerHTML = `
+        <div style="margin:14px 16px;padding:16px;background:linear-gradient(135deg,#0D1B3D,#1A2D5C);color:#fff;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;" onclick="location.href='membership.html'">
+          <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.3),transparent 70%);"></div>
+          <div style="display:flex;align-items:center;gap:12px;position:relative;">
+            <div style="font-size:28px;">✦</div>
+            <div style="flex:1;">
+              <div style="font-weight:900;font-size:14px;color:#FFD23F;">PASS 멤버십 · 월 9,900원</div>
+              <div style="font-size:11px;opacity:.85;margin-top:2px;">호텔 최저가 · 연간 23만원 절약</div>
+            </div>
+            <div style="padding:6px 12px;background:#FFD23F;color:#0D1B3D;border-radius:8px;font-weight:900;font-size:11px;">시작 →</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  /* ========================================================================
+     CREATE / UPLOAD FLOW
+     ======================================================================== */
+  let cmStep = 0;
+  const cmData = { source:null, caption:'', productId:null, tags:[] };
+
+  function openCreateModal(){
+    cmStep = 0;
+    cmData.source = null;
+    cmData.caption = '';
+    cmData.productId = null;
+    cmData.tags = [];
+    renderCreateStep();
+    document.getElementById('createModal').classList.add('open');
+  }
+  function closeCreateModal(){
+    document.getElementById('createModal').classList.remove('open');
+  }
+
+  function renderCreateStep(){
+    const body = document.getElementById('cmBody');
+    const footer = document.getElementById('cmFooter');
+    const title = document.getElementById('cmTitle');
+
+    if(cmStep === 0){
+      title.textContent = '새 콘텐츠 만들기';
+      footer.style.display = 'none';
+      body.innerHTML = `
+        <div style="padding:16px 0 8px;text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-bottom:10px;">
+          어떤 콘텐츠를 올리시겠어요?
+        </div>
+        <div class="source-options">
+          <button class="source-opt" onclick="cmPickSource('camera')">
+            <div class="source-opt-ico">🎬</div>
+            <div class="source-opt-info">
+              <div class="source-opt-t">영상 촬영</div>
+              <div class="source-opt-s">지금 바로 카메라로 쇼츠 녹화</div>
+            </div>
+            <span style="opacity:.5;">›</span>
+          </button>
+          <button class="source-opt" onclick="cmPickSource('gallery')">
+            <div class="source-opt-ico alt">📱</div>
+            <div class="source-opt-info">
+              <div class="source-opt-t">갤러리에서 선택</div>
+              <div class="source-opt-s">저장된 영상·사진 업로드</div>
+            </div>
+            <span style="opacity:.5;">›</span>
+          </button>
+          <button class="source-opt" onclick="cmPickSource('story')">
+            <div class="source-opt-ico alt2">📝</div>
+            <div class="source-opt-info">
+              <div class="source-opt-t">여행 후기 작성</div>
+              <div class="source-opt-s">다녀온 여행 리뷰 작성 + 사진 업로드</div>
+            </div>
+            <span style="opacity:.5;">›</span>
+          </button>
+          <button class="source-opt" onclick="cmPickSource('apply')">
+            <div class="source-opt-ico alt3">💼</div>
+            <div class="source-opt-info">
+              <div class="source-opt-t">크리에이터 지원하기</div>
+              <div class="source-opt-s">수익 창출 파트너 등록 (커미션 15%)</div>
+            </div>
+            <span style="opacity:.5;">›</span>
+          </button>
+        </div>
+        <div style="margin-top:22px;padding:14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:11px;color:rgba(255,255,255,.6);">
+          💡 <strong style="color:#fff;">TIP</strong> 크리에이터는 영상 판매 시 <strong style="color:var(--accent);">15% 커미션</strong>을 받을 수 있어요. 상세는 "크리에이터 지원하기"에서.
+        </div>
+      `;
+    } else if(cmStep === 1){
+      // Camera / Gallery UI
+      title.textContent = cmData.source === 'camera' ? '영상 촬영' : '영상 선택';
+      footer.style.display = 'flex';
+      document.querySelector('.cm-prev').textContent = '취소';
+      document.querySelector('.cm-next').textContent = '다음';
+
+      if(cmData.source === 'camera'){
+        body.innerHTML = `
+          <div class="camera-ui" id="cameraUi">
+            <div class="cam-top">
+              <span class="chip">🔘 15초</span>
+              <span class="chip">⚡ 플래시</span>
+              <span class="chip">🔄 전환</span>
+              <span class="chip">🎵 음악</span>
+            </div>
+            <div class="camera-placeholder">
+              <div class="ico">🎥</div>
+              <div class="t">카메라 미리보기</div>
+              <div class="s">기기 카메라가 여기에 표시됩니다</div>
+            </div>
+            <div class="camera-controls">
+              <button class="cam-ctrl-btn">🖼️</button>
+              <button class="record-btn" id="recBtn" onclick="toggleRec()"></button>
+              <button class="cam-ctrl-btn">🎨</button>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.6);">
+            버튼을 눌러 녹화하세요 (프로토타입 · 실제 녹화 없음)
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;">
+            ${['photo-1578271887552-5ac3a72752bc','photo-1509030450996-dd1a26dda07a','photo-1508009603885-50cf7c579365','photo-1552465011-b4e21bf6e79a','photo-1540959733332-eab4deabeeaf','photo-1528127269322-539801943592','photo-1528164344705-47542687000d','photo-1545569341-9eb8b30979d9','photo-1493976040374-85c8e12f0c0e','photo-1480796927426-f609979314bd','photo-1552550049-db097c9480d1','photo-1563492065599-3520f775eeed'].map(id => `
+              <div onclick="cmSelectMedia(this, '${id}')" style="aspect-ratio:1;background:url('https://images.unsplash.com/${id}?auto=format&fit=crop&w=200&q=80') center/cover;position:relative;cursor:pointer;">
+                <div class="sel-mark" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.4);border:1.5px solid #fff;"></div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="padding:14px 0;font-size:12px;color:rgba(255,255,255,.6);text-align:center;">
+            원하는 이미지를 선택하세요 (프로토타입)
+          </div>
+        `;
+      }
+    } else if(cmStep === 2){
+      title.textContent = '편집 & 설명';
+      footer.style.display = 'flex';
+      document.querySelector('.cm-prev').textContent = '이전';
+      document.querySelector('.cm-next').textContent = '게시하기';
+
+      const products = OMT.DATA.PRODUCTS.slice(0, 6);
+      body.innerHTML = `
+        <div class="edit-area">
+          <div class="preview-video" style="background-image:url('${cmData.media||'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=600&q=80'}')"></div>
+
+          <div class="edit-field">
+            <label>제목</label>
+            <input type="text" id="cmCaption" placeholder="오사카 2박3일 실제 비용 공개..." maxlength="60" value="${cmData.caption}" oninput="cmData.caption=this.value;"/>
+            <div class="hint" id="cmCapCount">0 / 60</div>
+          </div>
+
+          <div class="edit-field">
+            <label>상품 연결 (커미션 수익)</label>
+            <select id="cmProd" onchange="cmData.productId=this.value;">
+              <option value="">연결 없음</option>
+              ${products.map(p => `<option value="${p.id}" ${cmData.productId===p.id?'selected':''}>${p.name}</option>`).join('')}
+            </select>
+            <div class="hint">영상에서 상품이 판매되면 15% 커미션 지급</div>
+          </div>
+
+          <div class="edit-field">
+            <label>태그 (최대 3개)</label>
+            <div class="tag-input">
+              ${['일본','베트남','태국','필리핀','가성비','허니문','골프','가족여행','미식','휴양'].map(t => `
+                <button class="tag-sel ${cmData.tags.includes(t)?'active':''}" onclick="cmToggleTag('${t}')">#${t}</button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      updateCapCount();
+    } else if(cmStep === 3){
+      title.textContent = '업로드 중';
+      footer.style.display = 'none';
+      body.innerHTML = `
+        <div class="upload-progress">
+          <div class="up-spin"></div>
+          <div class="up-t">영상을 업로드하고 있어요</div>
+          <div class="up-s">잠시만 기다려주세요 · 남은 시간 약 3초</div>
+          <div class="up-bar"><div class="up-bar-fill" id="upBar" style="width:0%;"></div></div>
+        </div>
+      `;
+      simulateUpload();
+    } else if(cmStep === 4){
+      title.textContent = '완료';
+      footer.style.display = 'none';
+      body.innerHTML = `
+        <div class="success-card">
+          <div class="success-ic">✓</div>
+          <div style="font-size:18px;font-weight:900;margin-bottom:6px;">업로드 완료!</div>
+          <div style="font-size:13px;opacity:.75;margin-bottom:16px;">심사 후 피드에 공개됩니다 (평균 5분)</div>
+          ${cmData.productId ? `<div style="padding:12px;background:rgba(255,210,63,.12);border:1px solid rgba(255,210,63,.3);border-radius:10px;color:var(--accent);font-size:12px;font-weight:700;margin-bottom:16px;">💰 상품이 연결되어 판매 발생 시 커미션이 자동 적립돼요</div>` : ''}
+          <button onclick="closeCreateModal();switchTab('profile');" style="padding:13px 24px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:14px;">내 프로필 보기 →</button>
+        </div>
+      `;
+    }
+  }
+
+  window.cmPickSource = (src) => {
+    cmData.source = src;
+    if(src === 'apply'){
+      location.href = 'creator.html';
+      return;
+    }
+    if(src === 'story'){
+      cmStep = 2;
+    } else {
+      cmStep = 1;
+    }
+    renderCreateStep();
+  };
+  window.cmSelectMedia = (el, id) => {
+    document.querySelectorAll('.sel-mark').forEach(m => m.style.background='rgba(0,0,0,.4)');
+    el.querySelector('.sel-mark').style.background = 'var(--primary)';
+    cmData.media = `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
+  };
+  window.toggleRec = () => {
+    const btn = document.getElementById('recBtn');
+    btn.classList.toggle('recording');
+    if(btn.classList.contains('recording')){
+      toast('녹화 중... (프로토타입)');
+      cmData.media = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80';
+    } else {
+      toast('녹화 완료');
+    }
+  };
+  window.cmToggleTag = (t) => {
+    if(cmData.tags.includes(t)) cmData.tags = cmData.tags.filter(x => x !== t);
+    else if(cmData.tags.length < 3) cmData.tags.push(t);
+    else { toast('최대 3개까지 선택'); return; }
+    renderCreateStep();
+  };
+  window.cmPrevStep = () => {
+    if(cmStep === 1){ cmStep = 0; renderCreateStep(); }
+    else if(cmStep === 2){ cmStep = cmData.source === 'story' ? 0 : 1; renderCreateStep(); }
+  };
+  window.cmNextStep = () => {
+    if(cmStep === 1){ cmStep = 2; renderCreateStep(); }
+    else if(cmStep === 2){
+      if(!cmData.caption.trim()){ toast('제목을 입력해주세요'); return; }
+      cmStep = 3; renderCreateStep();
+    }
+  };
+  function updateCapCount(){
+    const cap = document.getElementById('cmCapCount');
+    const input = document.getElementById('cmCaption');
+    if(cap && input){
+      cap.textContent = `${input.value.length} / 60`;
+      input.addEventListener('input', () => { cap.textContent = `${input.value.length} / 60`; });
+    }
+  }
+  function simulateUpload(){
+    const bar = document.getElementById('upBar');
+    let w = 0;
+    const id = setInterval(() => {
+      w += 8 + Math.random() * 12;
+      if(w >= 100){
+        w = 100; bar.style.width = '100%';
+        clearInterval(id);
+        setTimeout(() => { cmStep = 4; renderCreateStep(); }, 400);
+      } else {
+        bar.style.width = w + '%';
+      }
+    }, 180);
+  }
+
+  /* ========================================================================
+     BOOKING SHEET
+     ======================================================================== */
+  const sheetState = { productId:null, date:'2026.05.10', adults:2 };
+
+  window.openBookSheet = (productId) => {
+    sheetState.productId = productId;
+    sheetState.adults = 2;
+    renderBookSheet();
+    document.getElementById('bookSheet').classList.add('open');
+    document.getElementById('sheetBd').classList.add('open');
+  };
+  window.closeBookSheet = () => {
+    document.getElementById('bookSheet').classList.remove('open');
+    document.getElementById('sheetBd').classList.remove('open');
+  };
+
+  function renderBookSheet(){
+    const p = OMT.getProduct(sheetState.productId);
+    if(!p) return;
+    const total = p.price * sheetState.adults;
+    document.getElementById('sheetBody').innerHTML = `
+      <div class="sh-product">
+        <div class="sh-prod-img" style="background-image:url('${p.images?.[0]}')"></div>
+        <div>
+          <div class="sh-prod-name">${p.name}</div>
+          <div class="sh-prod-meta">${p.subtitle || ''}</div>
+          <div class="sh-prod-price">1인 ${krw(p.price)}~</div>
+        </div>
+      </div>
+      <div class="sh-field">
+        <label>출발 날짜</label>
+        <select id="shDate">
+          <option>2026.05.10 출발</option>
+          <option>2026.05.17 출발</option>
+          <option>2026.05.24 출발</option>
+          <option>2026.06.07 출발</option>
+        </select>
+      </div>
+      <div class="sh-field">
+        <label>성인 인원</label>
+        <select id="shAdults" onchange="sheetState.adults=+this.value;renderBookSheet();">
+          ${[1,2,3,4,5].map(n => `<option ${sheetState.adults===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </div>
+      <div class="sh-total">
+        <div>
+          <div class="l">총 결제 금액</div>
+          <div style="font-size:10px;opacity:.6;">성인 ${sheetState.adults}명</div>
+        </div>
+        <div class="p">${krw(total)}</div>
+      </div>
+      <button class="sh-cta" onclick="proceedToCheckout()">${krw(total)} 결제하기 →</button>
+    `;
+  }
+
+  window.proceedToCheckout = () => {
+    const p = OMT.getProduct(sheetState.productId);
+    if(!p) return;
+    const payload = OMT.productAsPackage(p.id, sheetState.adults);
+    payload.final = p.price * sheetState.adults;
+    payload.source = 'mobile-feed';
+    sessionStorage.setItem('omt_package', JSON.stringify(payload));
+    location.href = 'checkout.html';
+  };
+
+  /* ========================================================================
+     INIT
+     ======================================================================== */
+  renderFeed();
+  renderExplore();
+  renderNotifications();
+  renderProfile();
+  switchTab('home');
+  </script>
+</body>
+</html>
