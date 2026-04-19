@@ -675,9 +675,6 @@
               <div style="font-size:12px;opacity:.85;margin-top:4px;">gildong@ohmytrip.kr</div>
             </div>
             <div class="profile-stats-bar" id="profStats"></div>
-            <!-- PASS Membership CTA (dynamic) -->
-            <div id="passMembershipCTA"></div>
-
             <div class="profile-creator-cta" onclick="location.href='creator.html'">
               <div class="ico">💰</div>
               <div class="info">
@@ -1028,42 +1025,6 @@
     document.getElementById('wishBadge').textContent = wish.length;
     document.getElementById('couponBadge').textContent = OMT.State.getAvailableCoupons().length;
     document.getElementById('pointsSum').textContent = points.toLocaleString('ko-KR') + ' P ›';
-
-    // PASS Membership CTA
-    const passCTA = document.getElementById('passMembershipCTA');
-    if(OMT.State.isMember()){
-      const m = OMT.State.getMembership();
-      const saved = m.savedTotal || 0;
-      passCTA.innerHTML = `
-        <div style="margin:14px 16px;padding:16px;background:linear-gradient(135deg,#FFD23F,#F1CB5D);border-radius:12px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div style="width:36px;height:36px;border-radius:9px;background:#0D1B3D;color:#FFD23F;display:grid;place-items:center;font-size:18px;font-weight:900;">✦</div>
-            <div style="flex:1;">
-              <div style="font-weight:900;font-size:14px;color:#0D1B3D;">PASS 멤버 활성</div>
-              <div style="font-size:10px;color:rgba(13,27,61,.7);font-weight:700;">${m.plan === 'annual' ? '연간' : '월간'} 플랜</div>
-            </div>
-            <div style="padding:5px 10px;background:#0D1B3D;color:#FFD23F;border-radius:999px;font-size:11px;font-weight:900;">✓ 최저가</div>
-          </div>
-          <div style="padding:10px 12px;background:rgba(13,27,61,.1);border-radius:8px;font-size:12px;color:#0D1B3D;font-weight:700;">
-            누적 절약 <strong style="font-size:15px;">${saved.toLocaleString('ko-KR')}원</strong>
-          </div>
-        </div>
-      `;
-    } else {
-      passCTA.innerHTML = `
-        <div style="margin:14px 16px;padding:16px;background:linear-gradient(135deg,#0D1B3D,#1A2D5C);color:#fff;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;" onclick="location.href='membership.html'">
-          <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.3),transparent 70%);"></div>
-          <div style="display:flex;align-items:center;gap:12px;position:relative;">
-            <div style="font-size:28px;">✦</div>
-            <div style="flex:1;">
-              <div style="font-weight:900;font-size:14px;color:#FFD23F;">PASS 멤버십 · 월 9,900원</div>
-              <div style="font-size:11px;opacity:.85;margin-top:2px;">호텔 최저가 · 연간 23만원 절약</div>
-            </div>
-            <div style="padding:6px 12px;background:#FFD23F;color:#0D1B3D;border-radius:8px;font-weight:900;font-size:11px;">시작 →</div>
-          </div>
-        </div>
-      `;
-    }
   }
 
   /* ========================================================================
