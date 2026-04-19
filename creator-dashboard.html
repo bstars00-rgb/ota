@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>크리에이터 대시보드 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --secondary:#1E88E5;--accent:#FFD23F;--success:#10B981;--danger:#EF4444;
+      --gold:#D4AF37;--navy:#0D1B3D;
+      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
+      --radius:14px;--radius-lg:20px;
+      --header-h:64px;--max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:#0A0A0A;line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    /* Dark Header */
+    .header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:#fff;}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .page-title{margin-left:16px;font-size:15px;font-weight:700;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;}
+    .page-title::before{content:"▶";color:var(--primary);font-size:12px;}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:rgba(255,255,255,.8);}
+    .btn-ghost:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .btn-primary{padding:8px 14px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:700;font-size:13px;}
+
+    .dash-wrap{
+      max-width:var(--max-w);margin:0 auto;padding:28px 24px 80px;
+      color:#fff;
+    }
+
+    /* ================================
+       NEW CREATOR BONUS BANNER
+       ================================ */
+    .bonus-banner{
+      background:linear-gradient(135deg,var(--accent) 0%,#F1CB5D 50%,var(--primary) 100%);
+      color:var(--ink);border-radius:var(--radius-lg);
+      padding:20px 28px;margin-bottom:20px;
+      display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+      position:relative;overflow:hidden;
+    }
+    .bonus-banner::before{
+      content:"";position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.25),transparent 70%);
+    }
+    .bonus-ic{font-size:32px;position:relative;}
+    .bonus-info{flex:1;min-width:220px;position:relative;}
+    .bonus-t{font-weight:900;font-size:16px;letter-spacing:-0.02em;}
+    .bonus-s{font-size:12px;opacity:.8;margin-top:3px;font-weight:600;}
+    .bonus-counter{
+      position:relative;padding:8px 14px;background:rgba(13,27,61,.15);border-radius:10px;
+      font-weight:900;font-size:13px;white-space:nowrap;
+    }
+    .bonus-counter strong{font-size:18px;}
+
+    /* ================================
+       TOP STATS BAR
+       ================================ */
+    .top-stats{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;
+    }
+    .stat-card{
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius-lg);padding:22px 24px;
+      position:relative;overflow:hidden;
+    }
+    .stat-lb{font-size:11px;color:rgba(255,255,255,.55);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .stat-v{font-size:28px;font-weight:900;letter-spacing:-0.02em;line-height:1;}
+    .stat-v .won{font-size:16px;opacity:.7;margin-left:2px;}
+    .stat-diff{
+      font-size:11px;font-weight:700;margin-top:8px;
+      display:inline-flex;align-items:center;gap:4px;
+    }
+    .stat-diff.up{color:#4ADE80;}
+    .stat-diff.down{color:#F87171;}
+    .stat-sparkle{position:absolute;top:20px;right:20px;font-size:14px;opacity:.4;}
+
+    /* ================================
+       GRID LAYOUT
+       ================================ */
+    .dash-grid{
+      display:grid;grid-template-columns:2fr 1fr;gap:20px;
+    }
+
+    .card{
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius-lg);padding:24px;
+    }
+    .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+    .card-title{margin:0;font-size:16px;font-weight:900;letter-spacing:-0.02em;}
+    .card-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;}
+    .card-more{font-size:12px;color:var(--accent);font-weight:700;}
+
+    /* ================================
+       GRADE PROGRESSION
+       ================================ */
+    .grade-card{
+      background:linear-gradient(135deg,var(--gold) 0%,#F1CB5D 100%);color:var(--ink);
+      border-radius:var(--radius-lg);padding:26px;margin-bottom:20px;
+      position:relative;overflow:hidden;
+    }
+    .grade-card::before{content:"";position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3),transparent 70%);}
+    .grade-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;position:relative;}
+    .grade-icon{
+      width:64px;height:64px;border-radius:50%;background:var(--ink);color:var(--accent);
+      display:grid;place-items:center;font-size:32px;box-shadow:0 10px 20px rgba(0,0,0,.2);
+    }
+    .grade-label{font-weight:900;font-size:22px;letter-spacing:-0.02em;}
+    .grade-bonus{font-size:13px;font-weight:800;margin-top:2px;opacity:.8;}
+    .grade-progress{
+      position:relative;height:10px;background:rgba(13,27,61,.2);border-radius:5px;margin:16px 0 10px;overflow:hidden;
+    }
+    .grade-progress-bar{
+      position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,var(--ink),#333);
+      border-radius:5px;transition:width .5s ease;
+    }
+    .grade-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;}
+    .grade-next{position:relative;margin-top:14px;padding:12px;background:rgba(13,27,61,.12);border-radius:10px;font-size:12px;font-weight:700;}
+    .grade-next strong{color:var(--primary);}
+
+    .grade-perks{margin-top:14px;padding-top:14px;border-top:1px dashed rgba(13,27,61,.25);}
+    .grade-perk{font-size:12px;padding:3px 0;display:flex;gap:6px;}
+    .grade-perk::before{content:"✓";font-weight:900;color:var(--success);}
+
+    /* ================================
+       CHART (Revenue)
+       ================================ */
+    .chart-card{}
+    .chart-legend{display:flex;gap:16px;font-size:11px;color:rgba(255,255,255,.7);margin-bottom:12px;}
+    .legend-item{display:inline-flex;align-items:center;gap:5px;}
+    .legend-dot{width:10px;height:10px;border-radius:3px;}
+    .legend-dot.direct{background:var(--accent);}
+    .legend-dot.general{background:rgba(255,255,255,.25);}
+
+    .chart{
+      height:200px;display:flex;align-items:flex-end;gap:3px;padding:0 4px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+      position:relative;
+    }
+    .chart-day{
+      flex:1;display:flex;flex-direction:column-reverse;
+      position:relative;
+      cursor:pointer;
+    }
+    .chart-bar-total{
+      width:100%;background:rgba(255,255,255,.15);
+      border-radius:3px 3px 0 0;
+      position:relative;transition:opacity .15s;
+    }
+    .chart-day:hover .chart-bar-total{opacity:1;background:rgba(255,255,255,.22);}
+    .chart-bar-direct{
+      position:absolute;bottom:0;left:0;right:0;background:var(--accent);
+      border-radius:3px 3px 0 0;
+    }
+    .chart-tooltip{
+      position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+      background:#000;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;
+      opacity:0;pointer-events:none;transition:opacity .15s;margin-bottom:6px;
+      z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.4);
+    }
+    .chart-day:hover .chart-tooltip{opacity:1;}
+    .chart-x-axis{
+      display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.4);
+      margin-top:8px;padding:0 4px;
+    }
+
+    /* ================================
+       DIRECT SALES RATIO GAUGE
+       ================================ */
+    .ratio-card{text-align:center;}
+    .gauge-wrap{position:relative;width:160px;height:160px;margin:16px auto;}
+    .gauge-svg{width:100%;height:100%;transform:rotate(-90deg);}
+    .gauge-bg{stroke:rgba(255,255,255,.1);stroke-width:14;fill:none;}
+    .gauge-fill{stroke:url(#gaugeGrad);stroke-width:14;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+    .gauge-center{
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    }
+    .gauge-big{font-size:36px;font-weight:900;letter-spacing:-0.03em;line-height:1;}
+    .gauge-sm{font-size:11px;color:rgba(255,255,255,.6);font-weight:700;margin-top:4px;}
+
+    .ratio-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+    .ratio-item{padding:12px;background:rgba(255,255,255,.05);border-radius:10px;}
+    .ratio-label{font-size:11px;color:rgba(255,255,255,.55);font-weight:700;}
+    .ratio-val{font-size:14px;font-weight:900;margin-top:3px;}
+    .ratio-val.direct{color:var(--accent);}
+
+    /* ================================
+       RECENT SALES
+       ================================ */
+    .sales-list{display:flex;flex-direction:column;gap:10px;}
+    .sale-row{
+      display:flex;gap:12px;padding:12px;background:rgba(255,255,255,.03);
+      border-radius:10px;align-items:center;
+    }
+    .sale-avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
+      display:grid;place-items:center;font-weight:900;font-size:13px;flex-shrink:0;
+    }
+    .sale-info{flex:1;min-width:0;}
+    .sale-action{font-size:12px;color:rgba(255,255,255,.85);line-height:1.4;}
+    .sale-action strong{color:#fff;}
+    .sale-action .prod{color:var(--accent);font-weight:700;}
+    .sale-meta{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px;}
+    .sale-direct-tag{display:inline-block;padding:1px 5px;background:rgba(255,210,63,.18);color:var(--accent);border-radius:3px;font-size:9px;font-weight:800;margin-left:4px;}
+    .sale-amount{text-align:right;white-space:nowrap;}
+    .sale-comm{font-size:14px;font-weight:900;color:#4ADE80;}
+    .sale-price{font-size:11px;color:rgba(255,255,255,.5);}
+
+    /* ================================
+       TOP CONTENT
+       ================================ */
+    .content-list{display:flex;flex-direction:column;gap:10px;}
+    .content-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:10px;align-items:center;}
+    .content-rank{
+      width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--ink);
+      display:grid;place-items:center;font-weight:900;font-size:13px;
+    }
+    .content-rank.r1{background:var(--gold);}
+    .content-rank.r2{background:#C0C0C0;}
+    .content-rank.r3{background:#CD7F32;}
+    .content-title{font-size:12px;font-weight:700;line-height:1.35;}
+    .content-meta{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;display:flex;gap:10px;}
+    .content-rev{text-align:right;font-size:13px;font-weight:900;color:var(--accent);white-space:nowrap;}
+
+    /* ================================
+       PAYOUT CARD
+       ================================ */
+    .payout-card{
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;
+      border-radius:var(--radius-lg);padding:24px;
+    }
+    .payout-title{font-size:12px;opacity:.85;font-weight:700;}
+    .payout-amount{font-size:32px;font-weight:900;letter-spacing:-0.02em;margin:6px 0 10px;}
+    .payout-date{font-size:12px;opacity:.85;}
+    .payout-cta{
+      width:100%;padding:12px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;
+      font-weight:800;font-size:13px;margin-top:14px;backdrop-filter:blur(6px);
+    }
+
+    /* ================================
+       UPLOAD CTA
+       ================================ */
+    .upload-cta{
+      background:linear-gradient(135deg,var(--secondary),#42A5F5);color:#fff;
+      border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;
+      display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s;
+    }
+    .upload-cta:hover{transform:translateY(-2px);}
+    .upload-cta .ic{width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:22px;flex-shrink:0;}
+    .upload-cta .t{font-weight:900;font-size:14px;}
+    .upload-cta .s{font-size:12px;opacity:.85;margin-top:2px;}
+
+    /* ================================
+       LEADERBOARD
+       ================================ */
+    .leader-card{margin-top:20px;}
+    .leader-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);align-items:center;}
+    .leader-row:last-child{border-bottom:none;}
+    .leader-row.me{background:rgba(255,107,53,.1);margin:0 -12px;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,107,53,.3);}
+    .leader-rank-n{
+      width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);
+      display:grid;place-items:center;font-weight:900;font-size:12px;
+    }
+    .leader-rank-n.top{background:var(--gold);color:var(--ink);}
+    .leader-name{font-size:13px;font-weight:700;}
+    .leader-grade{font-size:10px;color:rgba(255,255,255,.5);}
+    .leader-sales{font-size:13px;font-weight:900;color:var(--accent);white-space:nowrap;}
+
+    /* ================================
+       Responsive
+       ================================ */
+    @media (max-width:1024px){
+      .dash-grid{grid-template-columns:1fr;}
+      .top-stats{grid-template-columns:repeat(2,1fr);}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .page-title{display:none;}
+      .dash-wrap{padding:20px 16px 80px;}
+      .top-stats{grid-template-columns:1fr 1fr;gap:10px;}
+      .stat-card{padding:16px;}
+      .stat-v{font-size:22px;}
+      .bonus-banner{padding:18px;}
+      .grade-card{padding:22px;}
+      .card{padding:18px;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <span class="page-title">크리에이터 스튜디오</span>
+      <div class="header-actions">
+        <a href="feed.html" class="btn-ghost">피드 보기</a>
+        <a href="mypage.html" class="btn-ghost">일반 마이페이지</a>
+        <a href="mobile.html" class="btn-primary">+ 새 영상 올리기</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="dash-wrap">
+
+    <!-- NEW CREATOR BONUS BANNER (conditional) -->
+    <div id="bonusBanner"></div>
+
+    <!-- UPLOAD CTA -->
+    <div class="upload-cta" onclick="location.href='mobile.html'">
+      <div class="ic">🎬</div>
+      <div style="flex:1;">
+        <div class="t">새 쇼츠 업로드하고 수익 만들기</div>
+        <div class="s">직영 상품을 연결하면 커미션 2배 · 평균 업로드→판매 전환 24시간</div>
+      </div>
+      <div style="font-size:20px;">→</div>
+    </div>
+
+    <!-- TOP STATS BAR -->
+    <div class="top-stats">
+      <div class="stat-card">
+        <div class="stat-lb">📈 이번달 판매액</div>
+        <div class="stat-v" id="s-sales">0<span class="won">원</span></div>
+        <div class="stat-diff up" id="s-sales-diff">▲ 0% 지난달 대비</div>
+        <div class="stat-sparkle">💰</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lb">💵 이번달 커미션</div>
+        <div class="stat-v" id="s-comm" style="color:var(--accent);">0<span class="won">원</span></div>
+        <div class="stat-diff up" id="s-comm-bonus">+ 보너스 0원</div>
+        <div class="stat-sparkle">✨</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lb">🏠 직영 판매 비중</div>
+        <div class="stat-v" id="s-ratio">0<span class="won">%</span></div>
+        <div class="stat-diff up" id="s-ratio-note">수익 2배 상품</div>
+        <div class="stat-sparkle">🎯</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lb">👀 이번달 조회</div>
+        <div class="stat-v" id="s-views">0</div>
+        <div class="stat-diff" style="color:rgba(255,255,255,.6);" id="s-conv">전환율 0%</div>
+        <div class="stat-sparkle">🔥</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="dash-grid">
+      <!-- LEFT: Charts + Recent Sales -->
+      <div>
+        <div class="card chart-card" style="margin-bottom:20px;">
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">📊 최근 30일 매출 추이</h3>
+              <div class="card-sub" id="chartTotal">총 0원</div>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot direct"></span>직영</span>
+              <span class="legend-item"><span class="legend-dot general"></span>일반</span>
+            </div>
+          </div>
+          <svg style="position:absolute;width:0;height:0;">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#FF6B35"/>
+                <stop offset="100%" stop-color="#FFD23F"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="chart" id="chartBars"></div>
+          <div class="chart-x-axis">
+            <span>30일 전</span><span>15일 전</span><span>오늘</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">🔥 인기 콘텐츠 TOP 3</h3>
+              <div class="card-sub">누적 수익 기준</div>
+            </div>
+          </div>
+          <div class="content-list" id="contentList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">💸 최근 판매 내역</h3>
+              <div class="card-sub">실시간 알림 (최근 24시간)</div>
+            </div>
+            <a href="#" class="card-more">전체 보기 →</a>
+          </div>
+          <div class="sales-list" id="salesList"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Grade + Ratio + Payout -->
+      <div>
+        <div class="grade-card">
+          <div class="grade-head">
+            <div class="grade-icon" id="gradeIcon">🥉</div>
+            <div>
+              <div class="grade-label" id="gradeLabel">브론즈</div>
+              <div class="grade-bonus" id="gradeBonus">기본 커미션</div>
+            </div>
+          </div>
+          <div class="grade-progress">
+            <div class="grade-progress-bar" id="gradeProgressBar" style="width:0%;"></div>
+          </div>
+          <div class="grade-meta">
+            <span id="gradeMetaCur">누적 직영 0원</span>
+            <span id="gradeMetaMax">다음 등급 0원</span>
+          </div>
+          <div class="grade-next" id="gradeNext"></div>
+          <div class="grade-perks" id="gradePerks"></div>
+        </div>
+
+        <div class="card ratio-card" style="margin-bottom:20px;">
+          <div class="card-head" style="margin-bottom:0;">
+            <h3 class="card-title">🎯 이번달 직영 비중</h3>
+          </div>
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 120 120">
+              <circle class="gauge-bg" cx="60" cy="60" r="52"/>
+              <circle class="gauge-fill" id="gaugeFill" cx="60" cy="60" r="52"
+                      stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-big" id="gaugePct">0%</div>
+              <div class="gauge-sm">직영 판매</div>
+            </div>
+          </div>
+          <div class="ratio-breakdown">
+            <div class="ratio-item"><div class="ratio-label">직영</div><div class="ratio-val direct" id="ratioDirect">0원</div></div>
+            <div class="ratio-item"><div class="ratio-label">일반</div><div class="ratio-val" id="ratioGen">0원</div></div>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.2);border-radius:10px;font-size:11px;color:var(--accent);font-weight:700;line-height:1.6;" id="ratioTip"></div>
+        </div>
+
+        <div class="payout-card">
+          <div class="payout-title">다음 정산 예정</div>
+          <div class="payout-amount" id="payoutAmount">0원</div>
+          <div class="payout-date" id="payoutDate">-</div>
+          <button class="payout-cta">정산 계좌 관리 →</button>
+        </div>
+
+        <div class="card leader-card">
+          <div class="card-head" style="margin-bottom:12px;">
+            <h3 class="card-title">🏆 이번주 리더보드</h3>
+            <a href="#" class="card-more">전체 →</a>
+          </div>
+          <div id="leaderList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+  const S = OMT.DATA.CREATOR_MOCK_STATS;
+  const krw = OMT.krw;
+  const isNew = OMT.isNewCreator(S.joinedAt);
+  const daysLeft = OMT.daysLeftInBonus(S.joinedAt);
+
+  /* ======================================================
+     NEW CREATOR BONUS BANNER
+     ====================================================== */
+  if(isNew){
+    document.getElementById('bonusBanner').innerHTML = `
+      <div class="bonus-banner">
+        <div class="bonus-ic">🎁</div>
+        <div class="bonus-info">
+          <div class="bonus-t">신규 크리에이터 온보딩 보너스 활성 중</div>
+          <div class="bonus-s">가입 후 90일간 · 직영 판매 <strong>+2%p</strong> · 일반 판매 <strong>+1%p</strong> 추가 커미션</div>
+        </div>
+        <div class="bonus-counter">
+          남은 기간 <strong>${daysLeft}일</strong>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ======================================================
+     TOP STATS
+     ====================================================== */
+  const lastMonthSales = 2140000;  // 지난달 기준 (for diff calc)
+  const thisMonthDiffPct = Math.round((S.thisMonth.totalSales - lastMonthSales) / lastMonthSales * 100);
+
+  document.getElementById('s-sales').innerHTML = `${(S.thisMonth.totalSales/10000).toFixed(0)}<span class="won">만원</span>`;
+  document.getElementById('s-sales-diff').innerHTML = `${thisMonthDiffPct >= 0 ? '▲' : '▼'} ${Math.abs(thisMonthDiffPct)}% 지난달 대비`;
+  document.getElementById('s-sales-diff').className = 'stat-diff ' + (thisMonthDiffPct >= 0 ? 'up' : 'down');
+
+  document.getElementById('s-comm').innerHTML = `${(S.thisMonth.commission/10000).toFixed(1)}<span class="won">만원</span>`;
+  if(isNew){
+    document.getElementById('s-comm-bonus').textContent = `+ 보너스 ${(S.thisMonth.bonusEarned/10000).toFixed(1)}만원 (${daysLeft}일 남음)`;
+  } else {
+    document.getElementById('s-comm-bonus').textContent = '';
+  }
+
+  const ratio = Math.round(S.thisMonth.directSales / S.thisMonth.totalSales * 100);
+  document.getElementById('s-ratio').innerHTML = `${ratio}<span class="won">%</span>`;
+  document.getElementById('s-ratio-note').textContent = ratio > 50 ? '좋은 흐름 👍 유지!' : '직영 늘리면 수익 2배';
+
+  document.getElementById('s-views').textContent = (S.thisMonth.views/1000).toFixed(1)+'K';
+  document.getElementById('s-conv').textContent = `전환율 ${S.thisMonth.conversionRate}%`;
+
+  /* ======================================================
+     REVENUE CHART
+     ====================================================== */
+  const chart = document.getElementById('chartBars');
+  const maxSales = Math.max(...S.dailyRevenue.map(d => d.sales));
+  chart.innerHTML = S.dailyRevenue.map(d => {
+    const totalH = (d.sales / maxSales) * 100;
+    const directH = (d.direct / maxSales) * 100;
+    return `
+      <div class="chart-day">
+        <div class="chart-bar-total" style="height:${totalH}%;">
+          <div class="chart-bar-direct" style="height:${(d.direct/d.sales)*100}%;"></div>
+        </div>
+        <div class="chart-tooltip">${d.date.slice(5)} · 총 ${krw(d.sales)} (직영 ${krw(d.direct)})</div>
+      </div>
+    `;
+  }).join('');
+  const chartTotal = S.dailyRevenue.reduce((s,d) => s + d.sales, 0);
+  document.getElementById('chartTotal').textContent = `총 ${krw(chartTotal)}`;
+
+  /* ======================================================
+     GRADE PROGRESSION
+     ====================================================== */
+  const cur = OMT.getCreatorGrade(S.cumulative.directSales);
+  const next = OMT.getNextGrade(S.cumulative.directSales);
+
+  document.getElementById('gradeIcon').textContent = cur.icon;
+  document.getElementById('gradeIcon').style.background = cur.color;
+  document.getElementById('gradeIcon').style.color = cur.id === 'bronze' || cur.id === 'gold' ? '#fff' : 'var(--ink)';
+  document.getElementById('gradeLabel').textContent = cur.label;
+  document.getElementById('gradeBonus').textContent = cur.bonus > 0 ? `전 상품 +${(cur.bonus*100).toFixed(1)}%p 추가` : '기본 커미션';
+
+  const progress = next ? (S.cumulative.directSales - cur.min) / (next.min - cur.min) * 100 : 100;
+  document.getElementById('gradeProgressBar').style.width = Math.min(100, progress) + '%';
+
+  document.getElementById('gradeMetaCur').textContent = `누적 직영 ${krw(S.cumulative.directSales)}`;
+  document.getElementById('gradeMetaMax').textContent = next ? `다음 등급 ${krw(next.min)}` : '최고 등급';
+
+  const remaining = next ? next.min - S.cumulative.directSales : 0;
+  document.getElementById('gradeNext').innerHTML = next
+    ? `🎯 <strong>${next.icon} ${next.label}</strong>까지 직영 <strong>${krw(remaining)}</strong> 남음 · 약 ${Math.ceil(remaining / 700000)}건 판매`
+    : `🎉 최고 등급 달성! 플래티넘 혜택을 누리세요.`;
+
+  document.getElementById('gradePerks').innerHTML = cur.perks.map(p => `<div class="grade-perk">${p}</div>`).join('');
+
+  /* ======================================================
+     DIRECT RATIO GAUGE
+     ====================================================== */
+  const circumference = 2 * Math.PI * 52;
+  const gaugeOffset = circumference * (1 - ratio / 100);
+  document.getElementById('gaugeFill').setAttribute('stroke-dashoffset', gaugeOffset);
+  document.getElementById('gaugeFill').setAttribute('stroke-dasharray', circumference);
+  document.getElementById('gaugePct').textContent = ratio + '%';
+  document.getElementById('ratioDirect').textContent = krw(S.thisMonth.directSales);
+  document.getElementById('ratioGen').textContent = krw(S.thisMonth.totalSales - S.thisMonth.directSales);
+
+  const tipEl = document.getElementById('ratioTip');
+  if(ratio >= 70) tipEl.innerHTML = '🏆 직영 중심 전략 완벽 · 다음달도 이대로!';
+  else if(ratio >= 50) tipEl.innerHTML = '💡 직영 비중 더 늘리면 수익이 빠르게 상승합니다';
+  else tipEl.innerHTML = `💡 직영 1건 추가 시 평균 ${krw(80000)} 추가 수익 · 이번달 목표 50% 이상`;
+
+  /* ======================================================
+     RECENT SALES
+     ====================================================== */
+  function fmtTime(min){
+    if(min < 60) return min + '분 전';
+    if(min < 1440) return Math.floor(min/60) + '시간 전';
+    return Math.floor(min/1440) + '일 전';
+  }
+  document.getElementById('salesList').innerHTML = S.recentSales.map(s => {
+    const product = OMT.getProduct(s.productId);
+    const isDirect = product?.directRun;
+    return `
+      <div class="sale-row">
+        <div class="sale-avatar">${s.buyerInitial}</div>
+        <div class="sale-info">
+          <div class="sale-action">
+            <strong>${s.buyerName}</strong>님이 <span class="prod">${product?.name || '상품'}</span> 구매
+            ${isDirect ? '<span class="sale-direct-tag">🏠 직영 10%</span>' : '<span class="sale-direct-tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);">일반 5%</span>'}
+          </div>
+          <div class="sale-meta">${fmtTime(s.minutesAgo)} · ${s.postTitle}</div>
+        </div>
+        <div class="sale-amount">
+          <div class="sale-comm">+${krw(s.commission)}</div>
+          <div class="sale-price">판매 ${krw(s.price)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  /* ======================================================
+     TOP CONTENT
+     ====================================================== */
+  document.getElementById('contentList').innerHTML = S.topContent.map((c, i) => `
+    <div class="content-row">
+      <div class="content-rank r${i+1}">${i+1}</div>
+      <div>
+        <div class="content-title">${c.title} ${c.isDirect ? '<span style="color:var(--accent);font-size:10px;font-weight:800;margin-left:3px;">🏠 직영</span>' : ''}</div>
+        <div class="content-meta">
+          <span>👀 ${(c.views/1000).toFixed(1)}K 조회</span>
+          <span>🛒 ${c.sales}건 판매</span>
+        </div>
+      </div>
+      <div class="content-rev">${krw(c.revenue)}</div>
+    </div>
+  `).join('');
+
+  /* ======================================================
+     PAYOUT
+     ====================================================== */
+  document.getElementById('payoutAmount').textContent = krw(S.nextPayout.amount);
+  const payoutDate = new Date(S.nextPayout.date);
+  document.getElementById('payoutDate').textContent = `${payoutDate.getMonth()+1}월 ${payoutDate.getDate()}일 · 3일 후 카카오페이 송금`;
+
+  /* ======================================================
+     LEADERBOARD
+     ====================================================== */
+  const LEADERBOARD = [
+    { rank:1, name:'일본여행연구소', grade:'💎 플래티넘', sales:8420000 },
+    { rank:2, name:'태국고수', grade:'💎 플래티넘', sales:6140000 },
+    { rank:3, name:'허니문플래너', grade:'🥇 골드', sales:4280000 },
+    { rank:4, name:'베트남살이', grade:'🥇 골드', sales:3520000 },
+    { rank:5, name:'패밀리트립', grade:'🥇 골드', sales:3100000 },
+    { rank:12, name:'홍길동 (나)', grade:cur.icon + ' ' + cur.label, sales:S.cumulative.directSales, me:true }
+  ];
+  document.getElementById('leaderList').innerHTML = LEADERBOARD.map(l => `
+    <div class="leader-row ${l.me?'me':''}">
+      <div class="leader-rank-n ${l.rank<=3?'top':''}">${l.rank}</div>
+      <div>
+        <div class="leader-name">${l.name}</div>
+        <div class="leader-grade">${l.grade}</div>
+      </div>
+      <div class="leader-sales">${(l.sales/10000).toFixed(0)}만</div>
+    </div>
+  `).join('');
+  </script>
+</body>
+</html>

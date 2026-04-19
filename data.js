@@ -740,12 +740,110 @@
   ];
 
   /* =====================================================================
+     11) Creator Grade System & Stats (Mock)
+     ===================================================================== */
+  const CREATOR_GRADES = [
+    { id:'bronze',   label:'브론즈',  icon:'🥉', min:0,        max:500000,    bonus:0,      color:'#CD7F32',
+      perks:['기본 커미션 (일반 5% / 직영 10%)','월간 인사이트 리포트'] },
+    { id:'silver',   label:'실버',   icon:'🥈', min:500000,   max:2000000,   bonus:0.005,  color:'#9FA2A8',
+      perks:['+0.5%p 추가 커미션','분기별 팸투어 신청 가능','전용 에디터 툴'] },
+    { id:'gold',     label:'골드',   icon:'🥇', min:2000000,  max:5000000,   bonus:0.01,   color:'#D4AF37',
+      perks:['+1%p 추가 커미션','월간 팸투어 우선권','프로필 배지 노출','직영 신상품 선공개'] },
+    { id:'platinum', label:'플래티넘',icon:'💎', min:5000000,  max:Infinity,  bonus:0.02,   color:'#B9F2FF',
+      perks:['+2%p 추가 커미션','전담 파트너 매니저 1:1','오리지널 상품 공동 기획 참여','연 2회 해외 컨퍼런스 초청'] }
+  ];
+
+  // 신규 크리에이터 온보딩 보너스 (첫 90일)
+  const NEW_CREATOR_BONUS = {
+    days: 90,
+    extraDirect: 0.02,  // 직영 +2%p
+    extraGeneral: 0.01, // 일반 +1%p
+    label: '온보딩 보너스',
+    note: '가입 후 90일 동안 직영 판매 +2%p, 일반 +1%p 추가 커미션'
+  };
+
+  // Mock 크리에이터 통계 (로그인 유저 = 홍길동 기준 시뮬레이션)
+  const CREATOR_MOCK_STATS = {
+    joinedAt: new Date(Date.now() - 86400000 * 52).toISOString(),  // 52일 전 가입 (= 신규 보너스 적용 중)
+    isApproved: true,
+    thisMonth: {
+      totalSales: 3280000,          // 이번달 판매액
+      directSales: 2040000,          // 이번달 직영 판매액
+      commission: 246400,            // 이번달 커미션
+      views: 48200,                  // 이번달 영상 조회수
+      posts: 4,                      // 이번달 게시
+      conversionRate: 2.3,           // 조회 → 판매 전환율 (%)
+      bonusEarned: 42800             // 신규 보너스로 추가 적립된 금액
+    },
+    cumulative: {
+      totalSales: 4280000,           // 누적 전체
+      directSales: 2840000,          // 누적 직영 (등급 기준)
+      totalCommission: 520400,       // 누적 커미션
+      totalPayout: 418000,           // 실제 정산된 금액
+      pending: 102400,               // 정산 예정
+      subscribers: 68000,            // 구독자 수
+      followers: 4120,               // 오마이트립 내 팔로워
+      currentGrade: 'gold',          // 현재 등급 (2,840,000원 누적으로 골드)
+      rankPercentile: 12             // 전체 크리에이터 중 상위 %
+    },
+    // 최근 30일 일별 매출 (차트용)
+    dailyRevenue: Array.from({length: 30}, (_, i) => ({
+      date: new Date(Date.now() - (29-i)*86400000).toISOString().slice(0,10),
+      sales: Math.round(80000 + Math.random() * 200000 + (i > 20 ? 150000 : 0)),
+      direct: Math.round(40000 + Math.random() * 140000 + (i > 20 ? 80000 : 0))
+    })),
+    // 최근 판매 피드
+    recentSales: [
+      { id:'s1', minutesAgo:12,   productId:'prod-jp-01', buyerInitial:'김', buyerName:'김○○', price:689000, commission:82680, postTitle:'오사카 2박3일 가성비 완벽 루트' },
+      { id:'s2', minutesAgo:47,   productId:'prod-vn-01', buyerInitial:'박', buyerName:'박○○', price:1290000, commission:154800, postTitle:'다낭 신혼여행 5박 리얼 후기' },
+      { id:'s3', minutesAgo:134,  productId:'prod-ph-01', buyerInitial:'이', buyerName:'이○○', price:1580000, commission:189600, postTitle:'필리핀 세부 골프 패키지' },
+      { id:'s4', minutesAgo:312,  productId:'prod-jp-02', buyerInitial:'최', buyerName:'최○○', price:589000, commission:29450,  postTitle:'도쿄 3박4일 인기 코스' },
+      { id:'s5', minutesAgo:628,  productId:'prod-th-01', buyerInitial:'정', buyerName:'정○○', price:890000, commission:106800, postTitle:'방콕+파타야 5박6일' },
+      { id:'s6', minutesAgo:1127, productId:'prod-jp-01', buyerInitial:'윤', buyerName:'윤○○', price:689000, commission:82680, postTitle:'오사카 2박3일 가성비 완벽 루트' }
+    ],
+    // 인기 콘텐츠 TOP 3 (by 수익)
+    topContent: [
+      { postId:'fp-01', title:'오사카 2박3일 가성비 완벽 루트', views:28400, sales:8, revenue:661440, isDirect:true },
+      { postId:'fp-02', title:'다낭 신혼여행 5박 리얼 후기', views:19200, sales:4, revenue:619200, isDirect:true },
+      { postId:'fp-03', title:'후쿠오카 온천 당일치기', views:12800, sales:6, revenue:176700, isDirect:false }
+    ],
+    // 다음 정산 예정일
+    nextPayout: {
+      date: new Date(Date.now() + 86400000 * 3).toISOString().slice(0,10),
+      amount: 102400
+    }
+  };
+
+  /* =====================================================================
      Expose + Helpers
      ===================================================================== */
   root.DATA = {
     COUNTRIES, CITIES, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
     PRODUCTS, CREATORS, FEED_POSTS, REVIEWS, USER,
-    INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY
+    INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY,
+    CREATOR_GRADES, NEW_CREATOR_BONUS, CREATOR_MOCK_STATS
+  };
+
+  // 누적 직영 판매액 기준 등급 조회
+  root.getCreatorGrade = (directSales = 0) => {
+    return CREATOR_GRADES.find(g => directSales >= g.min && directSales < g.max) || CREATOR_GRADES[0];
+  };
+  // 다음 등급까지 필요한 금액
+  root.getNextGrade = (directSales = 0) => {
+    const current = root.getCreatorGrade(directSales);
+    const nextIdx = CREATOR_GRADES.indexOf(current) + 1;
+    return CREATOR_GRADES[nextIdx] || null;
+  };
+  // 가입 후 신규 보너스 유효 여부
+  root.isNewCreator = (joinedAtIso) => {
+    if(!joinedAtIso) return false;
+    const diffDays = (Date.now() - new Date(joinedAtIso).getTime()) / 86400000;
+    return diffDays < NEW_CREATOR_BONUS.days;
+  };
+  root.daysLeftInBonus = (joinedAtIso) => {
+    if(!joinedAtIso) return 0;
+    const diffDays = (Date.now() - new Date(joinedAtIso).getTime()) / 86400000;
+    return Math.max(0, Math.ceil(NEW_CREATOR_BONUS.days - diffDays));
   };
 
   root.getProduct    = (id) => PRODUCTS.find(p => p.id === id);

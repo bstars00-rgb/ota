@@ -675,14 +675,7 @@
               <div style="font-size:12px;opacity:.85;margin-top:4px;">gildong@ohmytrip.kr</div>
             </div>
             <div class="profile-stats-bar" id="profStats"></div>
-            <div class="profile-creator-cta" onclick="location.href='creator.html'">
-              <div class="ico">💰</div>
-              <div class="info">
-                <div class="t">크리에이터가 되어 수익을 만들어보세요</div>
-                <div class="s">일반 5% · 직영 10% · 평균 월 80만원</div>
-              </div>
-              <div class="go">지원 →</div>
-            </div>
+            <div id="creatorCTABlock"></div>
             <div class="profile-section-h">내 예약</div>
             <div class="booking-mini-list" id="profBookings"></div>
             <div class="profile-section-h">여행 도구</div>
@@ -1025,6 +1018,42 @@
     document.getElementById('wishBadge').textContent = wish.length;
     document.getElementById('couponBadge').textContent = OMT.State.getAvailableCoupons().length;
     document.getElementById('pointsSum').textContent = points.toLocaleString('ko-KR') + ' P ›';
+
+    // 크리에이터 CTA: 승인되었으면 대시보드, 아니면 지원하기
+    const stats = OMT.DATA.CREATOR_MOCK_STATS;
+    const isCreator = stats?.isApproved;
+    const ctaEl = document.getElementById('creatorCTABlock');
+    if(isCreator){
+      const isNew = OMT.isNewCreator(stats.joinedAt);
+      const daysLeft = OMT.daysLeftInBonus(stats.joinedAt);
+      const curGrade = OMT.getCreatorGrade(stats.cumulative.directSales);
+      const thisMonthComm = stats.thisMonth.commission;
+      ctaEl.innerHTML = `
+        <div style="margin:14px 16px;padding:16px;background:linear-gradient(135deg,#0D1B3D,#1A2D5C);color:#fff;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;" onclick="location.href='creator-dashboard.html'">
+          <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.25),transparent 70%);"></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;position:relative;">
+            <div style="width:40px;height:40px;border-radius:10px;background:${curGrade.color};color:#fff;display:grid;place-items:center;font-size:22px;">${curGrade.icon}</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:700;opacity:.7;">크리에이터 스튜디오</div>
+              <div style="font-weight:900;font-size:14px;color:var(--accent);">${curGrade.label} 등급 · 이번달 ${(thisMonthComm/10000).toFixed(1)}만원</div>
+            </div>
+            <div style="font-size:18px;">→</div>
+          </div>
+          ${isNew ? `<div style="padding:8px 12px;background:rgba(255,210,63,.15);color:var(--accent);border-radius:8px;font-size:11px;font-weight:800;position:relative;">🎁 온보딩 보너스 ${daysLeft}일 남음 · +2%p</div>` : `<div style="padding:8px 12px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);border-radius:8px;font-size:11px;font-weight:700;position:relative;">대시보드에서 매출·정산·리더보드 확인</div>`}
+        </div>
+      `;
+    } else {
+      ctaEl.innerHTML = `
+        <div class="profile-creator-cta" onclick="location.href='creator.html'">
+          <div class="ico">💰</div>
+          <div class="info">
+            <div class="t">크리에이터가 되어 수익을 만들어보세요</div>
+            <div class="s">일반 5% · 직영 10% · 평균 월 80만원</div>
+          </div>
+          <div class="go">지원 →</div>
+        </div>
+      `;
+    }
   }
 
   /* ========================================================================
@@ -1147,7 +1176,9 @@
       document.querySelector('.cm-prev').textContent = '이전';
       document.querySelector('.cm-next').textContent = '게시하기';
 
-      const products = OMT.DATA.PRODUCTS.slice(0, 6);
+      // 직영 상품 먼저 정렬 (크리에이터 수익 2배)
+      const directProducts = OMT.DATA.PRODUCTS.filter(p => p.directRun);
+      const normalProducts = OMT.DATA.PRODUCTS.filter(p => !p.directRun).slice(0, 4);
       body.innerHTML = `
         <div class="edit-area">
           <div class="preview-video" style="background-image:url('${cmData.media||'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=600&q=80'}')"></div>
@@ -1160,11 +1191,51 @@
 
           <div class="edit-field">
             <label>상품 연결 (커미션 수익)</label>
-            <select id="cmProd" onchange="cmData.productId=this.value;">
-              <option value="">연결 없음</option>
-              ${products.map(p => `<option value="${p.id}" ${cmData.productId===p.id?'selected':''}>${p.name}</option>`).join('')}
-            </select>
-            <div class="hint">판매 시 커미션 자동 지급 (일반 5% · 🏠 직영 10%)</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <!-- 연결 없음 -->
+              <button type="button" class="prod-opt ${!cmData.productId?'active':''}" data-pid="" onclick="cmPickProduct('')"
+                style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.05);border:1.5px solid ${!cmData.productId?'var(--primary)':'rgba(255,255,255,.1)'};border-radius:10px;color:#fff;text-align:left;">
+                <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:18px;">✕</div>
+                <div style="flex:1;"><div style="font-size:13px;font-weight:700;">상품 연결 없음</div><div style="font-size:11px;opacity:.6;">일반 콘텐츠로 게시</div></div>
+              </button>
+
+              ${directProducts.length > 0 ? `
+              <div style="font-size:10px;font-weight:800;color:var(--accent);padding:8px 2px 2px;letter-spacing:.04em;">
+                🏠 직영 상품 · 커미션 10% (2배 수익 ⭐)
+              </div>
+              ${directProducts.map(p => `
+                <button type="button" class="prod-opt ${cmData.productId===p.id?'active':''}" data-pid="${p.id}" onclick="cmPickProduct('${p.id}')"
+                  style="display:flex;align-items:center;gap:10px;padding:12px;background:${cmData.productId===p.id?'rgba(255,210,63,.15)':'rgba(255,255,255,.05)'};border:1.5px solid ${cmData.productId===p.id?'var(--accent)':'rgba(255,210,63,.25)'};border-radius:10px;color:#fff;text-align:left;">
+                  <div style="width:44px;height:44px;border-radius:8px;background-size:cover;background-position:center;background-image:url('${p.images?.[0]||''}');flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;gap:5px;align-items:center;margin-bottom:2px;">
+                      <span style="font-size:9px;font-weight:800;background:var(--accent);color:#1A1A1A;padding:2px 5px;border-radius:3px;">🏠 직영 10%</span>
+                    </div>
+                    <div style="font-size:12px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+                    <div style="font-size:10px;color:var(--accent);font-weight:700;margin-top:2px;">판매 1건 → +${OMT.krw(Math.round(p.price*0.10))} 적립</div>
+                  </div>
+                </button>
+              `).join('')}
+              ` : ''}
+
+              <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.55);padding:10px 2px 2px;letter-spacing:.04em;">
+                일반 파트너 상품 · 커미션 5%
+              </div>
+              ${normalProducts.map(p => `
+                <button type="button" class="prod-opt ${cmData.productId===p.id?'active':''}" data-pid="${p.id}" onclick="cmPickProduct('${p.id}')"
+                  style="display:flex;align-items:center;gap:10px;padding:12px;background:${cmData.productId===p.id?'rgba(255,107,53,.15)':'rgba(255,255,255,.05)'};border:1.5px solid ${cmData.productId===p.id?'var(--primary)':'rgba(255,255,255,.1)'};border-radius:10px;color:#fff;text-align:left;">
+                  <div style="width:44px;height:44px;border-radius:8px;background-size:cover;background-position:center;background-image:url('${p.images?.[0]||''}');flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;gap:5px;align-items:center;margin-bottom:2px;">
+                      <span style="font-size:9px;font-weight:800;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:2px 5px;border-radius:3px;">일반 5%</span>
+                    </div>
+                    <div style="font-size:12px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.55);font-weight:700;margin-top:2px;">판매 1건 → +${OMT.krw(Math.round(p.price*0.05))} 적립</div>
+                  </div>
+                </button>
+              `).join('')}
+            </div>
+            <div class="hint" style="margin-top:8px;">💡 직영 상품을 선택하면 같은 판매량으로도 <strong style="color:var(--accent);">2배 수익</strong></div>
           </div>
 
           <div class="edit-field">
@@ -1232,6 +1303,10 @@
     } else {
       toast('녹화 완료');
     }
+  };
+  window.cmPickProduct = (pid) => {
+    cmData.productId = pid;
+    renderCreateStep();
   };
   window.cmToggleTag = (t) => {
     if(cmData.tags.includes(t)) cmData.tags = cmData.tags.filter(x => x !== t);
