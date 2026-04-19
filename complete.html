@@ -343,11 +343,34 @@
 
   </main>
 
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   /* =========================================================================
-     Load booking from sessionStorage
+     Load booking — prefer State by ?bk= param, fallback to sessionStorage
      ========================================================================= */
-  const booking = JSON.parse(sessionStorage.getItem('omt_booking') || 'null');
+  const bkParam = new URLSearchParams(location.search).get('bk');
+  let booking = null;
+  if(bkParam){
+    const b = OMT.State.getBooking(bkParam);
+    if(b){
+      // Adapt to legacy shape that this page uses
+      const pkg = b.packageSnapshot || {};
+      booking = {
+        bookingNumber: b.bookingNumber,
+        total: b.total,
+        paymentMethod: b.paymentMethod,
+        leadName: b.leadName,
+        phone: b.phone,
+        package: pkg,
+        paxCount: b.paxCount,
+        createdAt: b.createdAt
+      };
+    }
+  }
+  if(!booking){
+    booking = JSON.parse(sessionStorage.getItem('omt_booking') || 'null');
+  }
 
   if(!booking){
     document.getElementById('emptyState').hidden = false;

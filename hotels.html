@@ -221,6 +221,8 @@
     </section>
   </main>
 
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   // TODO: API 연동 - GET /api/hotels?destination=osaka&checkin=...&checkout=...
   const HOTELS = [
@@ -385,8 +387,21 @@
 
   function selectHotel(id){
     const h = HOTELS.find(x => x.id === id);
-    // TODO: API 연동 - POST /api/cart { type:'hotel', hotelId:id, checkin:..., checkout:... }
-    location.href = 'product.html?id=' + id;
+    // Find matching product that uses this hotel
+    const matchedProduct = OMT.DATA.PRODUCTS.find(p => p.hotel === id) ||
+                           OMT.DATA.PRODUCTS.find(p => p.city === h.city);
+    if(matchedProduct){
+      location.href = 'product.html?id=' + matchedProduct.id;
+      return;
+    }
+    // Fallback: add hotel to cart
+    OMT.State.addToCart({
+      productId: null, type:'호텔', orig:false,
+      img: h.img, name: h.name, sub:`${h.area} · ${'★'.repeat(h.stars)} · 3박`,
+      dates:'2026.05.10 - 2026.05.13', pax:'성인 2명', paxCount:2, price: h.price * 3
+    });
+    alert(h.name + ' 3박 장바구니에 담았어요');
+    location.href = 'cart.html';
   }
 
   renderFilterUI();

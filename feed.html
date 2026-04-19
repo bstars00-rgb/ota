@@ -450,6 +450,8 @@
     <div class="sheet-body" id="sheetBody"></div>
   </aside>
 
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   /* =========================================================================
      DUMMY DATA — Creator feed
@@ -609,10 +611,23 @@
      STATE
      ========================================================================= */
   let currentFilter = 'all';
-  let cards = [];          // rendered items (with cycle suffix)
-  let likedSet = new Set();
-  let savedSet = new Set();
-  let followedSet = new Set();
+  let cards = [];
+  // State-backed sets (persist to localStorage via OMT.State)
+  const likedSet = {
+    has: (id) => OMT.State.isPostLiked(id),
+    add: (id) => OMT.State.togglePostLike(id),
+    delete: (id) => OMT.State.togglePostLike(id)
+  };
+  const savedSet = {
+    has: (id) => OMT.State.isPostSaved(id),
+    add: (id) => OMT.State.togglePostSave(id),
+    delete: (id) => OMT.State.togglePostSave(id)
+  };
+  const followedSet = {
+    has: (name) => OMT.State.isFollowing(name),
+    add: (name) => OMT.State.toggleFollow(name),
+    delete: (name) => OMT.State.toggleFollow(name)
+  };
 
   const krw = n => n.toLocaleString('ko-KR') + '원';
 
@@ -673,9 +688,9 @@
   }
 
   function cardHTML(c, idx){
-    const liked = likedSet.has(c.uniq);
-    const saved = savedSet.has(c.uniq);
-    const followed = followedSet.has(c.creator.name);
+    const liked = OMT.State.isPostLiked(c.id);
+    const saved = OMT.State.isPostSaved(c.id);
+    const followed = OMT.State.isFollowing(c.creator.name);
     const origTag = c.product.orig ? '<span class="f-chip orig">ORIGINAL</span>' : '';
     const verifiedMark = c.creator.verified ? '<span class="verified" aria-label="인증된 크리에이터">✓</span>' : '';
     return `
@@ -751,29 +766,29 @@
 
   function toggleLike(c, article){
     const uniq = article.dataset.uniq;
-    if(likedSet.has(uniq)) likedSet.delete(uniq); else likedSet.add(uniq);
+    // use the post id (not uniq) for persistence
+    OMT.State.togglePostLike(c.id);
     const btn = article.querySelector('.side-btn.like');
-    const liked = likedSet.has(uniq);
+    const liked = OMT.State.isPostLiked(c.id);
     btn.classList.toggle('active', liked);
     btn.querySelector('.ico').textContent = liked ? '❤️' : '🤍';
     // TODO: API 연동 - POST /api/creator/feed/{id}/like
   }
   function toggleSave(c, article){
-    const uniq = article.dataset.uniq;
-    if(savedSet.has(uniq)) savedSet.delete(uniq); else savedSet.add(uniq);
+    OMT.State.togglePostSave(c.id);
     const btn = article.querySelector('.side-btn[data-action="save"]');
-    const saved = savedSet.has(uniq);
+    const saved = OMT.State.isPostSaved(c.id);
     btn.classList.toggle('active', saved);
     btn.querySelector('.ico').textContent = saved ? '🔖' : '📑';
     // TODO: API 연동 - POST /api/creator/feed/{id}/save
   }
   function toggleFollow(c, article){
     const name = c.creator.name;
-    if(followedSet.has(name)) followedSet.delete(name); else followedSet.add(name);
+    OMT.State.toggleFollow(name);
     document.querySelectorAll('.feed-card').forEach(card => {
       if(cards[+card.dataset.idx]?.creator.name === name){
         const btn = card.querySelector('.c-follow');
-        const f = followedSet.has(name);
+        const f = OMT.State.isFollowing(name);
         btn.classList.toggle('following', f);
         btn.textContent = f ? '✓ 팔로잉' : '+ 팔로우';
       }

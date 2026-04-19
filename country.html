@@ -648,9 +648,9 @@
       </nav>
 
       <div class="header-actions">
-        <a href="/ai-planner" class="btn-ai">AI 플래너</a>
-        <a href="/login" class="btn-ghost">로그인</a>
-        <a href="/mypage" class="btn-ghost">마이페이지</a>
+        <a href="ai-planner.html" class="btn-ai">AI 플래너</a>
+        <a href="login.html" class="btn-ghost">로그인</a>
+        <a href="mypage.html" class="btn-ghost">마이페이지</a>
       </div>
 
       <button class="m-hamburger" aria-label="메뉴 열기" onclick="openDrawer()">
@@ -682,9 +682,10 @@
       <a href="country.html?c=vietnam">🇻🇳 한국인의 베트남</a>
       <a href="country.html?c=thailand">🇹🇭 한국인의 태국</a>
       <a href="country.html?c=philippines">🇵🇭 한국인의 필리핀</a>
-      <a href="/ai-planner">✦ AI 여행 플래너</a>
-      <a href="/feed">▶ 크리에이터 피드</a>
-      <a href="/creator">크리에이터 파트너 신청</a>
+      <a href="ai-planner.html">✦ AI 여행 플래너</a>
+      <a href="feed.html">▶ 크리에이터 피드</a>
+      <a href="mypage.html">👤 마이페이지</a>
+      <a href="creator.html">크리에이터 파트너 신청</a>
     </nav>
     <div class="drawer-foot">
       <button>로그인</button>
@@ -946,7 +947,7 @@
     </div>
   </footer>
 
-  <a href="/ai-planner" class="fab-ai" aria-label="AI 여행 플래너 열기">
+  <a href="ai-planner.html" class="fab-ai" aria-label="AI 여행 플래너 열기">
     <span class="sparkle" aria-hidden="true">✦</span>
     <span>AI 플래너</span>
   </a>
@@ -977,6 +978,8 @@
   <!-- ================================
        SCRIPTS — Country Template Engine
        ================================ -->
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   /* =========================================================================
      COUNTRY_CONFIGS
@@ -1661,7 +1664,7 @@
     // TODO: API 연동 필요 - GET /api/products/originals?country=${countrySlug}
     const el = document.getElementById('originalsGrid');
     el.innerHTML = cfg.originals.map(p => `
-      <a class="product-card" href="/product/${p.id}">
+      <a class="product-card" href="product.html?id=${p.id}">
         <div class="product-thumb" style="background-image:url('${p.img}')">
           <div class="product-badges">
             <span class="badge original">ORIGINAL</span>
@@ -1702,7 +1705,7 @@
     const el = document.getElementById('flightsGrid');
     const list = cfg.flightDeals[cityKey] || [];
     el.innerHTML = list.map(f => `
-      <a class="flight-card" href="/flights/search?country=${cfg.slug}&from=${encodeURIComponent(f.from)}&to=${encodeURIComponent(f.to)}">
+      <a class="flight-card" href="flights.html?from=${encodeURIComponent(f.from)}&to=${encodeURIComponent(f.to)}">
         <div class="flight-airline"><span class="airline-dot"></span>${f.airline}</div>
         <div class="flight-route">
           <span class="city">${f.from}</span>

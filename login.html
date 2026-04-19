@@ -276,6 +276,8 @@
 
   </div>
 
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   let mode = 'login';
   let remember = false;
@@ -367,11 +369,14 @@
     btn.disabled = true;
     btn.textContent = label + ' 중...';
     await new Promise(r => setTimeout(r, 900));
-    // Fake session
-    sessionStorage.setItem('omt_user', JSON.stringify({
-      name:'홍길동', email: document.getElementById('email').value, loggedAt: new Date().toISOString()
-    }));
-    alert(`${label} 성공 (프로토타입)\n마이페이지로 이동합니다.`);
+    // Set user session via State (prefers existing DATA.USER for demo)
+    const base = OMT.DATA.USER;
+    OMT.State.setUser({
+      ...base,
+      email: document.getElementById('email').value || base.email,
+      loggedAt: new Date().toISOString()
+    });
+    alert(`${label} 성공\n마이페이지로 이동합니다.`);
     location.href = 'mypage.html';
   }
 

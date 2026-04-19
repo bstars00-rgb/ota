@@ -474,6 +474,8 @@
     <button class="pay-cta" id="payBtnMobile" onclick="submitPayment()" disabled>결제하기</button>
   </div>
 
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   /* =========================================================================
      Load package from sessionStorage
@@ -755,11 +757,40 @@
 
     await new Promise(r => setTimeout(r, 1400)); // simulate payment latency
 
-    const bookingNumber = 'OMT-' + Date.now().toString(36).toUpperCase().slice(-8);
     const total = computeTotal();
 
+    // Create real booking via State (persists to localStorage, visible in mypage)
+    const booking = OMT.State.createBooking({
+      productId: pkg.productId || null,
+      productName: pkg.productName || (pkg.hotel?.name + ' 패키지'),
+      productImage: pkg.productImage || null,
+      dates: pkg.dates,
+      paxCount,
+      total,
+      paymentMethod: payMethod,
+      leadName: paxData[0].nameKo,
+      phone: paxData[0].phone,
+      travelers: paxData,
+      specialRequest: document.getElementById('specialReq').value,
+      source: pkg.source || 'checkout',
+      packageSnapshot: pkg
+    });
+
+    // Award points (1% of total)
+    OMT.State.addPoints(Math.round(total * 0.01), '예약 적립');
+
+    // Mark coupon as used if applied
+    if(pkg.couponCode) OMT.State.useCoupon(pkg.couponCode);
+
+    // Clear cart items that were purchased (if came from cart)
+    if(pkg.source === 'cart' && Array.isArray(pkg.cartItemIds)){
+      pkg.cartItemIds.forEach(cid => OMT.State.removeFromCart(cid));
+    }
+
+    // Legacy session payload for complete.html fallback
     sessionStorage.setItem('omt_booking', JSON.stringify({
-      bookingNumber,
+      bookingNumber: booking.bookingNumber,
+      bookingId: booking.id,
       total,
       paymentMethod: payMethod,
       leadName: paxData[0].nameKo,
@@ -767,10 +798,11 @@
       package: pkg,
       paxCount,
       specialRequest: document.getElementById('specialReq').value,
-      createdAt: new Date().toISOString()
+      createdAt: booking.createdAt
     }));
 
-    location.href = 'complete.html';
+    // TODO: API 연동 - POST /api/bookings (booking 객체 전송)
+    location.href = 'complete.html?bk=' + booking.bookingNumber;
   }
 
   function computeTotal(){

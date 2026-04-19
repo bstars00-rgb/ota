@@ -588,6 +588,8 @@
   <!-- ================================
        SCRIPTS
        ================================ -->
+  <script src="data.js"></script>
+  <script src="state.js"></script>
   <script>
   /* =========================================================================
      STATE & DUMMY DATA
@@ -595,6 +597,9 @@
      Conversation state is tracked in a simple object.
      In production, this context should be sent with every API call.
      ======================================================================== */
+
+  // Pre-fill query from URL (if passed from main AI search)
+  const urlQuery = new URLSearchParams(location.search).get('q');
   const state = {
     destination: null,
     style: null,
@@ -881,12 +886,21 @@
     `).join('');
     chatBody.appendChild(group);
 
+    // Map destination → productIds (tier: 가성비 / 밸런스 / 프리미엄)
+    const PRODUCT_MAP = {
+      '일본':   ['prod-jp-03','prod-jp-02','prod-jp-01'],
+      '베트남': ['prod-vn-02','prod-vn-03','prod-vn-01'],
+      '태국':   ['prod-th-01','prod-th-02','prod-th-03'],
+      '필리핀': ['prod-ph-02','prod-ph-01','prod-ph-01']
+    };
+    const productIds = PRODUCT_MAP[destination] || PRODUCT_MAP['일본'];
+
     group.querySelectorAll('.rec-book').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = +btn.dataset.idx;
-        const pick = recs[idx];
+        const pid = productIds[idx] || productIds[0];
         // TODO: API 연동 - POST /api/cart { productId, source:'ai-planner', context: state }
-        alert(`장바구니에 담겼습니다 (프로토타입)\n\n• ${pick.title}\n• ${pick.price.toLocaleString('ko-KR')}원`);
+        location.href = 'product.html?id=' + pid;
       });
     });
 
@@ -1035,8 +1049,15 @@
   /* =========================================================================
      INIT
      ========================================================================= */
-  window.addEventListener('load', () => {
-    goTo('greeting');
+  window.addEventListener('load', async () => {
+    if(urlQuery){
+      // User arrived via AI search; greet & acknowledge
+      await addBotMessage(`안녕하세요! "${urlQuery}" 관련해서 도와드릴게요 ✦`);
+      await addBotMessage('먼저 몇 가지만 확인할게요. 어디로 여행 가고 싶으세요?');
+      renderQuickReplies(FLOW.greeting.quickReplies);
+    } else {
+      goTo('greeting');
+    }
   });
   </script>
 </body>
