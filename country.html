@@ -1663,7 +1663,13 @@
   function renderOriginals(){
     // TODO: API 연동 필요 - GET /api/products/originals?country=${countrySlug}
     const el = document.getElementById('originalsGrid');
-    el.innerHTML = cfg.originals.map(p => `
+    // Map config originals to real product IDs from data.js (same-country products)
+    const centralProducts = (OMT.DATA?.PRODUCTS || []).filter(p => p.country === countrySlug);
+    const mapped = cfg.originals.map((p, i) => ({
+      ...p,
+      id: centralProducts[i]?.id || centralProducts[0]?.id || p.id
+    }));
+    el.innerHTML = mapped.map(p => `
       <a class="product-card" href="product.html?id=${p.id}">
         <div class="product-thumb" style="background-image:url('${p.img}')">
           <div class="product-badges">

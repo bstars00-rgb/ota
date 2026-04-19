@@ -1192,41 +1192,21 @@
     { slug:'world',        flag:'🌍', name:'전세계 호텔',     cities:'유럽·미주·오세아니아',     count:'12,340개 호텔' }
   ];
 
+  // Originals — 중앙 data.js에서 동적 생성 (originalFlag=true 상품 중 4개)
   // TODO: API 연동 필요 - GET /api/products/originals?limit=4
-  const ORIGINALS = [
-    {
-      id: 'orig-jp-01',
-      img: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80',
-      country: '🇯🇵 일본',
-      title: '[단독] 오사카 벚꽃 3박4일 프리미엄',
-      compo: '티웨이항공 + 호텔 그란비아 + 벚꽃 크루즈',
-      price: 689000, oldPrice: 890000
-    },
-    {
-      id: 'orig-vn-01',
-      img: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
-      country: '🇻🇳 베트남',
-      title: '[단독] 다낭 풀빌라 4박5일 올인클루시브',
-      compo: '비엣젯항공 + 프리미어빌리지 + 조식/석식',
-      price: 1290000, oldPrice: 1590000
-    },
-    {
-      id: 'orig-th-01',
-      img: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
-      country: '🇹🇭 태국',
-      title: '[단독] 방콕+파타야 5박6일 콤비',
-      compo: '타이항공 + ONE15 + 수상시장 투어',
-      price: 890000, oldPrice: 1180000
-    },
-    {
-      id: 'orig-ph-01',
-      img: 'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
-      country: '🇵🇭 필리핀',
-      title: '[단독] 세부 샹그릴라 막탄 4박5일',
-      compo: '세부퍼시픽 + 샹그릴라 막탄 + 호핑투어',
-      price: 1580000, oldPrice: 1890000
-    }
-  ];
+  const ORIGINALS = (OMT.DATA?.PRODUCTS || [])
+    .filter(p => p.originalFlag)
+    .slice(0, 4)
+    .map(p => ({
+      id: p.id,
+      img: p.images?.[0] || '',
+      country: (OMT.DATA.COUNTRIES[p.country]?.flag || '') + ' ' +
+               (OMT.DATA.COUNTRIES[p.country]?.name.replace('한국인의 ','') || p.country),
+      title: p.name,
+      compo: p.subtitle,
+      price: p.price,
+      oldPrice: p.oldPrice
+    }));
 
   // TODO: API 연동 필요 - GET /api/creator/shorts?featured=true&limit=4
   const SHORTS = [
