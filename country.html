@@ -537,6 +537,92 @@
     /* =========================================
        Responsive
        ========================================= */
+    /* =======================================
+       Search Popups (Calendar + Guests)
+       ======================================= */
+    .search-field-clickable:hover{background:var(--bg-soft);}
+    .search-field-clickable.active{background:var(--bg-soft);}
+
+    .s-popup-bd{position:fixed;inset:0;z-index:45;background:transparent;display:none;}
+    .s-popup-bd.open{display:block;}
+    .s-popup{
+      position:absolute;z-index:55;background:#fff;border:1px solid var(--line);border-radius:16px;
+      box-shadow:0 20px 50px rgba(0,0,0,.18);display:none;overflow:hidden;
+    }
+    .s-popup.open{display:block;animation:sPopupIn .2s ease;}
+    @keyframes sPopupIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+    .s-cal-popup{top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:min(700px,95vw);}
+    .s-cal-header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .s-cal-header .info{font-size:13px;color:var(--ink-2);}
+    .s-cal-header .info strong{color:var(--ink);font-weight:800;margin-left:6px;}
+    .s-cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--ink-3);font-weight:700;text-align:center;padding:4px 0;}
+    .s-cal-weekdays .sun{color:var(--danger,#EF4444);}
+    .s-cal-weekdays .sat{color:var(--secondary);}
+    .s-cal-months{display:grid;grid-template-columns:1fr 1fr;padding:16px 8px;}
+    .s-cal-month{padding:8px 12px;}
+    .s-cal-month-head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;}
+    .s-cal-month-head .nav{width:28px;height:28px;border-radius:8px;background:var(--bg-soft);display:grid;place-items:center;color:var(--ink);font-size:14px;border:none;cursor:pointer;}
+    .s-cal-month-head .nav:hover{background:var(--line);}
+    .s-cal-month-head .title{font-size:14px;font-weight:800;}
+    .s-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+    .s-cal-day{
+      aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;
+      border-radius:10px;transition:background .12s, color .12s;position:relative;
+    }
+    .s-cal-day:hover{background:var(--bg-soft);}
+    .s-cal-day.past{color:var(--ink-3);cursor:not-allowed;text-decoration:line-through;}
+    .s-cal-day.past:hover{background:transparent;}
+    .s-cal-day.sun{color:var(--danger,#EF4444);}
+    .s-cal-day.sat{color:var(--secondary);}
+    .s-cal-day.empty{cursor:default;}
+    .s-cal-day.empty:hover{background:transparent;}
+    .s-cal-day.selected{background:var(--primary);color:#fff;z-index:2;}
+    .s-cal-day.in-range{background:var(--primary-soft);color:var(--ink);border-radius:0;}
+    .s-cal-day.in-range.start{border-radius:10px 0 0 10px;}
+    .s-cal-day.in-range.end{border-radius:0 10px 10px 0;}
+    .s-cal-footer{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+    .s-cal-footer .summary{font-size:13px;color:var(--ink-2);}
+    .s-cal-footer .summary strong{color:var(--primary);font-weight:900;}
+    .s-cal-footer button{padding:10px 22px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;}
+    .s-cal-reset{background:var(--bg-soft);color:var(--ink-2);border:none;}
+    .s-cal-apply{background:var(--ink);color:#fff;border:none;}
+
+    .s-guests-popup{top:calc(100% + 8px);right:140px;width:min(380px,95vw);}
+    .s-guests-body{padding:18px;max-height:420px;overflow-y:auto;}
+    .s-room-block{padding:14px 0;border-top:1px solid var(--line);}
+    .s-room-block:first-child{border-top:none;padding-top:0;}
+    .s-room-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .s-room-head h4{margin:0;font-size:14px;font-weight:900;}
+    .s-room-head .remove{font-size:11px;color:var(--danger,#EF4444);font-weight:700;cursor:pointer;background:none;border:none;}
+    .s-count-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;}
+    .s-count-row .info{flex:1;}
+    .s-count-row .info .name{font-size:13px;font-weight:700;}
+    .s-count-row .info .note{font-size:11px;color:var(--ink-3);margin-top:1px;}
+    .s-count-ctrl{display:flex;align-items:center;gap:10px;}
+    .s-count-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;cursor:pointer;}
+    .s-count-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
+    .s-count-btn:disabled{opacity:.3;cursor:not-allowed;}
+    .s-count-val{font-weight:900;min-width:16px;text-align:center;font-size:14px;}
+    .s-age-row{margin-top:8px;}
+    .s-age-row .lb{font-size:11px;color:var(--ink-3);margin-bottom:6px;font-weight:700;}
+    .s-age-selects{display:flex;flex-wrap:wrap;gap:6px;}
+    .s-age-selects select{padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-weight:700;}
+    .s-add-room{width:100%;padding:12px;background:var(--bg-soft);color:var(--ink);border-radius:10px;font-weight:800;font-size:13px;margin-top:12px;border:none;cursor:pointer;}
+    .s-add-room:hover{background:var(--line);}
+    .s-guests-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;}
+    .s-guests-footer button{flex:1;padding:11px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;border:none;}
+    .s-guests-clear{background:var(--bg-soft);color:var(--ink-2);}
+    .s-guests-apply{background:var(--ink);color:#fff;}
+
+    @media (max-width: 1024px){
+      .s-cal-popup{left:0;right:0;transform:none;width:auto;max-width:none;}
+      .s-cal-months{grid-template-columns:1fr;}
+      .s-cal-month:last-child{display:none;}
+      .s-guests-popup{left:0;right:0;width:auto;}
+    }
+
     @media (max-width: 1024px){
       .originals-grid{grid-template-columns: repeat(2, 1fr);}
       .shorts-grid{grid-template-columns: repeat(3, 1fr);}
@@ -733,7 +819,7 @@
        SEARCH BAR
        ================================ -->
   <section>
-    <div class="container search-wrap">
+    <div class="container search-wrap" style="position:relative;">
       <div class="search-card">
         <div class="search-mode-tabs" role="tablist" aria-label="검색 유형">
           <button class="active" data-mode="bundle">항공 + 호텔 묶어 검색<span class="recommend">추천</span></button>
@@ -757,22 +843,47 @@
               <!-- Rendered by JS from config -->
             </select>
           </div>
-          <div class="search-field">
-            <label>여행 날짜</label>
-            <input type="text" id="travelDate" placeholder="2026.04.25 - 2026.04.28" value="2026.04.25 - 2026.04.28" readonly style="cursor:pointer;"/>
+          <div class="search-field search-field-clickable" onclick="openSPopup('cal')" style="cursor:pointer;">
+            <label>체크인 · 체크아웃</label>
+            <div id="cDateLabel" style="font-size:14px;font-weight:700;color:var(--ink);">2026.04.25 - 2026.04.28</div>
+            <div id="cNightsLabel" style="font-size:11px;color:var(--ink-3);margin-top:1px;">3박</div>
           </div>
-          <div class="search-field">
-            <label>인원</label>
-            <select id="travelerCount">
-              <option>성인 2명</option>
-              <option>성인 1명</option>
-              <option>성인 2명, 아동 1명</option>
-              <option>성인 2명, 아동 2명</option>
-              <option>성인 4명</option>
-            </select>
+          <div class="search-field search-field-clickable" onclick="openSPopup('guests')" style="cursor:pointer;">
+            <label>객실·인원</label>
+            <div id="cGuestsLabel" style="font-size:14px;font-weight:700;color:var(--ink);">객실 1개, 성인 2명</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:1px;">아동 추가 가능</div>
           </div>
           <button type="submit" class="search-btn">✈ 검색</button>
         </form>
+      </div>
+
+      <!-- Calendar Popup -->
+      <div class="s-popup-bd" id="sPopupBd" onclick="closeSPopups()"></div>
+      <div class="s-popup s-cal-popup" id="sCalPopup">
+        <div class="s-cal-header">
+          <div class="info">여행 날짜를 선택하세요 <strong id="sCalRangeInfo"></strong></div>
+          <button type="button" onclick="closeSPopups()" style="font-size:18px;color:var(--ink-3);">✕</button>
+        </div>
+        <div class="s-cal-weekdays" style="padding:0 20px;">
+          <div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div>
+        </div>
+        <div class="s-cal-months" id="sCalMonths"></div>
+        <div class="s-cal-footer">
+          <div class="summary" id="sCalSummary">체크인 날짜를 먼저 선택하세요</div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="s-cal-reset" onclick="sResetDates()">초기화</button>
+            <button type="button" class="s-cal-apply" onclick="sApplyDates()">날짜 적용</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guests Popup -->
+      <div class="s-popup s-guests-popup" id="sGuestsPopup">
+        <div class="s-guests-body" id="sGuestsBody"></div>
+        <div class="s-guests-footer">
+          <button type="button" class="s-guests-clear" onclick="sResetRooms()">초기화</button>
+          <button type="button" class="s-guests-apply" onclick="sApplyGuests()">완료</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1628,6 +1739,230 @@
       });
     });
   }
+
+  /* =========================================================================
+     Calendar + Guests Popup State & Logic
+     ========================================================================= */
+  const SPOP = {
+    checkin:  new Date(2026, 3, 25),   // 2026-04-25
+    checkout: new Date(2026, 3, 28),   // 2026-04-28
+    rooms: [{ adults: 2, children: [] }],
+    active: null,
+    calTempIn: null, calTempOut: null,
+    calView: { year: 2026, month: 3 }
+  };
+  let sRoomsDraft = JSON.parse(JSON.stringify(SPOP.rooms));
+
+  const sFmtDate = (d) => !d ? '' : `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  const sFmtDay  = (d) => !d ? '' : ['일','월','화','수','목','금','토'][d.getDay()];
+  const sDayKey  = (d) => !d ? '' : d.toISOString().slice(0,10);
+  const sNights  = (a, b) => !a || !b ? 0 : Math.max(0, Math.round((b - a) / 86400000));
+
+  function openSPopup(id){
+    closeSPopups(false);
+    SPOP.active = id;
+    document.getElementById('sPopupBd').classList.add('open');
+    if(id === 'cal'){
+      document.getElementById('sCalPopup').classList.add('open');
+      SPOP.calTempIn = SPOP.checkin;
+      SPOP.calTempOut = SPOP.checkout;
+      SPOP.calView = { year: SPOP.checkin.getFullYear(), month: SPOP.checkin.getMonth() };
+      sRenderCalendar();
+    } else if(id === 'guests'){
+      document.getElementById('sGuestsPopup').classList.add('open');
+      sRoomsDraft = JSON.parse(JSON.stringify(SPOP.rooms));
+      sRenderGuests();
+    }
+  }
+  function closeSPopups(withBd = true){
+    document.querySelectorAll('.s-popup.open').forEach(p => p.classList.remove('open'));
+    if(withBd) document.getElementById('sPopupBd').classList.remove('open');
+    SPOP.active = null;
+  }
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSPopups(); });
+
+  function sRenderCalendar(){
+    const wrap = document.getElementById('sCalMonths');
+    const { year, month } = SPOP.calView;
+    const m1 = { year, month };
+    const m2 = month === 11 ? { year: year+1, month: 0 } : { year, month: month+1 };
+    wrap.innerHTML = sMonthHTML(m1, true) + sMonthHTML(m2, false);
+    wrap.querySelectorAll('.s-cal-day:not(.past):not(.empty)').forEach(el => {
+      el.addEventListener('click', () => sOnDateClick(new Date(el.dataset.date)));
+    });
+    wrap.querySelectorAll('.nav').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const dir = +btn.dataset.dir;
+        let nm = SPOP.calView.month + dir;
+        let ny = SPOP.calView.year;
+        if(nm < 0){ nm = 11; ny -= 1; }
+        if(nm > 11){ nm = 0; ny += 1; }
+        SPOP.calView = { year: ny, month: nm };
+        sRenderCalendar();
+      });
+    });
+    sUpdateCalFooter();
+  }
+  function sMonthHTML(m, showPrev){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const firstDay = new Date(m.year, m.month, 1);
+    const startWeekDay = firstDay.getDay();
+    const daysInMonth = new Date(m.year, m.month+1, 0).getDate();
+    let html = `<div class="s-cal-month">
+      <div class="s-cal-month-head">
+        ${showPrev?'<button class="nav" data-dir="-1" type="button">‹</button>':'<span></span>'}
+        <div class="title">${m.year}년 ${m.month+1}월</div>
+        ${!showPrev?'<button class="nav" data-dir="1" type="button">›</button>':'<span></span>'}
+      </div>
+      <div class="s-cal-grid">`;
+    for(let i=0; i<startWeekDay; i++) html += `<div class="s-cal-day empty"></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const date = new Date(m.year, m.month, d);
+      const iso = sDayKey(date);
+      const isPast = date < today;
+      const isStart = SPOP.calTempIn && sDayKey(SPOP.calTempIn) === iso;
+      const isEnd = SPOP.calTempOut && sDayKey(SPOP.calTempOut) === iso;
+      const inRange = SPOP.calTempIn && SPOP.calTempOut &&
+                      date > SPOP.calTempIn && date < SPOP.calTempOut;
+      const dow = date.getDay();
+      const classes = ['s-cal-day'];
+      if(isPast) classes.push('past');
+      if(dow === 0) classes.push('sun');
+      if(dow === 6) classes.push('sat');
+      if(isStart || isEnd) classes.push('selected');
+      if(isStart) classes.push('start');
+      if(isEnd) classes.push('end');
+      if(inRange) classes.push('in-range');
+      html += `<div class="${classes.join(' ')}" data-date="${iso}">${d}</div>`;
+    }
+    html += `</div></div>`;
+    return html;
+  }
+  function sOnDateClick(date){
+    if(!SPOP.calTempIn || (SPOP.calTempIn && SPOP.calTempOut)){
+      SPOP.calTempIn = date;
+      SPOP.calTempOut = null;
+    } else {
+      if(date <= SPOP.calTempIn){
+        SPOP.calTempIn = date;
+        SPOP.calTempOut = null;
+      } else {
+        SPOP.calTempOut = date;
+      }
+    }
+    sRenderCalendar();
+  }
+  function sUpdateCalFooter(){
+    const ci = SPOP.calTempIn, co = SPOP.calTempOut;
+    const nights = sNights(ci, co);
+    const info = document.getElementById('sCalRangeInfo');
+    const summary = document.getElementById('sCalSummary');
+    if(ci && co){
+      info.textContent = `${sFmtDate(ci)} - ${sFmtDate(co)} · ${nights}박`;
+      summary.innerHTML = `선택됨: <strong>${sFmtDate(ci)} (${sFmtDay(ci)})</strong> → <strong>${sFmtDate(co)} (${sFmtDay(co)})</strong> · <strong>${nights}박</strong>`;
+    } else if(ci){
+      info.textContent = `${sFmtDate(ci)} ~ 체크아웃 선택`;
+      summary.innerHTML = `체크인: <strong>${sFmtDate(ci)}</strong> · 체크아웃 날짜를 선택하세요`;
+    } else {
+      info.textContent = '';
+      summary.textContent = '체크인 날짜를 먼저 선택하세요';
+    }
+  }
+  function sResetDates(){
+    SPOP.calTempIn = null;
+    SPOP.calTempOut = null;
+    sRenderCalendar();
+  }
+  function sApplyDates(){
+    if(!SPOP.calTempIn || !SPOP.calTempOut){
+      alert('체크인/체크아웃 날짜를 모두 선택해주세요');
+      return;
+    }
+    SPOP.checkin = SPOP.calTempIn;
+    SPOP.checkout = SPOP.calTempOut;
+    sUpdateDateLabels();
+    closeSPopups();
+  }
+  function sUpdateDateLabels(){
+    document.getElementById('cDateLabel').textContent = `${sFmtDate(SPOP.checkin)} - ${sFmtDate(SPOP.checkout)}`;
+    document.getElementById('cNightsLabel').textContent = sNights(SPOP.checkin, SPOP.checkout) + '박';
+  }
+
+  /* Guests popup */
+  function sRenderGuests(){
+    const body = document.getElementById('sGuestsBody');
+    body.innerHTML = sRoomsDraft.map((room, idx) => `
+      <div class="s-room-block">
+        <div class="s-room-head">
+          <h4>객실 ${idx+1}</h4>
+          ${sRoomsDraft.length > 1 ? `<button class="remove" type="button" onclick="sRemoveRoom(${idx})">삭제</button>` : ''}
+        </div>
+        <div class="s-count-row">
+          <div class="info"><div class="name">성인</div><div class="note">만 18세 이상</div></div>
+          <div class="s-count-ctrl">
+            <button class="s-count-btn" type="button" onclick="sStepCount(${idx},'adults',-1)" ${room.adults<=1?'disabled':''}>−</button>
+            <span class="s-count-val">${room.adults}</span>
+            <button class="s-count-btn" type="button" onclick="sStepCount(${idx},'adults',1)" ${room.adults>=4?'disabled':''}>+</button>
+          </div>
+        </div>
+        <div class="s-count-row">
+          <div class="info"><div class="name">아동</div><div class="note">0~17세</div></div>
+          <div class="s-count-ctrl">
+            <button class="s-count-btn" type="button" onclick="sStepCount(${idx},'children',-1)" ${room.children.length<=0?'disabled':''}>−</button>
+            <span class="s-count-val">${room.children.length}</span>
+            <button class="s-count-btn" type="button" onclick="sStepCount(${idx},'children',1)" ${room.children.length>=3?'disabled':''}>+</button>
+          </div>
+        </div>
+        ${room.children.length > 0 ? `
+          <div class="s-age-row">
+            <div class="lb">각 아동의 나이</div>
+            <div class="s-age-selects">
+              ${room.children.map((age, ai) => `
+                <select onchange="sSetAge(${idx},${ai},this.value)">
+                  ${[...Array(18)].map((_,i) => `<option value="${i}" ${age===i?'selected':''}>${i===0?'0-1세':i+'세'}</option>`).join('')}
+                </select>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `).join('') + `${sRoomsDraft.length < 5 ? `<button class="s-add-room" type="button" onclick="sAddRoom()">+ 객실 추가</button>` : ''}`;
+  }
+  window.sStepCount = (roomIdx, key, delta) => {
+    const r = sRoomsDraft[roomIdx];
+    if(key === 'adults') r.adults = Math.max(1, Math.min(4, r.adults + delta));
+    else {
+      if(delta > 0 && r.children.length < 3) r.children.push(5);
+      else if(delta < 0 && r.children.length > 0) r.children.pop();
+    }
+    sRenderGuests();
+  };
+  window.sSetAge = (ri, ci, age) => { sRoomsDraft[ri].children[ci] = +age; };
+  window.sAddRoom = () => { if(sRoomsDraft.length < 5){ sRoomsDraft.push({ adults:2, children:[] }); sRenderGuests(); } };
+  window.sRemoveRoom = (idx) => { if(sRoomsDraft.length > 1){ sRoomsDraft.splice(idx,1); sRenderGuests(); } };
+  window.sResetRooms = () => { sRoomsDraft = [{ adults:2, children:[] }]; sRenderGuests(); };
+  window.sApplyGuests = () => {
+    SPOP.rooms = JSON.parse(JSON.stringify(sRoomsDraft));
+    sUpdateGuestsLabel();
+    closeSPopups();
+  };
+  function sUpdateGuestsLabel(){
+    const totalA = SPOP.rooms.reduce((s,r)=>s+r.adults,0);
+    const totalC = SPOP.rooms.reduce((s,r)=>s+r.children.length,0);
+    let label = `객실 ${SPOP.rooms.length}개, 성인 ${totalA}명`;
+    if(totalC > 0) label += `, 아동 ${totalC}명`;
+    document.getElementById('cGuestsLabel').textContent = label;
+  }
+
+  // Initial labels
+  sUpdateDateLabels();
+  sUpdateGuestsLabel();
+
+  window.openSPopup = openSPopup;
+  window.closeSPopups = closeSPopups;
+  window.sResetDates = sResetDates;
+  window.sApplyDates = sApplyDates;
 
   function handleSearch(e){
     e.preventDefault();
