@@ -9,17 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
-      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981;
-      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
-      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
-      --radius:14px; --radius-lg:20px;
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --secondary:#1E88E5;--secondary-soft:#E3F2FD;
+      --accent:#FFD23F;--success:#10B981;--danger:#EF4444;
+      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
+      --radius:14px;--radius-lg:20px;
       --shadow:0 6px 20px rgba(0,0,0,.08);
-      --header-h:64px; --max-w:1280px;
+      --shadow-lg:0 20px 40px rgba(0,0,0,.15);
+      --header-h:64px;--max-w:1280px;
     }
     *,*::before,*::after{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
-    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;-webkit-font-smoothing:antialiased;}
     a{color:inherit;text-decoration:none;}
     button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
     input,select{font-family:inherit;}
@@ -27,7 +29,8 @@
     .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
     .skip-link:focus{left:0;}
 
-    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
     .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
     .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
     .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
@@ -37,47 +40,241 @@
     .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
     .btn-ghost:hover{background:var(--bg-soft);color:var(--ink);}
 
-    /* Search strip */
-    .search-strip{background:#fff;border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:var(--header-h);z-index:40;}
-    .search-form{
-      display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0;
-      border:1.5px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;
+    /* =======================================
+       SEARCH STRIP
+       ======================================= */
+    .search-strip{
+      background:#fff;border-bottom:1px solid var(--line);
+      padding:18px 0 16px;position:sticky;top:var(--header-h);z-index:50;
     }
-    .sf-field{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;}
+    .search-form{
+      display:grid;grid-template-columns:2fr 2.2fr 1.4fr auto;gap:0;
+      border:2px solid var(--ink);border-radius:16px;background:#fff;overflow:hidden;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .search-form:hover{box-shadow:var(--shadow);}
+    .sf-field{
+      padding:12px 18px;border-right:1px solid var(--line);
+      display:flex;flex-direction:column;gap:2px;cursor:pointer;
+      position:relative;
+    }
     .sf-field:last-of-type{border-right:none;}
-    .sf-field label{font-size:10px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;}
-    .sf-field select,.sf-field input{border:none;outline:none;padding:4px 0;font-size:14px;font-weight:700;color:var(--ink);background:transparent;}
-    .sf-btn{padding:0 28px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:900;font-size:14px;}
-    .sf-btn:hover{background:var(--primary-dark);}
+    .sf-field:hover{background:var(--bg-soft);}
+    .sf-field.active{background:var(--bg-soft);}
+    .sf-field label{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+    .sf-field .val{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+    .sf-field .sub{font-size:11px;color:var(--ink-2);}
+    .sf-field .placeholder{color:var(--ink-3);font-weight:600;}
+    .sf-dates{display:grid;grid-template-columns:1fr auto 1fr;padding:0;}
+    .sf-dates > *{padding:12px 18px;display:flex;flex-direction:column;justify-content:center;gap:2px;}
+    .sf-nights{background:var(--primary-soft);color:var(--primary);font-weight:900;font-size:12px;border-right:1px solid var(--line);border-left:1px solid var(--line);text-align:center;white-space:nowrap;padding:0 14px;display:flex;align-items:center;justify-content:center;}
+    .search-btn{padding:0 32px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:900;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+    .search-btn:hover{background:var(--primary-dark);}
 
-    /* Layout */
-    .results-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;padding:24px 24px 80px;max-width:var(--max-w);margin:0 auto;align-items:flex-start;}
+    /* Quick chips below search */
+    .quick-chips{
+      display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;
+      font-size:12px;color:var(--ink-3);
+    }
+    .quick-chips .label{font-weight:700;margin-right:4px;}
+    .quick-chip{
+      padding:6px 12px;border-radius:999px;background:var(--bg-soft);color:var(--ink-2);
+      font-weight:700;font-size:12px;transition:all .15s;
+    }
+    .quick-chip:hover{background:var(--primary-soft);color:var(--primary);}
 
-    .filter-side{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;position:sticky;top:calc(var(--header-h) + 104px);}
-    .filter-side h3{margin:0 0 12px;font-size:14px;font-weight:900;}
-    .f-group{padding:14px 0;border-top:1px solid var(--line);}
-    .f-group:first-of-type{border-top:none;padding-top:0;}
-    .f-group h4{margin:0 0 10px;font-size:12px;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;}
-    .f-row{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:var(--ink-2);cursor:pointer;}
+    /* =======================================
+       POPUPS
+       ======================================= */
+    .popup-backdrop{
+      position:fixed;inset:0;z-index:45;background:transparent;display:none;
+    }
+    .popup-backdrop.open{display:block;}
+
+    .popup{
+      position:absolute;top:calc(100% + 8px);z-index:55;
+      background:#fff;border:1px solid var(--line);border-radius:16px;
+      box-shadow:var(--shadow-lg);display:none;
+      overflow:hidden;
+    }
+    .popup.open{display:block;animation:popupIn .18s ease;}
+    @keyframes popupIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+    /* Destination popup */
+    .dest-popup{left:0;width:min(460px, 95vw);max-height:520px;display:none;flex-direction:column;}
+    .dest-popup.open{display:flex;}
+    .dest-search-row{padding:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+    .dest-search-row input{flex:1;border:none;outline:none;font-size:15px;font-weight:600;}
+    .dest-body{flex:1;overflow-y:auto;padding:6px 0;}
+    .dest-section-head{padding:12px 18px 6px;font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;}
+    .dest-item{
+      padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;
+      transition:background .12s;
+    }
+    .dest-item:hover{background:var(--bg-soft);}
+    .dest-item.selected{background:var(--primary-soft);}
+    .dest-icon{
+      width:40px;height:40px;border-radius:10px;
+      background:var(--bg-soft);display:grid;place-items:center;font-size:20px;flex-shrink:0;
+    }
+    .dest-icon.flag{background:linear-gradient(135deg,var(--primary-soft),#FFE4D4);}
+    .dest-info{flex:1;min-width:0;}
+    .dest-name{font-size:14px;font-weight:800;line-height:1.3;}
+    .dest-sub{font-size:12px;color:var(--ink-3);margin-top:1px;}
+    .dest-count{font-size:11px;color:var(--ink-3);white-space:nowrap;}
+    .dest-count strong{color:var(--primary);font-weight:800;}
+
+    /* Calendar popup */
+    .cal-popup{left:30%;transform:translateX(-50%);width:min(700px,95vw);}
+    .cal-popup.open{display:block;}
+    .cal-header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .cal-header .info{font-size:13px;color:var(--ink-2);}
+    .cal-header .info strong{color:var(--ink);font-weight:800;}
+    .cal-months{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:16px 8px;}
+    .cal-month{padding:8px 12px;}
+    .cal-month-head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;}
+    .cal-month-head .nav{width:28px;height:28px;border-radius:8px;background:var(--bg-soft);display:grid;place-items:center;color:var(--ink);font-size:14px;}
+    .cal-month-head .nav:hover{background:var(--line);}
+    .cal-month-head .nav:disabled{opacity:.3;cursor:not-allowed;}
+    .cal-month-head .title{font-size:14px;font-weight:800;}
+    .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:0;font-size:11px;color:var(--ink-3);font-weight:700;text-align:center;padding:4px 0;}
+    .cal-weekdays .sun{color:var(--danger);}
+    .cal-weekdays .sat{color:var(--secondary);}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+    .cal-day{
+      aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;
+      border-radius:10px;transition:background .12s, color .12s;
+      position:relative;
+    }
+    .cal-day:hover{background:var(--bg-soft);}
+    .cal-day.past{color:var(--ink-3);cursor:not-allowed;text-decoration:line-through;}
+    .cal-day.past:hover{background:transparent;}
+    .cal-day.sun{color:var(--danger);}
+    .cal-day.sat{color:var(--secondary);}
+    .cal-day.empty{cursor:default;}
+    .cal-day.empty:hover{background:transparent;}
+    .cal-day.selected{background:var(--primary);color:#fff;border-radius:10px;z-index:2;}
+    .cal-day.in-range{background:var(--primary-soft);color:var(--ink);border-radius:0;}
+    .cal-day.in-range.start{border-radius:10px 0 0 10px;}
+    .cal-day.in-range.end{border-radius:0 10px 10px 0;}
+    .cal-day.selected.start + .cal-day.in-range{border-left:0;}
+    .cal-footer{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+    .cal-footer .summary{font-size:13px;color:var(--ink-2);}
+    .cal-footer .summary strong{color:var(--primary);font-weight:900;}
+    .cal-footer button{padding:10px 22px;border-radius:10px;font-weight:800;font-size:13px;}
+    .cal-reset{background:var(--bg-soft);color:var(--ink-2);}
+    .cal-apply{background:var(--ink);color:#fff;}
+
+    /* Guests popup */
+    .guests-popup{right:120px;width:min(380px,95vw);}
+    .guests-popup.open{display:block;}
+    .guests-body{padding:18px;max-height:420px;overflow-y:auto;}
+    .room-block{padding:14px 0;border-top:1px solid var(--line);}
+    .room-block:first-child{border-top:none;padding-top:0;}
+    .room-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .room-head h4{margin:0;font-size:14px;font-weight:900;}
+    .room-head .remove{font-size:11px;color:var(--danger);font-weight:700;}
+    .count-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;}
+    .count-row .info{flex:1;}
+    .count-row .info .name{font-size:13px;font-weight:700;}
+    .count-row .info .note{font-size:11px;color:var(--ink-3);margin-top:1px;}
+    .count-ctrl{display:flex;align-items:center;gap:10px;}
+    .count-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;}
+    .count-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
+    .count-btn:disabled{opacity:.3;cursor:not-allowed;}
+    .count-val{font-weight:900;min-width:16px;text-align:center;font-size:14px;}
+    .age-row{margin-top:8px;}
+    .age-row .lb{font-size:11px;color:var(--ink-3);margin-bottom:6px;font-weight:700;}
+    .age-selects{display:flex;flex-wrap:wrap;gap:6px;}
+    .age-selects select{padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-weight:700;}
+    .add-room{width:100%;padding:12px;background:var(--bg-soft);color:var(--ink);border-radius:10px;font-weight:800;font-size:13px;margin-top:12px;}
+    .add-room:hover{background:var(--line);}
+    .guests-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;}
+    .guests-footer button{flex:1;padding:11px;border-radius:10px;font-weight:800;font-size:13px;}
+    .guests-clear{background:var(--bg-soft);color:var(--ink-2);}
+    .guests-apply{background:var(--ink);color:#fff;}
+
+    /* =======================================
+       LAYOUT
+       ======================================= */
+    .results-layout{
+      display:grid;grid-template-columns:280px 1fr;gap:20px;
+      padding:22px 24px 80px;max-width:var(--max-w);margin:0 auto;
+      align-items:flex-start;
+    }
+
+    /* =======================================
+       FILTER SIDEBAR
+       ======================================= */
+    .filter-side{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:6px 0;position:sticky;top:calc(var(--header-h) + 104px);
+      max-height:calc(100vh - var(--header-h) - 120px);overflow-y:auto;
+    }
+    .filter-side h3{margin:0;padding:14px 18px;font-size:14px;font-weight:900;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .filter-side h3 .reset{font-size:11px;font-weight:700;color:var(--primary);cursor:pointer;}
+
+    .f-group{padding:14px 18px;border-bottom:1px solid var(--line);}
+    .f-group:last-child{border-bottom:none;}
+    .f-group-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
+    .f-group-head h4{margin:0;font-size:13px;font-weight:800;}
+    .f-group-head .toggle{font-size:14px;color:var(--ink-3);transition:transform .2s;}
+    .f-group.collapsed .toggle{transform:rotate(-90deg);}
+    .f-group.collapsed .f-group-body{display:none;}
+    .f-group-body{margin-top:10px;}
+
+    .f-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:var(--ink-2);cursor:pointer;}
     .f-row:hover{color:var(--ink);}
-    .f-check{width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px;position:relative;flex-shrink:0;}
+    .f-check{width:16px;height:16px;border:1.5px solid var(--line);border-radius:4px;position:relative;flex-shrink:0;transition:all .15s;}
     .f-check.checked{background:var(--primary);border-color:var(--primary);}
-    .f-check.checked::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
-    .f-count{margin-left:auto;font-size:11px;color:var(--ink-3);}
-    .f-range{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--ink-3);}
-    .f-range input{flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;}
-    .f-reset{width:100%;margin-top:12px;padding:10px;background:var(--bg-soft);border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-2);}
+    .f-check.checked::after{content:"";position:absolute;left:3.5px;top:-0.5px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+    .f-label-text{flex:1;}
+    .f-count{font-size:11px;color:var(--ink-3);}
+    .f-stars{color:var(--accent);letter-spacing:1.5px;font-size:12px;}
 
-    /* Results */
+    /* Price range */
+    .price-range{margin-top:8px;}
+    .price-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-bottom:6px;}
+    .price-slider{position:relative;height:6px;background:var(--line);border-radius:3px;margin:14px 0;}
+    .price-track{position:absolute;top:0;bottom:0;background:var(--primary);border-radius:3px;}
+    .price-thumb{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--primary);cursor:grab;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.15);touch-action:none;}
+    .price-thumb:active{cursor:grabbing;}
+    .price-inputs{display:flex;gap:8px;margin-top:10px;}
+    .price-inputs > div{flex:1;}
+    .price-inputs label{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .price-inputs input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;}
+
+    .rating-scale{display:flex;gap:4px;margin-top:8px;}
+    .rating-opt{
+      flex:1;padding:8px;border:1.5px solid var(--line);border-radius:8px;text-align:center;
+      font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
+    }
+    .rating-opt:hover{border-color:var(--primary);}
+    .rating-opt.active{border-color:var(--primary);background:var(--primary);color:#fff;}
+    .rating-opt .big{font-size:14px;font-weight:900;display:block;}
+
+    /* =======================================
+       RESULTS
+       ======================================= */
     .results-main{min-width:0;}
     .results-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
     .results-count{font-size:14px;color:var(--ink-2);}
-    .results-count strong{color:var(--ink);}
+    .results-count strong{color:var(--ink);font-weight:900;}
+
+    .active-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .active-chip{
+      padding:5px 10px 5px 12px;background:var(--primary-soft);color:var(--primary);
+      border-radius:999px;font-size:12px;font-weight:700;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .active-chip button{color:var(--primary);font-weight:900;font-size:14px;}
+
     .sort-tabs{display:flex;gap:4px;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--line);}
-    .sort-tab{padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .sort-tab{padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-3);white-space:nowrap;}
     .sort-tab.active{background:var(--ink);color:#fff;}
 
-    /* Hotel card */
+    /* Hotel cards (enhanced) */
     .hotel-list{display:flex;flex-direction:column;gap:14px;}
     .hotel-card{
       background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-lg);
@@ -85,66 +282,107 @@
       transition:transform .2s, box-shadow .2s, border-color .15s;
     }
     .hotel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--primary);}
-    .hc-thumb{
-      aspect-ratio:4/3;background-size:cover;background-position:center;
-      background-color:#eee;position:relative;
+
+    .hc-gallery{position:relative;aspect-ratio:4/3;overflow:hidden;background:#eee;}
+    .hc-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .3s;}
+    .hc-img.active{opacity:1;}
+    .hc-gallery:hover .hc-nav{opacity:1;}
+    .hc-nav{
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);
+      display:grid;place-items:center;font-weight:900;font-size:14px;color:var(--ink);
+      opacity:0;transition:opacity .15s;cursor:pointer;
     }
-    .hc-badge{
-      position:absolute;top:12px;left:12px;
-      padding:5px 10px;border-radius:6px;
-      background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;
-      font-size:11px;font-weight:800;
+    .hc-nav:hover{background:#fff;}
+    .hc-nav.prev{left:8px;}
+    .hc-nav.next{right:8px;}
+    .hc-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:2;}
+    .hc-dots span{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.6);transition:background .15s, width .15s;}
+    .hc-dots span.active{background:#fff;width:14px;border-radius:3px;}
+    .hc-fav{
+      position:absolute;top:10px;right:10px;z-index:2;
+      width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);
+      display:grid;place-items:center;color:#fff;font-size:14px;backdrop-filter:blur(8px);
+      transition:all .15s;
     }
-    .hc-body{padding:18px 22px;display:flex;flex-direction:column;gap:6px;min-width:0;}
-    .hc-stars{color:var(--accent);font-size:13px;letter-spacing:2px;}
-    .hc-name{font-size:17px;font-weight:900;letter-spacing:-0.01em;}
-    .hc-area{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:5px;}
-    .hc-area::before{content:"📍";}
+    .hc-fav:hover{background:rgba(0,0,0,.7);}
+    .hc-fav.active{background:#E63946;color:#fff;}
+    .hc-topbadges{position:absolute;top:10px;left:10px;z-index:2;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 60px);}
+    .hc-topbadge{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.02em;}
+    .hc-topbadge.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .hc-topbadge.deal{background:#E63946;color:#fff;}
+    .hc-topbadge.member{background:var(--ink);color:#FFD23F;}
+
+    .hc-body{padding:18px 22px;display:flex;flex-direction:column;gap:5px;min-width:0;}
+    .hc-type{font-size:11px;color:var(--ink-3);font-weight:600;}
+    .hc-name{font-size:17px;font-weight:900;letter-spacing:-0.01em;margin-top:2px;}
+    .hc-english{font-size:12px;color:var(--ink-3);}
+    .hc-stars{color:var(--accent);font-size:13px;letter-spacing:2px;margin-top:2px;}
+    .hc-location{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:5px;margin-top:4px;}
+    .hc-location::before{content:"📍";}
+    .hc-location .distance{color:var(--ink-3);margin-left:4px;}
     .hc-score-row{display:flex;align-items:center;gap:10px;margin:6px 0;}
-    .hc-score{
-      padding:4px 10px;background:var(--primary);color:#fff;
-      border-radius:6px;font-weight:900;font-size:14px;
-    }
+    .hc-score{padding:4px 10px;background:var(--primary);color:#fff;border-radius:6px;font-weight:900;font-size:13px;}
     .hc-review{font-size:13px;}
     .hc-review strong{font-weight:800;}
     .hc-review small{color:var(--ink-3);margin-left:3px;}
-    .hc-amenities{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
-    .hc-amenity{
-      padding:4px 9px;border-radius:6px;background:var(--bg-soft);
-      font-size:11px;color:var(--ink-2);font-weight:600;
-    }
+    .hc-amenities{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+    .hc-amenity{padding:3px 8px;border-radius:5px;background:var(--bg-soft);font-size:11px;color:var(--ink-2);font-weight:600;}
+    .hc-amenity.highlight{background:var(--secondary-soft);color:var(--secondary);}
+    .hc-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+    .hc-badge{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:800;background:#E8F5E9;color:var(--success);}
+    .hc-badge.red{background:#FFEBEE;color:var(--danger);}
+    .hc-badge.blue{background:var(--secondary-soft);color:var(--secondary);}
+
     .hc-right{
       border-left:1px dashed var(--line);padding:18px 22px;
-      display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:8px;min-width:180px;
+      display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;gap:8px;min-width:200px;
     }
-    .hc-price-label{font-size:11px;color:var(--ink-3);}
-    .hc-price-row{display:flex;flex-direction:column;align-items:flex-end;}
-    .hc-old{font-size:12px;color:var(--ink-3);text-decoration:line-through;}
-    .hc-price{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .hc-price-box{text-align:right;width:100%;}
+    .hc-price-lb{font-size:11px;color:var(--ink-3);}
+    .hc-price-old{font-size:12px;color:var(--ink-3);text-decoration:line-through;margin-top:2px;}
+    .hc-price{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;margin-top:2px;}
     .hc-price small{font-size:11px;color:var(--ink-2);font-weight:600;}
-    .hc-total{font-size:11px;color:var(--ink-3);}
-    .hc-select-btn{
-      padding:10px 20px;border-radius:10px;background:var(--ink);color:#fff;
-      font-weight:900;font-size:13px;white-space:nowrap;margin-top:6px;
-    }
-    .hc-select-btn:hover{background:var(--primary);}
+    .hc-total{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .hc-member-price{display:flex;align-items:center;gap:5px;background:var(--ink);color:var(--accent);padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-top:6px;}
+    .hc-btn{padding:10px 22px;border-radius:10px;background:var(--ink);color:#fff;font-weight:900;font-size:13px;white-space:nowrap;transition:background .15s;}
+    .hc-btn:hover{background:var(--primary);}
+    .hc-trust-line{font-size:10px;color:var(--ink-3);text-align:right;margin-top:4px;}
 
+    /* Empty */
+    .empty-results{padding:60px;text-align:center;color:var(--ink-3);background:#fff;border-radius:var(--radius-lg);border:1px dashed var(--line);}
+    .empty-results h3{color:var(--ink);margin:0 0 8px;}
+
+    /* =======================================
+       RESPONSIVE
+       ======================================= */
     @media (max-width:1024px){
       .results-layout{grid-template-columns:1fr;}
-      .filter-side{position:static;}
-      .hotel-card{grid-template-columns:1fr;}
-      .hc-thumb{aspect-ratio:16/9;}
-      .hc-right{border-left:none;border-top:1px dashed var(--line);flex-direction:row;justify-content:space-between;align-items:center;min-width:0;}
+      .filter-side{position:static;max-height:none;}
       .search-form{grid-template-columns:1fr 1fr;}
-      .sf-field{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
-      .sf-field:nth-child(2n){border-right:none;}
-      .sf-btn{grid-column:1/-1;padding:14px;}
+      .sf-dates{grid-column:1/-1;border-top:1px solid var(--line);border-right:none;}
+      .sf-field:nth-child(-n+3){border-right:1px solid var(--line);}
+      .search-btn{grid-column:1/-1;padding:14px;}
+      .hotel-card{grid-template-columns:1fr;}
+      .hc-gallery{aspect-ratio:16/9;}
+      .hc-right{border-left:none;border-top:1px dashed var(--line);flex-direction:row;justify-content:space-between;align-items:center;min-width:0;}
+      .hc-price-box{text-align:left;width:auto;}
+      .cal-popup{left:0;right:0;transform:none;width:100%;max-width:100%;}
+      .cal-months{grid-template-columns:1fr;}
+      .cal-month:first-child{display:block;}
+      .cal-month:last-child{display:none;}
     }
     @media (max-width:768px){
       :root{--header-h:56px;}
       .page-title{display:none;}
-      .hc-body{padding:14px;}
-      .hc-right{padding:14px;}
+      .search-strip{padding:12px 0;}
+      .search-form{grid-template-columns:1fr;border-radius:12px;}
+      .sf-field{border-right:none!important;border-bottom:1px solid var(--line);}
+      .sf-dates{grid-template-columns:1fr auto 1fr;}
+      .sf-dates > *:first-child{border-right:1px solid var(--line);}
+      .search-btn{border-bottom:none;}
+      .dest-popup,.guests-popup{left:0;right:0;width:auto;}
+      .hc-body,.hc-right{padding:14px;}
       .hc-name{font-size:15px;}
       .hc-price{font-size:18px;}
     }
@@ -159,64 +397,210 @@
       <span class="page-title">호텔 검색</span>
       <div class="header-actions">
         <a href="flights.html" class="btn-ghost">✈️ 항공</a>
-        <a href="ai-planner.html" class="btn-ghost">✦ AI 플래너</a>
+        <a href="cart.html" class="btn-ghost">🛒 장바구니</a>
+        <a href="mypage.html" class="btn-ghost">MY</a>
       </div>
     </div>
   </header>
 
+  <!-- SEARCH STRIP -->
   <div class="search-strip">
-    <div class="container">
-      <form class="search-form" onsubmit="event.preventDefault();render();">
-        <div class="sf-field"><label>목적지</label>
-          <select id="dest"><option>오사카, 일본</option><option>도쿄, 일본</option><option>다낭, 베트남</option><option>방콕, 태국</option><option>세부, 필리핀</option></select>
+    <div class="container" style="position:relative;">
+      <form class="search-form" onsubmit="event.preventDefault();runSearch();">
+        <div class="sf-field" id="sfDest" onclick="openPopup('dest')">
+          <label>목적지</label>
+          <div class="val" id="destLabel">오사카</div>
+          <div class="sub" id="destSub">일본 · 간사이</div>
         </div>
-        <div class="sf-field"><label>체크인 - 체크아웃</label>
-          <input type="text" value="2026.05.10 - 2026.05.13 (3박)" readonly style="cursor:pointer;"/>
+        <div class="sf-field sf-dates" onclick="openPopup('cal')">
+          <div>
+            <label>체크인</label>
+            <div class="val" id="checkinLabel">5월 10일</div>
+            <div class="sub" id="checkinSub">토</div>
+          </div>
+          <div class="sf-nights" id="nightsLabel">3박</div>
+          <div>
+            <label>체크아웃</label>
+            <div class="val" id="checkoutLabel">5월 13일</div>
+            <div class="sub" id="checkoutSub">화</div>
+          </div>
         </div>
-        <div class="sf-field"><label>객실/인원</label>
-          <select><option>객실 1개, 성인 2명</option><option>객실 1개, 성인 1명</option><option>객실 2개, 성인 4명</option></select>
+        <div class="sf-field" onclick="openPopup('guests')">
+          <label>인원 · 객실</label>
+          <div class="val" id="guestsLabel">객실 1개, 성인 2명</div>
+          <div class="sub" id="guestsSub">0~17세 아동 추가 가능</div>
         </div>
-        <button type="submit" class="sf-btn">🔍 검색</button>
+        <button type="submit" class="search-btn">🔍 호텔 검색</button>
       </form>
+
+      <div class="quick-chips">
+        <span class="label">자주 찾는 목적지:</span>
+        <button class="quick-chip" onclick="quickSet('osaka')">🇯🇵 오사카</button>
+        <button class="quick-chip" onclick="quickSet('tokyo')">🇯🇵 도쿄</button>
+        <button class="quick-chip" onclick="quickSet('danang')">🇻🇳 다낭</button>
+        <button class="quick-chip" onclick="quickSet('bangkok')">🇹🇭 방콕</button>
+        <button class="quick-chip" onclick="quickSet('cebu')">🇵🇭 세부</button>
+      </div>
+
+      <!-- DESTINATION POPUP -->
+      <div class="popup dest-popup" id="popupDest">
+        <div class="dest-search-row">
+          <span style="font-size:18px;">🔍</span>
+          <input type="text" id="destSearch" placeholder="도시, 호텔, 공항 검색" autocomplete="off" />
+          <button type="button" onclick="clearDestSearch()" style="font-size:18px;color:var(--ink-3);">✕</button>
+        </div>
+        <div class="dest-body" id="destBody"></div>
+      </div>
+
+      <!-- CALENDAR POPUP -->
+      <div class="popup cal-popup" id="popupCal">
+        <div class="cal-header">
+          <div class="info">여행 날짜를 선택하세요 <strong id="calRangeInfo"></strong></div>
+          <button type="button" onclick="closePopups()" style="font-size:18px;color:var(--ink-3);">✕</button>
+        </div>
+        <div class="cal-weekdays" style="padding:0 20px;">
+          <div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div>
+        </div>
+        <div class="cal-months" id="calMonths"></div>
+        <div class="cal-footer">
+          <div class="summary" id="calSummary">체크인 날짜를 먼저 선택하세요</div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="cal-reset" onclick="resetDates()">초기화</button>
+            <button type="button" class="cal-apply" onclick="applyDates()">날짜 적용</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUESTS POPUP -->
+      <div class="popup guests-popup" id="popupGuests">
+        <div class="guests-body" id="guestsBody"></div>
+        <div class="guests-footer">
+          <button type="button" class="guests-clear" onclick="resetRooms()">초기화</button>
+          <button type="button" class="guests-apply" onclick="applyGuests()">완료</button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <div class="popup-backdrop" id="popupBackdrop" onclick="closePopups()"></div>
+
+  <!-- RESULTS -->
   <main id="omt-main" class="results-layout">
     <aside class="filter-side">
-      <h3>필터</h3>
-      <div class="f-group">
-        <h4>1박 가격</h4>
-        <div class="f-range">
-          <input type="number" id="priceMin" value="0" min="0"/>
-          <span>~</span>
-          <input type="number" id="priceMax" value="1000000"/>
+      <h3>필터 <span class="reset" onclick="resetFilters()">전체 초기화</span></h3>
+
+      <div class="f-group" data-fgroup="price">
+        <div class="f-group-head" onclick="toggleFGroup('price')">
+          <h4>1박 가격</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body">
+          <div class="price-range">
+            <div class="price-labels">
+              <span id="priceMinLabel">0원</span>
+              <span id="priceMaxLabel">100만원+</span>
+            </div>
+            <div class="price-slider" id="priceSlider">
+              <div class="price-track" id="priceTrack"></div>
+              <div class="price-thumb" id="priceThumbMin" data-side="min"></div>
+              <div class="price-thumb" id="priceThumbMax" data-side="max"></div>
+            </div>
+            <div class="price-inputs">
+              <div>
+                <label>최소</label>
+                <input type="number" id="priceMinInput" value="0" min="0" step="10000"/>
+              </div>
+              <div>
+                <label>최대</label>
+                <input type="number" id="priceMaxInput" value="1000000" step="10000"/>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="f-group">
-        <h4>성급</h4>
-        <div id="filterStars"></div>
+
+      <div class="f-group" data-fgroup="deals">
+        <div class="f-group-head" onclick="toggleFGroup('deals')">
+          <h4>특가 · 혜택</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterDeals"></div>
       </div>
-      <div class="f-group">
-        <h4>지역</h4>
-        <div id="filterAreas"></div>
+
+      <div class="f-group" data-fgroup="rating">
+        <div class="f-group-head" onclick="toggleFGroup('rating')">
+          <h4>숙소 평점</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body">
+          <div class="rating-scale" id="filterRating"></div>
+        </div>
       </div>
-      <div class="f-group">
-        <h4>편의시설</h4>
-        <div id="filterAmen"></div>
+
+      <div class="f-group" data-fgroup="stars">
+        <div class="f-group-head" onclick="toggleFGroup('stars')">
+          <h4>숙소 등급</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterStars"></div>
       </div>
-      <button class="f-reset" onclick="resetFilters()">필터 초기화</button>
+
+      <div class="f-group" data-fgroup="types">
+        <div class="f-group-head" onclick="toggleFGroup('types')">
+          <h4>숙소 유형</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterTypes"></div>
+      </div>
+
+      <div class="f-group" data-fgroup="areas">
+        <div class="f-group-head" onclick="toggleFGroup('areas')">
+          <h4>지역 · 관광지</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterAreas"></div>
+      </div>
+
+      <div class="f-group" data-fgroup="amen">
+        <div class="f-group-head" onclick="toggleFGroup('amen')">
+          <h4>편의시설</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterAmen"></div>
+      </div>
+
+      <div class="f-group collapsed" data-fgroup="chains">
+        <div class="f-group-head" onclick="toggleFGroup('chains')">
+          <h4>호텔 체인</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterChains"></div>
+      </div>
+
+      <div class="f-group collapsed" data-fgroup="distance">
+        <div class="f-group-head" onclick="toggleFGroup('distance')">
+          <h4>도심 거리</h4>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="f-group-body" id="filterDistance"></div>
+      </div>
     </aside>
 
     <section class="results-main">
       <div class="results-head">
-        <div class="results-count">오사카 · 총 <strong id="resCount">0</strong>개 호텔</div>
+        <div class="results-count"><strong id="destCountLabel">오사카</strong>의 숙소 <strong id="resCount">0</strong>개</div>
         <div class="sort-tabs">
           <button class="sort-tab active" data-sort="recommend">추천순</button>
           <button class="sort-tab" data-sort="price">가격 낮은순</button>
+          <button class="sort-tab" data-sort="priceDesc">가격 높은순</button>
           <button class="sort-tab" data-sort="rating">평점 높은순</button>
           <button class="sort-tab" data-sort="reviews">리뷰 많은순</button>
+          <button class="sort-tab" data-sort="distance">도심 가까운순</button>
         </div>
       </div>
+
+      <div class="active-chips" id="activeChips"></div>
+
       <div class="hotel-list" id="hotelList"></div>
     </section>
   </main>
@@ -224,152 +608,983 @@
   <script src="data.js"></script>
   <script src="state.js"></script>
   <script>
-  // TODO: API 연동 - GET /api/hotels?destination=osaka&checkin=...&checkout=...
-  const HOTELS = [
-    { id:'h1', img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
-      name:'호텔 그란비아 오사카', area:'우메다', areaId:'umeda', stars:5, score:9.2, reviews:4127,
-      badge:'오마이트립 추천', amenities:['조식 포함','와이파이','수영장','피트니스','역 직결'],
-      price:239000, oldPrice:289000, total:717000 },
-    { id:'h2', img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
-      name:'리가로얄 호텔 오사카', area:'나카노시마', areaId:'nakanoshima', stars:5, score:9.0, reviews:3528,
-      amenities:['조식 포함','와이파이','수영장','스파','비즈니스 센터'],
-      price:329000, oldPrice:389000, total:987000 },
-    { id:'h3', img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-      name:'크로스 호텔 오사카', area:'신사이바시', areaId:'shinsaibashi', stars:4, score:8.9, reviews:2145,
-      amenities:['조식 포함','와이파이','바/라운지','역 인근'],
-      price:189000, oldPrice:229000, total:567000 },
-    { id:'h4', img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-      name:'APA 호텔 난바', area:'난바', areaId:'namba', stars:4, score:8.5, reviews:5284,
-      amenities:['와이파이','24시간 프론트','역 도보 3분'],
-      price:129000, oldPrice:159000, total:387000 },
-    { id:'h5', img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
-      name:'호텔 몬터레이 그래스미어', area:'난바', areaId:'namba', stars:4, score:8.7, reviews:1842,
-      amenities:['조식 포함','와이파이','스카이오 연결'],
-      price:169000, oldPrice:199000, total:507000 },
-    { id:'h6', img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
-      name:'하나 호텔 신사이바시', area:'신사이바시', areaId:'shinsaibashi', stars:3, score:8.2, reviews:941,
-      amenities:['와이파이','24시간 프론트'],
-      price:89000, oldPrice:109000, total:267000 },
-    { id:'h7', img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
-      name:'인터컨티넨탈 호텔 오사카', area:'우메다', areaId:'umeda', stars:5, score:9.5, reviews:2184,
-      badge:'럭셔리', amenities:['조식 포함','스파','수영장','피트니스','라운지','역 직결'],
-      price:489000, oldPrice:589000, total:1467000 },
-    { id:'h8', img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
-      name:'호텔 닛코 오사카', area:'신사이바시', areaId:'shinsaibashi', stars:4, score:8.8, reviews:3012,
-      amenities:['조식 포함','와이파이','피트니스','바/라운지'],
-      price:219000, oldPrice:259000, total:657000 }
+  /* =============================================================
+     DATA: Destinations, Areas, enriched Hotels
+     ============================================================= */
+  const DESTINATIONS = [
+    // Popular cities
+    { type:'city', id:'osaka',     label:'오사카',    sub:'일본 · 간사이',     flag:'🇯🇵', country:'japan',       popular:true, desc:'도톤보리·유니버설' },
+    { type:'city', id:'tokyo',     label:'도쿄',      sub:'일본 · 간토',       flag:'🇯🇵', country:'japan',       popular:true, desc:'신주쿠·시부야' },
+    { type:'city', id:'fukuoka',   label:'후쿠오카',  sub:'일본 · 큐슈',       flag:'🇯🇵', country:'japan',       popular:true, desc:'하카타·텐진' },
+    { type:'city', id:'kyoto',     label:'교토',      sub:'일본 · 간사이',     flag:'🇯🇵', country:'japan',       popular:false, desc:'전통·료칸' },
+    { type:'city', id:'sapporo',   label:'삿포로',    sub:'일본 · 홋카이도',   flag:'🇯🇵', country:'japan',       popular:false, desc:'눈·온천' },
+    { type:'city', id:'okinawa',   label:'오키나와',  sub:'일본 · 오키나와',   flag:'🇯🇵', country:'japan',       popular:false, desc:'해변·리조트' },
+    { type:'city', id:'danang',    label:'다낭',      sub:'베트남 · 중부',     flag:'🇻🇳', country:'vietnam',     popular:true, desc:'미케 비치·바나힐' },
+    { type:'city', id:'nhatrang',  label:'나트랑',    sub:'베트남 · 남중부',   flag:'🇻🇳', country:'vietnam',     popular:false, desc:'빈펄 리조트' },
+    { type:'city', id:'hanoi',     label:'하노이',    sub:'베트남 · 북부',     flag:'🇻🇳', country:'vietnam',     popular:false, desc:'구시가지·하롱베이' },
+    { type:'city', id:'phuquoc',   label:'푸꾸옥',    sub:'베트남 · 남부',     flag:'🇻🇳', country:'vietnam',     popular:false, desc:'해변' },
+    { type:'city', id:'bangkok',   label:'방콕',      sub:'태국 · 중부',       flag:'🇹🇭', country:'thailand',    popular:true, desc:'수쿰빗·리버사이드' },
+    { type:'city', id:'phuket',    label:'푸켓',      sub:'태국 · 남부',       flag:'🇹🇭', country:'thailand',    popular:true, desc:'나이한·파통' },
+    { type:'city', id:'chiangmai', label:'치앙마이',  sub:'태국 · 북부',       flag:'🇹🇭', country:'thailand',    popular:false, desc:'올드시티' },
+    { type:'city', id:'cebu',      label:'세부',      sub:'필리핀 · 중부',     flag:'🇵🇭', country:'philippines', popular:true, desc:'막탄 섬' },
+    { type:'city', id:'boracay',   label:'보라카이',  sub:'필리핀 · 중부',     flag:'🇵🇭', country:'philippines', popular:true, desc:'화이트 비치' },
+    { type:'city', id:'manila',    label:'마닐라',    sub:'필리핀 · 루손',     flag:'🇵🇭', country:'philippines', popular:false, desc:'시티' },
+    // Countries
+    { type:'country', id:'japan',       label:'일본 전체',     sub:'모든 도시',         flag:'🇯🇵', country:'japan',       desc:'' },
+    { type:'country', id:'vietnam',     label:'베트남 전체',   sub:'모든 도시',         flag:'🇻🇳', country:'vietnam',     desc:'' },
+    { type:'country', id:'thailand',    label:'태국 전체',     sub:'모든 도시',         flag:'🇹🇭', country:'thailand',    desc:'' },
+    { type:'country', id:'philippines', label:'필리핀 전체',   sub:'모든 도시',         flag:'🇵🇭', country:'philippines', desc:'' },
+    // Famous areas
+    { type:'area', id:'shinjuku',    label:'신주쿠',       sub:'도쿄 · 일본',   flag:'🗼', country:'japan',       parent:'tokyo' },
+    { type:'area', id:'shibuya',     label:'시부야',       sub:'도쿄 · 일본',   flag:'🗼', country:'japan',       parent:'tokyo' },
+    { type:'area', id:'umeda',       label:'우메다',       sub:'오사카 · 일본', flag:'🏙️', country:'japan',       parent:'osaka' },
+    { type:'area', id:'namba',       label:'난바',         sub:'오사카 · 일본', flag:'🏙️', country:'japan',       parent:'osaka' },
+    { type:'area', id:'shinsaibashi',label:'신사이바시',   sub:'오사카 · 일본', flag:'🛍️', country:'japan',       parent:'osaka' },
+    { type:'area', id:'sontra',      label:'선짜 반도',    sub:'다낭 · 베트남', flag:'🏖️', country:'vietnam',     parent:'danang' },
+    { type:'area', id:'mykhe',       label:'미케 비치',    sub:'다낭 · 베트남', flag:'🏖️', country:'vietnam',     parent:'danang' },
+    { type:'area', id:'sukhumvit',   label:'수쿰빗',       sub:'방콕 · 태국',   flag:'🏙️', country:'thailand',    parent:'bangkok' },
+    { type:'area', id:'mactan',      label:'막탄 섬',      sub:'세부 · 필리핀', flag:'🏝️', country:'philippines', parent:'cebu' }
   ];
 
-  const STATE = {
-    sort:'recommend',
-    priceMin:0, priceMax:1000000,
-    stars:{5:true,4:true,3:true},
-    areas:{},
-    amenities:{}
+  // Enriched hotels
+  const HOTELS = [
+    { id:'h-granvia-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'우메다', areaId:'umeda',
+      name:'호텔 그란비아 오사카', englishName:'Hotel Granvia Osaka', chain:'JR Hotel Group',
+      stars:5, rating:9.2, reviews:4127, distance:0.1,
+      images:['https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80'],
+      price:239000, oldPrice:289000, memberPrice:215000,
+      amenities:['wifi','breakfast','pool','fitness','station','parking','bar','roomservice'],
+      deals:['free-cancel','breakfast','popular','member'],
+      desc:'JR 오사카역 직결 특급 호텔' },
+    { id:'h-rigaroyal-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'나카노시마', areaId:'nakanoshima',
+      name:'리가로얄 호텔 오사카', englishName:'Rihga Royal Hotel Osaka', chain:'Rihga Royal',
+      stars:5, rating:9.0, reviews:3528, distance:2.5,
+      images:['https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80'],
+      price:329000, oldPrice:389000, memberPrice:null,
+      amenities:['wifi','breakfast','pool','spa','fitness','bar','bizcenter'],
+      deals:['free-cancel','breakfast'],
+      desc:'나카노시마 강변의 클래식 5성 호텔' },
+    { id:'h-cross-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'신사이바시', areaId:'shinsaibashi',
+      name:'크로스 호텔 오사카', englishName:'Cross Hotel Osaka', chain:'Independent',
+      stars:4, rating:8.9, reviews:2145, distance:1.8,
+      images:['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80'],
+      price:189000, oldPrice:229000, memberPrice:null,
+      amenities:['wifi','breakfast','bar','station'],
+      deals:['free-cancel','breakfast'],
+      desc:'신사이바시 쇼핑 중심 부티크 호텔' },
+    { id:'h-apa-namba', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'난바', areaId:'namba',
+      name:'APA 호텔 난바', englishName:'APA Hotel Namba', chain:'APA',
+      stars:4, rating:8.5, reviews:5284, distance:2.1,
+      images:['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=80'],
+      price:129000, oldPrice:159000, memberPrice:118000,
+      amenities:['wifi','station','24front'],
+      deals:['free-cancel','member'],
+      desc:'난바역 도보 3분 가성비 호텔' },
+    { id:'h-monterey-namba', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'난바', areaId:'namba',
+      name:'호텔 몬터레이 그래스미어', englishName:'Hotel Monterey Grasmere', chain:'Monterey',
+      stars:4, rating:8.7, reviews:1842, distance:2.3,
+      images:['https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80'],
+      price:169000, oldPrice:199000, memberPrice:null,
+      amenities:['wifi','breakfast','fitness'],
+      deals:['free-cancel','breakfast'],
+      desc:'난바 스카이오 연결 럭셔리 호텔' },
+    { id:'h-hana-shinsaibashi', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'신사이바시', areaId:'shinsaibashi',
+      name:'하나 호텔 신사이바시', englishName:'Hana Hotel Shinsaibashi', chain:'Independent',
+      stars:3, rating:8.2, reviews:941, distance:2.0,
+      images:['https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=1200&q=80'],
+      price:89000, oldPrice:109000, memberPrice:null,
+      amenities:['wifi','24front'],
+      deals:['free-cancel'],
+      desc:'신사이바시 도보 5분 저렴한 숙소' },
+    { id:'h-intercon-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'우메다', areaId:'umeda',
+      name:'인터컨티넨탈 호텔 오사카', englishName:'InterContinental Osaka', chain:'IHG',
+      stars:5, rating:9.5, reviews:2184, distance:0.3,
+      images:['https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80'],
+      price:489000, oldPrice:589000, memberPrice:439000,
+      amenities:['wifi','breakfast','spa','pool','fitness','lounge','bar','station','parking'],
+      deals:['free-cancel','breakfast','popular','member'],
+      desc:'우메다역 직결 럭셔리 체인 호텔' },
+    { id:'h-nikko-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'신사이바시', areaId:'shinsaibashi',
+      name:'호텔 닛코 오사카', englishName:'Hotel Nikko Osaka', chain:'Okura Nikko',
+      stars:4, rating:8.8, reviews:3012, distance:1.5,
+      images:['https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=80'],
+      price:219000, oldPrice:259000, memberPrice:null,
+      amenities:['wifi','breakfast','fitness','bar'],
+      deals:['free-cancel','breakfast'],
+      desc:'신사이바시역 도보 2분' },
+    { id:'h-swissotel-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'난바', areaId:'namba',
+      name:'스위스호텔 난카이 오사카', englishName:'Swissotel Nankai Osaka', chain:'Accor',
+      stars:5, rating:9.3, reviews:3821, distance:1.9,
+      images:['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80'],
+      price:379000, oldPrice:449000, memberPrice:349000,
+      amenities:['wifi','breakfast','pool','spa','fitness','lounge','bar','parking','station'],
+      deals:['free-cancel','breakfast','popular','member'],
+      desc:'난카이 난바역 직결 스카이 럭셔리' },
+    { id:'h-prince-shinsaibashi', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'신사이바시', areaId:'shinsaibashi',
+      name:'프린스 호텔 신사이바시', englishName:'Prince Hotel Shinsaibashi', chain:'Prince',
+      stars:4, rating:8.6, reviews:1628, distance:1.4,
+      images:['https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=1200&q=80'],
+      price:148000, oldPrice:179000, memberPrice:null,
+      amenities:['wifi','breakfast','fitness'],
+      deals:['free-cancel','breakfast'],
+      desc:'신사이바시 중심 깔끔한 체인 호텔' },
+    { id:'h-ryokan-umeda', type:'ryokan', typeLabel:'료칸', city:'osaka', country:'japan', area:'우메다', areaId:'umeda',
+      name:'우메다 전통 료칸', englishName:'Umeda Traditional Ryokan', chain:'Independent',
+      stars:4, rating:9.1, reviews:524, distance:0.8,
+      images:['https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1200&q=80'],
+      price:289000, oldPrice:329000, memberPrice:null,
+      amenities:['wifi','onsen','breakfast','dinner','traditional'],
+      deals:['breakfast','original'],
+      desc:'다다미방 · 온천 · 가이세키 석식 포함' },
+    { id:'h-hostel-osaka', type:'guesthouse', typeLabel:'게스트하우스', city:'osaka', country:'japan', area:'난바', areaId:'namba',
+      name:'오사카 백패커스 호스텔', englishName:'Osaka Backpackers Hostel', chain:'Independent',
+      stars:2, rating:7.9, reviews:847, distance:2.5,
+      images:['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80'],
+      price:35000, oldPrice:45000, memberPrice:null,
+      amenities:['wifi','kitchen','24front','laundry'],
+      deals:['free-cancel'],
+      desc:'도미토리 6인실 · 저렴한 배낭여행자용' },
+    // Tokyo
+    { id:'h-parkhyatt-tokyo', type:'hotel', typeLabel:'호텔', city:'tokyo', country:'japan', area:'신주쿠', areaId:'shinjuku',
+      name:'파크 하얏트 도쿄', englishName:'Park Hyatt Tokyo', chain:'Hyatt',
+      stars:5, rating:9.4, reviews:2847, distance:1.2,
+      images:['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80'],
+      price:589000, oldPrice:689000, memberPrice:529000,
+      amenities:['wifi','breakfast','pool','fitness','spa','bar','lounge','parking'],
+      deals:['breakfast','popular','member'],
+      desc:'영화 "Lost in Translation" 촬영지' },
+    { id:'h-hilton-tokyo', type:'hotel', typeLabel:'호텔', city:'tokyo', country:'japan', area:'신주쿠', areaId:'shinjuku',
+      name:'힐튼 도쿄', englishName:'Hilton Tokyo', chain:'Hilton',
+      stars:5, rating:9.1, reviews:3901, distance:1.5,
+      images:['https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80'],
+      price:358000, oldPrice:419000, memberPrice:329000,
+      amenities:['wifi','breakfast','pool','fitness','spa','bar','lounge'],
+      deals:['free-cancel','breakfast','member'],
+      desc:'신주쿠 서쪽 대형 체인 호텔' },
+    // Danang
+    { id:'h-intercon-danang', type:'resort', typeLabel:'리조트', city:'danang', country:'vietnam', area:'선짜 반도', areaId:'sontra',
+      name:'인터컨티넨탈 다낭 선페닌슐라', englishName:'InterContinental Danang Sun Peninsula', chain:'IHG',
+      stars:5, rating:9.6, reviews:2184, distance:12,
+      images:['https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80'],
+      price:489000, oldPrice:589000, memberPrice:449000,
+      amenities:['wifi','breakfast','pool','spa','beach','shuttle','fitness','restaurant'],
+      deals:['free-cancel','breakfast','popular','original','member'],
+      desc:'빌 벤슬리 디자인 럭셔리 리조트' },
+    { id:'h-premier-danang', type:'villa', typeLabel:'풀빌라', city:'danang', country:'vietnam', area:'미케 비치', areaId:'mykhe',
+      name:'프리미어빌리지 다낭 리조트', englishName:'Premier Village Danang Resort', chain:'Accor',
+      stars:5, rating:9.3, reviews:3247, distance:6.5,
+      images:['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80'],
+      price:398000, oldPrice:489000, memberPrice:null,
+      amenities:['wifi','breakfast','dinner','pool','beach','kidsclub','fitness'],
+      deals:['breakfast','popular','original'],
+      desc:'가족·허니문 최적 풀빌라 리조트' }
+  ];
+
+  const AMENITY_MAP = {
+    wifi:{label:'무료 와이파이',icon:'📶'},
+    breakfast:{label:'조식 포함',icon:'🍳'},
+    dinner:{label:'석식 포함',icon:'🍽️'},
+    pool:{label:'수영장',icon:'🏊'},
+    spa:{label:'스파',icon:'💆'},
+    fitness:{label:'피트니스',icon:'🏋️'},
+    bar:{label:'바/라운지',icon:'🍸'},
+    lounge:{label:'라운지',icon:'☕'},
+    station:{label:'역 직결',icon:'🚇'},
+    parking:{label:'주차',icon:'🅿️'},
+    beach:{label:'프라이빗 비치',icon:'🏖️'},
+    kidsclub:{label:'키즈클럽',icon:'👶'},
+    bizcenter:{label:'비즈니스 센터',icon:'💼'},
+    shuttle:{label:'무료 셔틀',icon:'🚐'},
+    onsen:{label:'온천',icon:'♨️'},
+    traditional:{label:'전통 다다미',icon:'🏯'},
+    kitchen:{label:'공용 주방',icon:'🍳'},
+    laundry:{label:'세탁시설',icon:'👕'},
+    '24front':{label:'24시간 프론트',icon:'🕐'},
+    restaurant:{label:'레스토랑',icon:'🍴'},
+    roomservice:{label:'룸서비스',icon:'🛎️'}
   };
 
-  const krw = n => n.toLocaleString('ko-KR') + '원';
+  const DEAL_MAP = {
+    'free-cancel':{label:'무료 취소',color:'green'},
+    'breakfast':{label:'조식 포함',color:'green'},
+    'popular':{label:'한국인 선호',color:'red'},
+    'original':{label:'오마이트립 단독',color:'blue'},
+    'member':{label:'멤버 전용가',color:'blue'}
+  };
 
-  function applyFilters(){
-    return HOTELS.filter(h => {
-      if(h.price < STATE.priceMin || h.price > STATE.priceMax) return false;
-      if(!STATE.stars[h.stars]) return false;
-      if(STATE.areas[h.areaId] === false) return false;
-      // amenity: all selected must be present
-      const selAmen = Object.keys(STATE.amenities).filter(a => STATE.amenities[a]);
-      if(selAmen.length > 0){
-        if(!selAmen.every(a => h.amenities.includes(a))) return false;
+  /* =============================================================
+     STATE
+     ============================================================= */
+  const STATE = {
+    destination: DESTINATIONS.find(d => d.id === 'osaka'),
+    checkin: new Date(2026, 4, 10),   // 2026-05-10
+    checkout: new Date(2026, 4, 13),  // 2026-05-13
+    rooms: [{ adults: 2, children: [] }],
+    filters: {
+      priceMin: 0, priceMax: 1000000,
+      deals: {}, minRating: 0,
+      stars: { 5:true, 4:true, 3:true, 2:true, 1:true },
+      types: {}, areas: {}, amenities: {}, chains: {}, maxDistance: null
+    },
+    sort: 'recommend',
+    activePopup: null,
+    calTempCheckin: null, calTempCheckout: null,
+    calViewMonth: { year: new Date().getFullYear(), month: new Date().getMonth() }
+  };
+
+  // Temporary draft for guests popup
+  let roomsDraft = JSON.parse(JSON.stringify(STATE.rooms));
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+  const fmtDate = d => d ? `${d.getMonth()+1}월 ${d.getDate()}일` : '';
+  const fmtDay  = d => d ? ['일','월','화','수','목','금','토'][d.getDay()] : '';
+  const dayKey  = d => d ? d.toISOString().slice(0,10) : '';
+  const diffNights = (a, b) => !a || !b ? 0 : Math.max(0, Math.round((b - a) / 86400000));
+
+  /* =============================================================
+     POPUPS
+     ============================================================= */
+  function openPopup(id){
+    closePopups(false);
+    STATE.activePopup = id;
+    document.getElementById('popupBackdrop').classList.add('open');
+    if(id === 'dest'){
+      document.getElementById('popupDest').classList.add('open');
+      document.getElementById('sfDest').classList.add('active');
+      renderDestList(document.getElementById('destSearch').value);
+      setTimeout(() => document.getElementById('destSearch').focus(), 50);
+    } else if(id === 'cal'){
+      document.getElementById('popupCal').classList.add('open');
+      STATE.calTempCheckin = STATE.checkin;
+      STATE.calTempCheckout = STATE.checkout;
+      // Set view to month of current checkin
+      STATE.calViewMonth = { year: STATE.checkin.getFullYear(), month: STATE.checkin.getMonth() };
+      renderCalendar();
+    } else if(id === 'guests'){
+      document.getElementById('popupGuests').classList.add('open');
+      roomsDraft = JSON.parse(JSON.stringify(STATE.rooms));
+      renderGuestsPopup();
+    }
+  }
+  function closePopups(withBackdrop = true){
+    document.querySelectorAll('.popup.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.sf-field.active').forEach(p => p.classList.remove('active'));
+    if(withBackdrop) document.getElementById('popupBackdrop').classList.remove('open');
+    STATE.activePopup = null;
+  }
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closePopups(); });
+
+  /* =============================================================
+     DESTINATION POPUP
+     ============================================================= */
+  function renderDestList(keyword){
+    const kw = (keyword || '').trim().toLowerCase();
+    const body = document.getElementById('destBody');
+    const recent = OMT.State.getSearchHistory().slice(0, 5);
+
+    const matchesKw = (d) => {
+      if(!kw) return true;
+      return d.label.toLowerCase().includes(kw) ||
+             d.sub.toLowerCase().includes(kw) ||
+             (d.desc || '').toLowerCase().includes(kw);
+    };
+
+    let html = '';
+
+    if(!kw){
+      // No keyword — show recent + popular + all
+      if(recent.length){
+        html += `<div class="dest-section-head">최근 검색</div>`;
+        html += recent.map(r => {
+          const d = DESTINATIONS.find(x => x.label === r);
+          if(!d) return '';
+          return destItemHTML(d, '⏱');
+        }).filter(Boolean).join('');
       }
-      return true;
-    }).sort((a,b) => {
-      if(STATE.sort === 'price') return a.price - b.price;
-      if(STATE.sort === 'rating') return b.score - a.score;
-      if(STATE.sort === 'reviews') return b.reviews - a.reviews;
-      // recommend: score * log(reviews)
-      return (b.score * Math.log10(b.reviews+1)) - (a.score * Math.log10(a.reviews+1));
+      html += `<div class="dest-section-head">🔥 인기 목적지</div>`;
+      html += DESTINATIONS.filter(d => d.popular).map(d => destItemHTML(d)).join('');
+      html += `<div class="dest-section-head">🌐 국가별 전체</div>`;
+      html += DESTINATIONS.filter(d => d.type === 'country').map(d => destItemHTML(d)).join('');
+      html += `<div class="dest-section-head">📍 지역 · 관광지</div>`;
+      html += DESTINATIONS.filter(d => d.type === 'area').slice(0, 10).map(d => destItemHTML(d)).join('');
+    } else {
+      const results = DESTINATIONS.filter(matchesKw);
+      if(results.length === 0){
+        html = `<div style="padding:40px;text-align:center;color:var(--ink-3);font-size:13px;">"${keyword}" 검색 결과가 없어요</div>`;
+      } else {
+        html += `<div class="dest-section-head">검색 결과 ${results.length}개</div>`;
+        html += results.map(d => destItemHTML(d)).join('');
+      }
+    }
+    body.innerHTML = html;
+
+    body.querySelectorAll('.dest-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const d = DESTINATIONS.find(x => x.id === el.dataset.id && x.type === el.dataset.type);
+        if(d) selectDestination(d);
+      });
     });
   }
 
-  function render(){
-    const list = applyFilters();
-    document.getElementById('resCount').textContent = list.length;
-    const el = document.getElementById('hotelList');
-    if(list.length === 0){
-      el.innerHTML = `<div style="padding:60px;text-align:center;color:var(--ink-3);background:#fff;border-radius:16px;border:1px dashed var(--line);">
-        <h3 style="margin:0 0 6px;">조건에 맞는 호텔이 없어요</h3>
-        <p style="margin:0;font-size:13px;">필터를 완화해보세요</p>
-      </div>`;
+  function destItemHTML(d, iconOverride){
+    const hotelCount = HOTELS.filter(h => {
+      if(d.type === 'city') return h.city === d.id;
+      if(d.type === 'country') return h.country === d.country;
+      if(d.type === 'area') return h.areaId === d.id;
+      return false;
+    }).length;
+    const selected = d.id === STATE.destination?.id && d.type === STATE.destination?.type;
+    const icon = iconOverride || d.flag;
+    const sub = d.desc ? `${d.sub} · ${d.desc}` : d.sub;
+    return `
+      <div class="dest-item ${selected?'selected':''}" data-id="${d.id}" data-type="${d.type}">
+        <div class="dest-icon flag">${icon}</div>
+        <div class="dest-info">
+          <div class="dest-name">${d.label}</div>
+          <div class="dest-sub">${sub}</div>
+        </div>
+        ${hotelCount > 0 ? `<div class="dest-count"><strong>${hotelCount}</strong>개 숙소</div>` : ''}
+      </div>
+    `;
+  }
+
+  function selectDestination(d){
+    STATE.destination = d;
+    OMT.State.addSearchHistory(d.label);
+    updateDestLabel();
+    closePopups();
+    resetAreaFilter();
+    render();
+  }
+
+  function updateDestLabel(){
+    const d = STATE.destination;
+    document.getElementById('destLabel').textContent = d.label;
+    document.getElementById('destSub').textContent = d.sub;
+    document.getElementById('destCountLabel').textContent = d.label;
+  }
+
+  function quickSet(cityId){
+    const d = DESTINATIONS.find(x => x.id === cityId);
+    if(d) selectDestination(d);
+  }
+
+  function clearDestSearch(){
+    document.getElementById('destSearch').value = '';
+    renderDestList('');
+  }
+
+  document.getElementById('destSearch').addEventListener('input', (e) => renderDestList(e.target.value));
+
+  /* =============================================================
+     CALENDAR POPUP
+     ============================================================= */
+  function renderCalendar(){
+    const wrap = document.getElementById('calMonths');
+    const { year, month } = STATE.calViewMonth;
+    const m1 = { year, month };
+    const m2 = month === 11 ? { year: year+1, month: 0 } : { year, month: month+1 };
+    wrap.innerHTML = monthHTML(m1, true) + monthHTML(m2, false);
+    wrap.querySelectorAll('.cal-day:not(.past):not(.empty)').forEach(el => {
+      el.addEventListener('click', () => onDateClick(new Date(el.dataset.date)));
+    });
+    wrap.querySelectorAll('.nav').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dir = +btn.dataset.dir;
+        let nm = STATE.calViewMonth.month + dir;
+        let ny = STATE.calViewMonth.year;
+        if(nm < 0){ nm = 11; ny -= 1; }
+        if(nm > 11){ nm = 0; ny += 1; }
+        STATE.calViewMonth = { year: ny, month: nm };
+        renderCalendar();
+      });
+    });
+    updateCalendarFooter();
+  }
+
+  function monthHTML(m, showPrev){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const firstDay = new Date(m.year, m.month, 1);
+    const startWeekDay = firstDay.getDay();
+    const daysInMonth = new Date(m.year, m.month+1, 0).getDate();
+
+    let html = `<div class="cal-month">
+      <div class="cal-month-head">
+        ${showPrev?'<button class="nav" data-dir="-1" type="button">‹</button>':'<span></span>'}
+        <div class="title">${m.year}년 ${m.month+1}월</div>
+        ${!showPrev?'<button class="nav" data-dir="1" type="button">›</button>':'<span></span>'}
+      </div>
+      <div class="cal-grid">`;
+
+    for(let i=0; i<startWeekDay; i++) html += `<div class="cal-day empty"></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const date = new Date(m.year, m.month, d);
+      const iso = dayKey(date);
+      const isPast = date < today;
+      const isStart = STATE.calTempCheckin && dayKey(STATE.calTempCheckin) === iso;
+      const isEnd = STATE.calTempCheckout && dayKey(STATE.calTempCheckout) === iso;
+      const inRange = STATE.calTempCheckin && STATE.calTempCheckout &&
+                      date > STATE.calTempCheckin && date < STATE.calTempCheckout;
+      const dow = date.getDay();
+      const classes = ['cal-day'];
+      if(isPast) classes.push('past');
+      if(dow === 0) classes.push('sun');
+      if(dow === 6) classes.push('sat');
+      if(isStart || isEnd) classes.push('selected');
+      if(isStart) classes.push('start');
+      if(isEnd) classes.push('end');
+      if(inRange) classes.push('in-range');
+      html += `<div class="${classes.join(' ')}" data-date="${iso}">${d}</div>`;
+    }
+
+    html += `</div></div>`;
+    return html;
+  }
+
+  function onDateClick(date){
+    if(!STATE.calTempCheckin || (STATE.calTempCheckin && STATE.calTempCheckout)){
+      STATE.calTempCheckin = date;
+      STATE.calTempCheckout = null;
+    } else {
+      if(date <= STATE.calTempCheckin){
+        STATE.calTempCheckin = date;
+        STATE.calTempCheckout = null;
+      } else {
+        STATE.calTempCheckout = date;
+      }
+    }
+    renderCalendar();
+  }
+
+  function updateCalendarFooter(){
+    const ci = STATE.calTempCheckin, co = STATE.calTempCheckout;
+    const nights = diffNights(ci, co);
+    const info = document.getElementById('calRangeInfo');
+    const summary = document.getElementById('calSummary');
+    if(ci && co){
+      info.textContent = `${fmtDate(ci)} - ${fmtDate(co)} · ${nights}박`;
+      summary.innerHTML = `선택됨: <strong>${fmtDate(ci)} (${fmtDay(ci)})</strong> → <strong>${fmtDate(co)} (${fmtDay(co)})</strong> · <strong>${nights}박</strong>`;
+    } else if(ci){
+      info.textContent = `${fmtDate(ci)} ~ 체크아웃 선택`;
+      summary.innerHTML = `체크인: <strong>${fmtDate(ci)}</strong> · 체크아웃 날짜를 선택하세요`;
+    } else {
+      info.textContent = '';
+      summary.textContent = '체크인 날짜를 먼저 선택하세요';
+    }
+  }
+
+  function resetDates(){
+    STATE.calTempCheckin = null;
+    STATE.calTempCheckout = null;
+    renderCalendar();
+  }
+  function applyDates(){
+    if(!STATE.calTempCheckin || !STATE.calTempCheckout){
+      alert('체크인/체크아웃 날짜를 모두 선택해주세요');
       return;
     }
-    el.innerHTML = list.map(h => `
-      <article class="hotel-card">
-        <div class="hc-thumb" style="background-image:url('${h.img}')">
-          ${h.badge ? `<span class="hc-badge">${h.badge}</span>` : ''}
+    STATE.checkin = STATE.calTempCheckin;
+    STATE.checkout = STATE.calTempCheckout;
+    updateDateLabels();
+    closePopups();
+    render();
+  }
+  function updateDateLabels(){
+    const ci = STATE.checkin, co = STATE.checkout;
+    document.getElementById('checkinLabel').textContent  = fmtDate(ci);
+    document.getElementById('checkinSub').textContent    = fmtDay(ci);
+    document.getElementById('checkoutLabel').textContent = fmtDate(co);
+    document.getElementById('checkoutSub').textContent   = fmtDay(co);
+    document.getElementById('nightsLabel').textContent   = diffNights(ci, co) + '박';
+  }
+
+  /* =============================================================
+     GUESTS POPUP
+     ============================================================= */
+  function renderGuestsPopup(){
+    const body = document.getElementById('guestsBody');
+    body.innerHTML = roomsDraft.map((room, idx) => `
+      <div class="room-block">
+        <div class="room-head">
+          <h4>객실 ${idx+1}</h4>
+          ${roomsDraft.length > 1 ? `<button class="remove" type="button" onclick="removeRoom(${idx})">삭제</button>` : ''}
         </div>
-        <div class="hc-body">
-          <div class="hc-stars">${'★'.repeat(h.stars)}</div>
-          <div class="hc-name">${h.name}</div>
-          <div class="hc-area">${h.area}</div>
-          <div class="hc-score-row">
-            <span class="hc-score">${h.score}</span>
-            <span class="hc-review"><strong>${h.score >= 9 ? '최고' : h.score >= 8.5 ? '매우 좋음' : '좋음'}</strong><small>리뷰 ${h.reviews.toLocaleString('ko-KR')}개</small></span>
+        <div class="count-row">
+          <div class="info">
+            <div class="name">성인</div>
+            <div class="note">만 18세 이상</div>
           </div>
-          <div class="hc-amenities">
-            ${h.amenities.slice(0,5).map(a => `<span class="hc-amenity">${a}</span>`).join('')}
-            ${h.amenities.length > 5 ? `<span class="hc-amenity">+${h.amenities.length-5}</span>` : ''}
+          <div class="count-ctrl">
+            <button class="count-btn" type="button" onclick="stepCount(${idx},'adults',-1)" ${room.adults<=1?'disabled':''}>−</button>
+            <span class="count-val">${room.adults}</span>
+            <button class="count-btn" type="button" onclick="stepCount(${idx},'adults',1)" ${room.adults>=4?'disabled':''}>+</button>
           </div>
         </div>
-        <div class="hc-right">
-          <span class="hc-price-label">1박 기준</span>
-          <div class="hc-price-row">
-            <span class="hc-old">${krw(h.oldPrice)}</span>
-            <span class="hc-price">${krw(h.price)}<small>~</small></span>
+        <div class="count-row">
+          <div class="info">
+            <div class="name">아동</div>
+            <div class="note">0~17세</div>
           </div>
-          <span class="hc-total">3박 ${krw(h.total)}</span>
-          <button class="hc-select-btn" onclick="selectHotel('${h.id}')">선택 →</button>
+          <div class="count-ctrl">
+            <button class="count-btn" type="button" onclick="stepCount(${idx},'children',-1)" ${room.children.length<=0?'disabled':''}>−</button>
+            <span class="count-val">${room.children.length}</span>
+            <button class="count-btn" type="button" onclick="stepCount(${idx},'children',1)" ${room.children.length>=3?'disabled':''}>+</button>
+          </div>
         </div>
-      </article>
+        ${room.children.length > 0 ? `
+          <div class="age-row">
+            <div class="lb">각 아동의 나이</div>
+            <div class="age-selects">
+              ${room.children.map((age, ai) => `
+                <select onchange="setAge(${idx},${ai},this.value)">
+                  ${[...Array(18)].map((_,i) => `<option value="${i}" ${age===i?'selected':''}>${i===0?'0-1세':i+'세'}</option>`).join('')}
+                </select>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `).join('') + `
+      ${roomsDraft.length < 5 ? `<button class="add-room" type="button" onclick="addRoom()">+ 객실 추가</button>` : ''}
+    `;
+  }
+
+  window.stepCount = (roomIdx, key, delta) => {
+    const r = roomsDraft[roomIdx];
+    if(key === 'adults'){
+      r.adults = Math.max(1, Math.min(4, r.adults + delta));
+    } else {
+      if(delta > 0 && r.children.length < 3) r.children.push(5);
+      else if(delta < 0 && r.children.length > 0) r.children.pop();
+    }
+    renderGuestsPopup();
+  };
+  window.setAge = (roomIdx, childIdx, age) => {
+    roomsDraft[roomIdx].children[childIdx] = +age;
+  };
+  window.addRoom = () => {
+    if(roomsDraft.length < 5){ roomsDraft.push({ adults: 2, children: [] }); renderGuestsPopup(); }
+  };
+  window.removeRoom = (idx) => {
+    if(roomsDraft.length > 1){ roomsDraft.splice(idx, 1); renderGuestsPopup(); }
+  };
+  window.resetRooms = () => { roomsDraft = [{ adults: 2, children: [] }]; renderGuestsPopup(); };
+  window.applyGuests = () => {
+    STATE.rooms = JSON.parse(JSON.stringify(roomsDraft));
+    updateGuestsLabel();
+    closePopups();
+  };
+  function updateGuestsLabel(){
+    const totalAdults = STATE.rooms.reduce((s,r) => s + r.adults, 0);
+    const totalChildren = STATE.rooms.reduce((s,r) => s + r.children.length, 0);
+    const rc = STATE.rooms.length;
+    let label = `객실 ${rc}개, 성인 ${totalAdults}명`;
+    if(totalChildren > 0) label += `, 아동 ${totalChildren}명`;
+    document.getElementById('guestsLabel').textContent = label;
+    document.getElementById('guestsSub').textContent = `${rc}개 객실에서 숙박`;
+  }
+
+  /* =============================================================
+     FILTERS
+     ============================================================= */
+  const STARS_OPTS = [
+    { v:5, label:'5성급' }, { v:4, label:'4성급' }, { v:3, label:'3성급' }, { v:2, label:'2성급' }, { v:1, label:'1성급' }
+  ];
+  const TYPE_OPTS = [
+    { v:'hotel',      label:'호텔',         icon:'🏨' },
+    { v:'resort',     label:'리조트',       icon:'🌴' },
+    { v:'villa',      label:'풀빌라',       icon:'🏡' },
+    { v:'ryokan',     label:'료칸',         icon:'🎎' },
+    { v:'guesthouse', label:'게스트하우스', icon:'🏠' }
+  ];
+  const DEAL_OPTS = [
+    { v:'free-cancel', label:'무료 취소'        },
+    { v:'breakfast',   label:'조식 포함'        },
+    { v:'popular',     label:'한국인 선호'      },
+    { v:'original',    label:'오마이트립 단독'  },
+    { v:'member',      label:'멤버 전용가'      }
+  ];
+  const RATING_OPTS = [
+    { v:9.0, big:'9.0+', label:'최고' },
+    { v:8.0, big:'8.0+', label:'매우 좋음' },
+    { v:7.0, big:'7.0+', label:'좋음' },
+    { v:0,   big:'전체', label:'' }
+  ];
+  const DISTANCE_OPTS = [
+    { v:1,   label:'도심 1km 이내' },
+    { v:3,   label:'도심 3km 이내' },
+    { v:5,   label:'도심 5km 이내' },
+    { v:null,label:'전체' }
+  ];
+
+  function renderFilterUI(){
+    // Deals
+    document.getElementById('filterDeals').innerHTML = DEAL_OPTS.map(o => `
+      <div class="f-row" onclick="toggleFilter('deals','${o.v}')">
+        <span class="f-check ${STATE.filters.deals[o.v]?'checked':''}"></span>
+        <span class="f-label-text">${o.label}</span>
+        <span class="f-count">${HOTELS.filter(h => h.deals?.includes(o.v) && h.city === STATE.destination?.id).length}</span>
+      </div>
+    `).join('');
+
+    // Rating
+    document.getElementById('filterRating').innerHTML = RATING_OPTS.map(o => `
+      <button class="rating-opt ${STATE.filters.minRating === o.v?'active':''}" type="button" onclick="setRating(${o.v})">
+        <span class="big">${o.big}</span>${o.label}
+      </button>
+    `).join('');
+
+    // Stars
+    document.getElementById('filterStars').innerHTML = STARS_OPTS.map(o => `
+      <div class="f-row" onclick="toggleStars(${o.v})">
+        <span class="f-check ${STATE.filters.stars[o.v]?'checked':''}"></span>
+        <span class="f-label-text">${o.label}</span>
+        <span class="f-stars">${'★'.repeat(o.v)}</span>
+      </div>
+    `).join('');
+
+    // Types
+    document.getElementById('filterTypes').innerHTML = TYPE_OPTS.map(o => `
+      <div class="f-row" onclick="toggleFilter('types','${o.v}')">
+        <span class="f-check ${STATE.filters.types[o.v]?'checked':''}"></span>
+        <span class="f-label-text">${o.icon} ${o.label}</span>
+        <span class="f-count">${HOTELS.filter(h => h.type === o.v && h.city === STATE.destination?.id).length}</span>
+      </div>
+    `).join('');
+
+    // Areas (dynamic by destination)
+    const relevant = HOTELS.filter(h => h.city === STATE.destination?.id);
+    const areaSet = [...new Set(relevant.map(h => h.areaId))].map(id => ({
+      id, label: relevant.find(h => h.areaId === id).area
+    }));
+    document.getElementById('filterAreas').innerHTML = areaSet.length > 0 ? areaSet.map(a => `
+      <div class="f-row" onclick="toggleFilter('areas','${a.id}')">
+        <span class="f-check ${STATE.filters.areas[a.id]?'checked':''}"></span>
+        <span class="f-label-text">${a.label}</span>
+        <span class="f-count">${relevant.filter(h => h.areaId === a.id).length}</span>
+      </div>
+    `).join('') : `<div style="font-size:12px;color:var(--ink-3);">해당 목적지 지역 정보가 없어요</div>`;
+
+    // Amenities
+    const MAIN_AMENITIES = ['wifi','breakfast','pool','spa','fitness','parking','beach','station','kidsclub','onsen'];
+    document.getElementById('filterAmen').innerHTML = MAIN_AMENITIES.map(k => `
+      <div class="f-row" onclick="toggleFilter('amenities','${k}')">
+        <span class="f-check ${STATE.filters.amenities[k]?'checked':''}"></span>
+        <span class="f-label-text">${AMENITY_MAP[k].icon} ${AMENITY_MAP[k].label}</span>
+      </div>
+    `).join('');
+
+    // Chains
+    const chains = [...new Set(HOTELS.filter(h => h.city === STATE.destination?.id).map(h => h.chain))];
+    document.getElementById('filterChains').innerHTML = chains.length > 0 ? chains.map(c => `
+      <div class="f-row" onclick="toggleFilter('chains','${c}')">
+        <span class="f-check ${STATE.filters.chains[c]?'checked':''}"></span>
+        <span class="f-label-text">${c}</span>
+      </div>
+    `).join('') : `<div style="font-size:12px;color:var(--ink-3);">체인 정보 없음</div>`;
+
+    // Distance
+    document.getElementById('filterDistance').innerHTML = DISTANCE_OPTS.map(o => `
+      <div class="f-row" onclick="setMaxDistance(${o.v===null?'null':o.v})">
+        <span class="f-check ${STATE.filters.maxDistance === o.v?'checked':''}"></span>
+        <span class="f-label-text">${o.label}</span>
+      </div>
     `).join('');
   }
 
-  function renderFilterUI(){
-    // Stars
-    document.getElementById('filterStars').innerHTML = [5,4,3].map(n => `
-      <div class="f-row" onclick="toggleStars(${n})">
-        <span class="f-check ${STATE.stars[n]?'checked':''}"></span>${n}성급 ${'★'.repeat(n)}
-        <span class="f-count">${HOTELS.filter(h=>h.stars===n).length}</span>
-      </div>
-    `).join('');
-    // Areas
-    const areas = [...new Set(HOTELS.map(h => h.areaId))];
-    areas.forEach(a => { if(!(a in STATE.areas)) STATE.areas[a] = true; });
-    document.getElementById('filterAreas').innerHTML = areas.map(a => {
-      const label = HOTELS.find(h => h.areaId === a).area;
-      return `<div class="f-row" onclick="toggleArea('${a}')">
-        <span class="f-check ${STATE.areas[a]?'checked':''}"></span>${label}
-        <span class="f-count">${HOTELS.filter(h=>h.areaId===a).length}</span>
+  window.toggleFilter = (key, v) => {
+    STATE.filters[key][v] = !STATE.filters[key][v];
+    renderFilterUI(); render();
+  };
+  window.toggleStars = (v) => {
+    STATE.filters.stars[v] = !STATE.filters.stars[v];
+    renderFilterUI(); render();
+  };
+  window.setRating = (v) => {
+    STATE.filters.minRating = v;
+    renderFilterUI(); render();
+  };
+  window.setMaxDistance = (v) => {
+    STATE.filters.maxDistance = v;
+    renderFilterUI(); render();
+  };
+  window.toggleFGroup = (id) => {
+    document.querySelector(`[data-fgroup="${id}"]`).classList.toggle('collapsed');
+  };
+  window.resetFilters = () => {
+    STATE.filters = {
+      priceMin: 0, priceMax: 1000000,
+      deals: {}, minRating: 0,
+      stars: { 5:true, 4:true, 3:true, 2:true, 1:true },
+      types: {}, areas: {}, amenities: {}, chains: {}, maxDistance: null
+    };
+    document.getElementById('priceMinInput').value = 0;
+    document.getElementById('priceMaxInput').value = 1000000;
+    updatePriceThumbs();
+    renderFilterUI(); render();
+  };
+  function resetAreaFilter(){ STATE.filters.areas = {}; }
+
+  /* Price slider */
+  function updatePriceThumbs(){
+    const min = STATE.filters.priceMin;
+    const max = STATE.filters.priceMax;
+    const MAX = 1000000;
+    const minPct = (min / MAX) * 100;
+    const maxPct = (max / MAX) * 100;
+    document.getElementById('priceThumbMin').style.left = minPct + '%';
+    document.getElementById('priceThumbMax').style.left = maxPct + '%';
+    document.getElementById('priceTrack').style.left = minPct + '%';
+    document.getElementById('priceTrack').style.right = (100-maxPct) + '%';
+    document.getElementById('priceMinLabel').textContent = krw(min);
+    document.getElementById('priceMaxLabel').textContent = max >= MAX ? '100만원+' : krw(max);
+  }
+  function attachPriceDrag(){
+    const slider = document.getElementById('priceSlider');
+    const MAX = 1000000;
+    ['priceThumbMin','priceThumbMax'].forEach(id => {
+      const thumb = document.getElementById(id);
+      let dragging = false;
+      const onMove = (clientX) => {
+        const rect = slider.getBoundingClientRect();
+        let pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        let val = Math.round(pct * MAX / 10000) * 10000;
+        if(id === 'priceThumbMin'){
+          val = Math.min(val, STATE.filters.priceMax - 10000);
+          STATE.filters.priceMin = Math.max(0, val);
+          document.getElementById('priceMinInput').value = STATE.filters.priceMin;
+        } else {
+          val = Math.max(val, STATE.filters.priceMin + 10000);
+          STATE.filters.priceMax = Math.min(MAX, val);
+          document.getElementById('priceMaxInput').value = STATE.filters.priceMax;
+        }
+        updatePriceThumbs();
+      };
+      thumb.addEventListener('mousedown', e => { dragging = true; e.preventDefault(); });
+      thumb.addEventListener('touchstart', e => { dragging = true; });
+      document.addEventListener('mousemove', e => { if(dragging) onMove(e.clientX); });
+      document.addEventListener('touchmove', e => { if(dragging && e.touches[0]) onMove(e.touches[0].clientX); });
+      document.addEventListener('mouseup', () => { if(dragging){ dragging = false; render(); } });
+      document.addEventListener('touchend', () => { if(dragging){ dragging = false; render(); } });
+    });
+    ['priceMinInput','priceMaxInput'].forEach(id => {
+      document.getElementById(id).addEventListener('change', e => {
+        const side = id === 'priceMinInput' ? 'min' : 'max';
+        let v = +e.target.value || 0;
+        if(side === 'min') STATE.filters.priceMin = Math.max(0, Math.min(v, STATE.filters.priceMax - 10000));
+        else STATE.filters.priceMax = Math.min(1000000, Math.max(v, STATE.filters.priceMin + 10000));
+        e.target.value = side === 'min' ? STATE.filters.priceMin : STATE.filters.priceMax;
+        updatePriceThumbs(); render();
+      });
+    });
+  }
+
+  /* =============================================================
+     APPLY FILTERS → render results
+     ============================================================= */
+  function applyFilters(){
+    const d = STATE.destination;
+    return HOTELS.filter(h => {
+      // Destination match
+      if(d){
+        if(d.type === 'city' && h.city !== d.id) return false;
+        if(d.type === 'country' && h.country !== d.country) return false;
+        if(d.type === 'area' && h.areaId !== d.id) return false;
+      }
+      // Price
+      if(h.price < STATE.filters.priceMin || h.price > STATE.filters.priceMax) return false;
+      // Stars
+      if(!STATE.filters.stars[h.stars]) return false;
+      // Rating
+      if(h.rating < STATE.filters.minRating) return false;
+      // Types
+      const typeKeys = Object.keys(STATE.filters.types).filter(k => STATE.filters.types[k]);
+      if(typeKeys.length > 0 && !typeKeys.includes(h.type)) return false;
+      // Areas
+      const areaKeys = Object.keys(STATE.filters.areas).filter(k => STATE.filters.areas[k]);
+      if(areaKeys.length > 0 && !areaKeys.includes(h.areaId)) return false;
+      // Amenities (all selected must be present)
+      const amenKeys = Object.keys(STATE.filters.amenities).filter(k => STATE.filters.amenities[k]);
+      if(amenKeys.length > 0 && !amenKeys.every(k => h.amenities.includes(k))) return false;
+      // Deals
+      const dealKeys = Object.keys(STATE.filters.deals).filter(k => STATE.filters.deals[k]);
+      if(dealKeys.length > 0 && !dealKeys.every(k => (h.deals||[]).includes(k))) return false;
+      // Chain
+      const chainKeys = Object.keys(STATE.filters.chains).filter(k => STATE.filters.chains[k]);
+      if(chainKeys.length > 0 && !chainKeys.includes(h.chain)) return false;
+      // Distance
+      if(STATE.filters.maxDistance !== null && h.distance > STATE.filters.maxDistance) return false;
+
+      return true;
+    }).sort((a,b) => {
+      switch(STATE.sort){
+        case 'price':      return a.price - b.price;
+        case 'priceDesc':  return b.price - a.price;
+        case 'rating':     return b.rating - a.rating;
+        case 'reviews':    return b.reviews - a.reviews;
+        case 'distance':   return a.distance - b.distance;
+        default:           return (b.rating * Math.log10(b.reviews+1)) - (a.rating * Math.log10(a.reviews+1));
+      }
+    });
+  }
+
+  function activeChipsHTML(){
+    const chips = [];
+    if(STATE.filters.minRating > 0){
+      chips.push(`<span class="active-chip">평점 ${STATE.filters.minRating}+ <button onclick="setRating(0)">×</button></span>`);
+    }
+    if(STATE.filters.maxDistance !== null){
+      chips.push(`<span class="active-chip">도심 ${STATE.filters.maxDistance}km 이내 <button onclick="setMaxDistance(null)">×</button></span>`);
+    }
+    Object.keys(STATE.filters.deals).filter(k => STATE.filters.deals[k]).forEach(k => {
+      chips.push(`<span class="active-chip">${DEAL_MAP[k]?.label||k} <button onclick="toggleFilter('deals','${k}')">×</button></span>`);
+    });
+    Object.keys(STATE.filters.types).filter(k => STATE.filters.types[k]).forEach(k => {
+      const o = TYPE_OPTS.find(x => x.v === k);
+      chips.push(`<span class="active-chip">${o?.label||k} <button onclick="toggleFilter('types','${k}')">×</button></span>`);
+    });
+    Object.keys(STATE.filters.areas).filter(k => STATE.filters.areas[k]).forEach(k => {
+      chips.push(`<span class="active-chip">${k} <button onclick="toggleFilter('areas','${k}')">×</button></span>`);
+    });
+    Object.keys(STATE.filters.amenities).filter(k => STATE.filters.amenities[k]).forEach(k => {
+      chips.push(`<span class="active-chip">${AMENITY_MAP[k]?.label||k} <button onclick="toggleFilter('amenities','${k}')">×</button></span>`);
+    });
+    if(STATE.filters.priceMin > 0 || STATE.filters.priceMax < 1000000){
+      chips.push(`<span class="active-chip">${krw(STATE.filters.priceMin)} - ${STATE.filters.priceMax>=1000000?'100만원+':krw(STATE.filters.priceMax)} <button onclick="clearPriceFilter()">×</button></span>`);
+    }
+    return chips.join('');
+  }
+  window.clearPriceFilter = () => {
+    STATE.filters.priceMin = 0; STATE.filters.priceMax = 1000000;
+    document.getElementById('priceMinInput').value = 0;
+    document.getElementById('priceMaxInput').value = 1000000;
+    updatePriceThumbs(); render();
+  };
+
+  /* =============================================================
+     HOTEL CARDS RENDER
+     ============================================================= */
+  const galleryIndexes = {};
+
+  function render(){
+    const results = applyFilters();
+    const nights = diffNights(STATE.checkin, STATE.checkout);
+    document.getElementById('resCount').textContent = results.length;
+    document.getElementById('activeChips').innerHTML = activeChipsHTML();
+
+    const list = document.getElementById('hotelList');
+    if(results.length === 0){
+      list.innerHTML = `<div class="empty-results">
+        <h3>조건에 맞는 숙소가 없어요</h3>
+        <p style="margin:0;font-size:13px;">필터를 완화하거나 다른 날짜를 시도해보세요</p>
+        <button onclick="resetFilters()" style="margin-top:14px;padding:10px 20px;background:var(--primary);color:#fff;border-radius:10px;font-weight:800;font-size:13px;">필터 초기화</button>
       </div>`;
+      return;
+    }
+
+    list.innerHTML = results.map(h => {
+      if(!(h.id in galleryIndexes)) galleryIndexes[h.id] = 0;
+      const totalPrice = h.price * Math.max(1, nights);
+      const discountPct = Math.round((1 - h.price/h.oldPrice) * 100);
+      const wished = OMT.State.isWished(h.id);
+
+      const topBadges = [];
+      if(h.deals?.includes('original'))  topBadges.push(`<span class="hc-topbadge orig">단독 특가</span>`);
+      else if(discountPct > 15)          topBadges.push(`<span class="hc-topbadge deal">${discountPct}% OFF</span>`);
+      if(h.memberPrice)                  topBadges.push(`<span class="hc-topbadge member">멤버가</span>`);
+
+      return `
+        <article class="hotel-card" data-id="${h.id}">
+          <div class="hc-gallery" data-gallery="${h.id}">
+            ${h.images.map((img,i) => `<div class="hc-img ${i===0?'active':''}" data-i="${i}" style="background-image:url('${img}')"></div>`).join('')}
+            <div class="hc-topbadges">${topBadges.join('')}</div>
+            <button class="hc-fav ${wished?'active':''}" type="button" onclick="toggleFav(event,'${h.id}')" aria-label="찜하기">${wished?'❤️':'🤍'}</button>
+            ${h.images.length > 1 ? `
+              <button class="hc-nav prev" type="button" onclick="galleryNav(event,'${h.id}',-1)">‹</button>
+              <button class="hc-nav next" type="button" onclick="galleryNav(event,'${h.id}',1)">›</button>
+              <div class="hc-dots">${h.images.map((_,i)=>`<span class="${i===0?'active':''}" data-i="${i}"></span>`).join('')}</div>
+            ` : ''}
+          </div>
+          <div class="hc-body">
+            <div class="hc-type">${h.typeLabel} · ${h.chain}</div>
+            <div class="hc-name">${h.name}</div>
+            <div class="hc-english">${h.englishName}</div>
+            <div class="hc-stars">${'★'.repeat(h.stars)}</div>
+            <div class="hc-location">${h.area}<span class="distance">· 도심 ${h.distance}km</span></div>
+            <div class="hc-score-row">
+              <span class="hc-score">${h.rating}</span>
+              <span class="hc-review"><strong>${h.rating>=9?'매우 좋음':h.rating>=8?'좋음':'괜찮음'}</strong><small>리뷰 ${h.reviews.toLocaleString('ko-KR')}개</small></span>
+            </div>
+            <div class="hc-amenities">
+              ${h.amenities.slice(0,6).map(k => {
+                const a = AMENITY_MAP[k]; if(!a) return '';
+                const highlight = ['breakfast','pool','spa','station'].includes(k);
+                return `<span class="hc-amenity ${highlight?'highlight':''}">${a.icon} ${a.label}</span>`;
+              }).join('')}
+              ${h.amenities.length > 6 ? `<span class="hc-amenity">+${h.amenities.length-6}</span>` : ''}
+            </div>
+            <div class="hc-badges">
+              ${(h.deals||[]).map(d => {
+                const dm = DEAL_MAP[d]; if(!dm) return '';
+                return `<span class="hc-badge ${dm.color}">${dm.label}</span>`;
+              }).join('')}
+            </div>
+          </div>
+          <div class="hc-right">
+            <div class="hc-price-box">
+              <div class="hc-price-lb">1박 기준 (세금·수수료 포함)</div>
+              <div class="hc-price-old">${krw(h.oldPrice)}</div>
+              <div class="hc-price">${krw(h.price)}<small>~</small></div>
+              ${nights > 0 ? `<div class="hc-total">${nights}박 총 ${krw(totalPrice)}</div>` : ''}
+              ${h.memberPrice ? `<div class="hc-member-price">⭐ 멤버가 ${krw(h.memberPrice)}</div>` : ''}
+            </div>
+            <button class="hc-btn" onclick="selectHotel('${h.id}')">선택 →</button>
+            <div class="hc-trust-line">${h.deals?.includes('free-cancel')?'✓ 무료 취소':''}</div>
+          </div>
+        </article>
+      `;
     }).join('');
-    // Amenities
-    const amens = ['조식 포함','수영장','스파','피트니스','와이파이','역 직결'];
-    document.getElementById('filterAmen').innerHTML = amens.map(a => `
-      <div class="f-row" onclick="toggleAmen('${a}')">
-        <span class="f-check ${STATE.amenities[a]?'checked':''}"></span>${a}
-      </div>
-    `).join('');
   }
-  function toggleStars(n){ STATE.stars[n] = !STATE.stars[n]; renderFilterUI(); render(); }
-  function toggleArea(a){ STATE.areas[a] = !STATE.areas[a]; renderFilterUI(); render(); }
-  function toggleAmen(a){ STATE.amenities[a] = !STATE.amenities[a]; renderFilterUI(); render(); }
-  function resetFilters(){
-    STATE.priceMin=0;STATE.priceMax=1000000;
-    STATE.stars={5:true,4:true,3:true};
-    Object.keys(STATE.areas).forEach(a => STATE.areas[a]=true);
-    STATE.amenities={};
-    document.getElementById('priceMin').value=0;
-    document.getElementById('priceMax').value=1000000;
-    renderFilterUI();render();
-  }
+
+  window.galleryNav = (e, hid, dir) => {
+    e.stopPropagation(); e.preventDefault();
+    const h = HOTELS.find(x => x.id === hid);
+    if(!h) return;
+    const idx = galleryIndexes[hid] || 0;
+    const next = (idx + dir + h.images.length) % h.images.length;
+    galleryIndexes[hid] = next;
+    const card = document.querySelector(`[data-gallery="${hid}"]`);
+    card.querySelectorAll('.hc-img').forEach((el, i) => el.classList.toggle('active', i === next));
+    card.querySelectorAll('.hc-dots span').forEach((el, i) => el.classList.toggle('active', i === next));
+  };
+  window.toggleFav = (e, hid) => {
+    e.stopPropagation(); e.preventDefault();
+    // Use product-like key for wishlist (hotels aren't products, but we can wish them)
+    OMT.State.toggleWishlist(hid);
+    render();
+  };
+  window.selectHotel = (hid) => {
+    const h = HOTELS.find(x => x.id === hid);
+    const matchedProduct = (OMT.DATA?.PRODUCTS || []).find(p => p.hotel === hid);
+    if(matchedProduct){
+      location.href = 'product.html?id=' + matchedProduct.id;
+      return;
+    }
+    // Fallback: add to cart + redirect
+    OMT.State.addToCart({
+      productId: null, type:'호텔', orig: h.deals?.includes('original'),
+      img: h.images[0], name: h.name,
+      sub: `${h.area} · ${'★'.repeat(h.stars)} · ${diffNights(STATE.checkin,STATE.checkout)||1}박`,
+      dates: `${STATE.checkin.toISOString().slice(0,10)} - ${STATE.checkout.toISOString().slice(0,10)}`,
+      pax: `${STATE.rooms.reduce((s,r)=>s+r.adults,0)}명`,
+      paxCount: STATE.rooms.reduce((s,r)=>s+r.adults,0),
+      price: h.price * Math.max(1, diffNights(STATE.checkin,STATE.checkout))
+    });
+    location.href = 'cart.html';
+  };
+
+  /* Sort tabs */
   document.querySelectorAll('.sort-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
@@ -378,32 +1593,32 @@
       render();
     });
   });
-  ['priceMin','priceMax'].forEach(id => {
-    document.getElementById(id).addEventListener('input', (e) => {
-      STATE[id] = +e.target.value || 0;
-      render();
-    });
-  });
 
-  function selectHotel(id){
-    const h = HOTELS.find(x => x.id === id);
-    // Find matching product that uses this hotel
-    const matchedProduct = OMT.DATA.PRODUCTS.find(p => p.hotel === id) ||
-                           OMT.DATA.PRODUCTS.find(p => p.city === h.city);
-    if(matchedProduct){
-      location.href = 'product.html?id=' + matchedProduct.id;
-      return;
-    }
-    // Fallback: add hotel to cart
-    OMT.State.addToCart({
-      productId: null, type:'호텔', orig:false,
-      img: h.img, name: h.name, sub:`${h.area} · ${'★'.repeat(h.stars)} · 3박`,
-      dates:'2026.05.10 - 2026.05.13', pax:'성인 2명', paxCount:2, price: h.price * 3
-    });
-    alert(h.name + ' 3박 장바구니에 담았어요');
-    location.href = 'cart.html';
+  function runSearch(){
+    closePopups();
+    render();
   }
 
+  /* =============================================================
+     INIT
+     ============================================================= */
+  // URL params (from flights.html or index)
+  const url = new URLSearchParams(location.search);
+  if(url.get('c')){
+    const c = url.get('c');
+    const d = DESTINATIONS.find(x => x.type==='country' && x.id === c);
+    if(d) STATE.destination = d;
+  }
+  if(url.get('city')){
+    const d = DESTINATIONS.find(x => x.type==='city' && x.id === url.get('city'));
+    if(d) STATE.destination = d;
+  }
+
+  updateDestLabel();
+  updateDateLabels();
+  updateGuestsLabel();
+  updatePriceThumbs();
+  attachPriceDrag();
   renderFilterUI();
   render();
   </script>
