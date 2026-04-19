@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>마이페이지 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981; --danger:#EF4444;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --header-h:64px; --max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+
+    /* Profile hero */
+    .profile-hero{
+      background:linear-gradient(135deg,#1A1A1A 0%,#2C1810 60%,var(--primary) 100%);
+      color:#fff;padding:40px 24px 60px;position:relative;overflow:hidden;
+    }
+    .profile-hero::before{
+      content:"";position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;
+      background:radial-gradient(circle,rgba(255,210,63,.3),transparent 70%);
+    }
+    .profile-wrap{max-width:var(--max-w);margin:0 auto;display:flex;align-items:center;gap:20px;position:relative;flex-wrap:wrap;}
+    .profile-av{
+      width:80px;height:80px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:grid;place-items:center;font-weight:900;font-size:34px;color:#fff;
+      border:4px solid rgba(255,255,255,.2);
+      flex-shrink:0;
+    }
+    .profile-info{flex:1;min-width:200px;}
+    .profile-greet{font-size:13px;opacity:.8;margin-bottom:4px;}
+    .profile-name{font-size:24px;font-weight:900;letter-spacing:-0.02em;margin-bottom:4px;}
+    .profile-grade{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:var(--accent);color:#1A1A1A;border-radius:999px;font-size:12px;font-weight:900;}
+    .profile-stats{display:flex;gap:24px;margin-top:16px;}
+    .ps{display:flex;flex-direction:column;}
+    .ps-val{font-size:20px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+    .ps-lb{font-size:11px;opacity:.75;margin-top:2px;}
+
+    /* Layout */
+    .my-layout{
+      display:grid;grid-template-columns:240px 1fr;gap:24px;
+      max-width:var(--max-w);margin:0 auto;padding:20px 24px 80px;
+      align-items:flex-start;margin-top:-30px;
+    }
+
+    /* Side nav */
+    .side-nav{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:14px;position:sticky;top:calc(var(--header-h) + 16px);
+    }
+    .sn-item{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 14px;border-radius:10px;
+      font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer;
+      transition:all .15s;
+    }
+    .sn-item:hover{background:var(--bg-soft);color:var(--ink);}
+    .sn-item.active{background:var(--primary-soft);color:var(--primary);}
+    .sn-item .ic{font-size:16px;}
+    .sn-item .badge{margin-left:auto;font-size:10px;padding:2px 7px;background:var(--primary);color:#fff;border-radius:999px;font-weight:900;}
+    .sn-divider{height:1px;background:var(--line);margin:8px 4px;}
+
+    /* Main */
+    .my-main{min-width:0;}
+    .panel-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+    .panel-title{margin:0;font-size:18px;font-weight:900;letter-spacing:-0.02em;}
+    .panel-sub{font-size:13px;color:var(--ink-2);}
+
+    /* Tabs */
+    .sub-tabs{display:flex;gap:4px;background:var(--bg-soft);border-radius:10px;padding:4px;}
+    .sub-tab{padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .sub-tab.active{background:#fff;color:var(--ink);}
+
+    /* Booking list */
+    .book-list{display:flex;flex-direction:column;gap:12px;}
+    .book-card{
+      border:1px solid var(--line);border-radius:var(--radius);padding:16px;
+      display:grid;grid-template-columns:100px 1fr auto;gap:14px;align-items:center;
+      transition:border-color .15s;
+    }
+    .book-card:hover{border-color:var(--primary);}
+    .bc-thumb{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;background-color:#eee;}
+    .bc-status{
+      display:inline-block;padding:3px 8px;border-radius:5px;
+      font-size:10px;font-weight:800;letter-spacing:.04em;margin-bottom:4px;
+    }
+    .bc-status.confirmed{background:#E8F5E9;color:var(--success);}
+    .bc-status.pending{background:#FFF3E0;color:#F57C00;}
+    .bc-status.completed{background:var(--bg-soft);color:var(--ink-3);}
+    .bc-status.cancelled{background:#FEE;color:var(--danger);}
+    .bc-name{font-size:14px;font-weight:800;}
+    .bc-meta{font-size:12px;color:var(--ink-3);margin-top:3px;}
+    .bc-num{font-size:11px;color:var(--ink-3);margin-top:4px;font-family:'Courier New',monospace;}
+    .bc-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+    .bc-price{font-size:15px;font-weight:900;color:var(--primary);}
+    .bc-action{padding:7px 14px;border-radius:8px;background:var(--ink);color:#fff;font-weight:800;font-size:11px;}
+    .bc-action:hover{background:var(--primary);}
+
+    /* Coupons */
+    .coupon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .coupon{
+      display:grid;grid-template-columns:auto 1fr;gap:14px;
+      padding:16px;border:1.5px dashed var(--primary);border-radius:12px;
+      background:linear-gradient(135deg,#fff,var(--primary-soft));
+      position:relative;overflow:hidden;
+    }
+    .coupon::before{
+      content:"";position:absolute;top:50%;left:calc(100% - 50px);transform:translate(-50%,-50%);
+      width:24px;height:24px;border-radius:50%;background:var(--bg-soft);
+    }
+    .cp-amount{
+      font-size:28px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;
+      padding-right:14px;border-right:1.5px dashed var(--primary);
+      display:flex;flex-direction:column;justify-content:center;
+    }
+    .cp-amount small{font-size:11px;font-weight:700;color:var(--ink-3);}
+    .cp-info .title{font-weight:800;font-size:13px;margin-bottom:3px;}
+    .cp-info .terms{font-size:11px;color:var(--ink-2);}
+    .cp-info .exp{font-size:11px;color:var(--danger);margin-top:5px;}
+
+    /* Wishlist */
+    .wish-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .wish-card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .15s;position:relative;}
+    .wish-card:hover{transform:translateY(-2px);}
+    .wish-thumb{aspect-ratio:4/3;background-size:cover;background-position:center;background-color:#eee;}
+    .wish-heart{
+      position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;
+      background:rgba(0,0,0,.5);color:#fff;display:grid;place-items:center;backdrop-filter:blur(8px);
+    }
+    .wish-body{padding:12px;}
+    .wish-name{font-size:13px;font-weight:800;line-height:1.35;}
+    .wish-price{font-size:15px;font-weight:900;color:var(--primary);margin-top:4px;letter-spacing:-0.02em;}
+
+    /* Profile form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-field{display:flex;flex-direction:column;gap:5px;}
+    .form-field label{font-size:12px;font-weight:700;color:var(--ink-2);}
+    .form-field input, .form-field select{
+      padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;
+      font-size:14px;outline:none;font-weight:700;
+    }
+    .form-field input:focus, .form-field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,53,.12);}
+    .save-btn{padding:12px 24px;border-radius:10px;background:var(--primary);color:#fff;font-weight:900;font-size:13px;margin-top:14px;}
+    .save-btn:hover{background:var(--primary-dark);}
+
+    @media (max-width:1024px){
+      .my-layout{grid-template-columns:1fr;margin-top:-20px;}
+      .side-nav{position:static;display:flex;overflow-x:auto;padding:10px;}
+      .side-nav::-webkit-scrollbar{display:none;}
+      .sn-item{white-space:nowrap;}
+      .sn-divider{display:none;}
+      .wish-grid{grid-template-columns:1fr 1fr;}
+      .coupon-grid{grid-template-columns:1fr;}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .profile-hero{padding:30px 18px 50px;}
+      .profile-stats{gap:16px;}
+      .panel-card{padding:18px;border-radius:var(--radius);}
+      .book-card{grid-template-columns:72px 1fr;}
+      .bc-right{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;flex-direction:row;justify-content:space-between;}
+      .wish-grid{grid-template-columns:1fr;}
+      .form-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <div class="header-actions">
+        <a href="cart.html" class="btn-ghost">🛒 장바구니</a>
+        <a href="index.html" class="btn-ghost">← 홈</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profile Hero -->
+  <section class="profile-hero">
+    <div class="profile-wrap">
+      <div class="profile-av">홍</div>
+      <div class="profile-info">
+        <div class="profile-greet">안녕하세요,</div>
+        <div class="profile-name">홍길동 님</div>
+        <span class="profile-grade">⭐ GOLD 등급 · 다음 VIP까지 2회 여행</span>
+        <div class="profile-stats">
+          <div class="ps"><span class="ps-val">12</span><span class="ps-lb">총 여행 횟수</span></div>
+          <div class="ps"><span class="ps-val">3</span><span class="ps-lb">예약 대기</span></div>
+          <div class="ps"><span class="ps-val">8</span><span class="ps-lb">찜한 상품</span></div>
+          <div class="ps"><span class="ps-val">48,500P</span><span class="ps-lb">사용 가능 포인트</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main id="omt-main" class="my-layout">
+
+    <!-- Side nav -->
+    <aside class="side-nav" id="sideNav">
+      <div class="sn-item active" data-tab="bookings"><span class="ic">🎫</span><span>예약 내역</span><span class="badge">3</span></div>
+      <div class="sn-item" data-tab="wishlist"><span class="ic">❤️</span><span>찜한 상품</span><span class="badge">8</span></div>
+      <div class="sn-item" data-tab="coupons"><span class="ic">🎟️</span><span>쿠폰함</span><span class="badge">5</span></div>
+      <div class="sn-item" data-tab="points"><span class="ic">💰</span><span>포인트</span></div>
+      <div class="sn-item" data-tab="reviews"><span class="ic">✏️</span><span>작성한 리뷰</span></div>
+      <div class="sn-divider"></div>
+      <div class="sn-item" data-tab="profile"><span class="ic">👤</span><span>내 정보 수정</span></div>
+      <div class="sn-item" data-tab="travelers"><span class="ic">👥</span><span>여행자 관리</span></div>
+      <div class="sn-item" data-tab="notifications"><span class="ic">🔔</span><span>알림 설정</span></div>
+      <div class="sn-divider"></div>
+      <div class="sn-item" onclick="alert('로그아웃 (프로토타입)')"><span class="ic">🚪</span><span>로그아웃</span></div>
+    </aside>
+
+    <section class="my-main">
+
+      <!-- Bookings -->
+      <div class="tab-panel" data-panel="bookings">
+        <div class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">예약 내역</h2>
+              <div class="panel-sub">총 12건 · 진행 중 3건</div>
+            </div>
+            <div class="sub-tabs">
+              <button class="sub-tab active">전체</button>
+              <button class="sub-tab">예약 확정</button>
+              <button class="sub-tab">예약 대기</button>
+              <button class="sub-tab">여행 완료</button>
+              <button class="sub-tab">취소</button>
+            </div>
+          </div>
+          <div class="book-list">
+            <div class="book-card">
+              <div class="bc-thumb" style="background-image:url('https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <span class="bc-status confirmed">● 예약 확정</span>
+                <div class="bc-name">[단독] 오사카 3박4일 도톤보리 프리미엄 패키지</div>
+                <div class="bc-meta">인천 → 오사카 · 2026.05.10 - 05.13 · 성인 2명</div>
+                <div class="bc-num">예약번호: OMT-K3X9LP2M</div>
+              </div>
+              <div class="bc-right">
+                <div class="bc-price">1,796,000원</div>
+                <button class="bc-action" onclick="location.href='complete.html'">예약 확인서</button>
+              </div>
+            </div>
+            <div class="book-card">
+              <div class="bc-thumb" style="background-image:url('https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <span class="bc-status pending">● 입금 대기</span>
+                <div class="bc-name">다낭 풀빌라 4박5일 올인클루시브</div>
+                <div class="bc-meta">인천 → 다낭 · 2026.06.07 - 06.12 · 성인 2명</div>
+                <div class="bc-num">예약번호: OMT-J7N2QW4K · 입금 마감 2시간 남음</div>
+              </div>
+              <div class="bc-right">
+                <div class="bc-price">1,290,000원</div>
+                <button class="bc-action">계좌 안내</button>
+              </div>
+            </div>
+            <div class="book-card">
+              <div class="bc-thumb" style="background-image:url('https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <span class="bc-status confirmed">● 예약 확정</span>
+                <div class="bc-name">방콕+파타야 5박6일 콤비 패키지</div>
+                <div class="bc-meta">인천 → 방콕 · 2026.04.29 - 05.04 · 성인 2명</div>
+                <div class="bc-num">예약번호: OMT-M5P8RT3H · 출발 D-10</div>
+              </div>
+              <div class="bc-right">
+                <div class="bc-price">1,780,000원</div>
+                <button class="bc-action">바우처 보기</button>
+              </div>
+            </div>
+            <div class="book-card" style="opacity:.65;">
+              <div class="bc-thumb" style="background-image:url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <span class="bc-status completed">● 여행 완료</span>
+                <div class="bc-name">도쿄 3박4일 신주쿠 패키지</div>
+                <div class="bc-meta">인천 → 도쿄 · 2026.02.15 - 02.18</div>
+                <div class="bc-num">예약번호: OMT-B1D4FG7C</div>
+              </div>
+              <div class="bc-right">
+                <div class="bc-price">1,178,000원</div>
+                <button class="bc-action">리뷰 쓰기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wishlist -->
+      <div class="tab-panel" data-panel="wishlist" hidden>
+        <div class="panel-card">
+          <div class="panel-head">
+            <h2 class="panel-title">❤️ 찜한 상품</h2>
+            <div class="panel-sub">총 8개</div>
+          </div>
+          <div class="wish-grid">
+            <a class="wish-card" href="product.html">
+              <div class="wish-thumb" style="background-image:url('https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=600&q=80')"></div>
+              <span class="wish-heart">❤️</span>
+              <div class="wish-body">
+                <div class="wish-name">세부 샹그릴라 4박5일</div>
+                <div class="wish-price">1,580,000원~</div>
+              </div>
+            </a>
+            <a class="wish-card" href="product.html">
+              <div class="wish-thumb" style="background-image:url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80')"></div>
+              <span class="wish-heart">❤️</span>
+              <div class="wish-body">
+                <div class="wish-name">방콕 시암 CC 골프 4박5일</div>
+                <div class="wish-price">798,000원~</div>
+              </div>
+            </a>
+            <a class="wish-card" href="product.html">
+              <div class="wish-thumb" style="background-image:url('https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=600&q=80')"></div>
+              <span class="wish-heart">❤️</span>
+              <div class="wish-body">
+                <div class="wish-name">교토 료칸 허니문 3박4일</div>
+                <div class="wish-price">1,490,000원~</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupons -->
+      <div class="tab-panel" data-panel="coupons" hidden>
+        <div class="panel-card">
+          <div class="panel-head">
+            <h2 class="panel-title">🎟️ 쿠폰함</h2>
+            <div class="panel-sub">사용 가능 5개</div>
+          </div>
+          <div class="coupon-grid">
+            <div class="coupon">
+              <div class="cp-amount">25,000<small>원</small></div>
+              <div class="cp-info">
+                <div class="title">봄 시즌 특가 쿠폰</div>
+                <div class="terms">전체 상품 · 20만원 이상 사용 가능</div>
+                <div class="exp">~ 2026.05.31 만료</div>
+              </div>
+            </div>
+            <div class="coupon">
+              <div class="cp-amount">10%<small>할인</small></div>
+              <div class="cp-info">
+                <div class="title">일본 여행 전용 쿠폰</div>
+                <div class="terms">일본 국가 상품 한정 · 최대 5만원</div>
+                <div class="exp">~ 2026.06.30 만료</div>
+              </div>
+            </div>
+            <div class="coupon">
+              <div class="cp-amount">50,000<small>원</small></div>
+              <div class="cp-info">
+                <div class="title">GOLD 회원 전용 쿠폰</div>
+                <div class="terms">오리지널 상품 한정 · 100만원 이상</div>
+                <div class="exp">~ 2026.12.31 만료</div>
+              </div>
+            </div>
+            <div class="coupon">
+              <div class="cp-amount">5%<small>할인</small></div>
+              <div class="cp-info">
+                <div class="title">크리에이터 피드 쿠폰</div>
+                <div class="terms">피드 내 상품 결제 시</div>
+                <div class="exp">~ 2026.04.30 만료</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Points -->
+      <div class="tab-panel" data-panel="points" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">💰 포인트</h2></div>
+          <div style="padding:20px;background:linear-gradient(135deg,var(--ink),#2C2C2C);color:#fff;border-radius:14px;margin-bottom:16px;">
+            <div style="font-size:12px;opacity:.7;margin-bottom:4px;">사용 가능 포인트</div>
+            <div style="font-size:32px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;">48,500 P</div>
+            <div style="font-size:11px;opacity:.6;margin-top:4px;">적립 예정 2,350P · 이달 만료 예정 1,200P</div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead style="background:var(--bg-soft);">
+              <tr>
+                <th style="padding:10px;text-align:left;font-weight:800;">날짜</th>
+                <th style="padding:10px;text-align:left;font-weight:800;">내역</th>
+                <th style="padding:10px;text-align:right;font-weight:800;">변동</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">2026.04.15</td><td style="padding:10px;">오사카 패키지 예약 적립</td><td style="padding:10px;text-align:right;color:var(--success);font-weight:800;">+ 17,960P</td></tr>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">2026.04.10</td><td style="padding:10px;">다낭 패키지 결제 사용</td><td style="padding:10px;text-align:right;color:var(--danger);font-weight:800;">- 10,000P</td></tr>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">2026.03.20</td><td style="padding:10px;">리뷰 작성 보너스</td><td style="padding:10px;text-align:right;color:var(--success);font-weight:800;">+ 5,000P</td></tr>
+              <tr><td style="padding:10px;">2026.02.28</td><td style="padding:10px;">도쿄 패키지 적립</td><td style="padding:10px;text-align:right;color:var(--success);font-weight:800;">+ 11,780P</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="tab-panel" data-panel="reviews" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">✏️ 작성한 리뷰</h2><div class="panel-sub">총 5개 · 리뷰 작성 가능 2개</div></div>
+          <div style="padding:20px;background:var(--primary-soft);border-radius:12px;margin-bottom:14px;font-size:13px;">
+            💡 리뷰 작성 시 <strong style="color:var(--primary);">+5,000P</strong>를 적립해드려요!
+          </div>
+          <div class="book-list">
+            <div class="book-card">
+              <div class="bc-thumb" style="background-image:url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <div style="color:var(--accent);margin-bottom:4px;">★★★★★</div>
+                <div class="bc-name">도쿄 3박4일 신주쿠 패키지</div>
+                <div class="bc-meta" style="font-style:italic;color:var(--ink-2);margin-top:4px;">"처음 가본 도쿄인데 호텔 위치가 정말 좋았어요..."</div>
+                <div class="bc-num">2026.02.20 작성 · 추천 38</div>
+              </div>
+              <div class="bc-right"><button class="bc-action">수정</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="tab-panel" data-panel="profile" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">👤 내 정보 수정</h2></div>
+          <div class="form-grid">
+            <div class="form-field"><label>한글 이름</label><input type="text" value="홍길동" /></div>
+            <div class="form-field"><label>영문 이름</label><input type="text" value="HONG GILDONG" /></div>
+            <div class="form-field"><label>이메일</label><input type="email" value="gildong@ohmytrip.kr" /></div>
+            <div class="form-field"><label>연락처</label><input type="tel" value="010-1234-5678" /></div>
+            <div class="form-field"><label>생년월일</label><input type="text" value="1990-03-15" /></div>
+            <div class="form-field"><label>성별</label><select><option>남성</option><option>여성</option><option>선택 안 함</option></select></div>
+          </div>
+          <button class="save-btn" onclick="alert('저장되었습니다 (프로토타입)')">정보 저장하기</button>
+        </div>
+      </div>
+
+      <!-- Travelers -->
+      <div class="tab-panel" data-panel="travelers" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">👥 여행자 관리</h2><div class="panel-sub">등록 2명 · 빠른 예약을 위해 자주 쓰는 여행자 정보를 저장하세요</div></div>
+          <div class="book-list">
+            <div class="book-card" style="grid-template-columns:1fr auto;">
+              <div>
+                <div class="bc-name">홍길동 (본인 · 대표)</div>
+                <div class="bc-meta">HONG GILDONG · 1990-03-15 · 010-1234-5678</div>
+              </div>
+              <div class="bc-right"><button class="bc-action">수정</button></div>
+            </div>
+            <div class="book-card" style="grid-template-columns:1fr auto;">
+              <div>
+                <div class="bc-name">홍길순 (가족)</div>
+                <div class="bc-meta">HONG GILSOON · 1992-07-22 · 010-2345-6789</div>
+              </div>
+              <div class="bc-right"><button class="bc-action">수정</button></div>
+            </div>
+          </div>
+          <button class="save-btn" style="background:var(--bg-soft);color:var(--ink);margin-top:14px;">+ 여행자 추가</button>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="tab-panel" data-panel="notifications" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">🔔 알림 설정</h2></div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            ${['카카오톡 알림톡','이메일 알림','예약 확정/변경 알림','특가/프로모션 알림','크리에이터 업데이트 알림'].map(l => `
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">${l}</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:3px;">예약 상태 변경 및 출발 전 안내</div>
+                </div>
+                <label class="switch" style="position:relative;width:44px;height:24px;"><input type="checkbox" checked style="opacity:0;width:0;height:0;" onclick="this.nextElementSibling.style.background=this.checked?'var(--primary)':'var(--line)';this.nextElementSibling.firstElementChild.style.transform=this.checked?'translateX(20px)':'translateX(0)';" /><span style="position:absolute;inset:0;background:var(--primary);border-radius:999px;transition:background .2s;"><span style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(20px);display:block;"></span></span></label>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+  // Tab switching
+  document.querySelectorAll('.sn-item[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sn-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-panel').forEach(p => p.hidden = p.dataset.panel !== tab);
+    });
+  });
+
+  // TODO: API 연동 - GET /api/users/me (프로필 정보)
+  // TODO: API 연동 - GET /api/bookings?userId=...
+  // TODO: API 연동 - GET /api/wishlist?userId=...
+  // TODO: API 연동 - GET /api/coupons?userId=...
+  // TODO: API 연동 - GET /api/points/history?userId=...
+  </script>
+</body>
+</html>

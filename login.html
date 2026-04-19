@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로그인 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981; --danger:#EF4444;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;}
+    body{
+      font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);line-height:1.55;
+      min-height:100%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,107,53,.08), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(30,136,229,.08), transparent 40%),
+        var(--bg-soft);
+      display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input{font-family:inherit;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    /* Card */
+    .auth-card{
+      width:100%;max-width:440px;
+      background:#fff;border:1px solid var(--line);border-radius:20px;
+      padding:36px 32px;
+      box-shadow:0 20px 60px rgba(0,0,0,.08);
+    }
+
+    .brand{
+      text-align:center;margin-bottom:28px;
+    }
+    .brand-mark{
+      width:56px;height:56px;border-radius:16px;
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);
+      color:#fff;display:grid;place-items:center;font-weight:900;font-size:28px;margin:0 auto 12px;
+      box-shadow:0 10px 24px rgba(255,107,53,.4);
+    }
+    .brand-mark::after{content:"O";}
+    .brand h1{margin:0 0 4px;font-size:24px;font-weight:900;letter-spacing:-0.02em;}
+    .brand p{margin:0;color:var(--ink-2);font-size:13px;}
+
+    /* Mode tabs */
+    .mode-tabs{
+      display:flex;gap:4px;background:var(--bg-soft);border-radius:10px;padding:4px;margin-bottom:22px;
+    }
+    .mode-tab{
+      flex:1;padding:10px;border-radius:8px;font-weight:800;font-size:13px;color:var(--ink-3);
+      transition:all .15s;
+    }
+    .mode-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+    /* Form */
+    .form{display:flex;flex-direction:column;gap:12px;}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    .field label{font-size:12px;font-weight:700;color:var(--ink-2);}
+    .field input{
+      padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
+      font-size:14px;outline:none;transition:border-color .15s, box-shadow .15s;
+    }
+    .field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,53,.12);}
+    .field .hint{font-size:11px;color:var(--ink-3);margin-top:3px;}
+    .field .error{font-size:11px;color:var(--danger);margin-top:3px;display:none;}
+    .field.has-error input{border-color:var(--danger);}
+    .field.has-error .error{display:block;}
+
+    .pw-row{position:relative;}
+    .pw-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      width:24px;height:24px;display:grid;place-items:center;color:var(--ink-3);
+    }
+
+    .actions-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px;font-size:12px;}
+    .remember{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink-2);font-weight:600;}
+    .check{
+      width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px;
+      background:#fff;position:relative;
+    }
+    .check.checked{background:var(--primary);border-color:var(--primary);}
+    .check.checked::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+    .forgot{color:var(--primary);font-weight:700;}
+
+    .submit-btn{
+      padding:14px;border-radius:10px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:14px;
+      box-shadow:0 6px 20px rgba(255,107,53,.3);
+      transition:all .15s;
+    }
+    .submit-btn:hover{background:var(--primary-dark);transform:translateY(-1px);}
+    .submit-btn:disabled{background:var(--line);color:var(--ink-3);box-shadow:none;cursor:not-allowed;transform:none;}
+
+    /* Divider */
+    .divider{
+      display:flex;align-items:center;gap:14px;margin:22px 0 16px;
+      font-size:11px;color:var(--ink-3);font-weight:700;
+    }
+    .divider::before, .divider::after{content:"";flex:1;height:1px;background:var(--line);}
+
+    /* Social */
+    .social-grid{display:flex;flex-direction:column;gap:8px;}
+    .social-btn{
+      padding:12px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      font-weight:800;font-size:13px;
+      transition:all .15s;
+    }
+    .social-btn.kakao{background:#FEE500;color:#3C1E1E;}
+    .social-btn.naver{background:#03C75A;color:#fff;}
+    .social-btn.google{background:#fff;color:var(--ink);border:1.5px solid var(--line);}
+    .social-btn.apple{background:#000;color:#fff;}
+    .social-btn:hover{transform:translateY(-1px);}
+    .social-btn .logo{
+      width:22px;height:22px;border-radius:5px;display:grid;place-items:center;
+      font-weight:900;font-size:12px;
+    }
+    .social-btn.kakao .logo{background:#3C1E1E;color:#FEE500;}
+    .social-btn.naver .logo{background:#fff;color:#03C75A;}
+    .social-btn.google .logo{background:#fff;}
+    .social-btn.apple .logo{background:#fff;color:#000;}
+
+    /* Switch mode */
+    .switch-mode{
+      text-align:center;margin-top:20px;font-size:13px;color:var(--ink-2);
+    }
+    .switch-mode a{color:var(--primary);font-weight:800;}
+
+    /* Back */
+    .back-home{
+      text-align:center;margin-top:14px;font-size:12px;color:var(--ink-3);
+    }
+    .back-home a:hover{color:var(--primary);}
+
+    /* Signup agreements */
+    .agreements-block{padding:12px;background:var(--bg-soft);border-radius:10px;margin-bottom:4px;}
+    .agree-row{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:12px;color:var(--ink-2);}
+    .agree-row .view{margin-left:auto;font-size:10px;color:var(--ink-3);text-decoration:underline;}
+    .agree-row .tag{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:800;}
+    .agree-row .tag.req{background:#FEE;color:var(--danger);}
+    .agree-row .tag.opt{background:#fff;color:var(--ink-3);border:1px solid var(--line);}
+
+    @media (max-width:480px){
+      .auth-card{padding:28px 22px;border-radius:16px;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#authForm">본문 바로가기</a>
+
+  <div class="auth-card">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <h1>오마이트립</h1>
+      <p>오, 내가 찾는 모든 여행</p>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs" role="tablist">
+      <button class="mode-tab active" data-mode="login" role="tab">로그인</button>
+      <button class="mode-tab" data-mode="signup" role="tab">회원가입</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="authForm" class="form" data-view="login">
+      <div class="field">
+        <label>이메일</label>
+        <input type="email" id="email" placeholder="email@example.com" autocomplete="email" required />
+        <span class="error">올바른 이메일 형식이 아니에요</span>
+      </div>
+      <div class="field">
+        <label>비밀번호</label>
+        <div class="pw-row">
+          <input type="password" id="password" placeholder="8자 이상" autocomplete="current-password" required />
+          <button type="button" class="pw-toggle" onclick="togglePw('password')" aria-label="비밀번호 표시">👁️</button>
+        </div>
+      </div>
+
+      <!-- Signup fields (hidden initially) -->
+      <div class="signup-only" hidden>
+        <div class="field">
+          <label>비밀번호 확인</label>
+          <div class="pw-row">
+            <input type="password" id="password2" placeholder="비밀번호 재입력" />
+            <button type="button" class="pw-toggle" onclick="togglePw('password2')" aria-label="비밀번호 표시">👁️</button>
+          </div>
+          <span class="error">비밀번호가 일치하지 않아요</span>
+        </div>
+        <div class="field">
+          <label>이름</label>
+          <input type="text" id="name" placeholder="홍길동" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label>연락처</label>
+          <input type="tel" id="phone" placeholder="010-1234-5678" autocomplete="tel" maxlength="13" />
+        </div>
+        <div class="agreements-block">
+          <label class="agree-row" onclick="toggleAgree('all')" style="font-weight:800;color:var(--ink);font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);margin-bottom:4px;">
+            <span class="check" id="checkAll"></span><span>모든 약관 전체 동의</span>
+          </label>
+          <label class="agree-row" onclick="toggleAgree('terms')">
+            <span class="check agree" data-k="terms"></span>
+            <span class="tag req">필수</span><span>이용약관 동의</span>
+            <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+          </label>
+          <label class="agree-row" onclick="toggleAgree('privacy')">
+            <span class="check agree" data-k="privacy"></span>
+            <span class="tag req">필수</span><span>개인정보 수집·이용 동의</span>
+            <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+          </label>
+          <label class="agree-row" onclick="toggleAgree('age')">
+            <span class="check agree" data-k="age"></span>
+            <span class="tag req">필수</span><span>만 14세 이상 확인</span>
+          </label>
+          <label class="agree-row" onclick="toggleAgree('marketing')">
+            <span class="check agree" data-k="marketing"></span>
+            <span class="tag opt">선택</span><span>마케팅 정보 수신 동의</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Login-only action row -->
+      <div class="actions-row login-only">
+        <label class="remember" onclick="event.preventDefault();toggleRemember();">
+          <span class="check" id="chkRemember"></span>
+          <span>로그인 유지</span>
+        </label>
+        <a href="#" class="forgot" onclick="event.preventDefault();alert('비밀번호 재설정 링크를 이메일로 보내드립니다 (프로토타입)');">비밀번호 찾기</a>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">로그인</button>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">SNS로 간편하게</div>
+
+    <!-- Social -->
+    <div class="social-grid">
+      <button type="button" class="social-btn kakao" onclick="socialLogin('kakao')">
+        <span class="logo">K</span>카카오로 계속하기
+      </button>
+      <button type="button" class="social-btn naver" onclick="socialLogin('naver')">
+        <span class="logo">N</span>네이버로 계속하기
+      </button>
+      <button type="button" class="social-btn google" onclick="socialLogin('google')">
+        <span class="logo" style="background:conic-gradient(#EA4335,#FBBC05,#34A853,#4285F4);"></span>Google로 계속하기
+      </button>
+      <button type="button" class="social-btn apple" onclick="socialLogin('apple')">
+        <span class="logo"></span>Apple로 계속하기
+      </button>
+    </div>
+
+    <!-- Switch -->
+    <div class="switch-mode" id="switchHint">
+      아직 계정이 없으신가요? <a href="#" onclick="event.preventDefault();switchMode('signup');">회원가입 →</a>
+    </div>
+
+    <!-- Back -->
+    <div class="back-home">
+      <a href="index.html">← 오마이트립 홈으로 돌아가기</a>
+    </div>
+
+  </div>
+
+  <script>
+  let mode = 'login';
+  let remember = false;
+  const agreements = { terms:false, privacy:false, age:false, marketing:false };
+
+  function switchMode(m){
+    mode = m;
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    document.querySelector('.signup-only').hidden = m !== 'signup';
+    document.querySelector('.login-only').style.display = m === 'signup' ? 'none' : '';
+    document.getElementById('submitBtn').textContent = m === 'signup' ? '회원가입' : '로그인';
+    document.getElementById('switchHint').innerHTML = m === 'signup'
+      ? `이미 계정이 있으신가요? <a href="#" onclick="event.preventDefault();switchMode('login');">로그인 →</a>`
+      : `아직 계정이 없으신가요? <a href="#" onclick="event.preventDefault();switchMode('signup');">회원가입 →</a>`;
+  }
+  document.querySelectorAll('.mode-tab').forEach(b => {
+    b.addEventListener('click', () => switchMode(b.dataset.mode));
+  });
+
+  function togglePw(id){
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+
+  function toggleRemember(){
+    remember = !remember;
+    document.getElementById('chkRemember').classList.toggle('checked', remember);
+  }
+
+  function toggleAgree(k){
+    if(k === 'all'){
+      const all = Object.values(agreements).every(v => v);
+      const next = !all;
+      Object.keys(agreements).forEach(key => agreements[key] = next);
+    } else {
+      agreements[k] = !agreements[k];
+    }
+    document.querySelectorAll('.check.agree').forEach(el => {
+      el.classList.toggle('checked', agreements[el.dataset.k]);
+    });
+    const all = Object.values(agreements).every(v => v);
+    document.getElementById('checkAll').classList.toggle('checked', all);
+  }
+
+  // Phone auto-format on signup
+  document.getElementById('phone').addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g,'').slice(0,11);
+    if(v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+    else if(v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+    e.target.value = v;
+  });
+
+  // Submit
+  document.getElementById('authForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const pw = document.getElementById('password').value;
+
+    // Validation
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.querySelector('.field:has(#email)').classList.toggle('has-error', !emailValid && email.length > 0);
+    if(!emailValid){ alert('이메일을 확인해주세요'); return; }
+    if(pw.length < 8){ alert('비밀번호는 8자 이상이어야 해요'); return; }
+
+    if(mode === 'signup'){
+      const pw2 = document.getElementById('password2').value;
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      document.querySelector('.field:has(#password2)').classList.toggle('has-error', pw !== pw2);
+      if(pw !== pw2){ alert('비밀번호가 일치하지 않아요'); return; }
+      if(!name){ alert('이름을 입력해주세요'); return; }
+      if(!phone || phone.length < 12){ alert('연락처를 확인해주세요'); return; }
+      if(!agreements.terms || !agreements.privacy || !agreements.age){
+        alert('필수 약관에 모두 동의해주세요'); return;
+      }
+      // TODO: API 연동 - POST /api/auth/signup
+      //   { email, password, name, phone, agreements }
+      await simulateAuth('회원가입');
+    } else {
+      // TODO: API 연동 - POST /api/auth/login
+      //   { email, password, remember }
+      //   response: { token, user, expiresAt }
+      await simulateAuth('로그인');
+    }
+  });
+
+  async function simulateAuth(label){
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = label + ' 중...';
+    await new Promise(r => setTimeout(r, 900));
+    // Fake session
+    sessionStorage.setItem('omt_user', JSON.stringify({
+      name:'홍길동', email: document.getElementById('email').value, loggedAt: new Date().toISOString()
+    }));
+    alert(`${label} 성공 (프로토타입)\n마이페이지로 이동합니다.`);
+    location.href = 'mypage.html';
+  }
+
+  function socialLogin(provider){
+    // TODO: API 연동 - OAuth 리다이렉트
+    //   Kakao:  https://kauth.kakao.com/oauth/authorize?client_id=...&redirect_uri=...
+    //   Naver:  https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=...
+    //   Google: https://accounts.google.com/o/oauth2/v2/auth?...
+    //   Apple:  https://appleid.apple.com/auth/authorize?...
+    const labels = { kakao:'카카오', naver:'네이버', google:'Google', apple:'Apple' };
+    alert(`${labels[provider]} 로그인 페이지로 이동합니다 (프로토타입)`);
+  }
+  </script>
+</body>
+</html>

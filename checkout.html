@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --secondary-soft:#E3F2FD;
+      --accent:#FFD23F; --success:#10B981; --danger:#EF4444;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+      --header-h:64px; --max-w:1200px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select,textarea{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .page-title{margin-left:16px;font-size:15px;font-weight:700;color:var(--ink-2);}
+    .header-actions{margin-left:auto;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+
+    /* Checkout grid */
+    .checkout-grid{
+      display:grid;grid-template-columns:1fr 380px;gap:24px;
+      padding:28px 24px 140px;max-width:var(--max-w);margin:0 auto;
+      align-items:flex-start;
+    }
+
+    /* Section card */
+    .card{
+      background:#fff;border:1px solid var(--line);
+      border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;
+    }
+    .card h3{
+      margin:0 0 4px;font-size:18px;font-weight:900;letter-spacing:-0.02em;
+      display:flex;align-items:center;gap:8px;
+    }
+    .card-sub{margin:0 0 18px;font-size:13px;color:var(--ink-2);}
+
+    /* Form */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;}
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:12px;font-weight:700;color:var(--ink-2);}
+    .field label .req{color:var(--danger);margin-left:4px;}
+    .field input, .field select, .field textarea{
+      padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
+      font-size:14px;color:var(--ink);background:#fff;outline:none;
+      transition:border-color .15s, box-shadow .15s;
+      width:100%;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(255,107,53,.12);
+    }
+    .field textarea{min-height:80px;resize:vertical;}
+    .field .hint{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+    /* Pax selector */
+    .pax-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+    .pax-tab{
+      padding:8px 14px;border-radius:999px;background:var(--bg-soft);
+      font-weight:700;font-size:12px;color:var(--ink-2);cursor:pointer;
+      transition:all .15s;
+    }
+    .pax-tab.active{background:var(--ink);color:#fff;}
+
+    /* Pay method tabs */
+    .pay-tabs{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;
+    }
+    .pay-tab{
+      padding:18px 10px;border:2px solid var(--line);border-radius:12px;
+      background:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;
+      font-weight:700;font-size:13px;transition:all .15s;cursor:pointer;
+    }
+    .pay-tab:hover{border-color:var(--primary);}
+    .pay-tab.active{border-color:var(--primary);background:var(--primary-soft);}
+    .pay-tab .pay-logo{
+      width:48px;height:32px;border-radius:6px;
+      display:grid;place-items:center;
+      font-weight:900;font-size:13px;color:#fff;letter-spacing:-0.02em;
+    }
+    .pay-tab[data-pay="kakao"] .pay-logo{background:#FEE500;color:#3C1E1E;}
+    .pay-tab[data-pay="naver"] .pay-logo{background:#03C75A;}
+    .pay-tab[data-pay="card"] .pay-logo{background:linear-gradient(135deg,#1E88E5,#42A5F5);}
+    .pay-tab[data-pay="bank"] .pay-logo{background:var(--ink);}
+
+    /* Pay content panels */
+    .pay-panel{display:none;padding:18px;background:var(--bg-soft);border-radius:12px;}
+    .pay-panel.active{display:block;}
+    .pay-panel p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.7;}
+    .pay-panel strong{color:var(--ink);}
+    .pay-panel .logo-line{
+      display:flex;align-items:center;gap:10px;
+      padding:12px;background:#fff;border-radius:10px;margin-top:10px;
+    }
+    .pay-panel .logo-line .badge{
+      padding:4px 10px;border-radius:6px;font-size:11px;font-weight:800;
+    }
+    .kakao-badge{background:#FEE500;color:#3C1E1E;}
+    .naver-badge{background:#03C75A;color:#fff;}
+
+    /* Card form */
+    .card-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .card-form .full{grid-column:1/-1;}
+    .card-preview{
+      grid-column:1/-1;
+      background:linear-gradient(135deg,#1E3A5F,#2C5282 55%,#1E88E5);
+      color:#fff;border-radius:14px;padding:20px;
+      font-family:'Courier New',monospace;
+      min-height:160px;
+      display:flex;flex-direction:column;justify-content:space-between;
+      position:relative;overflow:hidden;
+      box-shadow:0 12px 30px rgba(30,58,95,.3);
+    }
+    .card-preview::before{
+      content:"";position:absolute;top:-40px;right:-40px;
+      width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.15),transparent 70%);
+    }
+    .card-preview .chip{
+      width:36px;height:26px;border-radius:5px;
+      background:linear-gradient(135deg,#FFD700,#FFA500);
+      margin-bottom:8px;
+    }
+    .card-preview .num{font-size:18px;letter-spacing:3px;font-weight:700;}
+    .card-preview .row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:11px;}
+    .card-preview .row .label{opacity:.6;display:block;margin-bottom:2px;letter-spacing:1px;text-transform:uppercase;}
+    .card-preview .row .val{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+
+    /* Agreements */
+    .agree-all{
+      padding:14px 16px;background:var(--bg-soft);border-radius:10px;
+      display:flex;align-items:center;gap:10px;margin-bottom:10px;
+      font-weight:800;font-size:14px;cursor:pointer;
+    }
+    .agree-item{
+      padding:10px 16px;display:flex;align-items:center;gap:10px;
+      font-size:13px;color:var(--ink-2);cursor:pointer;
+    }
+    .agree-item.required{font-weight:600;}
+    .agree-item .view{margin-left:auto;font-size:11px;color:var(--ink-3);text-decoration:underline;}
+    .agree-item .tag{
+      font-size:10px;padding:2px 6px;border-radius:4px;font-weight:800;
+    }
+    .agree-item .tag.req{background:#FEE;color:var(--danger);}
+    .agree-item .tag.opt{background:var(--bg-soft);color:var(--ink-3);}
+
+    /* Custom checkbox */
+    .check{
+      width:20px;height:20px;border:2px solid var(--line);
+      border-radius:5px;background:#fff;position:relative;flex-shrink:0;
+      transition:all .15s;
+    }
+    .check.checked{background:var(--primary);border-color:var(--primary);}
+    .check.checked::after{
+      content:"";position:absolute;left:5px;top:1px;
+      width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;
+      transform:rotate(45deg);
+    }
+
+    /* Summary (right) */
+    .sum-panel{
+      background:#fff;border:1px solid var(--line);
+      border-radius:var(--radius-lg);padding:22px;
+      position:sticky;top:calc(var(--header-h) + 16px);
+    }
+    .sum-panel h3{margin:0 0 14px;font-size:16px;font-weight:900;}
+    .sum-item{
+      display:grid;grid-template-columns:28px 1fr auto;gap:10px;
+      padding:10px;background:var(--bg-soft);border-radius:8px;margin-bottom:8px;
+    }
+    .sum-icon{font-size:16px;line-height:1.2;}
+    .sum-t{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+    .sum-n{font-size:13px;font-weight:700;line-height:1.3;margin-top:2px;}
+    .sum-s{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .sum-p{font-size:13px;font-weight:800;align-self:center;white-space:nowrap;}
+    .sum-divider{height:1px;background:var(--line);margin:14px 0;}
+    .sum-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:6px;}
+    .sum-row.discount{color:var(--primary);font-weight:700;}
+    .sum-grand{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding:14px;background:var(--ink);color:#fff;border-radius:10px;margin:14px 0;
+    }
+    .sum-grand .label{font-size:12px;opacity:.7;}
+    .sum-grand .total{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+
+    /* Pay button */
+    .pay-cta{
+      width:100%;padding:16px;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:16px;
+      box-shadow:0 6px 20px rgba(255,107,53,.35);
+      transition:all .15s;
+    }
+    .pay-cta:hover{background:var(--primary-dark);transform:translateY(-1px);}
+    .pay-cta:disabled{background:var(--line);color:var(--ink-3);box-shadow:none;cursor:not-allowed;transform:none;}
+    .pay-guard{
+      margin-top:10px;text-align:center;font-size:11px;color:var(--ink-3);
+    }
+    .pay-guard::before{content:"🔒 ";}
+
+    /* Mobile sticky bar */
+    .m-pay-bar{display:none;}
+
+    /* Empty state */
+    .empty-state{
+      text-align:center;padding:60px 24px;
+      color:var(--ink-2);font-size:14px;
+    }
+    .empty-state a{color:var(--primary);font-weight:700;}
+
+    /* Responsive */
+    @media (max-width:1024px){
+      .checkout-grid{grid-template-columns:1fr;padding:18px 16px 120px;}
+      .sum-panel{display:none;}
+      .m-pay-bar{
+        display:flex;align-items:center;gap:10px;
+        position:fixed;left:0;right:0;bottom:0;z-index:55;
+        background:#fff;border-top:1px solid var(--line);
+        padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+        box-shadow:0 -4px 20px rgba(0,0,0,.08);
+      }
+      .m-pay-bar .info{flex:1;min-width:0;}
+      .m-pay-bar .label{font-size:10px;color:var(--ink-3);font-weight:700;}
+      .m-pay-bar .total{font-size:18px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+      .m-pay-bar .pay-cta{width:auto;padding:13px 22px;font-size:14px;}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .card{padding:18px;border-radius:var(--radius);}
+      .card h3{font-size:16px;}
+      .form-row{grid-template-columns:1fr;gap:10px;}
+      .pay-tabs{grid-template-columns:repeat(2,1fr);}
+      .pay-tab{padding:14px 8px;font-size:12px;}
+      .card-form{grid-template-columns:1fr;}
+      .page-title{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- A11y: Skip link -->
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+  <style>.skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;}.skip-link:focus{left:0;}</style>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <span class="page-title">결제하기</span>
+      <div class="header-actions">
+        <a href="packages.html" class="btn-ghost">← 패키지 수정</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- No package — empty state -->
+  <div id="emptyState" class="empty-state" hidden>
+    <h2>예약할 상품이 없어요</h2>
+    <p>다이나믹 패키지를 먼저 구성해주세요.</p>
+    <p><a href="packages.html">→ 패키지 만들러 가기</a></p>
+  </div>
+
+  <!-- Checkout -->
+  <main class="checkout-grid" id="checkoutMain">
+    <section>
+      <!-- 여행자 정보 -->
+      <div class="card">
+        <h3>👤 여행자 정보</h3>
+        <p class="card-sub">항공권 발권 기준으로 여권과 동일하게 입력해주세요</p>
+
+        <div class="pax-tabs" id="paxTabs"></div>
+
+        <div id="paxForms"></div>
+      </div>
+
+      <!-- 특이사항 -->
+      <div class="card">
+        <h3>📝 특이사항</h3>
+        <p class="card-sub">알레르기·거동 불편·특별 요청이 있으면 알려주세요 (선택)</p>
+        <div class="field">
+          <textarea id="specialReq" placeholder="예: 견과류 알레르기가 있어요, 고층 객실 희망"></textarea>
+        </div>
+      </div>
+
+      <!-- 결제 수단 -->
+      <div class="card">
+        <h3>💳 결제 수단</h3>
+        <p class="card-sub">원하시는 결제 방법을 선택해주세요</p>
+
+        <div class="pay-tabs" id="payTabs">
+          <button class="pay-tab active" data-pay="kakao">
+            <span class="pay-logo">pay</span>
+            <span>카카오페이</span>
+          </button>
+          <button class="pay-tab" data-pay="naver">
+            <span class="pay-logo">N pay</span>
+            <span>네이버페이</span>
+          </button>
+          <button class="pay-tab" data-pay="card">
+            <span class="pay-logo">💳</span>
+            <span>신용카드</span>
+          </button>
+          <button class="pay-tab" data-pay="bank">
+            <span class="pay-logo">₩</span>
+            <span>무통장입금</span>
+          </button>
+        </div>
+
+        <!-- Kakao Pay -->
+        <div class="pay-panel active" data-panel="kakao">
+          <p><strong>카카오페이로 간편결제</strong><br>
+            결제하기 버튼을 누르면 카카오톡으로 결제 요청이 전송됩니다. QR 인증 또는 비밀번호 입력으로 결제가 완료됩니다.
+          </p>
+          <div class="logo-line">
+            <span class="badge kakao-badge">kakao pay</span>
+            <span style="font-size:12px;color:var(--ink-3);">간편결제 · 5% 적립 · 카카오 머니 사용 가능</span>
+          </div>
+        </div>
+
+        <!-- Naver Pay -->
+        <div class="pay-panel" data-panel="naver">
+          <p><strong>네이버페이로 간편결제</strong><br>
+            네이버 간편결제 · 네이버 포인트 적립 · 취소/환불 1분 완료.
+          </p>
+          <div class="logo-line">
+            <span class="badge naver-badge">N pay</span>
+            <span style="font-size:12px;color:var(--ink-3);">최대 2.5% 포인트 적립</span>
+          </div>
+        </div>
+
+        <!-- Credit Card -->
+        <div class="pay-panel" data-panel="card">
+          <div class="card-form">
+            <div class="card-preview">
+              <div>
+                <div class="chip"></div>
+                <div style="font-size:10px;opacity:.6;letter-spacing:1px;">OHMYTRIP CARD</div>
+              </div>
+              <div class="num" id="cpNum">•••• •••• •••• ••••</div>
+              <div class="row">
+                <div>
+                  <span class="label">유효기간</span>
+                  <span class="val" id="cpExp">MM/YY</span>
+                </div>
+                <div style="text-align:right;">
+                  <span class="label">소유자</span>
+                  <span class="val" id="cpName">NAME</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label>카드번호 <span class="req">*</span></label>
+              <input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="0000-0000-0000-0000" autocomplete="cc-number" />
+            </div>
+            <div class="field">
+              <label>유효기간 <span class="req">*</span></label>
+              <input type="text" id="cardExp" inputmode="numeric" maxlength="5" placeholder="MM/YY" autocomplete="cc-exp" />
+            </div>
+            <div class="field">
+              <label>CVC <span class="req">*</span></label>
+              <input type="text" id="cardCvc" inputmode="numeric" maxlength="3" placeholder="3자리" autocomplete="cc-csc" />
+            </div>
+            <div class="field full">
+              <label>카드 소유자명 (영문) <span class="req">*</span></label>
+              <input type="text" id="cardName" placeholder="HONG GILDONG" autocomplete="cc-name" />
+            </div>
+            <div class="field">
+              <label>할부</label>
+              <select id="cardInstallment">
+                <option>일시불</option>
+                <option>2개월</option>
+                <option>3개월 (무이자)</option>
+                <option>6개월 (무이자)</option>
+                <option>12개월</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank transfer -->
+        <div class="pay-panel" data-panel="bank">
+          <p><strong>무통장입금 안내</strong><br>
+            입금 계좌를 안내해드리며, 24시간 이내에 입금해주셔야 예약이 확정됩니다.
+          </p>
+          <div class="logo-line" style="flex-direction:column;align-items:flex-start;gap:6px;padding:14px;">
+            <span style="font-size:12px;color:var(--ink-3);font-weight:700;">입금 은행</span>
+            <span style="font-weight:800;">국민은행 · 123-4567-8901-23</span>
+            <span style="font-size:12px;color:var(--ink-3);">(주)오마이트립</span>
+          </div>
+          <p style="margin-top:10px;color:var(--danger);font-size:12px;">
+            ※ 미입금 시 24시간 후 예약이 자동 취소됩니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 약관 동의 -->
+      <div class="card">
+        <h3>✅ 약관 동의</h3>
+        <p class="card-sub">예약 전 아래 약관을 확인해주세요</p>
+
+        <label class="agree-all">
+          <div class="check" id="checkAll"></div>
+          <span>모든 약관 전체 동의</span>
+        </label>
+
+        <label class="agree-item required">
+          <div class="check agree" data-key="terms"></div>
+          <span class="tag req">필수</span>
+          <span>이용약관 동의</span>
+          <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+        </label>
+        <label class="agree-item required">
+          <div class="check agree" data-key="privacy"></div>
+          <span class="tag req">필수</span>
+          <span>개인정보 수집·이용 동의</span>
+          <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+        </label>
+        <label class="agree-item required">
+          <div class="check agree" data-key="refund"></div>
+          <span class="tag req">필수</span>
+          <span>환불 규정 및 여행 약관</span>
+          <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+        </label>
+        <label class="agree-item">
+          <div class="check agree" data-key="marketing"></div>
+          <span class="tag opt">선택</span>
+          <span>마케팅 정보 수신 동의</span>
+          <a class="view" href="#" onclick="event.preventDefault();">보기</a>
+        </label>
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <aside class="sum-panel">
+      <h3>🧳 예약 상품</h3>
+      <div id="sumItems"></div>
+      <div class="sum-divider"></div>
+      <div id="sumRows"></div>
+      <div class="sum-grand">
+        <div class="label">총 결제 금액</div>
+        <div class="total" id="sumTotal">0원</div>
+      </div>
+      <button class="pay-cta" id="payBtnDesktop" onclick="submitPayment()" disabled>결제하기</button>
+      <p class="pay-guard">안전한 SSL 암호화 결제 · 오마이트립 안심 보장</p>
+    </aside>
+  </main>
+
+  <!-- MOBILE BAR -->
+  <div class="m-pay-bar">
+    <div class="info">
+      <div class="label">총 결제 금액</div>
+      <div class="total" id="mTotal">0원</div>
+    </div>
+    <button class="pay-cta" id="payBtnMobile" onclick="submitPayment()" disabled>결제하기</button>
+  </div>
+
+  <script>
+  /* =========================================================================
+     Load package from sessionStorage
+     ========================================================================= */
+  const pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
+
+  if(!pkg || !pkg.flight || !pkg.hotel){
+    document.getElementById('emptyState').hidden = false;
+    document.getElementById('checkoutMain').style.display = 'none';
+    document.querySelector('.m-pay-bar').style.display = 'none';
+    throw new Error('No package in session');
+  }
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  /* =========================================================================
+     Pax forms
+     ========================================================================= */
+  const paxCount = pkg.paxCount || 2;
+  let activePax = 0;
+  const paxData = Array.from({length: paxCount}, () => ({
+    nameKo:'', nameEn:'', birth:'', phone:''
+  }));
+
+  function renderPaxTabs(){
+    const el = document.getElementById('paxTabs');
+    el.innerHTML = paxData.map((_, i) =>
+      `<button type="button" class="pax-tab ${i===activePax?'active':''}" data-idx="${i}">여행자 ${i+1}${i===0?' (대표)':''}</button>`
+    ).join('');
+    el.querySelectorAll('.pax-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activePax = +btn.dataset.idx;
+        renderPaxTabs();
+        renderPaxForm();
+      });
+    });
+  }
+
+  function renderPaxForm(){
+    const d = paxData[activePax];
+    const el = document.getElementById('paxForms');
+    el.innerHTML = `
+      <div class="form-row">
+        <div class="field">
+          <label>이름 (한글) <span class="req">*</span></label>
+          <input type="text" data-k="nameKo" value="${d.nameKo}" placeholder="홍길동" />
+        </div>
+        <div class="field">
+          <label>영문 이름 <span class="req">*</span></label>
+          <input type="text" data-k="nameEn" value="${d.nameEn}" placeholder="HONG GILDONG" />
+          <span class="hint">여권과 동일하게 성/이름 사이 띄어쓰기</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>생년월일 <span class="req">*</span></label>
+          <input type="text" data-k="birth" value="${d.birth}" placeholder="1990-01-01" maxlength="10" />
+        </div>
+        <div class="field">
+          <label>연락처 <span class="req">*</span></label>
+          <input type="tel" data-k="phone" value="${d.phone}" placeholder="010-1234-5678" maxlength="13" />
+        </div>
+      </div>
+    `;
+    el.querySelectorAll('input[data-k]').forEach(input => {
+      input.addEventListener('input', () => {
+        const k = input.dataset.k;
+        let v = input.value;
+        if(k === 'phone'){
+          v = v.replace(/\D/g,'').slice(0,11);
+          if(v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+          else if(v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+          input.value = v;
+        } else if(k === 'birth'){
+          v = v.replace(/\D/g,'').slice(0,8);
+          if(v.length > 6) v = v.slice(0,4) + '-' + v.slice(4,6) + '-' + v.slice(6);
+          else if(v.length > 4) v = v.slice(0,4) + '-' + v.slice(4);
+          input.value = v;
+        } else if(k === 'nameEn'){
+          v = v.toUpperCase();
+          input.value = v;
+        }
+        paxData[activePax][k] = v;
+        updatePayButton();
+      });
+    });
+  }
+
+  /* =========================================================================
+     Pay method tabs
+     ========================================================================= */
+  let payMethod = 'kakao';
+  document.querySelectorAll('.pay-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      payMethod = btn.dataset.pay;
+      document.querySelectorAll('.pay-tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.pay-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === payMethod));
+      updatePayButton();
+    });
+  });
+
+  /* =========================================================================
+     Card number auto-format + live preview
+     ========================================================================= */
+  const cardNum = document.getElementById('cardNumber');
+  const cardExp = document.getElementById('cardExp');
+  const cardCvc = document.getElementById('cardCvc');
+  const cardNameI = document.getElementById('cardName');
+  const cpNum = document.getElementById('cpNum');
+  const cpExp = document.getElementById('cpExp');
+  const cpName = document.getElementById('cpName');
+
+  cardNum.addEventListener('input', () => {
+    let v = cardNum.value.replace(/\D/g, '').slice(0, 16);
+    cardNum.value = v.match(/.{1,4}/g)?.join('-') || v;
+    cpNum.textContent = (v.padEnd(16, '•').match(/.{1,4}/g) || []).join(' ');
+    updatePayButton();
+  });
+  cardExp.addEventListener('input', () => {
+    let v = cardExp.value.replace(/\D/g, '').slice(0, 4);
+    if(v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+    cardExp.value = v;
+    cpExp.textContent = v || 'MM/YY';
+    updatePayButton();
+  });
+  cardCvc.addEventListener('input', () => {
+    cardCvc.value = cardCvc.value.replace(/\D/g, '').slice(0, 3);
+    updatePayButton();
+  });
+  cardNameI.addEventListener('input', () => {
+    cardNameI.value = cardNameI.value.toUpperCase();
+    cpName.textContent = cardNameI.value || 'NAME';
+    updatePayButton();
+  });
+
+  /* =========================================================================
+     Agreements
+     ========================================================================= */
+  const agreements = { terms:false, privacy:false, refund:false, marketing:false };
+
+  function toggleAgree(key){
+    agreements[key] = !agreements[key];
+    document.querySelector(`.check.agree[data-key="${key}"]`).classList.toggle('checked', agreements[key]);
+    syncAgreeAll();
+    updatePayButton();
+  }
+  function syncAgreeAll(){
+    const all = Object.values(agreements).every(v => v);
+    document.getElementById('checkAll').classList.toggle('checked', all);
+  }
+  document.querySelectorAll('.check.agree').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      toggleAgree(el.dataset.key);
+    });
+  });
+  document.querySelectorAll('.agree-item').forEach(item => {
+    item.addEventListener('click', e => {
+      if(e.target.closest('.view')) return;
+      const cb = item.querySelector('.check.agree');
+      if(cb){
+        e.preventDefault();
+        toggleAgree(cb.dataset.key);
+      }
+    });
+  });
+  document.querySelector('.agree-all').addEventListener('click', (e) => {
+    e.preventDefault();
+    const all = Object.values(agreements).every(v => v);
+    const next = !all;
+    Object.keys(agreements).forEach(k => {
+      agreements[k] = next;
+      document.querySelector(`.check.agree[data-key="${k}"]`).classList.toggle('checked', next);
+    });
+    syncAgreeAll();
+    updatePayButton();
+  });
+
+  /* =========================================================================
+     Summary render
+     ========================================================================= */
+  function renderSummary(){
+    const items = [];
+    items.push({
+      type:'항공', icon:'✈️',
+      title: `${pkg.flight.airline} ${pkg.flight.out.depAp}↔${pkg.flight.out.arrAp}`,
+      sub: `${pkg.dates} · 왕복`, price: pkg.flight.price
+    });
+    items.push({
+      type:'호텔', icon:'🏨',
+      title: pkg.hotel.name,
+      sub: `${pkg.hotel.areaLabel} · ${pkg.nights}박`,
+      price: pkg.hotel.price * pkg.nights
+    });
+    (pkg.activities || []).forEach(a => {
+      items.push({ type:'액티비티', icon:'🎫', title:a.title, sub:a.meta, price:a.price });
+    });
+
+    document.getElementById('sumItems').innerHTML = items.map(i => `
+      <div class="sum-item">
+        <div class="sum-icon">${i.icon}</div>
+        <div>
+          <div class="sum-t">${i.type}</div>
+          <div class="sum-n">${i.title}</div>
+          <div class="sum-s">${i.sub}</div>
+        </div>
+        <div class="sum-p">${krw(i.price)}</div>
+      </div>
+    `).join('');
+
+    const sub = items.reduce((s, i) => s + i.price, 0);
+    const discount = Math.round(sub * 0.07);
+    const total = sub - discount;
+
+    document.getElementById('sumRows').innerHTML = `
+      <div class="sum-row"><span>소계</span><span>${krw(sub)}</span></div>
+      <div class="sum-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
+      <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>
+    `;
+    document.getElementById('sumTotal').textContent = krw(total);
+    document.getElementById('mTotal').textContent = krw(total);
+
+    return total;
+  }
+
+  /* =========================================================================
+     Validation
+     ========================================================================= */
+  function validate(){
+    // 필수 여행자 정보 (최소 대표자)
+    const lead = paxData[0];
+    if(!lead.nameKo || !lead.nameEn || !lead.birth || !lead.phone) return false;
+    // 필수 약관
+    if(!agreements.terms || !agreements.privacy || !agreements.refund) return false;
+    // 카드 결제라면 카드 정보 필수
+    if(payMethod === 'card'){
+      if(!cardNum.value || cardNum.value.replace(/\D/g,'').length < 16) return false;
+      if(!cardExp.value || cardExp.value.length < 5) return false;
+      if(!cardCvc.value || cardCvc.value.length < 3) return false;
+      if(!cardNameI.value) return false;
+    }
+    return true;
+  }
+
+  function updatePayButton(){
+    const ok = validate();
+    ['payBtnDesktop','payBtnMobile'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.disabled = !ok;
+      const total = document.getElementById('sumTotal').textContent;
+      btn.textContent = ok ? `${total} 결제하기` : '결제하기';
+    });
+  }
+
+  /* =========================================================================
+     Submit payment
+     ========================================================================= */
+  async function submitPayment(){
+    if(!validate()){
+      alert('필수 정보와 약관 동의를 확인해주세요');
+      return;
+    }
+
+    const btn = document.getElementById('payBtnDesktop');
+    const btnM = document.getElementById('payBtnMobile');
+    btn.disabled = btnM.disabled = true;
+    btn.textContent = btnM.textContent = '결제 처리 중...';
+
+    // TODO: 결제 API 연동
+    //   - 카카오페이:   POST https://kapi.kakao.com/v1/payment/ready
+    //   - 네이버페이:   POST https://api.naver.com/pay/...
+    //   - 토스페이먼츠: POST https://api.tosspayments.com/v1/payments
+    //   request: { amount, orderId, method: payMethod, items: pkg }
+    //   response: { paymentId, redirectUrl (for Kakao/Naver) }
+    //
+    // TODO: 예약 생성 API - POST /api/bookings
+    //   request: { package: pkg, travelers: paxData, paymentId, specialRequests }
+    //   response: { bookingId, bookingNumber, status: 'CONFIRMED' }
+
+    await new Promise(r => setTimeout(r, 1400)); // simulate payment latency
+
+    const bookingNumber = 'OMT-' + Date.now().toString(36).toUpperCase().slice(-8);
+    const total = computeTotal();
+
+    sessionStorage.setItem('omt_booking', JSON.stringify({
+      bookingNumber,
+      total,
+      paymentMethod: payMethod,
+      leadName: paxData[0].nameKo,
+      phone: paxData[0].phone,
+      package: pkg,
+      paxCount,
+      specialRequest: document.getElementById('specialReq').value,
+      createdAt: new Date().toISOString()
+    }));
+
+    location.href = 'complete.html';
+  }
+
+  function computeTotal(){
+    let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
+    (pkg.activities||[]).forEach(a => sub += a.price);
+    return sub - Math.round(sub * 0.07);
+  }
+
+  /* =========================================================================
+     INIT
+     ========================================================================= */
+  renderPaxTabs();
+  renderPaxForm();
+  renderSummary();
+  updatePayButton();
+  </script>
+</body>
+</html>

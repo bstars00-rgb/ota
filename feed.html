@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>크리에이터 피드 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --header-h:56px; --filter-h:52px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+    body{
+      font-family:'Noto Sans KR',-apple-system,sans-serif;
+      color:var(--ink);background:#0A0A0A;line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    ul{list-style:none;margin:0;padding:0;}
+
+    /* A11y skip */
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#fff;color:#000;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    /* Page */
+    .page{height:100vh;height:100dvh;display:flex;flex-direction:column;background:#0A0A0A;color:#fff;}
+
+    /* Header */
+    .header{
+      flex-shrink:0;height:var(--header-h);
+      background:rgba(10,10,10,.85);backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;gap:14px;
+      padding:0 18px;z-index:10;
+    }
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:16px;color:#fff;}
+    .logo-mark{
+      width:28px;height:28px;border-radius:8px;
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);
+      color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;
+    }
+    .logo-mark::after{content:"O";}
+    .page-title{margin-left:6px;font-size:14px;font-weight:700;color:rgba(255,255,255,.7);}
+    .header-actions{margin-left:auto;display:flex;gap:8px;}
+    .h-btn{
+      padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;
+      color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);
+      transition:background .15s;
+    }
+    .h-btn:hover{background:rgba(255,255,255,.18);}
+
+    /* Filter bar */
+    .filter-bar{
+      flex-shrink:0;height:var(--filter-h);
+      display:flex;align-items:center;gap:6px;
+      overflow-x:auto;padding:0 18px;
+      background:rgba(10,10,10,.8);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .filter-bar::-webkit-scrollbar{display:none;}
+    .filter{
+      flex-shrink:0;padding:8px 14px;border-radius:999px;
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.75);
+      font-weight:700;font-size:13px;
+      transition:background .15s, color .15s;
+      white-space:nowrap;
+    }
+    .filter:hover{background:rgba(255,255,255,.14);color:#fff;}
+    .filter.active{background:#fff;color:#0A0A0A;}
+
+    /* Layout */
+    .feed-layout{
+      flex:1;min-height:0;display:grid;
+      grid-template-columns:1fr 420px;
+      background:#0A0A0A;
+    }
+    .feed-column{
+      overflow-y:scroll;
+      scroll-snap-type:y mandatory;
+      scrollbar-width:none;
+    }
+    .feed-column::-webkit-scrollbar{display:none;}
+
+    .feed-card{
+      width:100%;height:100%;
+      scroll-snap-align:start;scroll-snap-stop:always;
+      display:flex;align-items:center;justify-content:center;
+      padding:16px;
+    }
+    .feed-card-inner{
+      position:relative;
+      height:100%;aspect-ratio:9/16;
+      max-width:100%;
+      border-radius:20px;overflow:hidden;
+      background:#222;
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
+      color:#fff;
+    }
+    .feed-bg{
+      position:absolute;inset:0;
+      background-size:cover;background-position:center;
+      transition:transform 8s linear;
+    }
+    .feed-card-inner:hover .feed-bg{transform:scale(1.05);}
+    .feed-gradient{
+      position:absolute;inset:0;
+      background:
+        linear-gradient(180deg,rgba(0,0,0,.45) 0%,transparent 25%,transparent 50%,rgba(0,0,0,.95) 100%);
+      pointer-events:none;
+    }
+
+    /* Top tags on card */
+    .feed-top{
+      position:absolute;top:14px;left:14px;right:70px;z-index:3;
+      display:flex;gap:6px;flex-wrap:wrap;
+    }
+    .f-chip{
+      padding:5px 10px;border-radius:999px;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
+      color:#fff;font-size:11px;font-weight:800;
+    }
+    .f-chip.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);}
+
+    /* Bottom content */
+    .feed-bottom{
+      position:absolute;left:14px;right:70px;bottom:14px;z-index:3;
+    }
+    .creator-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .c-avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      border:2px solid #fff;display:grid;place-items:center;
+      font-weight:900;font-size:14px;color:#fff;flex-shrink:0;
+    }
+    .c-info{flex:1;min-width:0;}
+    .c-name{
+      font-weight:800;font-size:13px;display:flex;align-items:center;gap:4px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .c-name .verified{color:var(--secondary);font-size:11px;}
+    .c-subs{font-size:11px;opacity:.85;}
+    .c-follow{
+      padding:6px 12px;border-radius:999px;
+      background:var(--primary);color:#fff;
+      font-weight:800;font-size:11px;white-space:nowrap;
+      transition:background .15s;
+    }
+    .c-follow:hover{background:var(--primary-dark);}
+    .c-follow.following{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);}
+
+    .f-title{
+      font-size:15px;font-weight:800;line-height:1.4;margin-bottom:10px;
+      text-shadow:0 2px 8px rgba(0,0,0,.3);
+    }
+
+    .mini-product{
+      background:rgba(255,255,255,.12);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:14px;
+      padding:10px;
+      display:grid;
+      grid-template-columns:52px 1fr;
+      gap:10px;align-items:center;
+      margin-bottom:8px;
+    }
+    .mini-img{
+      width:52px;height:52px;border-radius:10px;
+      background-size:cover;background-position:center;
+      background-color:#333;
+      flex-shrink:0;
+    }
+    .mini-info{min-width:0;}
+    .mini-tag{
+      display:inline-block;font-size:9px;font-weight:800;
+      padding:2px 6px;border-radius:4px;
+      background:rgba(255,255,255,.2);margin-bottom:3px;letter-spacing:.04em;
+    }
+    .mini-name{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mini-price{font-size:13px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+    .mini-price .strike{font-size:10px;opacity:.6;text-decoration:line-through;margin-left:4px;font-weight:600;color:#fff;}
+
+    .book-btn{
+      width:100%;padding:11px;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:13px;
+      box-shadow:0 6px 20px rgba(255,107,53,.5);
+      transition:all .15s;
+    }
+    .book-btn:hover{background:var(--primary-dark);transform:translateY(-1px);}
+
+    /* Side actions */
+    .side-actions{
+      position:absolute;right:10px;bottom:100px;z-index:3;
+      display:flex;flex-direction:column;gap:16px;
+    }
+    .side-btn{
+      display:flex;flex-direction:column;align-items:center;gap:3px;
+      color:#fff;cursor:pointer;
+    }
+    .side-btn .ico{
+      width:42px;height:42px;border-radius:50%;
+      background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
+      display:grid;place-items:center;font-size:20px;
+      transition:transform .15s, background .15s;
+    }
+    .side-btn:hover .ico{background:rgba(0,0,0,.65);transform:scale(1.08);}
+    .side-btn.active .ico{background:var(--primary);}
+    .side-btn.active.like .ico{background:#E63946;}
+    .side-btn .num{font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+
+    /* ==============================
+       Product Panel (PC)
+       ============================== */
+    .product-panel{
+      background:#fff;color:var(--ink);
+      border-left:1px solid var(--line);
+      overflow-y:auto;padding:24px;
+    }
+    .pp-empty{
+      padding:60px 20px;text-align:center;color:var(--ink-3);font-size:13px;
+    }
+    .pp-hero{
+      aspect-ratio:16/10;border-radius:14px;
+      background-size:cover;background-position:center;
+      margin-bottom:16px;background-color:#eee;
+    }
+    .pp-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .pp-tag{
+      padding:4px 10px;border-radius:999px;
+      background:var(--primary-soft);color:var(--primary);
+      font-size:11px;font-weight:800;
+    }
+    .pp-tag.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .pp-title{font-size:19px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .pp-desc{font-size:13px;color:var(--ink-2);margin:0 0 16px;line-height:1.6;}
+
+    .pp-creator{
+      display:flex;align-items:center;gap:10px;
+      padding:12px;background:var(--bg-soft);border-radius:12px;margin-bottom:16px;
+    }
+    .pp-ca{
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:grid;place-items:center;color:#fff;font-weight:900;font-size:14px;
+      flex-shrink:0;
+    }
+    .pp-cinfo{flex:1;min-width:0;}
+    .pp-cname{font-weight:800;font-size:14px;}
+    .pp-csubs{font-size:12px;color:var(--ink-3);}
+
+    .pp-section{
+      padding:14px 0;border-top:1px dashed var(--line);
+    }
+    .pp-section h4{
+      margin:0 0 10px;font-size:13px;font-weight:800;color:var(--ink-3);
+      letter-spacing:.04em;text-transform:uppercase;
+    }
+    .pp-row{
+      display:grid;grid-template-columns:28px 1fr auto;gap:10px;
+      padding:8px 0;font-size:13px;align-items:center;
+    }
+    .pp-row .k{font-weight:700;}
+    .pp-row .v{color:var(--ink-2);text-align:right;}
+    .pp-row .ic{font-size:16px;}
+
+    .pp-includes{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);}
+    .pp-includes li::before{content:"✓ ";color:var(--success);font-weight:900;}
+
+    .pp-price-box{
+      background:var(--ink);color:#fff;
+      border-radius:14px;padding:16px;margin-top:16px;
+      display:flex;justify-content:space-between;align-items:baseline;
+    }
+    .pp-price-box .lb{font-size:11px;opacity:.7;}
+    .pp-price-box .pr{font-size:24px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+    .pp-price-box .old{font-size:11px;opacity:.55;text-decoration:line-through;display:block;}
+
+    .pp-cta{
+      width:100%;padding:15px;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:15px;margin-top:12px;
+      box-shadow:0 6px 20px rgba(255,107,53,.35);
+      transition:all .15s;
+    }
+    .pp-cta:hover{background:var(--primary-dark);transform:translateY(-1px);}
+
+    /* ==============================
+       Booking Bottom Sheet
+       ============================== */
+    .sheet-overlay{
+      position:fixed;inset:0;z-index:80;
+      background:rgba(0,0,0,.6);
+      opacity:0;pointer-events:none;transition:opacity .25s;
+    }
+    .sheet-overlay.open{opacity:1;pointer-events:auto;}
+    .sheet{
+      position:fixed;left:0;right:0;bottom:0;z-index:81;
+      background:#fff;color:var(--ink);
+      border-radius:24px 24px 0 0;
+      transform:translateY(100%);transition:transform .3s cubic-bezier(.4,1.1,.6,1);
+      max-height:90vh;overflow-y:auto;
+      padding-bottom:calc(24px + env(safe-area-inset-bottom));
+    }
+    .sheet.open{transform:translateY(0);}
+    .sheet-handle{
+      width:44px;height:5px;background:var(--line);
+      border-radius:3px;margin:12px auto 8px;
+    }
+    .sheet-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 20px 14px;
+      border-bottom:1px solid var(--line);
+    }
+    .sheet-head h3{margin:0;font-size:17px;font-weight:900;letter-spacing:-0.02em;}
+    .sheet-close{
+      width:32px;height:32px;border-radius:50%;
+      background:var(--bg-soft);display:grid;place-items:center;font-size:18px;color:var(--ink-2);
+    }
+    .sheet-body{padding:18px 20px;}
+    .sheet-product{
+      display:grid;grid-template-columns:80px 1fr;gap:12px;
+      padding:12px;background:var(--bg-soft);border-radius:12px;margin-bottom:18px;
+    }
+    .sp-img{
+      width:80px;height:80px;border-radius:10px;
+      background-size:cover;background-position:center;background-color:#eee;
+    }
+    .sp-info .sp-name{font-weight:800;font-size:14px;line-height:1.35;}
+    .sp-info .sp-meta{font-size:12px;color:var(--ink-3);margin-top:3px;}
+    .sp-info .sp-price{font-size:16px;font-weight:900;color:var(--primary);margin-top:6px;letter-spacing:-0.02em;}
+
+    .sheet-field{margin-bottom:14px;}
+    .sheet-field label{
+      display:block;font-size:12px;font-weight:800;color:var(--ink-2);
+      margin-bottom:6px;letter-spacing:.02em;
+    }
+    .sheet-field input, .sheet-field select{
+      width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
+      font-size:14px;font-weight:700;color:var(--ink);background:#fff;outline:none;
+    }
+    .sheet-field input:focus, .sheet-field select:focus{
+      border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,53,.12);
+    }
+    .pax-steppers{display:flex;gap:10px;}
+    .pax-stepper{
+      flex:1;border:1.5px solid var(--line);border-radius:10px;
+      padding:10px 12px;display:flex;align-items:center;justify-content:space-between;
+    }
+    .ps-label{font-size:12px;font-weight:700;color:var(--ink-2);}
+    .ps-label span{font-size:10px;color:var(--ink-3);display:block;}
+    .ps-ctrl{display:flex;align-items:center;gap:10px;}
+    .ps-btn{
+      width:26px;height:26px;border-radius:50%;
+      background:var(--bg-soft);color:var(--ink);
+      display:grid;place-items:center;font-size:14px;font-weight:900;
+    }
+    .ps-btn:disabled{color:var(--ink-3);cursor:not-allowed;}
+    .ps-val{font-weight:900;min-width:18px;text-align:center;font-size:15px;}
+
+    .sheet-total{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding:14px;background:var(--ink);color:#fff;border-radius:12px;margin-top:8px;
+    }
+    .sheet-total .lb{font-size:12px;opacity:.7;}
+    .sheet-total .pr{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+
+    .sheet-cta{
+      width:100%;padding:16px;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:16px;margin-top:16px;
+      box-shadow:0 6px 20px rgba(255,107,53,.35);
+      transition:all .15s;
+    }
+    .sheet-cta:hover{background:var(--primary-dark);}
+
+    /* ==============================
+       Responsive
+       ============================== */
+    @media (max-width:1024px){
+      .feed-layout{grid-template-columns:1fr;}
+      .product-panel{display:none;}
+      .feed-card{padding:0;}
+      .feed-card-inner{
+        width:100%;height:100%;aspect-ratio:unset;max-width:unset;
+        border-radius:0;box-shadow:none;
+      }
+      .side-actions{right:8px;bottom:200px;}
+      .feed-bottom{left:12px;right:68px;bottom:20px;}
+    }
+    @media (max-width:768px){
+      .page-title{display:none;}
+      .h-btn{padding:7px 12px;font-size:11px;}
+      .filter{padding:7px 12px;font-size:12px;}
+      .side-btn .ico{width:40px;height:40px;font-size:18px;}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#feedScroller">본문 바로가기</a>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <header class="header">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <span class="page-title">크리에이터 피드</span>
+      <div class="header-actions">
+        <a href="ai-planner.html" class="h-btn">✦ AI</a>
+        <a href="index.html" class="h-btn">홈</a>
+      </div>
+    </header>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filterBar" role="tablist"></div>
+
+    <!-- LAYOUT -->
+    <div class="feed-layout">
+      <div class="feed-column" id="feedScroller" tabindex="0" aria-label="크리에이터 피드 스크롤"></div>
+
+      <!-- PC product panel -->
+      <aside class="product-panel" id="productPanel">
+        <div class="pp-empty">피드를 스크롤하면 상품 상세가 여기에 표시돼요</div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- BOOKING SHEET -->
+  <div class="sheet-overlay" onclick="closeBookSheet()"></div>
+  <aside class="sheet" id="bookSheet" aria-label="예약 패널">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h3>예약하기</h3>
+      <button class="sheet-close" onclick="closeBookSheet()" aria-label="닫기">×</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </aside>
+
+  <script>
+  /* =========================================================================
+     DUMMY DATA — Creator feed
+     ========================================================================= */
+  // TODO: API 연동 - GET /api/creator/feed?filter={tag}&cursor={cursor}
+  const CREATORS = [
+    {
+      id:'c1',
+      bg:'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'일본여행연구소', initial:'일', subs:'48만', verified:false },
+      title:'오사카 2박3일 가성비 완벽 루트 (진짜 현지인 꿀팁)',
+      description:'도톤보리·구로몬 시장·신사이바시까지 완벽 정복. 실제 지출 내역 영수증으로 공개합니다.',
+      tags:['일본','가성비'], countries:['japan'],
+      stats:{ likes:'12.4K', comments:'328', shares:'156', saves:'892' },
+      product:{
+        type:'패키지', orig:false,
+        name:'티웨이 왕복 + 도톤보리 호텔 2박',
+        img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 오사카', duration:'2박 3일',
+        price:298000, oldPrice:378000,
+        includes:['왕복 항공권 (티웨이)','도톤보리 호텔 2박 (조식 포함)','간사이 스루패스 2일권','공항 픽업/샌딩']
+      }
+    },
+    {
+      id:'c2',
+      bg:'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'베트남살이', initial:'베', subs:'23만', verified:true },
+      title:'다낭 신혼여행 5박 리얼 후기 - 예산 짜는 법부터 공개',
+      description:'프리미어빌리지 풀빌라 4박, 바나힐 1일, 호이안 등불 투어까지. 실제 800만원 예산 분배법.',
+      tags:['베트남','허니문'], countries:['vietnam'],
+      stats:{ likes:'8.7K', comments:'512', shares:'234', saves:'1.2K' },
+      product:{
+        type:'허니문 패키지', orig:false,
+        name:'대한항공 + 프리미어빌리지 풀빌라 4박',
+        img:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 다낭', duration:'5박 6일',
+        price:798000, oldPrice:980000,
+        includes:['왕복 항공권 (대한항공)','프리미어빌리지 풀빌라 4박','조식+석식 전일','커플 스파 1회','호이안 등불 크루즈']
+      }
+    },
+    {
+      id:'c3',
+      bg:'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'태국고수', initial:'태', subs:'67만', verified:true },
+      title:'방콕 호텔 3만원 vs 30만원 직접 가봤다, 차이가 어마어마',
+      description:'1박 3만원 게스트하우스부터 30만원 루프탑 호텔까지 실제 체류 영상. 가성비 승자는?',
+      tags:['태국'], countries:['thailand'],
+      stats:{ likes:'24.1K', comments:'1.4K', shares:'892', saves:'3.2K' },
+      product:{
+        type:'패키지', orig:false,
+        name:'에어아시아 + 수쿰빗 4성 호텔 3박',
+        img:'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 방콕', duration:'3박 4일',
+        price:248000, oldPrice:329000,
+        includes:['왕복 항공권 (에어아시아)','수쿰빗 4성 호텔 3박','BTS 스카이트레인 3일권','수상시장 1일 투어']
+      }
+    },
+    {
+      id:'c4',
+      bg:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'오마이트립 공식', initial:'O', subs:'ORIGINAL', verified:true, official:true },
+      title:'필리핀 세부 골프 패키지 완전 비교 - 단독 특가',
+      description:'세부 3대 골프장 라운딩 3회 + 샹그릴라 막탄 4박. 경쟁사 대비 28% 저렴.',
+      tags:['필리핀','골프'], countries:['philippines'],
+      stats:{ likes:'6.2K', comments:'187', shares:'421', saves:'1.8K' },
+      product:{
+        type:'ORIGINAL', orig:true,
+        name:'세부 골프 4박5일 오리지널 패키지',
+        img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 세부', duration:'4박 5일 · 라운딩 3회',
+        price:1290000, oldPrice:1790000,
+        includes:['왕복 항공권 (세부퍼시픽)','샹그릴라 막탄 리조트 4박','알타비스타 골프 라운딩 3회','전 라운드 카트+캐디','공항 픽업/샌딩']
+      }
+    },
+    {
+      id:'c5',
+      bg:'https://images.unsplash.com/photo-1480796927426-f609979314bd?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'여행하는부부', initial:'부', subs:'12만', verified:false },
+      title:'후쿠오카 당일치기 완벽 코스 8시간 - 8만원대 가능',
+      description:'아침 출국→점심 라멘→온천→야경→야식→귀국. 당일치기 풀타임 코스.',
+      tags:['일본'], countries:['japan'],
+      stats:{ likes:'3.8K', comments:'156', shares:'89', saves:'421' },
+      product:{
+        type:'항공', orig:false,
+        name:'진에어 왕복 (당일치기)',
+        img:'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
+        route:'부산 → 후쿠오카', duration:'당일',
+        price:89000, oldPrice:129000,
+        includes:['왕복 항공권 (진에어)','부산 공항 라운지 할인']
+      }
+    },
+    {
+      id:'c6',
+      bg:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'골프덕후진', initial:'골', subs:'8만', verified:false },
+      title:'방콕 골프 4박5일 올인클루시브 실제 비용 공개',
+      description:'시암 컨트리클럽 + 알파인 + 뉴스프링 3라운드. 캐디팁·그린피·카트 포함 80만원대.',
+      tags:['태국','골프'], countries:['thailand'],
+      stats:{ likes:'4.2K', comments:'298', shares:'178', saves:'1.1K' },
+      product:{
+        type:'골프 패키지', orig:false,
+        name:'시암 컨트리클럽 + 4성 호텔 4박 + 라운딩 4회',
+        img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 방콕', duration:'4박 5일',
+        price:798000, oldPrice:990000,
+        includes:['왕복 항공권 (타이항공)','4성 호텔 4박 (조식)','골프장 3곳 4라운드','전 라운드 카트+캐디','공항 픽업/샌딩']
+      }
+    },
+    {
+      id:'c7',
+      bg:'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'허니문플래너', initial:'허', subs:'19만', verified:true },
+      title:'교토 료칸 허니문 3박4일 - 벚꽃 시즌 완벽 플랜',
+      description:'유후인 료칸 3박 + 교토 기모노 체험 + 아라시야마 대나무숲. 2인 300만원 예산.',
+      tags:['일본','허니문'], countries:['japan'],
+      stats:{ likes:'15.7K', comments:'892', shares:'567', saves:'4.1K' },
+      product:{
+        type:'허니문 패키지', orig:false,
+        name:'대한항공 + 유후인 료칸 3박',
+        img:'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 후쿠오카/교토', duration:'3박 4일',
+        price:1490000, oldPrice:1890000,
+        includes:['왕복 항공권 (대한항공)','유후인 료칸 3박','전 일 가이세키 정식','교토 기모노 체험','아라시야마 투어']
+      }
+    },
+    {
+      id:'c8',
+      bg:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&h=1422&q=80',
+      creator:{ name:'패밀리트립', initial:'패', subs:'31만', verified:true },
+      title:'아이와 함께 다낭 5박6일, 키즈 프렌들리 꿀팁 모음',
+      description:'바나힐 테마파크+워터파크+풀빌라. 2세/5세 두 아이 데리고 안 힘든 루트 완전 정리.',
+      tags:['베트남','가족여행'], countries:['vietnam'],
+      stats:{ likes:'9.4K', comments:'621', shares:'312', saves:'2.3K' },
+      product:{
+        type:'가족여행 패키지', orig:false,
+        name:'비엣젯 + 패밀리 풀빌라 + 바나힐',
+        img:'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=800&q=80',
+        route:'인천 → 다낭', duration:'5박 6일',
+        price:1290000, oldPrice:1580000,
+        includes:['왕복 항공권 (비엣젯)','패밀리 풀빌라 5박','조식 전일','바나힐 1일권 (가족)','키즈 웰컴 키트']
+      }
+    }
+  ];
+
+  const FILTERS = [
+    { id:'all',         label:'전체' },
+    { id:'japan',       label:'🇯🇵 일본' },
+    { id:'vietnam',     label:'🇻🇳 베트남' },
+    { id:'thailand',    label:'🇹🇭 태국' },
+    { id:'philippines', label:'🇵🇭 필리핀' },
+    { id:'골프',         label:'⛳ 골프' },
+    { id:'허니문',       label:'💕 허니문' },
+    { id:'가족여행',     label:'👨‍👩‍👧 가족여행' }
+  ];
+
+  /* =========================================================================
+     STATE
+     ========================================================================= */
+  let currentFilter = 'all';
+  let cards = [];          // rendered items (with cycle suffix)
+  let likedSet = new Set();
+  let savedSet = new Set();
+  let followedSet = new Set();
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  /* =========================================================================
+     FILTER BAR
+     ========================================================================= */
+  function renderFilters(){
+    const el = document.getElementById('filterBar');
+    el.innerHTML = FILTERS.map(f =>
+      `<button class="filter ${f.id===currentFilter?'active':''}" data-id="${f.id}" role="tab">${f.label}</button>`
+    ).join('');
+    el.querySelectorAll('.filter').forEach(b => {
+      b.addEventListener('click', () => {
+        currentFilter = b.dataset.id;
+        renderFilters();
+        rebuildFeed();
+      });
+    });
+  }
+
+  function filteredSource(){
+    if(currentFilter === 'all') return CREATORS;
+    // country filter (japan|vietnam|thailand|philippines)
+    if(['japan','vietnam','thailand','philippines'].includes(currentFilter)){
+      return CREATORS.filter(c => c.countries.includes(currentFilter));
+    }
+    // tag filter (골프|허니문|가족여행)
+    return CREATORS.filter(c => c.tags.includes(currentFilter));
+  }
+
+  /* =========================================================================
+     FEED RENDER
+     ========================================================================= */
+  function rebuildFeed(){
+    cards = filteredSource().map((c, i) => ({...c, uniq:`${c.id}-0-${i}`}));
+    const scroller = document.getElementById('feedScroller');
+    scroller.innerHTML = '';
+    renderCards(cards, scroller, 0);
+    scroller.scrollTo({top:0});
+    // sync first card panel
+    if(cards[0]) updateProductPanel(cards[0]);
+    // seed second batch for infinite scroll feel (if only few items)
+    if(cards.length < 4) loadMore();
+  }
+
+  function renderCards(list, scroller, startIdx){
+    list.forEach((c, i) => {
+      const idx = startIdx + i;
+      const article = document.createElement('article');
+      article.className = 'feed-card';
+      article.dataset.idx = idx;
+      article.dataset.uniq = c.uniq;
+      article.innerHTML = cardHTML(c, idx);
+      scroller.appendChild(article);
+      attachCardHandlers(article, c, idx);
+      activeIO.observe(article);
+    });
+  }
+
+  function cardHTML(c, idx){
+    const liked = likedSet.has(c.uniq);
+    const saved = savedSet.has(c.uniq);
+    const followed = followedSet.has(c.creator.name);
+    const origTag = c.product.orig ? '<span class="f-chip orig">ORIGINAL</span>' : '';
+    const verifiedMark = c.creator.verified ? '<span class="verified" aria-label="인증된 크리에이터">✓</span>' : '';
+    return `
+      <div class="feed-card-inner">
+        <div class="feed-bg" style="background-image:url('${c.bg}')" loading="lazy"></div>
+        <div class="feed-gradient"></div>
+
+        <div class="feed-top">
+          ${origTag}
+          ${c.tags.map(t => `<span class="f-chip">#${t}</span>`).join('')}
+        </div>
+
+        <div class="feed-bottom">
+          <div class="creator-row">
+            <div class="c-avatar">${c.creator.initial}</div>
+            <div class="c-info">
+              <div class="c-name">${c.creator.name}${verifiedMark}</div>
+              <div class="c-subs">${c.creator.subs} 구독자</div>
+            </div>
+            <button class="c-follow ${followed?'following':''}" data-action="follow">${followed?'✓ 팔로잉':'+ 팔로우'}</button>
+          </div>
+
+          <h2 class="f-title">${c.title}</h2>
+
+          <div class="mini-product" data-action="view-product">
+            <div class="mini-img" style="background-image:url('${c.product.img}')"></div>
+            <div class="mini-info">
+              <span class="mini-tag">${c.product.type}</span>
+              <div class="mini-name">${c.product.name}</div>
+              <div class="mini-price">${krw(c.product.price)}<span class="strike">${krw(c.product.oldPrice)}</span></div>
+            </div>
+          </div>
+
+          <button class="book-btn" data-action="book">지금 예약하기 →</button>
+        </div>
+
+        <div class="side-actions">
+          <button class="side-btn like ${liked?'active':''}" data-action="like" aria-label="좋아요">
+            <span class="ico">${liked?'❤️':'🤍'}</span>
+            <span class="num">${c.stats.likes}</span>
+          </button>
+          <button class="side-btn" data-action="comment" aria-label="댓글">
+            <span class="ico">💬</span>
+            <span class="num">${c.stats.comments}</span>
+          </button>
+          <button class="side-btn" data-action="share" aria-label="공유">
+            <span class="ico">🔗</span>
+            <span class="num">공유</span>
+          </button>
+          <button class="side-btn ${saved?'active':''}" data-action="save" aria-label="저장">
+            <span class="ico">${saved?'🔖':'📑'}</span>
+            <span class="num">${c.stats.saves}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachCardHandlers(article, c, idx){
+    article.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const a = btn.dataset.action;
+        if(a === 'like'){ toggleLike(c, article); }
+        else if(a === 'save'){ toggleSave(c, article); }
+        else if(a === 'follow'){ toggleFollow(c, article); }
+        else if(a === 'share'){ handleShare(c); }
+        else if(a === 'comment'){ alert('댓글 기능은 곧 제공돼요 (프로토타입)'); }
+        else if(a === 'book' || a === 'view-product'){ openBookSheet(c); }
+      });
+    });
+  }
+
+  function toggleLike(c, article){
+    const uniq = article.dataset.uniq;
+    if(likedSet.has(uniq)) likedSet.delete(uniq); else likedSet.add(uniq);
+    const btn = article.querySelector('.side-btn.like');
+    const liked = likedSet.has(uniq);
+    btn.classList.toggle('active', liked);
+    btn.querySelector('.ico').textContent = liked ? '❤️' : '🤍';
+    // TODO: API 연동 - POST /api/creator/feed/{id}/like
+  }
+  function toggleSave(c, article){
+    const uniq = article.dataset.uniq;
+    if(savedSet.has(uniq)) savedSet.delete(uniq); else savedSet.add(uniq);
+    const btn = article.querySelector('.side-btn[data-action="save"]');
+    const saved = savedSet.has(uniq);
+    btn.classList.toggle('active', saved);
+    btn.querySelector('.ico').textContent = saved ? '🔖' : '📑';
+    // TODO: API 연동 - POST /api/creator/feed/{id}/save
+  }
+  function toggleFollow(c, article){
+    const name = c.creator.name;
+    if(followedSet.has(name)) followedSet.delete(name); else followedSet.add(name);
+    document.querySelectorAll('.feed-card').forEach(card => {
+      if(cards[+card.dataset.idx]?.creator.name === name){
+        const btn = card.querySelector('.c-follow');
+        const f = followedSet.has(name);
+        btn.classList.toggle('following', f);
+        btn.textContent = f ? '✓ 팔로잉' : '+ 팔로우';
+      }
+    });
+    // TODO: API 연동 - POST /api/creator/{name}/follow
+  }
+  function handleShare(c){
+    if(navigator.share){
+      navigator.share({ title:c.title, text:c.description, url:location.href }).catch(()=>{});
+    } else {
+      navigator.clipboard?.writeText(location.href);
+      alert('링크가 복사되었습니다');
+    }
+  }
+
+  /* =========================================================================
+     Active card detection — syncs right panel
+     ========================================================================= */
+  const activeIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting && e.intersectionRatio > 0.6){
+        const idx = +e.target.dataset.idx;
+        if(cards[idx]) updateProductPanel(cards[idx]);
+      }
+    });
+  }, {
+    root: document.getElementById('feedScroller'),
+    threshold: [0.6]
+  });
+
+  function updateProductPanel(c){
+    const el = document.getElementById('productPanel');
+    const p = c.product;
+    el.innerHTML = `
+      <div class="pp-hero" style="background-image:url('${p.img}')"></div>
+      <div class="pp-tags">
+        ${p.orig ? '<span class="pp-tag orig">ORIGINAL</span>' : ''}
+        <span class="pp-tag">${p.type}</span>
+        ${c.tags.map(t => `<span class="pp-tag">#${t}</span>`).join('')}
+      </div>
+      <h3 class="pp-title">${p.name}</h3>
+      <p class="pp-desc">${c.description}</p>
+
+      <div class="pp-creator">
+        <div class="pp-ca">${c.creator.initial}</div>
+        <div class="pp-cinfo">
+          <div class="pp-cname">${c.creator.name}</div>
+          <div class="pp-csubs">${c.creator.subs} 구독자 · "${c.title}"</div>
+        </div>
+      </div>
+
+      <div class="pp-section">
+        <h4>상품 정보</h4>
+        <div class="pp-row"><span class="ic">✈️</span><span class="k">노선</span><span class="v">${p.route}</span></div>
+        <div class="pp-row"><span class="ic">📅</span><span class="k">기간</span><span class="v">${p.duration}</span></div>
+      </div>
+
+      <div class="pp-section">
+        <h4>포함 사항</h4>
+        <ul class="pp-includes">
+          ${p.includes.map(i => `<li>${i}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="pp-price-box">
+        <div>
+          <div class="lb">1인 기준 최저가</div>
+          <span class="old">${krw(p.oldPrice)}</span>
+        </div>
+        <div class="pr">${krw(p.price)}</div>
+      </div>
+
+      <button class="pp-cta" onclick='openBookSheetById("${c.id}")'>지금 예약하기 →</button>
+    `;
+  }
+
+  /* =========================================================================
+     Infinite scroll — cycle data when near end
+     ========================================================================= */
+  let loading = false;
+  function loadMore(){
+    if(loading) return;
+    loading = true;
+    const src = filteredSource();
+    if(src.length === 0){ loading=false; return; }
+    const startIdx = cards.length;
+    const cycle = Math.floor(startIdx / src.length) + 1;
+    const newBatch = src.map((c, i) => ({...c, uniq:`${c.id}-${cycle}-${i}`}));
+    cards.push(...newBatch);
+    const scroller = document.getElementById('feedScroller');
+    renderCards(newBatch, scroller, startIdx);
+    loading = false;
+  }
+
+  const scroller = document.getElementById('feedScroller');
+  scroller.addEventListener('scroll', () => {
+    if(scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight - 300){
+      loadMore();
+    }
+  });
+
+  /* =========================================================================
+     Booking Bottom Sheet
+     ========================================================================= */
+  function openBookSheetById(id){
+    const c = CREATORS.find(x => x.id === id) || cards.find(x => x.id === id);
+    if(c) openBookSheet(c);
+  }
+
+  const sheetState = { creator:null, date:'2026.05.10 출발', paxAdults:2, paxChildren:0 };
+
+  function openBookSheet(c){
+    sheetState.creator = c;
+    sheetState.paxAdults = 2;
+    sheetState.paxChildren = 0;
+    renderSheet();
+    document.getElementById('bookSheet').classList.add('open');
+    document.querySelector('.sheet-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeBookSheet(){
+    document.getElementById('bookSheet').classList.remove('open');
+    document.querySelector('.sheet-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function renderSheet(){
+    const c = sheetState.creator;
+    if(!c) return;
+    const p = c.product;
+    const total = computeSheetTotal();
+    document.getElementById('sheetBody').innerHTML = `
+      <div class="sheet-product">
+        <div class="sp-img" style="background-image:url('${p.img}')"></div>
+        <div class="sp-info">
+          <div class="sp-name">${p.name}</div>
+          <div class="sp-meta">${p.route} · ${p.duration}</div>
+          <div class="sp-price">1인 ${krw(p.price)}~</div>
+        </div>
+      </div>
+
+      <div class="sheet-field">
+        <label>출발 날짜</label>
+        <select id="sheetDate">
+          <option>2026.05.10 출발</option>
+          <option>2026.05.17 출발</option>
+          <option>2026.05.24 출발</option>
+          <option>2026.06.07 출발</option>
+          <option>2026.06.14 출발</option>
+        </select>
+      </div>
+
+      <div class="sheet-field">
+        <label>인원 선택</label>
+        <div class="pax-steppers">
+          <div class="pax-stepper">
+            <div class="ps-label">성인<span>(만 12세 이상)</span></div>
+            <div class="ps-ctrl">
+              <button class="ps-btn" onclick="stepPax('adults',-1)" ${sheetState.paxAdults<=1?'disabled':''}>−</button>
+              <span class="ps-val">${sheetState.paxAdults}</span>
+              <button class="ps-btn" onclick="stepPax('adults',1)">+</button>
+            </div>
+          </div>
+          <div class="pax-stepper">
+            <div class="ps-label">아동<span>(만 2-11세)</span></div>
+            <div class="ps-ctrl">
+              <button class="ps-btn" onclick="stepPax('children',-1)" ${sheetState.paxChildren<=0?'disabled':''}>−</button>
+              <span class="ps-val">${sheetState.paxChildren}</span>
+              <button class="ps-btn" onclick="stepPax('children',1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-total">
+        <div>
+          <div class="lb">총 결제 금액</div>
+          <div style="font-size:11px;opacity:.6;">성인 ${sheetState.paxAdults}명${sheetState.paxChildren>0?' + 아동 '+sheetState.paxChildren+'명':''}</div>
+        </div>
+        <div class="pr">${krw(total)}</div>
+      </div>
+
+      <button class="sheet-cta" onclick="proceedToCheckout()">${krw(total)} 결제하기 →</button>
+    `;
+
+    document.getElementById('sheetDate').addEventListener('change', (e) => {
+      sheetState.date = e.target.value;
+    });
+  }
+
+  function stepPax(key, delta){
+    if(key === 'adults'){
+      sheetState.paxAdults = Math.max(1, Math.min(9, sheetState.paxAdults + delta));
+    } else {
+      sheetState.paxChildren = Math.max(0, Math.min(6, sheetState.paxChildren + delta));
+    }
+    renderSheet();
+  }
+
+  function computeSheetTotal(){
+    const p = sheetState.creator.product;
+    return p.price * sheetState.paxAdults + Math.round(p.price * 0.7) * sheetState.paxChildren;
+  }
+
+  function proceedToCheckout(){
+    const c = sheetState.creator;
+    const p = c.product;
+    const adults = sheetState.paxAdults;
+    const children = sheetState.paxChildren;
+    const total = computeSheetTotal();
+
+    // Adapt creator product to checkout.html expected shape
+    const payload = {
+      flight: {
+        airline: p.route.split(' → ')[0] + ' 출발',
+        number: 'FEED-' + c.id,
+        out: { dep:'--:--', arr:'--:--', depAp:p.route.split(' → ')[0], arrAp:p.route.split(' → ')[1], dur:'-' },
+        ret: { dep:'--:--', arr:'--:--', depAp:p.route.split(' → ')[1], arrAp:p.route.split(' → ')[0], dur:'-' },
+        direct:true, price: Math.round(p.price * 0.4)
+      },
+      hotel: {
+        name: p.name + ' (크리에이터 번들)',
+        areaLabel: p.route.split(' → ')[1],
+        price: Math.round(p.price * 0.6 / Math.max(1, parseInt(p.duration)||1))
+      },
+      activities: p.includes.slice(2).map((i, idx) => ({
+        title: i, meta: '크리에이터 추천 포함', price: 0
+      })),
+      paxCount: adults + children,
+      nights: parseInt(p.duration) || 2,
+      dates: sheetState.date,
+      final: total,
+      source:'creator-feed',
+      creatorId: c.creator.name
+    };
+
+    // TODO: API 연동 - POST /api/cart { source:'feed', creatorId, product, pax, date }
+    sessionStorage.setItem('omt_package', JSON.stringify(payload));
+    location.href = 'checkout.html';
+  }
+
+  /* =========================================================================
+     A11y: Escape closes sheet
+     ========================================================================= */
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.getElementById('bookSheet').classList.contains('open')){
+      closeBookSheet();
+    }
+  });
+
+  /* =========================================================================
+     INIT
+     ========================================================================= */
+  renderFilters();
+  rebuildFeed();
+  </script>
+</body>
+</html>

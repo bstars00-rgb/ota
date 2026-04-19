@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다이나믹 패키지 만들기 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* Tokens (shared) */
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --secondary-soft:#E3F2FD;
+      --accent:#FFD23F; --success:#10B981;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --shadow:0 6px 20px rgba(0,0,0,.08); --shadow-lg:0 20px 40px rgba(0,0,0,.12);
+      --header-h:64px; --max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    img{display:block;max-width:100%;}
+    ul{list-style:none;margin:0;padding:0;}
+    input,select,textarea{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;letter-spacing:-0.02em;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;box-shadow:0 4px 12px rgba(255,107,53,.35);}
+    .logo-mark::after{content:"O";}
+    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+    .btn-ghost:hover{background:var(--bg-soft);color:var(--ink);}
+
+    /* ==============================
+       Progress Bar
+       ============================== */
+    .progress-wrap{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      padding: 24px 0 20px;
+    }
+    .progress-steps{
+      display:flex;align-items:center;justify-content:center;gap:14px;
+      max-width:600px;margin:0 auto;
+    }
+    .p-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+    .p-step-circle{
+      width:40px;height:40px;border-radius:50%;
+      background:#fff;border:2px solid var(--line);color:var(--ink-3);
+      display:grid;place-items:center;
+      font-weight:900;font-size:15px;
+      transition:all .25s;
+      flex-shrink:0;
+    }
+    .p-step.active .p-step-circle{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 0 0 4px rgba(255,107,53,.18);}
+    .p-step.done .p-step-circle{background:var(--success);border-color:var(--success);color:#fff;}
+    .p-step.done .p-step-circle::after{content:"✓";}
+    .p-step.done .p-step-circle .n{display:none;}
+    .p-step-label{font-size:13px;font-weight:700;color:var(--ink-3);margin-top:8px;}
+    .p-step.active .p-step-label,.p-step.done .p-step-label{color:var(--ink);}
+    .p-line{
+      flex:1;height:2px;background:var(--line);
+      position:relative;margin-top:-20px;
+    }
+    .p-line.done{background:var(--success);}
+
+    /* ==============================
+       Builder Layout
+       ============================== */
+    .builder-grid{
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      padding: 28px 24px 100px;
+      max-width:var(--max-w); margin: 0 auto;
+      align-items:flex-start;
+    }
+    .builder-main{min-width:0;}
+
+    /* Step panels */
+    .step-panel{
+      background:#fff;
+      border-radius:var(--radius-lg);
+      padding:28px;
+      border:1px solid var(--line);
+    }
+    .step-panel[hidden]{display:none;}
+    .step-panel h2{
+      margin:0 0 6px;font-size:22px;font-weight:900;letter-spacing:-0.02em;
+    }
+    .step-panel .sub{margin:0 0 22px;font-size:14px;color:var(--ink-2);}
+
+    /* Flight search row (Step 1) */
+    .flight-form{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1.4fr 0.8fr;
+      gap:10px;
+      margin-bottom:22px;
+      padding:14px;
+      background:var(--bg-soft);
+      border-radius:var(--radius);
+    }
+    .ff-field{display:flex;flex-direction:column;padding:4px 10px;}
+    .ff-field label{font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;}
+    .ff-field select,.ff-field input{border:none;outline:none;background:transparent;font-size:14px;font-weight:700;color:var(--ink);padding:4px 0;}
+
+    /* Flight cards */
+    .flight-list{display:flex;flex-direction:column;gap:10px;}
+    .flight-card{
+      background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+      padding:16px 20px;
+      display:grid;
+      grid-template-columns: 70px 1fr auto;
+      gap:16px;align-items:center;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .flight-card:hover{border-color:var(--primary);box-shadow:var(--shadow);}
+    .flight-card.selected{border-color:var(--primary);background:var(--primary-soft);}
+    .airline-logo{
+      width:48px;height:48px;border-radius:10px;
+      background:linear-gradient(135deg,var(--secondary),#64B5F6);
+      color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;
+      letter-spacing:-0.02em;
+    }
+    .flight-legs{display:flex;flex-direction:column;gap:6px;min-width:0;}
+    .flight-leg{display:flex;align-items:center;gap:10px;font-size:13px;}
+    .flight-leg .tag{font-size:11px;color:var(--ink-3);font-weight:700;width:40px;flex-shrink:0;}
+    .flight-leg .time{font-weight:800;font-size:15px;color:var(--ink);}
+    .flight-leg .airport{color:var(--ink-2);font-weight:600;}
+    .flight-leg .dur{font-size:11px;color:var(--ink-3);margin:0 4px;display:inline-flex;align-items:center;gap:4px;}
+    .flight-leg .dur::before,.flight-leg .dur::after{content:"";flex:1;height:1px;background:var(--ink-3);opacity:.35;width:20px;display:inline-block;}
+    .flight-leg .direct{color:var(--success);font-weight:700;font-size:11px;}
+    .flight-airline-name{font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;}
+    .flight-price-col{text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+    .flight-price{font-size:20px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .flight-price small{font-size:11px;color:var(--ink-3);font-weight:600;}
+    .btn-select{
+      padding:8px 16px;border-radius:8px;
+      background:var(--ink);color:#fff;
+      font-weight:800;font-size:12px;
+      transition:background .15s;
+    }
+    .flight-card.selected .btn-select{background:var(--success);}
+    .flight-card.selected .btn-select::before{content:"✓ ";}
+    .btn-select:hover{background:var(--primary);}
+
+    /* Hotel filters + list */
+    .hotel-filters{
+      display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;
+      padding:14px;background:var(--bg-soft);border-radius:var(--radius);
+    }
+    .hf-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:150px;}
+    .hf-group label{font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;}
+    .hf-group select{
+      padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+      background:#fff;font-weight:700;font-size:13px;color:var(--ink);
+      outline:none;
+    }
+    .date-notice{
+      font-size:13px;color:var(--secondary);
+      background:var(--secondary-soft);
+      padding:10px 14px;border-radius:10px;
+      margin-bottom:16px;
+      display:flex;align-items:center;gap:8px;
+    }
+
+    .hotel-list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+    .hotel-card{
+      background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+      overflow:hidden;display:flex;flex-direction:column;
+      transition:border-color .15s, box-shadow .15s, transform .15s;
+    }
+    .hotel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+    .hotel-card.selected{border-color:var(--primary);background:var(--primary-soft);}
+    .h-thumb{aspect-ratio:16/10;background-size:cover;background-position:center;background-color:#eee;}
+    .h-body{padding:14px 16px;display:flex;flex-direction:column;flex:1;}
+    .h-stars{color:var(--accent);font-size:12px;letter-spacing:2px;margin-bottom:4px;}
+    .h-name{font-weight:800;font-size:15px;letter-spacing:-0.01em;}
+    .h-area{font-size:12px;color:var(--ink-3);margin-top:2px;}
+    .h-meta{display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:11px;color:var(--ink-2);flex:1;}
+    .h-score{padding:2px 6px;background:var(--primary-soft);color:var(--primary);border-radius:5px;font-weight:800;font-size:11px;}
+    .h-price-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;border-top:1px dashed var(--line);}
+    .h-per{font-size:11px;color:var(--ink-3);}
+    .h-price{font-size:17px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .h-select-bar{
+      margin-top:10px;padding:10px;border-radius:8px;
+      background:var(--ink);color:#fff;
+      text-align:center;font-weight:800;font-size:12px;
+      transition:background .15s;
+      cursor:pointer;
+    }
+    .hotel-card.selected .h-select-bar{background:var(--success);}
+    .hotel-card.selected .h-select-bar::before{content:"✓ ";}
+
+    /* Activities */
+    .act-cats{
+      display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;
+    }
+    .act-cats::-webkit-scrollbar{display:none;}
+    .act-cat{
+      padding:10px 16px;border-radius:999px;
+      font-weight:700;font-size:13px;color:var(--ink-2);
+      background:var(--bg-soft);white-space:nowrap;
+      transition:background .15s, color .15s;
+    }
+    .act-cat.active{background:var(--ink);color:#fff;}
+
+    .act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .act-card{
+      background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);
+      overflow:hidden;display:flex;flex-direction:column;
+      transition:border-color .15s, transform .15s;
+    }
+    .act-card.selected{border-color:var(--primary);}
+    .a-thumb{aspect-ratio:16/10;background-size:cover;background-position:center;}
+    .a-body{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1;}
+    .a-title{font-weight:800;font-size:13px;line-height:1.35;}
+    .a-meta{font-size:11px;color:var(--ink-3);flex:1;margin-top:2px;}
+    .a-price-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+    .a-price{font-size:15px;font-weight:900;color:var(--primary);}
+    .btn-add{
+      padding:6px 12px;border-radius:8px;font-weight:800;font-size:11px;
+      background:var(--primary-soft);color:var(--primary);border:1.5px solid var(--primary);
+      transition:all .15s;
+    }
+    .btn-add:hover{background:var(--primary);color:#fff;}
+    .act-card.selected .btn-add{background:var(--success);color:#fff;border-color:var(--success);}
+    .act-card.selected .btn-add::before{content:"✓ 추가됨 · ";}
+
+    /* Step actions */
+    .step-actions{
+      display:flex;justify-content:space-between;gap:10px;margin-top:22px;
+    }
+    .btn-prev, .btn-next, .btn-skip{
+      padding:14px 28px;border-radius:12px;font-weight:800;font-size:14px;
+      transition:all .15s;
+    }
+    .btn-prev{background:var(--bg-soft);color:var(--ink-2);}
+    .btn-prev:hover{background:var(--line);}
+    .btn-next{background:var(--primary);color:#fff;margin-left:auto;}
+    .btn-next:hover{background:var(--primary-dark);}
+    .btn-next:disabled{background:var(--line);color:var(--ink-3);cursor:not-allowed;}
+    .btn-skip{background:transparent;color:var(--ink-3);}
+    .btn-skip:hover{color:var(--ink);}
+
+    /* ==============================
+       Summary Panel
+       ============================== */
+    .summary-panel{
+      background:#fff;border-radius:var(--radius-lg);
+      border:1px solid var(--line);padding:22px;
+      position:sticky;top:calc(var(--header-h) + 16px);
+    }
+    .sp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+    .sp-head h3{font-size:16px;font-weight:900;margin:0;letter-spacing:-0.02em;}
+    .sp-head .pax{font-size:12px;color:var(--ink-3);font-weight:600;}
+
+    .sp-empty{
+      padding:24px 12px;text-align:center;
+      font-size:13px;color:var(--ink-3);
+      border:1.5px dashed var(--line);border-radius:10px;
+    }
+    .sp-items{display:flex;flex-direction:column;gap:10px;}
+    .sp-item{
+      display:grid;
+      grid-template-columns: 28px 1fr auto 24px;
+      gap:8px;align-items:flex-start;
+      padding:12px;background:var(--bg-soft);border-radius:10px;
+    }
+    .sp-icon{font-size:18px;line-height:1.2;}
+    .sp-item-main{min-width:0;}
+    .sp-item-type{font-size:10px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;}
+    .sp-item-title{font-size:13px;font-weight:700;line-height:1.35;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sp-item-sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .sp-item-price{font-size:14px;font-weight:900;color:var(--ink);white-space:nowrap;align-self:center;}
+    .sp-item-remove{
+      width:24px;height:24px;border-radius:50%;
+      background:#fff;color:var(--ink-3);
+      display:grid;place-items:center;font-size:14px;
+      transition:background .15s, color .15s;
+    }
+    .sp-item-remove:hover{background:#fee; color:#c00;}
+
+    .sp-divider{height:1px;background:var(--line);margin:14px 0;}
+    .sp-totals{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);}
+    .sp-totals-row{display:flex;justify-content:space-between;}
+    .sp-totals-row.discount{color:var(--primary);font-weight:700;}
+    .sp-grand{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding:14px;background:var(--ink);color:#fff;border-radius:10px;margin:14px 0;
+    }
+    .sp-grand .label{font-size:12px;opacity:.7;}
+    .sp-grand .total{font-size:22px;font-weight:900;letter-spacing:-0.02em;color:var(--accent);}
+    .sp-cta{
+      width:100%;padding:15px;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-weight:900;font-size:15px;
+      box-shadow:0 6px 20px rgba(255,107,53,.35);
+      transition:all .15s;
+    }
+    .sp-cta:hover{background:var(--primary-dark);transform:translateY(-1px);}
+    .sp-cta:disabled{background:var(--line);color:var(--ink-3);box-shadow:none;cursor:not-allowed;transform:none;}
+
+    /* ==============================
+       Mobile Summary Bar + Sheet
+       ============================== */
+    .m-sum-bar{display:none;}
+    .sheet-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;}
+    .sheet-overlay.open{opacity:1;pointer-events:auto;}
+    .sheet{
+      position:fixed;left:0;right:0;bottom:0;z-index:71;
+      background:#fff;border-radius:20px 20px 0 0;
+      transform:translateY(100%);transition:transform .3s ease;
+      max-height:80vh;overflow-y:auto;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+    .sheet.open{transform:translateY(0);}
+    .sheet-handle{
+      width:40px;height:4px;background:var(--line);
+      border-radius:2px;margin:10px auto 4px;
+    }
+
+    /* ==============================
+       Responsive
+       ============================== */
+    @media (max-width: 1024px){
+      .builder-grid{grid-template-columns:1fr;padding:18px 16px 120px;}
+      .summary-panel{display:none;}
+      .hotel-list{grid-template-columns:1fr;}
+      .act-grid{grid-template-columns:repeat(2,1fr);}
+      .flight-form{grid-template-columns:1fr 1fr;}
+
+      .m-sum-bar{
+        display:flex;align-items:center;gap:10px;
+        position:fixed;left:0;right:0;bottom:0;z-index:55;
+        background:#fff;border-top:1px solid var(--line);
+        padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+      }
+      .m-sum-info{flex:1;min-width:0;}
+      .m-sum-label{font-size:10px;color:var(--ink-3);font-weight:700;}
+      .m-sum-price{font-size:18px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+      .m-sum-price small{font-size:11px;color:var(--ink-3);font-weight:600;}
+      .m-sum-view{
+        padding:12px 14px;border-radius:10px;background:var(--bg-soft);
+        font-weight:700;font-size:12px;color:var(--ink-2);
+      }
+      .m-sum-next{
+        padding:14px 20px;border-radius:10px;background:var(--primary);
+        color:#fff;font-weight:900;font-size:14px;white-space:nowrap;
+      }
+      .m-sum-next:disabled{background:var(--line);color:var(--ink-3);}
+    }
+
+    @media (max-width: 768px){
+      :root{--header-h:56px;}
+      .progress-wrap{padding:16px 12px 14px;}
+      .p-step-circle{width:34px;height:34px;font-size:13px;}
+      .p-step-label{font-size:11px;}
+      .p-line{margin-top:-18px;}
+
+      .step-panel{padding:18px;border-radius:var(--radius);}
+      .step-panel h2{font-size:18px;}
+
+      .flight-form{grid-template-columns:1fr 1fr;}
+      .flight-card{grid-template-columns:1fr;gap:12px;padding:14px;}
+      .flight-price-col{flex-direction:row;justify-content:space-between;align-items:center;text-align:left;}
+
+      .act-grid{grid-template-columns:1fr;}
+      .hotel-filters{flex-direction:column;}
+      .hf-group{min-width:0;}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- A11y: Skip link -->
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+  <style>.skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;}.skip-link:focus{left:0;}</style>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <div class="header-actions">
+        <a href="ai-planner.html" class="btn-ghost">✦ AI 플래너</a>
+        <a href="index.html" class="btn-ghost">← 홈</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-steps" id="progressSteps">
+      <div class="p-step active" data-step="1">
+        <div class="p-step-circle"><span class="n">1</span></div>
+        <div class="p-step-label">항공 선택</div>
+      </div>
+      <div class="p-line" data-line="1"></div>
+      <div class="p-step" data-step="2">
+        <div class="p-step-circle"><span class="n">2</span></div>
+        <div class="p-step-label">호텔 선택</div>
+      </div>
+      <div class="p-line" data-line="2"></div>
+      <div class="p-step" data-step="3">
+        <div class="p-step-circle"><span class="n">3</span></div>
+        <div class="p-step-label">액티비티</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILDER -->
+  <main class="builder-grid">
+    <section class="builder-main">
+      <!-- STEP 1: FLIGHT -->
+      <div class="step-panel" data-step-panel="1">
+        <h2>✈️ 어떤 항공편으로 가시나요?</h2>
+        <p class="sub">왕복 기준 · 1인 가격</p>
+
+        <form class="flight-form" onsubmit="return false;">
+          <div class="ff-field">
+            <label>출발지</label>
+            <select id="ffDep">
+              <option>인천 (ICN)</option>
+              <option>김포 (GMP)</option>
+              <option>김해 (PUS)</option>
+              <option>대구 (TAE)</option>
+            </select>
+          </div>
+          <div class="ff-field">
+            <label>도착지</label>
+            <select id="ffArr">
+              <option>오사카 (KIX)</option>
+              <option>도쿄 (NRT)</option>
+              <option>후쿠오카 (FUK)</option>
+            </select>
+          </div>
+          <div class="ff-field">
+            <label>여행 날짜</label>
+            <input type="text" id="ffDate" value="2026.04.25 - 2026.04.28" readonly style="cursor:pointer;" />
+          </div>
+          <div class="ff-field">
+            <label>인원</label>
+            <select id="ffPax">
+              <option>성인 2명</option>
+              <option>성인 1명</option>
+              <option>성인 2명, 아동 1명</option>
+              <option>성인 2명, 아동 2명</option>
+              <option>성인 4명</option>
+            </select>
+          </div>
+        </form>
+
+        <div class="flight-list" id="flightList"></div>
+
+        <div class="step-actions">
+          <span></span>
+          <button class="btn-next" data-action="next" disabled>다음 (호텔 선택) →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: HOTEL -->
+      <div class="step-panel" data-step-panel="2" hidden>
+        <h2>🏨 어느 호텔에 묵으시나요?</h2>
+        <p class="sub">선택한 항공편 날짜에 맞춰 자동 필터링되었어요</p>
+
+        <div class="date-notice" id="hotelDateNotice">📅 날짜 정보를 불러오는 중...</div>
+
+        <div class="hotel-filters">
+          <div class="hf-group">
+            <label>가격대 (1박)</label>
+            <select id="hfPrice">
+              <option value="all">전체</option>
+              <option value="low">10만원 이하</option>
+              <option value="mid">10~20만원</option>
+              <option value="high">20만원 이상</option>
+            </select>
+          </div>
+          <div class="hf-group">
+            <label>성급</label>
+            <select id="hfStars">
+              <option value="all">전체</option>
+              <option value="5">5성급</option>
+              <option value="4">4성급</option>
+              <option value="3">3성급</option>
+            </select>
+          </div>
+          <div class="hf-group">
+            <label>위치</label>
+            <select id="hfArea">
+              <option value="all">전체</option>
+              <option value="umeda">우메다</option>
+              <option value="namba">난바</option>
+              <option value="shinsaibashi">신사이바시</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hotel-list" id="hotelList"></div>
+
+        <div class="step-actions">
+          <button class="btn-prev" data-action="prev">← 이전</button>
+          <button class="btn-next" data-action="next" disabled>다음 (액티비티) →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: ACTIVITY -->
+      <div class="step-panel" data-step-panel="3" hidden>
+        <h2>🎫 추가할 액티비티가 있나요?</h2>
+        <p class="sub">선택사항이에요. 원하는 만큼 추가하거나 건너뛸 수 있어요</p>
+
+        <div class="act-cats" id="actCats"></div>
+        <div class="act-grid" id="actGrid"></div>
+
+        <div class="step-actions">
+          <button class="btn-prev" data-action="prev">← 이전</button>
+          <button class="btn-skip" data-action="skip">건너뛰기</button>
+          <button class="btn-next" data-action="checkout">예약 진행 →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUMMARY PANEL (PC) -->
+    <aside class="summary-panel" id="summaryPanel">
+      <div class="sp-head">
+        <h3>예약 요약</h3>
+        <span class="pax" id="spPax">성인 2명</span>
+      </div>
+      <div id="sumBody">
+        <div class="sp-empty">선택한 상품이 여기에 표시돼요</div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- MOBILE SUMMARY BAR -->
+  <div class="m-sum-bar">
+    <div class="m-sum-info">
+      <div class="m-sum-label">총 예상 가격</div>
+      <div class="m-sum-price"><span id="mSumPrice">0원</span> <small id="mSumPax">성인 2명</small></div>
+    </div>
+    <button class="m-sum-view" onclick="openSheet()">요약 ▲</button>
+    <button class="m-sum-next" id="mSumNext" onclick="mobileNext()" disabled>다음 →</button>
+  </div>
+
+  <!-- MOBILE SUMMARY SHEET -->
+  <div class="sheet-overlay" onclick="closeSheet()"></div>
+  <aside class="sheet" id="sumSheet" aria-label="예약 요약">
+    <div class="sheet-handle"></div>
+    <div style="padding:16px 20px;">
+      <div class="sp-head">
+        <h3>예약 요약</h3>
+        <button onclick="closeSheet()" style="font-size:22px;color:var(--ink-3);">×</button>
+      </div>
+      <div id="sumBodyM"></div>
+    </div>
+  </aside>
+
+  <script>
+  /* =========================================================================
+     DUMMY DATA
+     ========================================================================= */
+  // TODO: API 연동 - GET /api/flights/search?from=ICN&to=KIX&date=...&pax=...
+  const FLIGHTS = [
+    { id:'f1', code:'TW', airline:'티웨이항공', number:'TW283',
+      out: {dep:'08:30', arr:'10:15', depAp:'ICN', arrAp:'KIX', dur:'1h 45m'},
+      ret: {dep:'11:00', arr:'13:00', depAp:'KIX', arrAp:'ICN', dur:'2h 00m'},
+      direct:true, price:189000 },
+    { id:'f2', code:'7C', airline:'제주항공', number:'7C1156',
+      out: {dep:'10:20', arr:'12:00', depAp:'ICN', arrAp:'KIX', dur:'1h 40m'},
+      ret: {dep:'14:30', arr:'16:40', depAp:'KIX', arrAp:'ICN', dur:'2h 10m'},
+      direct:true, price:229000 },
+    { id:'f3', code:'KE', airline:'대한항공', number:'KE723',
+      out: {dep:'13:00', arr:'14:45', depAp:'ICN', arrAp:'KIX', dur:'1h 45m'},
+      ret: {dep:'18:20', arr:'20:30', depAp:'KIX', arrAp:'ICN', dur:'2h 10m'},
+      direct:true, price:329000 },
+    { id:'f4', code:'LJ', airline:'진에어', number:'LJ201',
+      out: {dep:'18:15', arr:'19:55', depAp:'ICN', arrAp:'KIX', dur:'1h 40m'},
+      ret: {dep:'21:10', arr:'23:25', depAp:'KIX', arrAp:'ICN', dur:'2h 15m'},
+      direct:true, price:209000 },
+    { id:'f5', code:'OZ', airline:'아시아나항공', number:'OZ112',
+      out: {dep:'20:40', arr:'22:25', depAp:'ICN', arrAp:'KIX', dur:'1h 45m'},
+      ret: {dep:'09:30', arr:'11:40', depAp:'KIX', arrAp:'ICN', dur:'2h 10m'},
+      direct:true, price:279000 }
+  ];
+
+  // TODO: API 연동 - GET /api/hotels?destination=osaka&checkin=...&checkout=...
+  const HOTELS = [
+    { id:'h1', img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+      name:'호텔 그란비아 오사카', area:'umeda', areaLabel:'우메다역 직결', stars:5, score:9.2, reviews:'4,127', price:239000 },
+    { id:'h2', img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+      name:'리가로얄 호텔 오사카', area:'umeda', areaLabel:'나카노시마', stars:5, score:9.0, reviews:'3,528', price:329000 },
+    { id:'h3', img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+      name:'크로스 호텔 오사카', area:'shinsaibashi', areaLabel:'신사이바시', stars:4, score:8.9, reviews:'2,145', price:189000 },
+    { id:'h4', img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      name:'APA 호텔 난바', area:'namba', areaLabel:'난바역 도보 3분', stars:4, score:8.5, reviews:'5,284', price:129000 },
+    { id:'h5', img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+      name:'호텔 몬터레이 그래스미어', area:'namba', areaLabel:'난바 스카이오 연결', stars:4, score:8.7, reviews:'1,842', price:169000 },
+    { id:'h6', img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+      name:'하나 호텔 신사이바시', area:'shinsaibashi', areaLabel:'신사이바시 도보 5분', stars:3, score:8.2, reviews:'941', price:89000 }
+  ];
+
+  // TODO: API 연동 - GET /api/activities?destination=osaka&category=...
+  const ACTIVITIES = {
+    golf: [
+      { id:'ag1', img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80',
+        title:'오사카 골프 라운딩 1회', meta:'18홀 + 카트 + 캐디', price:120000 },
+      { id:'ag2', img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=600&q=80',
+        title:'브리즈베이 골프 CC', meta:'18홀 프리미엄 코스', price:198000 },
+      { id:'ag3', img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80',
+        title:'이즈미사노 컨트리클럽', meta:'18홀 + 캐디 + 점심', price:168000 }
+    ],
+    spa: [
+      { id:'as1', img:'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
+        title:'스파월드 오사카 1일권', meta:'온천 + 찜질방', price:35000 },
+      { id:'as2', img:'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=600&q=80',
+        title:'난바 아로마 스파 90분', meta:'전신 마사지 + 아로마', price:89000 },
+      { id:'as3', img:'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
+        title:'료칸 노천탕 당일 이용', meta:'유후인 온천 당일', price:48000 }
+    ],
+    tour: [
+      { id:'at1', img:'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=600&q=80',
+        title:'오사카성 벚꽃 크루즈', meta:'90분 · 한국어 가이드', price:65000 },
+      { id:'at2', img:'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=600&q=80',
+        title:'교토 1일 투어', meta:'기요미즈데라 + 후시미이나리', price:98000 },
+      { id:'at3', img:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&q=80',
+        title:'나라 사슴공원 반일 투어', meta:'오전 반일 · 점심 미포함', price:58000 }
+    ],
+    ticket: [
+      { id:'ak1', img:'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=600&q=80',
+        title:'유니버설 스튜디오 1일권', meta:'USJ 입장권', price:89000 },
+      { id:'ak2', img:'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=600&q=80',
+        title:'USJ 익스프레스 패스 4', meta:'4개 어트랙션 우선입장', price:145000 },
+      { id:'ak3', img:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&q=80',
+        title:'우메다 스카이빌딩 전망대', meta:'야경 입장권', price:18000 }
+    ],
+    restaurant: [
+      { id:'ar1', img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=600&q=80',
+        title:'고베 와규 코스 디너', meta:'A5 등급 5코스 · 예약 확정', price:198000 },
+      { id:'ar2', img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
+        title:'구시카츠 만세이 본점', meta:'도톤보리 · 2인 코스', price:45000 },
+      { id:'ar3', img:'https://images.unsplash.com/photo-1564489563601-c53cfc451e93?auto=format&fit=crop&w=600&q=80',
+        title:'오마카세 스시 디너', meta:'신사이바시 · 12피스', price:158000 }
+    ]
+  };
+
+  const CAT_LABELS = [
+    { id:'golf',       label:'⛳ 골프' },
+    { id:'spa',        label:'💆 스파' },
+    { id:'tour',       label:'🎫 투어' },
+    { id:'ticket',     label:'🎟️ 티켓' },
+    { id:'restaurant', label:'🍣 레스토랑' }
+  ];
+
+  /* =========================================================================
+     STATE
+     ========================================================================= */
+  const STATE = {
+    step: 1,
+    flight: null,
+    hotel: null,
+    activities: [],
+    paxCount: 2,      // 성인 2명
+    nights: 3         // 4/25 → 4/28 = 3박
+  };
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  /* =========================================================================
+     RENDER: Flights
+     ========================================================================= */
+  function renderFlights(){
+    const el = document.getElementById('flightList');
+    el.innerHTML = FLIGHTS.map(f => `
+      <div class="flight-card ${STATE.flight?.id===f.id?'selected':''}" data-id="${f.id}">
+        <div class="airline-logo">${f.code}</div>
+        <div class="flight-legs">
+          <div class="flight-airline-name">${f.airline} ${f.number}</div>
+          <div class="flight-leg">
+            <span class="tag">출국</span>
+            <span class="time">${f.out.dep}</span>
+            <span class="airport">${f.out.depAp}</span>
+            <span class="dur">${f.out.dur}</span>
+            <span class="time">${f.out.arr}</span>
+            <span class="airport">${f.out.arrAp}</span>
+            ${f.direct?'<span class="direct">직항</span>':''}
+          </div>
+          <div class="flight-leg">
+            <span class="tag">귀국</span>
+            <span class="time">${f.ret.dep}</span>
+            <span class="airport">${f.ret.depAp}</span>
+            <span class="dur">${f.ret.dur}</span>
+            <span class="time">${f.ret.arr}</span>
+            <span class="airport">${f.ret.arrAp}</span>
+            ${f.direct?'<span class="direct">직항</span>':''}
+          </div>
+        </div>
+        <div class="flight-price-col">
+          <div class="flight-price">${krw(f.price)}<br><small>왕복 · 1인</small></div>
+          <button class="btn-select">${STATE.flight?.id===f.id?'선택됨':'선택'}</button>
+        </div>
+      </div>
+    `).join('');
+
+    el.querySelectorAll('.flight-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        STATE.flight = FLIGHTS.find(f => f.id === id);
+        renderFlights();
+        renderSummary();
+        updateStepButtons();
+      });
+    });
+  }
+
+  /* =========================================================================
+     RENDER: Hotels
+     ========================================================================= */
+  function renderHotelDateNotice(){
+    const el = document.getElementById('hotelDateNotice');
+    const date = document.getElementById('ffDate').value;
+    el.innerHTML = `📅 ${date} · ${STATE.nights}박 기준으로 보여드려요`;
+  }
+
+  function renderHotels(){
+    const filterPrice = document.getElementById('hfPrice').value;
+    const filterStars = document.getElementById('hfStars').value;
+    const filterArea  = document.getElementById('hfArea').value;
+
+    const filtered = HOTELS.filter(h => {
+      if(filterStars !== 'all' && h.stars !== +filterStars) return false;
+      if(filterArea !== 'all' && h.area !== filterArea) return false;
+      if(filterPrice === 'low' && h.price > 100000) return false;
+      if(filterPrice === 'mid' && (h.price <= 100000 || h.price > 200000)) return false;
+      if(filterPrice === 'high' && h.price <= 200000) return false;
+      return true;
+    });
+
+    const el = document.getElementById('hotelList');
+    if(filtered.length === 0){
+      el.innerHTML = `<div class="sp-empty" style="grid-column:1/-1;">조건에 맞는 호텔이 없어요. 필터를 조정해보세요.</div>`;
+      return;
+    }
+
+    el.innerHTML = filtered.map(h => `
+      <div class="hotel-card ${STATE.hotel?.id===h.id?'selected':''}" data-id="${h.id}">
+        <div class="h-thumb" style="background-image:url('${h.img}')"></div>
+        <div class="h-body">
+          <div class="h-stars">${'★'.repeat(h.stars)}</div>
+          <div class="h-name">${h.name}</div>
+          <div class="h-area">${h.areaLabel}</div>
+          <div class="h-meta">
+            <span class="h-score">${h.score}</span>
+            <span>리뷰 ${h.reviews}</span>
+          </div>
+          <div class="h-price-row">
+            <span class="h-per">1박 기준</span>
+            <span class="h-price">${krw(h.price)}</span>
+          </div>
+          <div class="h-select-bar">${STATE.hotel?.id===h.id?'선택됨':'이 호텔 선택 ('+STATE.nights+'박 '+krw(h.price*STATE.nights)+')'}</div>
+        </div>
+      </div>
+    `).join('');
+
+    el.querySelectorAll('.hotel-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        STATE.hotel = HOTELS.find(h => h.id === id);
+        renderHotels();
+        renderSummary();
+        updateStepButtons();
+      });
+    });
+  }
+
+  /* =========================================================================
+     RENDER: Activities
+     ========================================================================= */
+  let currentCat = 'golf';
+  function renderActCats(){
+    const el = document.getElementById('actCats');
+    el.innerHTML = CAT_LABELS.map(c =>
+      `<button class="act-cat ${c.id===currentCat?'active':''}" data-cat="${c.id}">${c.label}</button>`
+    ).join('');
+    el.querySelectorAll('.act-cat').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCat = btn.dataset.cat;
+        renderActCats();
+        renderActGrid();
+      });
+    });
+  }
+
+  function renderActGrid(){
+    const el = document.getElementById('actGrid');
+    const list = ACTIVITIES[currentCat] || [];
+    el.innerHTML = list.map(a => {
+      const isSel = STATE.activities.some(s => s.id === a.id);
+      return `
+        <div class="act-card ${isSel?'selected':''}" data-id="${a.id}">
+          <div class="a-thumb" style="background-image:url('${a.img}')"></div>
+          <div class="a-body">
+            <div class="a-title">${a.title}</div>
+            <div class="a-meta">${a.meta}</div>
+            <div class="a-price-row">
+              <span class="a-price">${krw(a.price)}</span>
+              <button class="btn-add">${isSel?'선택 취소':'+ 추가'}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    el.querySelectorAll('.act-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        const allAct = Object.values(ACTIVITIES).flat();
+        const item = allAct.find(a => a.id === id);
+        const idx = STATE.activities.findIndex(s => s.id === id);
+        if(idx >= 0) STATE.activities.splice(idx, 1);
+        else STATE.activities.push(item);
+        renderActGrid();
+        renderSummary();
+      });
+    });
+  }
+
+  /* =========================================================================
+     RENDER: Summary
+     ========================================================================= */
+  function renderSummaryInto(containerId){
+    const el = document.getElementById(containerId);
+    const items = [];
+
+    if(STATE.flight){
+      items.push({
+        type:'항공', icon:'✈️', key:'flight',
+        title: `${STATE.flight.airline} ${STATE.flight.out.depAp} ↔ ${STATE.flight.out.arrAp}`,
+        sub: '왕복 · 1인', price: STATE.flight.price
+      });
+    }
+    if(STATE.hotel){
+      items.push({
+        type:'호텔', icon:'🏨', key:'hotel',
+        title: STATE.hotel.name,
+        sub: `${STATE.hotel.areaLabel} · ${STATE.nights}박`,
+        price: STATE.hotel.price * STATE.nights
+      });
+    }
+    STATE.activities.forEach((a, i) => {
+      items.push({
+        type:'액티비티', icon:'🎫', key:'act-'+i,
+        title: a.title, sub: a.meta, price: a.price
+      });
+    });
+
+    if(items.length === 0){
+      el.innerHTML = `<div class="sp-empty">선택한 상품이 여기에 표시돼요</div>`;
+      return;
+    }
+
+    const subtotal = items.reduce((s,i) => s + i.price, 0);
+    const discount = Math.round(subtotal * 0.07);
+    const final = subtotal - discount;
+
+    el.innerHTML = `
+      <div class="sp-items">
+        ${items.map(i => `
+          <div class="sp-item">
+            <div class="sp-icon">${i.icon}</div>
+            <div class="sp-item-main">
+              <div class="sp-item-type">${i.type}</div>
+              <div class="sp-item-title">${i.title}</div>
+              <div class="sp-item-sub">${i.sub}</div>
+            </div>
+            <div class="sp-item-price">${krw(i.price)}</div>
+            <button class="sp-item-remove" data-remove="${i.key}" aria-label="삭제">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="sp-divider"></div>
+      <div class="sp-totals">
+        <div class="sp-totals-row"><span>소계</span><span>${krw(subtotal)}</span></div>
+        <div class="sp-totals-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
+      </div>
+      <div class="sp-grand">
+        <div class="label">총 예상 가격<br><small style="opacity:.6;">성인 ${STATE.paxCount}명 기준</small></div>
+        <div class="total">${krw(final)}</div>
+      </div>
+      <button class="sp-cta" ${!STATE.flight||!STATE.hotel?'disabled':''} onclick="goCheckout()">예약하기 →</button>
+    `;
+
+    el.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.remove;
+        if(key === 'flight'){ STATE.flight = null; renderFlights(); }
+        else if(key === 'hotel'){ STATE.hotel = null; renderHotels(); }
+        else if(key.startsWith('act-')){
+          const idx = +key.slice(4);
+          STATE.activities.splice(idx, 1);
+          renderActGrid();
+        }
+        renderSummary();
+        updateStepButtons();
+      });
+    });
+  }
+
+  function renderSummary(){
+    renderSummaryInto('sumBody');
+    renderSummaryInto('sumBodyM');
+
+    const total = computeFinal();
+    document.getElementById('mSumPrice').textContent = krw(total);
+  }
+
+  function computeFinal(){
+    let sub = 0;
+    if(STATE.flight) sub += STATE.flight.price;
+    if(STATE.hotel) sub += STATE.hotel.price * STATE.nights;
+    STATE.activities.forEach(a => sub += a.price);
+    return Math.max(0, sub - Math.round(sub * 0.07));
+  }
+
+  /* =========================================================================
+     STEP NAVIGATION
+     ========================================================================= */
+  function goToStep(n){
+    STATE.step = n;
+    // Progress bar
+    document.querySelectorAll('.p-step').forEach(el => {
+      const s = +el.dataset.step;
+      el.classList.remove('active','done');
+      if(s < n) el.classList.add('done');
+      if(s === n) el.classList.add('active');
+    });
+    document.querySelectorAll('.p-line').forEach(el => {
+      const s = +el.dataset.line;
+      el.classList.toggle('done', s < n);
+    });
+    // Panels
+    document.querySelectorAll('[data-step-panel]').forEach(p => {
+      p.hidden = +p.dataset.stepPanel !== n;
+    });
+    // Step 2 auto-refresh date notice
+    if(n === 2) renderHotelDateNotice();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateStepButtons();
+  }
+
+  function updateStepButtons(){
+    // Desktop step-actions next buttons
+    const s1Next = document.querySelector('[data-step-panel="1"] .btn-next');
+    if(s1Next) s1Next.disabled = !STATE.flight;
+    const s2Next = document.querySelector('[data-step-panel="2"] .btn-next');
+    if(s2Next) s2Next.disabled = !STATE.hotel;
+
+    // Mobile next button
+    const mNext = document.getElementById('mSumNext');
+    if(STATE.step === 1){
+      mNext.disabled = !STATE.flight;
+      mNext.textContent = '다음 (호텔) →';
+    } else if(STATE.step === 2){
+      mNext.disabled = !STATE.hotel;
+      mNext.textContent = '다음 (액티비티) →';
+    } else {
+      mNext.disabled = !(STATE.flight && STATE.hotel);
+      mNext.textContent = '예약 진행 →';
+    }
+  }
+
+  function mobileNext(){
+    if(STATE.step === 1 && STATE.flight) goToStep(2);
+    else if(STATE.step === 2 && STATE.hotel) goToStep(3);
+    else if(STATE.step === 3) goCheckout();
+  }
+
+  function goCheckout(){
+    if(!STATE.flight || !STATE.hotel){
+      alert('항공과 호텔을 모두 선택해주세요');
+      return;
+    }
+    // Persist to sessionStorage for checkout page
+    const payload = {
+      flight: STATE.flight,
+      hotel:  STATE.hotel,
+      activities: STATE.activities,
+      paxCount: STATE.paxCount,
+      nights: STATE.nights,
+      dates: document.getElementById('ffDate').value,
+      final: computeFinal()
+    };
+    sessionStorage.setItem('omt_package', JSON.stringify(payload));
+    location.href = 'checkout.html';
+  }
+
+  /* =========================================================================
+     Mobile sheet
+     ========================================================================= */
+  function openSheet(){
+    document.getElementById('sumSheet').classList.add('open');
+    document.querySelector('.sheet-overlay').classList.add('open');
+  }
+  function closeSheet(){
+    document.getElementById('sumSheet').classList.remove('open');
+    document.querySelector('.sheet-overlay').classList.remove('open');
+  }
+
+  // A11y: Escape closes bottom sheet
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.getElementById('sumSheet').classList.contains('open')){
+      closeSheet();
+    }
+  });
+
+  /* =========================================================================
+     WIRE UP
+     ========================================================================= */
+  // Step action buttons
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = btn.dataset.action;
+      if(a === 'next'){
+        if(STATE.step < 3) goToStep(STATE.step + 1);
+      } else if(a === 'prev'){
+        if(STATE.step > 1) goToStep(STATE.step - 1);
+      } else if(a === 'skip'){
+        goCheckout();
+      } else if(a === 'checkout'){
+        goCheckout();
+      }
+    });
+  });
+
+  // Progress steps — allow back-navigation only
+  document.querySelectorAll('.p-step').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => {
+      const target = +el.dataset.step;
+      if(target < STATE.step) goToStep(target);
+    });
+  });
+
+  // Hotel filters
+  ['hfPrice','hfStars','hfArea'].forEach(id => {
+    document.getElementById(id).addEventListener('change', renderHotels);
+  });
+
+  // Pax change
+  document.getElementById('ffPax').addEventListener('change', (e) => {
+    const m = e.target.value.match(/성인\s*(\d+)/);
+    if(m) STATE.paxCount = +m[1];
+    document.getElementById('spPax').textContent = e.target.value;
+    document.getElementById('mSumPax').textContent = e.target.value;
+  });
+
+  // Init
+  renderFlights();
+  renderHotels();
+  renderActCats();
+  renderActGrid();
+  renderSummary();
+  updateStepButtons();
+  </script>
+</body>
+</html>

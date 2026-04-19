@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>장바구니 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981; --danger:#EF4444;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --header-h:64px; --max-w:1200px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .page-title{margin-left:16px;font-size:15px;font-weight:700;color:var(--ink-2);}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+
+    .page-head{padding:24px 0 16px;max-width:var(--max-w);margin:0 auto;padding-left:24px;padding-right:24px;}
+    .page-head h1{margin:0 0 4px;font-size:26px;font-weight:900;letter-spacing:-0.02em;}
+    .page-head p{margin:0;color:var(--ink-2);font-size:14px;}
+
+    .cart-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;padding:0 24px 80px;max-width:var(--max-w);margin:0 auto;align-items:flex-start;}
+
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
+    .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .card-title{margin:0;font-size:16px;font-weight:900;}
+    .card-actions{display:flex;gap:8px;}
+    .card-actions button{padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;background:var(--bg-soft);color:var(--ink-2);}
+
+    .cart-item{
+      display:grid;grid-template-columns:100px 1fr auto;gap:14px;
+      padding:14px 0;border-top:1px dashed var(--line);align-items:center;
+    }
+    .cart-item:first-child{border-top:none;padding-top:0;}
+    .ci-thumb{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;background-color:#eee;}
+    .ci-info{min-width:0;}
+    .ci-tags{display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap;}
+    .ci-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--primary-soft);color:var(--primary);font-weight:800;}
+    .ci-tag.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .ci-name{font-size:14px;font-weight:800;line-height:1.35;}
+    .ci-sub{font-size:12px;color:var(--ink-3);margin-top:2px;}
+    .ci-date{font-size:11px;color:var(--ink-2);margin-top:4px;}
+    .ci-right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+    .ci-price{font-size:16px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .ci-controls{display:flex;gap:4px;}
+    .ci-btn{width:28px;height:28px;border-radius:6px;background:var(--bg-soft);display:grid;place-items:center;font-size:12px;color:var(--ink-2);}
+    .ci-btn:hover{background:var(--line);color:var(--ink);}
+    .ci-btn.del:hover{background:#FEE;color:var(--danger);}
+    .ci-check{
+      width:20px;height:20px;border-radius:5px;border:1.5px solid var(--line);
+      background:#fff;position:relative;cursor:pointer;flex-shrink:0;transition:all .15s;
+    }
+    .ci-check.checked{background:var(--primary);border-color:var(--primary);}
+    .ci-check.checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+    .cart-item.cart-item-grid{grid-template-columns:auto 100px 1fr auto;}
+
+    /* Coupon */
+    .coupon-row{display:flex;gap:8px;}
+    .coupon-row input{flex:1;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;}
+    .coupon-row button{padding:0 18px;background:var(--ink);color:#fff;border-radius:10px;font-weight:800;font-size:13px;}
+    .applied-coupon{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--success);color:#fff;border-radius:8px;margin-top:10px;font-size:12px;font-weight:700;}
+    .applied-coupon button{color:#fff;font-weight:900;}
+
+    /* Summary panel */
+    .sum-panel{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;
+      position:sticky;top:calc(var(--header-h) + 16px);
+    }
+    .sum-panel h3{margin:0 0 14px;font-size:16px;font-weight:900;}
+    .sum-row{display:flex;justify-content:space-between;font-size:14px;color:var(--ink-2);padding:6px 0;}
+    .sum-row.discount{color:var(--primary);font-weight:700;}
+    .sum-div{height:1px;background:var(--line);margin:12px 0;}
+    .sum-grand{display:flex;justify-content:space-between;align-items:baseline;padding:14px;background:var(--ink);color:#fff;border-radius:12px;margin:12px 0;}
+    .sum-grand .lb{font-size:12px;opacity:.7;}
+    .sum-grand .pr{font-size:24px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+    .sum-cta{
+      width:100%;padding:16px;border-radius:12px;background:var(--primary);color:#fff;
+      font-weight:900;font-size:15px;box-shadow:0 6px 20px rgba(255,107,53,.35);
+    }
+    .sum-cta:hover{background:var(--primary-dark);}
+    .sum-cta:disabled{background:var(--line);color:var(--ink-3);cursor:not-allowed;box-shadow:none;}
+
+    /* Empty */
+    .empty{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:80px 24px;text-align:center;color:var(--ink-2);
+    }
+    .empty-ico{font-size:56px;margin-bottom:14px;}
+    .empty h2{margin:0 0 6px;font-size:20px;}
+    .empty p{margin:0 0 20px;font-size:14px;color:var(--ink-3);}
+    .empty a{display:inline-block;padding:12px 24px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:14px;}
+
+    /* Recommend */
+    .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .rec-card{background:var(--bg-soft);border-radius:12px;overflow:hidden;transition:transform .15s;}
+    .rec-card:hover{transform:translateY(-2px);}
+    .rec-thumb{aspect-ratio:4/3;background-size:cover;background-position:center;background-color:#eee;}
+    .rec-body{padding:12px;}
+    .rec-name{font-size:12px;font-weight:800;line-height:1.35;}
+    .rec-price{font-size:14px;font-weight:900;color:var(--primary);margin-top:4px;}
+
+    @media (max-width:1024px){
+      .cart-grid{grid-template-columns:1fr;}
+      .sum-panel{position:static;}
+      .rec-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .page-title{display:none;}
+      .cart-item{grid-template-columns:72px 1fr;}
+      .cart-item.cart-item-grid{grid-template-columns:auto 72px 1fr;}
+      .ci-right{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;flex-direction:row;justify-content:space-between;align-items:center;}
+      .rec-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <span class="page-title">장바구니</span>
+      <div class="header-actions">
+        <a href="index.html" class="btn-ghost">← 쇼핑 계속하기</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-head">
+    <h1>🛒 장바구니</h1>
+    <p id="itemSummary">담긴 상품 확인 중...</p>
+  </div>
+
+  <main id="omt-main" class="cart-grid">
+    <section>
+      <!-- Items card -->
+      <div class="card" id="itemsCard">
+        <div class="card-head">
+          <h3 class="card-title">예약 상품</h3>
+          <div class="card-actions">
+            <button onclick="selectAll(true)">전체 선택</button>
+            <button onclick="selectAll(false)">전체 해제</button>
+            <button onclick="removeSelected()" style="color:var(--danger);">선택 삭제</button>
+          </div>
+        </div>
+        <div id="itemsList"></div>
+      </div>
+
+      <!-- Coupon -->
+      <div class="card">
+        <div class="card-head">
+          <h3 class="card-title">🎟️ 쿠폰 / 프로모션</h3>
+        </div>
+        <div class="coupon-row">
+          <input type="text" id="couponInput" placeholder="쿠폰 코드를 입력하세요 (예: OMTSPRING25)" />
+          <button onclick="applyCoupon()">적용</button>
+        </div>
+        <div id="appliedCoupons"></div>
+        <div style="margin-top:12px;padding:10px 12px;background:var(--bg-soft);border-radius:8px;font-size:12px;color:var(--ink-2);">
+          💡 <strong>OMTSPRING25</strong> 쿠폰으로 전체 금액 25,000원 할인 (체험 가능)
+        </div>
+      </div>
+
+      <!-- Recommended -->
+      <div class="card">
+        <div class="card-head">
+          <h3 class="card-title">✨ 이 상품은 어떠세요?</h3>
+        </div>
+        <div class="rec-grid" id="recGrid"></div>
+      </div>
+    </section>
+
+    <!-- Summary -->
+    <aside class="sum-panel" id="sumPanel">
+      <h3>결제 예정 금액</h3>
+      <div id="sumRows"></div>
+      <div class="sum-div"></div>
+      <div class="sum-grand">
+        <div><div class="lb">총 결제 금액</div><div style="font-size:11px;opacity:.6;" id="sumSummary">0개 상품</div></div>
+        <div class="pr" id="sumTotal">0원</div>
+      </div>
+      <button class="sum-cta" id="sumCta" onclick="goCheckout()" disabled>결제하기</button>
+      <ul style="list-style:none;padding:12px 0 0;margin:0;display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--ink-3);">
+        <li>✓ 안전한 SSL 암호화 결제</li>
+        <li>✓ 24시간 내 예약 확정</li>
+        <li>✓ 카카오톡 실시간 알림</li>
+      </ul>
+    </aside>
+  </main>
+
+  <script>
+  /* =========================================================================
+     Load cart from sessionStorage + seed default items
+     ========================================================================= */
+  // TODO: API 연동 - GET /api/cart (sessionStorage → server 이관)
+  let CART = JSON.parse(sessionStorage.getItem('omt_cart_items') || 'null');
+  if(!CART){
+    // sessionStorage에 omt_package가 있으면 그것도 추가, 없으면 기본 예시
+    const pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
+    CART = [];
+    if(pkg){
+      CART.push({
+        id:'p1', type:'패키지', orig:false, checked:true,
+        img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80',
+        name: pkg.hotel?.name + ' + ' + (pkg.flight?.airline || '항공') + ' 패키지',
+        sub: (pkg.flight?.out?.depAp || 'ICN') + ' → ' + (pkg.flight?.out?.arrAp || 'KIX') + ' · ' + pkg.nights + '박',
+        dates: pkg.dates,
+        pax: '성인 ' + pkg.paxCount + '명',
+        price: pkg.final
+      });
+    }
+    CART.push({
+      id:'p2', type:'ORIGINAL', orig:true, checked:true,
+      img:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80',
+      name:'[오마이트립 단독] 다낭 풀빌라 4박5일',
+      sub:'인천 → 다낭 · 4박5일 · 비엣젯항공',
+      dates:'2026.06.07 - 2026.06.12',
+      pax:'성인 2명',
+      price: 1290000
+    });
+    CART.push({
+      id:'p3', type:'골프', orig:false, checked:false,
+      img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80',
+      name:'방콕 시암 컨트리클럽 골프 라운딩',
+      sub:'18홀 + 카트 + 캐디 · 1회',
+      dates:'2026.05.25',
+      pax:'성인 1명',
+      price: 198000
+    });
+    persistCart();
+  }
+  let couponApplied = null;
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  function persistCart(){
+    sessionStorage.setItem('omt_cart_items', JSON.stringify(CART));
+  }
+
+  function renderItems(){
+    const el = document.getElementById('itemsList');
+    const card = document.getElementById('itemsCard');
+    if(CART.length === 0){
+      card.style.display = 'none';
+      document.getElementById('omt-main').insertAdjacentHTML('afterbegin', `
+        <div class="empty" style="grid-column:1/-1;">
+          <div class="empty-ico">🛒</div>
+          <h2>장바구니가 비어있어요</h2>
+          <p>담긴 상품이 없어요. 지금 여행을 계획해보세요!</p>
+          <a href="index.html">홈으로 가기 →</a>
+        </div>
+      `);
+      document.getElementById('sumPanel').style.display='none';
+      return;
+    }
+
+    el.innerHTML = CART.map((item, idx) => `
+      <div class="cart-item cart-item-grid" data-idx="${idx}">
+        <div class="ci-check ${item.checked?'checked':''}" onclick="toggleCheck(${idx})"></div>
+        <div class="ci-thumb" style="background-image:url('${item.img}')"></div>
+        <div class="ci-info">
+          <div class="ci-tags">
+            <span class="ci-tag ${item.orig?'orig':''}">${item.type}</span>
+          </div>
+          <div class="ci-name">${item.name}</div>
+          <div class="ci-sub">${item.sub}</div>
+          <div class="ci-date">📅 ${item.dates} · ${item.pax}</div>
+        </div>
+        <div class="ci-right">
+          <div class="ci-price">${krw(item.price)}</div>
+          <div class="ci-controls">
+            <button class="ci-btn" title="편집" onclick="editItem(${idx})">✎</button>
+            <button class="ci-btn del" title="삭제" onclick="removeItem(${idx})">🗑</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    updateItemSummary();
+  }
+
+  function updateItemSummary(){
+    const checked = CART.filter(i => i.checked).length;
+    document.getElementById('itemSummary').textContent = `총 ${CART.length}개 상품 · 선택된 ${checked}개`;
+  }
+
+  function toggleCheck(idx){
+    CART[idx].checked = !CART[idx].checked;
+    persistCart();
+    renderItems();
+    renderSummary();
+  }
+  function selectAll(on){
+    CART.forEach(i => i.checked = on);
+    persistCart();
+    renderItems();
+    renderSummary();
+  }
+  function removeItem(idx){
+    if(confirm(`"${CART[idx].name}"을(를) 장바구니에서 삭제할까요?`)){
+      CART.splice(idx,1);
+      persistCart();
+      renderItems();
+      renderSummary();
+    }
+  }
+  function removeSelected(){
+    const checked = CART.filter(i => i.checked);
+    if(checked.length === 0){ alert('선택된 상품이 없어요'); return; }
+    if(confirm(`선택된 ${checked.length}개 상품을 삭제할까요?`)){
+      CART = CART.filter(i => !i.checked);
+      persistCart();
+      renderItems();
+      renderSummary();
+    }
+  }
+  function editItem(idx){
+    // TODO: API 연동 - PATCH /api/cart/{itemId} - 항목별 편집 모달
+    alert('상품 편집은 곧 제공돼요 (프로토타입)');
+  }
+
+  /* Coupon */
+  function applyCoupon(){
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    if(!code) return;
+    // TODO: API 연동 - POST /api/cart/coupons { code }
+    if(code === 'OMTSPRING25'){
+      couponApplied = { code, amount: 25000, label:'오마이트립 봄 시즌 할인' };
+      document.getElementById('couponInput').value = '';
+      renderSummary();
+    } else {
+      alert('유효하지 않은 쿠폰 코드입니다');
+    }
+  }
+  function removeCoupon(){
+    couponApplied = null;
+    renderSummary();
+  }
+
+  /* Summary */
+  function renderSummary(){
+    const selected = CART.filter(i => i.checked);
+    const sub = selected.reduce((s, i) => s + i.price, 0);
+    const bundleDisc = selected.length >= 2 ? Math.round(sub * 0.07) : 0;
+    const couponDisc = couponApplied ? couponApplied.amount : 0;
+    const total = Math.max(0, sub - bundleDisc - couponDisc);
+
+    document.getElementById('sumRows').innerHTML = `
+      <div class="sum-row"><span>상품 금액 (${selected.length}개)</span><span>${krw(sub)}</span></div>
+      ${bundleDisc > 0 ? `<div class="sum-row discount"><span>번들 할인 (-7%, 2개 이상)</span><span>- ${krw(bundleDisc)}</span></div>` : ''}
+      ${couponDisc > 0 ? `<div class="sum-row discount"><span>쿠폰 할인 (${couponApplied.code})</span><span>- ${krw(couponDisc)}</span></div>` : ''}
+    `;
+    document.getElementById('sumTotal').textContent = krw(total);
+    document.getElementById('sumSummary').textContent = `${selected.length}개 상품 · 총 ${selected.reduce((s,i) => s + (parseInt(i.pax)||0), 0) || '2'}명`;
+
+    document.getElementById('sumCta').disabled = selected.length === 0;
+    document.getElementById('sumCta').textContent = selected.length === 0 ? '결제하기' : `${krw(total)} 결제하기`;
+
+    // Applied coupon display
+    const appliedEl = document.getElementById('appliedCoupons');
+    if(couponApplied){
+      appliedEl.innerHTML = `
+        <div class="applied-coupon">
+          <span>✓ ${couponApplied.code} · ${couponApplied.label} · -${krw(couponApplied.amount)}</span>
+          <button onclick="removeCoupon()">✕</button>
+        </div>
+      `;
+    } else {
+      appliedEl.innerHTML = '';
+    }
+  }
+
+  function goCheckout(){
+    const selected = CART.filter(i => i.checked);
+    if(selected.length === 0) return;
+
+    // 결제는 첫 번째 상품 기준 (복합 결제 로직은 TODO)
+    // TODO: API 연동 - POST /api/orders { items: selected, couponCode }
+    const first = selected[0];
+    const sub = selected.reduce((s,i) => s + i.price, 0);
+    const bundleDisc = selected.length >= 2 ? Math.round(sub * 0.07) : 0;
+    const couponDisc = couponApplied ? couponApplied.amount : 0;
+
+    const payload = {
+      flight:{airline:'묶음 결제', number:'CART', out:{dep:'--:--',arr:'--:--',depAp:'ICN',arrAp:first.sub.split(' → ')[1]?.split(' ')[0] || 'DST', dur:'-'}, ret:{dep:'--:--',arr:'--:--',depAp:'DST',arrAp:'ICN',dur:'-'}, direct:true, price:Math.round(sub*0.4)},
+      hotel:{name:selected.map(i=>i.name).join(' + '), areaLabel:'복수 상품', price:Math.round(sub*0.6/3)},
+      activities: [],
+      paxCount: 2,
+      nights: 3,
+      dates: first.dates,
+      final: Math.max(0, sub - bundleDisc - couponDisc),
+      source:'cart',
+      itemCount: selected.length
+    };
+    sessionStorage.setItem('omt_package', JSON.stringify(payload));
+    location.href = 'checkout.html';
+  }
+
+  /* Recommended */
+  function renderRec(){
+    const recs = [
+      { img:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600&q=80', name:'도쿄 3박4일 신주쿠 패키지', price:589000 },
+      { img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=600&q=80', name:'방콕+파타야 5박6일 콤비', price:890000 },
+      { img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=600&q=80', name:'세부 샹그릴라 4박5일', price:1580000 }
+    ];
+    document.getElementById('recGrid').innerHTML = recs.map(r => `
+      <a class="rec-card" href="product.html">
+        <div class="rec-thumb" style="background-image:url('${r.img}')"></div>
+        <div class="rec-body">
+          <div class="rec-name">${r.name}</div>
+          <div class="rec-price">${krw(r.price)}~</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  /* INIT */
+  renderItems();
+  renderSummary();
+  renderRec();
+  </script>
+</body>
+</html>

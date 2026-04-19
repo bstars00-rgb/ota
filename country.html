@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="오마이트립 국가 섹터 - 한국인 특화 여행 큐레이션" />
+  <title id="pageTitle">한국인의 일본 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       Design Tokens (shared with index.html)
+       ========================================= */
+    :root{
+      --primary: #FF6B35;
+      --primary-dark: #E85826;
+      --primary-soft: #FFF0E8;
+      --secondary: #1E88E5;
+      --secondary-dark: #1565C0;
+      --accent: #FFD23F;
+      --accent-country: #FFB7C5;   /* overridden per country */
+      --ink: #1A1A1A;
+      --ink-2: #4B5563;
+      --ink-3: #9CA3AF;
+      --line: #E5E7EB;
+      --bg: #FFFFFF;
+      --bg-soft: #F7F7F9;
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+      --shadow: 0 6px 20px rgba(0,0,0,.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.12);
+      --header-h: 72px;
+      --max-w: 1280px;
+    }
+
+    /* Reset */
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink); background: var(--bg); line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a{color:inherit; text-decoration:none;}
+    button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+    img{display:block; max-width:100%;}
+    ul{list-style:none; margin:0; padding:0;}
+    input,select{font-family:inherit;}
+
+    .container{max-width: var(--max-w); margin: 0 auto; padding: 0 24px;}
+    .section{padding: 56px 0;}
+    .section-title{font-size: 26px; font-weight: 900; margin: 0 0 6px; letter-spacing: -0.02em;}
+    .section-sub{color: var(--ink-2); margin: 0 0 24px; font-size: 14px;}
+    .section-head-row{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap;}
+    .section-head-row .section-title, .section-head-row .section-sub{margin:0;}
+    .see-all{color: var(--primary); font-weight:700; font-size:14px; white-space:nowrap;}
+
+    /* =========================================
+       Header (shared with main)
+       ========================================= */
+    .header{
+      position: sticky; top:0; z-index: 50;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner{height: var(--header-h); display:flex; align-items:center; gap:24px;}
+    .logo{display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; letter-spacing:-0.02em; color: var(--ink);}
+    .logo-mark{
+      width:34px; height:34px; border-radius:10px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; display:grid; place-items:center; font-weight:900; font-size:18px;
+      box-shadow: 0 4px 12px rgba(255,107,53,.35);
+    }
+    .logo-mark::after{content:"O";}
+    .gnb{display:flex; align-items:center; gap:6px; margin-left:16px;}
+    .gnb a{padding:10px 14px; border-radius:10px; font-weight:600; font-size:15px; color: var(--ink-2); transition: background .15s, color .15s;}
+    .gnb a:hover{background: var(--bg-soft); color: var(--ink);}
+    .gnb a.active{color: var(--primary); background: var(--primary-soft);}
+    .header-actions{margin-left:auto; display:flex; align-items:center; gap:8px;}
+    .btn-ai{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:10px 14px; border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:700; font-size:14px;
+      box-shadow: 0 4px 14px rgba(255,107,53,.3);
+    }
+    .btn-ai::before{content:"✦"; font-size:14px;}
+    .btn-ghost{padding:10px 14px; border-radius:10px; font-weight:600; font-size:14px; color: var(--ink-2);}
+    .btn-ghost:hover{background: var(--bg-soft); color: var(--ink);}
+    .m-hamburger{display:none; width:40px; height:40px; border-radius:10px; align-items:center; justify-content:center;}
+    .m-hamburger:hover{background: var(--bg-soft);}
+    .m-hamburger svg{width:24px; height:24px;}
+
+    /* Breadcrumb */
+    .breadcrumb{
+      padding: 14px 0;
+      font-size: 13px; color: var(--ink-3);
+      border-bottom: 1px solid var(--line);
+    }
+    .breadcrumb a{color: var(--ink-2);}
+    .breadcrumb a:hover{color: var(--primary);}
+    .breadcrumb .sep{margin: 0 8px;}
+    .breadcrumb .current{color: var(--ink); font-weight:600;}
+
+    /* =========================================
+       Country Hero
+       ========================================= */
+    .c-hero{
+      position:relative; overflow:hidden;
+      min-height: 420px;
+      color:#fff;
+      isolation: isolate;
+    }
+    .c-hero-slides{position:absolute; inset:0; z-index:-2;}
+    .c-hero-slide{
+      position:absolute; inset:0;
+      background-size:cover; background-position:center;
+      opacity:0; transition: opacity 1.2s ease;
+    }
+    .c-hero-slide.active{opacity:1;}
+    .c-hero::after{
+      content:""; position:absolute; inset:0; z-index:-1;
+      background: linear-gradient(135deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.6) 100%);
+    }
+    .c-hero-inner{
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 64px 24px 48px;
+      display:flex; flex-direction:column; gap:24px;
+    }
+    .c-hero-flag{
+      font-size: 52px; line-height:1;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,.3));
+    }
+    .c-hero h1{
+      font-size: clamp(32px, 5vw, 48px); font-weight:900; letter-spacing:-0.03em;
+      margin:0; text-shadow: 0 4px 24px rgba(0,0,0,.35);
+    }
+    .c-hero-tagline{
+      font-size: clamp(15px, 1.5vw, 18px);
+      opacity:.95; margin:0; max-width:620px;
+    }
+
+    .popular-cities{
+      display:flex; gap: 8px; flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .popular-cities .label{
+      font-size:13px; font-weight:700; opacity:.85;
+      display:inline-flex; align-items:center;
+      padding:8px 0;
+    }
+    .city-chip{
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+      color:#fff; font-weight:600; font-size:14px;
+      border:1px solid rgba(255,255,255,.28);
+      transition: background .15s, transform .15s;
+    }
+    .city-chip:hover{background: rgba(255,255,255,.3); transform:translateY(-1px);}
+    .city-chip.featured{background: var(--accent-country); color:#1A1A1A; border-color: var(--accent-country);}
+
+    /* =========================================
+       Search Bar
+       ========================================= */
+    .search-wrap{
+      margin-top:-40px; position:relative; z-index:5;
+      margin-bottom: 10px;
+    }
+    .search-card{
+      background:#fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .search-mode-tabs{
+      display:flex; border-bottom: 1px solid var(--line);
+    }
+    .search-mode-tabs button{
+      padding: 14px 20px;
+      font-weight:700; font-size:14px; color: var(--ink-3);
+      position:relative; transition: color .15s;
+      white-space:nowrap;
+    }
+    .search-mode-tabs button:hover{color: var(--ink-2);}
+    .search-mode-tabs button.active{color: var(--primary);}
+    .search-mode-tabs button.active::after{
+      content:""; position:absolute; left:12px; right:12px; bottom:-1px;
+      height:3px; background: var(--primary); border-radius: 3px 3px 0 0;
+    }
+    .search-mode-tabs button .recommend{
+      margin-left:6px; font-size:10px; padding: 2px 6px; border-radius: 999px;
+      background: var(--primary); color:#fff; font-weight:800;
+    }
+    .search-form{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1.3fr .9fr auto;
+      gap: 0;
+    }
+    .search-field{
+      padding: 14px 18px;
+      border-right: 1px solid var(--line);
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .search-field:last-child{border-right:none;}
+    .search-field label{font-size:11px; color: var(--ink-3); font-weight:700; text-transform:uppercase;}
+    .search-field select,
+    .search-field input{
+      border:none; outline:none; padding:4px 0;
+      font-size:15px; font-weight:700; color: var(--ink);
+      background:transparent;
+      width:100%;
+    }
+    .search-btn{
+      margin: 10px 14px 10px 0;
+      padding: 0 28px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:800; font-size:15px;
+      border-radius: 12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      box-shadow: 0 4px 14px rgba(255,107,53,.3);
+      white-space:nowrap;
+    }
+
+    /* =========================================
+       Category Strip
+       ========================================= */
+    .cat-strip-wrap{
+      position: sticky; top: var(--header-h); z-index: 40;
+      background:#fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .cat-strip{
+      display:flex; gap: 4px;
+      overflow-x:auto; scroll-snap-type: x proximity;
+      padding: 10px 0;
+    }
+    .cat-strip::-webkit-scrollbar{display:none;}
+    .cat-item{
+      flex-shrink:0;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight:700; font-size:14px; color: var(--ink-2);
+      display:inline-flex; align-items:center; gap:6px;
+      transition: background .15s, color .15s;
+      scroll-snap-align: start;
+    }
+    .cat-item:hover{background: var(--bg-soft); color: var(--ink);}
+    .cat-item.active{background: var(--ink); color: #fff;}
+    .cat-item .icon{font-size:16px;}
+
+    /* =========================================
+       Product Card (shared)
+       ========================================= */
+    .product-card{
+      border-radius: var(--radius);
+      overflow:hidden;
+      background:#fff;
+      border:1px solid var(--line);
+      transition: transform .2s, box-shadow .2s;
+      display:flex; flex-direction:column;
+    }
+    .product-card:hover{transform:translateY(-4px); box-shadow: var(--shadow-lg);}
+    .product-thumb{
+      position:relative; aspect-ratio: 4/3;
+      background-size:cover; background-position:center;
+      background-color:#eee;
+    }
+    .product-badges{position:absolute; top:12px; left:12px; display:flex; gap:6px; flex-wrap:wrap;}
+    .badge{
+      padding: 5px 10px; border-radius: 999px;
+      font-size: 11px; font-weight:700;
+      background: rgba(0,0,0,.7); color:#fff; backdrop-filter: blur(6px);
+    }
+    .badge.original{background: linear-gradient(135deg, var(--primary), #FF9A6C);}
+    .badge.country{background: rgba(255,255,255,.92); color: var(--ink);}
+    .product-body{padding:16px; display:flex; flex-direction:column; flex:1;}
+    .product-title{font-weight:800; font-size:15px; line-height:1.4; letter-spacing:-0.01em;}
+    .product-compo{font-size:12px; color: var(--ink-3); margin:6px 0 14px; flex:1;}
+    .product-price-row{display:flex; align-items:baseline; gap:6px;}
+    .product-price-row .from{font-size:11px; color: var(--ink-3);}
+    .product-price-row .price{font-size:20px; font-weight:900; letter-spacing:-0.02em;}
+    .product-price-row .unit{font-size:12px; color: var(--ink-2); font-weight:600;}
+    .product-old{font-size:12px; color:var(--ink-3); text-decoration:line-through;}
+
+    .originals-grid{display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px;}
+
+    /* =========================================
+       Flight Deals
+       ========================================= */
+    .tabs{display:flex; gap:4px; margin-bottom:20px; border-bottom: 1px solid var(--line); overflow-x:auto;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{padding: 10px 18px; font-weight:700; font-size:15px; color: var(--ink-3); position:relative; transition: color .15s; white-space:nowrap;}
+    .tab.active{color: var(--primary);}
+    .tab.active::after{content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:3px; background: var(--primary); border-radius: 3px 3px 0 0;}
+    .flights-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;}
+    .flight-card{
+      background:#fff; border:1px solid var(--line); border-radius: var(--radius);
+      padding:18px;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .flight-card:hover{border-color: var(--primary); transform:translateY(-2px); box-shadow: var(--shadow);}
+    .flight-airline{font-size:12px; color:var(--ink-3); font-weight:600; display:flex; align-items:center; gap:6px;}
+    .airline-dot{width:8px; height:8px; border-radius:50%; background: var(--secondary);}
+    .flight-route{display:flex; align-items:center; gap:10px; margin:10px 0;}
+    .flight-route .city{font-weight:800; font-size:18px; letter-spacing:-0.02em;}
+    .flight-route .arrow{color: var(--ink-3);}
+    .flight-meta{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--ink-2); padding-top:10px; border-top: 1px dashed var(--line);}
+    .flight-price{font-size:18px; font-weight:900; color: var(--primary); letter-spacing:-0.02em;}
+
+    /* =========================================
+       Creator Shorts
+       ========================================= */
+    .shorts-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;}
+    .short-card{
+      position:relative; aspect-ratio: 9/16;
+      border-radius: var(--radius); overflow:hidden;
+      background-size:cover; background-position:center;
+      background-color:#222; cursor:pointer;
+      transition: transform .2s;
+    }
+    .short-card:hover{transform:translateY(-4px);}
+    .short-card::after{
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.88) 100%);
+    }
+    .short-play{
+      position:absolute; top:14px; right:14px; z-index:2;
+      width:36px; height:36px; border-radius:50%;
+      background: rgba(0,0,0,.55); color:#fff;
+      display:grid; place-items:center; backdrop-filter: blur(8px);
+    }
+    .short-content{position:absolute; left:14px; right:14px; bottom:14px; z-index:2; color:#fff;}
+    .short-creator{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+    .creator-avatar{
+      width:28px; height:28px; border-radius:50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border:2px solid #fff; display:grid; place-items:center;
+      font-weight:900; font-size:12px; color:#fff;
+    }
+    .creator-name{font-weight:700; font-size:13px;}
+    .creator-subs{font-size:11px; opacity:.85;}
+    .short-title{font-weight:800; font-size:14px; line-height:1.35; margin-bottom:10px;}
+    .short-actions{display:flex; gap:6px;}
+    .short-actions button{flex:1; padding:8px 10px; border-radius:8px; font-size:12px; font-weight:700; transition: background .15s;}
+    .short-actions .view{background: rgba(255,255,255,.2); color:#fff; border:1px solid rgba(255,255,255,.4);}
+    .short-actions .book{background: var(--primary); color:#fff;}
+
+    /* =========================================
+       Hotel Grid
+       ========================================= */
+    .hotels-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:18px;}
+    .hotel-card{
+      background:#fff; border:1px solid var(--line); border-radius: var(--radius);
+      overflow:hidden;
+      transition: transform .2s, box-shadow .2s;
+      display:flex; flex-direction:column;
+    }
+    .hotel-card:hover{transform:translateY(-4px); box-shadow: var(--shadow-lg);}
+    .hotel-thumb{aspect-ratio: 16/10; background-size:cover; background-position:center; background-color:#eee;}
+    .hotel-body{padding:16px; flex:1; display:flex; flex-direction:column;}
+    .hotel-stars{color: var(--accent); font-size:13px; margin-bottom:4px; letter-spacing:2px;}
+    .hotel-name{font-weight:800; font-size:16px; letter-spacing:-0.01em;}
+    .hotel-area{font-size:12px; color: var(--ink-3); margin-top:2px;}
+    .hotel-meta{display:flex; align-items:center; gap:10px; margin: 10px 0 14px; font-size:12px; color: var(--ink-2); flex:1;}
+    .hotel-score{
+      display:inline-flex; align-items:center; gap:4px;
+      padding: 3px 8px; background: var(--primary-soft); color: var(--primary);
+      border-radius:6px; font-weight:800;
+    }
+    .hotel-price-row{display:flex; justify-content:space-between; align-items:baseline; padding-top:10px; border-top:1px dashed var(--line);}
+    .hotel-price-row .per{font-size:11px; color: var(--ink-3);}
+    .hotel-price-row .price{font-size:18px; font-weight:900; color: var(--primary); letter-spacing:-0.02em;}
+
+    /* =========================================
+       Golf Section
+       ========================================= */
+    .golf-wrap{
+      background: linear-gradient(135deg, #063E2A, #0B5E43);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      color:#fff;
+      position:relative; overflow:hidden;
+    }
+    .golf-wrap::before{
+      content:""; position:absolute; top:-60px; right:-60px;
+      width: 240px; height: 240px; border-radius:50%;
+      background: radial-gradient(circle, rgba(255,210,63,.3), transparent 70%);
+    }
+    .golf-wrap .section-title{color:#fff;}
+    .golf-wrap .section-sub{color: rgba(255,255,255,.75);}
+    .golf-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top: 20px; position:relative;}
+    .golf-card{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius);
+      overflow:hidden;
+      backdrop-filter: blur(6px);
+      transition: transform .2s, background .2s;
+    }
+    .golf-card:hover{transform:translateY(-4px); background: rgba(255,255,255,.14);}
+    .golf-thumb{aspect-ratio: 16/10; background-size:cover; background-position:center;}
+    .golf-body{padding: 16px;}
+    .golf-title{font-weight:800; font-size:15px; margin-bottom:6px;}
+    .golf-compo{font-size:12px; opacity:.8; margin-bottom:12px;}
+    .golf-price{display:flex; justify-content:space-between; align-items:baseline; padding-top:12px; border-top: 1px dashed rgba(255,255,255,.2);}
+    .golf-price .price{font-size: 20px; font-weight:900; color: var(--accent);}
+
+    /* =========================================
+       Package Builder (stepper)
+       ========================================= */
+    .pkg-builder{
+      background: linear-gradient(135deg, #FFF5EE, #FFFBEB);
+      border-radius: var(--radius-lg); padding: 36px;
+      border: 1px solid var(--line);
+    }
+    .pkg-steps{
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 28px; margin-top: 20px;
+    }
+    .pkg-stages{display:flex; flex-direction:column; gap:12px;}
+    .pkg-stage{
+      background:#fff;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+    }
+    .pkg-stage-head{
+      display:flex; align-items:center; gap:12px; margin-bottom: 14px;
+    }
+    .pkg-step-num{
+      width:32px; height:32px; border-radius:50%;
+      background: var(--primary); color:#fff;
+      display:grid; place-items:center;
+      font-weight:900; font-size:14px;
+      flex-shrink:0;
+    }
+    .pkg-step-title{font-weight:800; font-size:15px;}
+    .pkg-step-sub{font-size:12px; color: var(--ink-3); font-weight:500;}
+    .pkg-options{
+      display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;
+    }
+    .pkg-option{
+      padding: 12px 14px; border-radius: 10px;
+      border: 1.5px solid var(--line);
+      background:#fff; cursor:pointer;
+      text-align:left;
+      transition: border-color .15s, background .15s;
+    }
+    .pkg-option:hover{border-color: var(--primary);}
+    .pkg-option.active{
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+    .pkg-option .opt-title{font-weight:700; font-size:13px; line-height:1.3;}
+    .pkg-option .opt-price{font-size:12px; color: var(--primary); font-weight:800; margin-top:4px;}
+    .pkg-summary{
+      background: var(--ink); color:#fff;
+      border-radius: var(--radius); padding: 24px;
+      display:flex; flex-direction:column;
+      position: sticky; top: calc(var(--header-h) + 70px);
+      align-self: flex-start;
+    }
+    .pkg-summary h4{margin:0 0 12px; font-size:14px; opacity:.7; font-weight:600;}
+    .pkg-lines{display:flex; flex-direction:column; gap:8px; margin-bottom:12px;}
+    .pkg-line{display:flex; justify-content:space-between; font-size:13px; opacity:.88; gap:10px;}
+    .pkg-line .l{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .pkg-divider{height:1px; background: rgba(255,255,255,.15); margin: 10px 0;}
+    .pkg-total{display:flex; justify-content:space-between; align-items:baseline;}
+    .pkg-total .label{font-size:14px; opacity:.7;}
+    .pkg-total .price{font-size: 28px; font-weight:900; color: var(--accent); letter-spacing:-0.02em;}
+    .pkg-cta{
+      margin-top:18px; padding: 14px; border-radius: 10px;
+      background: var(--primary); color:#fff;
+      font-weight:800; font-size:15px; text-align:center;
+    }
+
+    /* =========================================
+       Footer (compact)
+       ========================================= */
+    .footer{background: var(--bg-soft); padding: 40px 0 32px; margin-top: 40px; border-top: 1px solid var(--line);}
+    .footer-bottom{font-size: 12px; color: var(--ink-3); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+    .footer-links{display:flex; gap: 20px; margin-bottom: 18px; flex-wrap:wrap;}
+    .footer-links a{color: var(--ink-2); font-size:13px; font-weight:600;}
+    .footer-links a:hover{color: var(--primary);}
+
+    /* =========================================
+       Floating AI + Bottom Tab
+       ========================================= */
+    .fab-ai{
+      position: fixed; right: 24px; bottom: 24px; z-index: 60;
+      display:flex; align-items:center; gap:10px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:800; font-size:14px;
+      border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(255,107,53,.45);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .fab-ai .sparkle{width:24px; height:24px; display:grid; place-items:center; background: rgba(255,255,255,.25); border-radius:50%; font-size:13px;}
+    @keyframes pulse{0%,100%{box-shadow: 0 12px 32px rgba(255,107,53,.45);} 50%{box-shadow: 0 12px 40px rgba(255,107,53,.65);}}
+    .fab-ai:hover{transform: translateY(-2px);}
+
+    .bottom-tab{display:none;}
+
+    /* Mobile Drawer */
+    .drawer-overlay{position:fixed; inset:0; z-index:70; background: rgba(0,0,0,.5); opacity:0; pointer-events:none; transition: opacity .2s;}
+    .drawer-overlay.open{opacity:1; pointer-events:auto;}
+    .drawer{position:fixed; top:0; right:0; bottom:0; z-index:71; width: min(320px, 85%); background:#fff; transform: translateX(100%); transition: transform .25s ease; display:flex; flex-direction:column;}
+    .drawer.open{transform:translateX(0);}
+    .drawer-head{padding:18px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line);}
+    .drawer-head .close{width:36px; height:36px; border-radius:8px;}
+    .drawer-list{padding:12px 0; flex:1; overflow-y:auto;}
+    .drawer-list a{display:flex; align-items:center; gap:10px; padding:14px 20px; font-weight:600; font-size:15px; color: var(--ink);}
+    .drawer-list a:hover{background: var(--bg-soft);}
+    .drawer-foot{padding: 16px 20px; border-top: 1px solid var(--line); display:flex; gap:8px;}
+    .drawer-foot button{flex:1; padding:12px; border-radius:10px; background: var(--bg-soft); font-weight:700; font-size:13px;}
+
+    /* Reveal */
+    .reveal{opacity:0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease;}
+    .reveal.in{opacity:1; transform: translateY(0);}
+
+    /* =========================================
+       Responsive
+       ========================================= */
+    @media (max-width: 1024px){
+      .originals-grid{grid-template-columns: repeat(2, 1fr);}
+      .shorts-grid{grid-template-columns: repeat(3, 1fr);}
+      .flights-grid{grid-template-columns: repeat(2, 1fr);}
+      .hotels-grid{grid-template-columns: repeat(2, 1fr);}
+      .golf-grid{grid-template-columns: repeat(2, 1fr);}
+      .pkg-steps{grid-template-columns: 1fr;}
+      .pkg-summary{position: static;}
+      .search-form{grid-template-columns: 1fr 1fr;}
+      .search-field{border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);}
+      .search-field:nth-child(2n){border-right:none;}
+      .search-btn{grid-column: 1 / -1; margin: 10px; padding: 14px;}
+    }
+
+    @media (max-width: 768px){
+      :root{--header-h: 60px;}
+      .container{padding: 0 16px;}
+      .section{padding: 36px 0;}
+      .section-title{font-size: 20px;}
+      .gnb,.header-actions{display:none;}
+      .m-hamburger{display:inline-flex;}
+
+      .c-hero{min-height: 360px;}
+      .c-hero-inner{padding: 40px 16px 36px;}
+      .c-hero-flag{font-size: 40px;}
+      .popular-cities{gap: 6px;}
+      .city-chip{padding: 8px 14px; font-size: 13px;}
+      .popular-cities .label{display:none;}
+
+      .search-wrap{margin-top: -20px;}
+      .search-mode-tabs{overflow-x: auto;}
+      .search-mode-tabs::-webkit-scrollbar{display:none;}
+      .search-mode-tabs button{padding: 12px 14px; font-size:13px;}
+      .search-form{grid-template-columns: 1fr 1fr;}
+      .search-field{padding: 12px 14px;}
+
+      .cat-strip-wrap{top: var(--header-h);}
+      .cat-item{font-size:13px; padding: 8px 12px;}
+
+      .originals-grid{grid-template-columns: repeat(2, 1fr); gap: 12px;}
+      .product-body{padding:12px;}
+      .product-title{font-size:14px;}
+      .product-price-row .price{font-size:17px;}
+
+      .flights-grid{grid-template-columns: 1fr; gap:10px;}
+      .flight-card{padding:14px;}
+
+      .shorts-grid{
+        display:flex; grid-template-columns: unset;
+        overflow-x: auto; gap: 12px;
+        scroll-snap-type: x mandatory;
+        margin: 0 -16px; padding: 0 16px 8px;
+      }
+      .shorts-grid::-webkit-scrollbar{display:none;}
+      .short-card{flex: 0 0 68%; min-width: 220px; scroll-snap-align: start;}
+
+      .hotels-grid{grid-template-columns: 1fr; gap: 12px;}
+      .hotel-card{flex-direction: row;}
+      .hotel-thumb{aspect-ratio: 1/1; width: 130px; flex-shrink:0;}
+      .hotel-body{padding: 12px; min-width:0;}
+      .hotel-name{font-size: 14px;}
+
+      .golf-wrap{padding: 24px 18px;}
+      .golf-grid{grid-template-columns: 1fr; gap:12px;}
+
+      .pkg-builder{padding: 20px 16px;}
+      .pkg-options{grid-template-columns: 1fr;}
+      .pkg-summary{padding: 18px;}
+
+      .footer{padding: 32px 0 100px;}
+
+      .bottom-tab{
+        display:flex; position: fixed; left:0; right:0; bottom:0; z-index:55;
+        background:#fff; border-top: 1px solid var(--line);
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        justify-content: space-around;
+      }
+      .bottom-tab a{flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px; color: var(--ink-3); font-size:10px; font-weight:600;}
+      .bottom-tab a.active{color: var(--primary);}
+      .bottom-tab svg{width:22px; height:22px;}
+
+      .fab-ai{bottom: 80px; right: 16px; padding: 12px 16px; font-size:13px;}
+      .fab-ai .sparkle{width:20px; height:20px;}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation-duration:.01ms!important; transition-duration:.01ms!important;}
+      .reveal{opacity:1; transform:none;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- A11y: Skip link -->
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+  <style>.skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;}.skip-link:focus{left:0;}</style>
+
+  <!-- ================================
+       HEADER (shared)
+       ================================ -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="오마이트립 홈">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </a>
+
+      <nav class="gnb" id="headerNav" aria-label="주요 메뉴">
+        <a href="country.html?c=japan"       data-c="japan">🇯🇵 일본</a>
+        <a href="country.html?c=vietnam"     data-c="vietnam">🇻🇳 베트남</a>
+        <a href="country.html?c=thailand"    data-c="thailand">🇹🇭 태국</a>
+        <a href="country.html?c=philippines" data-c="philippines">🇵🇭 필리핀</a>
+        <a href="country.html?c=southeast-asia" data-c="southeast-asia">🌏 동남아</a>
+        <a href="country.html?c=world"       data-c="world">🌍 전세계 호텔</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/ai-planner" class="btn-ai">AI 플래너</a>
+        <a href="/login" class="btn-ghost">로그인</a>
+        <a href="/mypage" class="btn-ghost">마이페이지</a>
+      </div>
+
+      <button class="m-hamburger" aria-label="메뉴 열기" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="drawer-overlay" onclick="closeDrawer()"></div>
+  <aside class="drawer" aria-label="모바일 메뉴">
+    <div class="drawer-head">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </div>
+      <button class="close" onclick="closeDrawer()" aria-label="닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="drawer-list">
+      <a href="country.html?c=japan">🇯🇵 한국인의 일본</a>
+      <a href="country.html?c=vietnam">🇻🇳 한국인의 베트남</a>
+      <a href="country.html?c=thailand">🇹🇭 한국인의 태국</a>
+      <a href="country.html?c=philippines">🇵🇭 한국인의 필리핀</a>
+      <a href="/ai-planner">✦ AI 여행 플래너</a>
+      <a href="/feed">▶ 크리에이터 피드</a>
+      <a href="/creator">크리에이터 파트너 신청</a>
+    </nav>
+    <div class="drawer-foot">
+      <button>로그인</button>
+      <button>회원가입</button>
+    </div>
+  </aside>
+
+  <!-- ================================
+       BREADCRUMB
+       ================================ -->
+  <div class="breadcrumb" id="breadcrumb">
+    <div class="container">
+      <a href="index.html">홈</a>
+      <span class="sep">›</span>
+      <a href="#" id="bcParent">아시아</a>
+      <span class="sep">›</span>
+      <span class="current" id="bcCurrent">한국인의 일본</span>
+    </div>
+  </div>
+
+  <!-- ================================
+       COUNTRY HERO
+       ================================ -->
+  <section class="c-hero">
+    <div class="c-hero-slides" id="heroSlides" aria-hidden="true">
+      <!-- TODO: API 연동 필요 - /api/countries/{slug}/hero (큐레이션 배경 이미지) -->
+    </div>
+    <div class="c-hero-inner">
+      <span class="c-hero-flag" id="heroFlag">🇯🇵</span>
+      <h1 id="heroTitle">한국인의 일본</h1>
+      <p class="c-hero-tagline" id="heroTagline">벚꽃부터 야경까지, 한국인이 가장 사랑하는 여행지</p>
+      <div class="popular-cities" id="popularCities" role="navigation" aria-label="인기 도시">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       SEARCH BAR
+       ================================ -->
+  <section>
+    <div class="container search-wrap">
+      <div class="search-card">
+        <div class="search-mode-tabs" role="tablist" aria-label="검색 유형">
+          <button class="active" data-mode="bundle">항공 + 호텔 묶어 검색<span class="recommend">추천</span></button>
+          <button data-mode="flight">항공만</button>
+          <button data-mode="hotel">호텔만</button>
+          <button data-mode="golf">골프만</button>
+        </div>
+        <form class="search-form" onsubmit="handleSearch(event)">
+          <div class="search-field">
+            <label>출발지</label>
+            <select id="depAirport">
+              <option>인천 (ICN)</option>
+              <option>김포 (GMP)</option>
+              <option>김해 (PUS)</option>
+              <option>대구 (TAE)</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>도착지</label>
+            <select id="arrCity">
+              <!-- Rendered by JS from config -->
+            </select>
+          </div>
+          <div class="search-field">
+            <label>여행 날짜</label>
+            <input type="text" id="travelDate" placeholder="2026.04.25 - 2026.04.28" value="2026.04.25 - 2026.04.28" readonly style="cursor:pointer;"/>
+          </div>
+          <div class="search-field">
+            <label>인원</label>
+            <select id="travelerCount">
+              <option>성인 2명</option>
+              <option>성인 1명</option>
+              <option>성인 2명, 아동 1명</option>
+              <option>성인 2명, 아동 2명</option>
+              <option>성인 4명</option>
+            </select>
+          </div>
+          <button type="submit" class="search-btn">✈ 검색</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       CATEGORY STRIP (sticky)
+       ================================ -->
+  <div class="cat-strip-wrap">
+    <div class="container cat-strip" id="catStrip" role="tablist">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ================================
+       ORIGINALS
+       ================================ -->
+  <section class="section reveal" id="secOriginals">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">🔥 오마이트립 오리지널 <span id="origCountry">일본</span></h2>
+          <p class="section-sub">단독 기획 상품만 모았습니다</p>
+        </div>
+        <a href="#" class="see-all">전체보기 →</a>
+      </div>
+      <div class="originals-grid" id="originalsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================================
+       FLIGHT DEALS
+       ================================ -->
+  <section class="section reveal" style="background: var(--bg-soft);">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">✈️ 지금 뜨는 <span id="flightCountry">일본</span> 특가항공</h2>
+          <p class="section-sub">실시간 최저가 · 지금 예약하면 이 가격</p>
+        </div>
+        <a href="#" class="see-all">항공권 전체 →</a>
+      </div>
+      <div class="tabs" id="flightTabs" role="tablist"></div>
+      <div class="flights-grid" id="flightsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================================
+       CREATOR SHORTS
+       ================================ -->
+  <section class="section reveal">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">▶ 크리에이터가 추천하는 <span id="shortsCountry">일본</span></h2>
+          <p class="section-sub">영상으로 보고, 바로 예약하세요</p>
+        </div>
+        <a href="#" class="see-all">피드 전체 →</a>
+      </div>
+      <div class="shorts-grid" id="shortsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================================
+       HOTELS
+       ================================ -->
+  <section class="section reveal" style="background: var(--bg-soft);">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">🏨 인기 호텔</h2>
+          <p class="section-sub">한국인 여행자가 실제로 많이 예약한 호텔</p>
+        </div>
+        <a href="#" class="see-all">호텔 전체 →</a>
+      </div>
+      <div class="tabs" id="hotelTabs" role="tablist"></div>
+      <div class="hotels-grid" id="hotelsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================================
+       GOLF
+       ================================ -->
+  <section class="section reveal" id="secGolf">
+    <div class="container">
+      <div class="golf-wrap">
+        <div class="section-head-row" style="margin-bottom:6px;">
+          <div>
+            <h2 class="section-title" id="golfTitle">⛳ 일본 골프 여행, 오마이트립에서 가장 저렴하게</h2>
+            <p class="section-sub" id="golfSub">한국인 특화 골프 패키지 · 라운딩 픽업 포함</p>
+          </div>
+        </div>
+        <div class="golf-grid" id="golfGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       DYNAMIC PACKAGE BUILDER (stepper)
+       ================================ -->
+  <section class="section reveal" id="secBuilder">
+    <div class="container">
+      <div class="pkg-builder">
+        <div class="section-head-row" style="margin-bottom:6px;">
+          <div>
+            <h2 class="section-title">나만의 <span id="builderCountry">일본</span> 여행 조합하기</h2>
+            <p class="section-sub">항공 → 호텔 → 액티비티 순으로 선택하면 총 가격이 실시간으로 업데이트됩니다</p>
+          </div>
+        </div>
+        <div class="pkg-steps">
+          <div class="pkg-stages">
+            <!-- Step 1 -->
+            <div class="pkg-stage">
+              <div class="pkg-stage-head">
+                <div class="pkg-step-num">1</div>
+                <div>
+                  <div class="pkg-step-title">항공 선택</div>
+                  <div class="pkg-step-sub">왕복 기준</div>
+                </div>
+              </div>
+              <div class="pkg-options" id="stepFlight"></div>
+            </div>
+            <!-- Step 2 -->
+            <div class="pkg-stage">
+              <div class="pkg-stage-head">
+                <div class="pkg-step-num">2</div>
+                <div>
+                  <div class="pkg-step-title">호텔 선택</div>
+                  <div class="pkg-step-sub">3박 기준</div>
+                </div>
+              </div>
+              <div class="pkg-options" id="stepHotel"></div>
+            </div>
+            <!-- Step 3 -->
+            <div class="pkg-stage">
+              <div class="pkg-stage-head">
+                <div class="pkg-step-num">3</div>
+                <div>
+                  <div class="pkg-step-title">액티비티 추가 (선택)</div>
+                  <div class="pkg-step-sub">패키지에 더해지는 옵션</div>
+                </div>
+              </div>
+              <div class="pkg-options" id="stepActivity"></div>
+            </div>
+          </div>
+
+          <aside class="pkg-summary" aria-live="polite">
+            <h4>실시간 예상 비용</h4>
+            <div class="pkg-lines" id="pkgLines"></div>
+            <div class="pkg-divider"></div>
+            <div class="pkg-total">
+              <span class="label">총 예상 가격 (1인)</span>
+              <span class="price" id="pkgTotal">0원</span>
+            </div>
+            <button class="pkg-cta" onclick="addPackageToCart()">이 조합으로 예약하기</button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       FOOTER (compact)
+       ================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/about">회사 소개</a>
+        <a href="/terms">이용약관</a>
+        <a href="/privacy">개인정보처리방침</a>
+        <a href="/cs">고객센터</a>
+        <a href="/creator">크리에이터 파트너</a>
+        <a href="/supplier">공급자 제휴</a>
+      </div>
+      <div class="footer-bottom">
+        <div><strong>(주)오마이트립</strong> · 대표: 홍길동 · 사업자등록번호: 123-45-67890 · Tel 1588-0000</div>
+        <div>© 2026 OhMyTrip Inc.</div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="/ai-planner" class="fab-ai" aria-label="AI 여행 플래너 열기">
+    <span class="sparkle" aria-hidden="true">✦</span>
+    <span>AI 플래너</span>
+  </a>
+
+  <nav class="bottom-tab" aria-label="모바일 하단 메뉴">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+      <span>홈</span>
+    </a>
+    <a href="/flights/search" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <span>검색</span>
+    </a>
+    <a href="/feed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>피드</span>
+    </a>
+    <a href="/cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg>
+      <span>장바구니</span>
+    </a>
+    <a href="/mypage">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>MY</span>
+    </a>
+  </nav>
+
+  <!-- ================================
+       SCRIPTS — Country Template Engine
+       ================================ -->
+  <script>
+  /* =========================================================================
+     COUNTRY_CONFIGS
+     -------------------------------------------------------------------------
+     country = URL ?c= 파라미터 (japan | vietnam | thailand | philippines)
+     다른 국가 페이지 추가: 이 객체에 동일 shape로 키 하나만 추가하면 됨.
+     실제 서비스에서는 아래 객체 전체를 /api/countries/{slug} 응답으로 교체.
+     ========================================================================= */
+  const CATEGORIES = [
+    { id:'package',    icon:'📦', label:'몽키팩 (패키지)' },
+    { id:'flight',     icon:'✈️', label:'항공권' },
+    { id:'hotel',      icon:'🏨', label:'호텔' },
+    { id:'golf',       icon:'⛳', label:'골프' },
+    { id:'tour',       icon:'🎫', label:'투어' },
+    { id:'spa',        icon:'💆', label:'스파' },
+    { id:'ticket',     icon:'🎟️', label:'티켓' },
+    { id:'restaurant', icon:'🍣', label:'레스토랑' },
+    { id:'car',        icon:'🚗', label:'렌터카' }
+  ];
+
+  const COUNTRY_CONFIGS = {
+    japan: {
+      slug: 'japan',
+      flag: '🇯🇵',
+      name: '한국인의 일본',
+      tagline: '벚꽃부터 야경까지, 한국인이 가장 사랑하는 여행지',
+      accentCountry: '#FFB7C5',          // sakura pink
+      breadcrumbParent: '아시아',
+      heroImages: [
+        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=1800&q=80'
+      ],
+      cities: [
+        { id:'tokyo',    label:'도쿄',    featured:true  },
+        { id:'osaka',    label:'오사카',  featured:true  },
+        { id:'fukuoka',  label:'후쿠오카', featured:true },
+        { id:'sapporo',  label:'삿포로' },
+        { id:'kyoto',    label:'교토' },
+        { id:'okinawa',  label:'오키나와' }
+      ],
+      originals: [
+        { id:'jp-o-1', img:'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80',
+          title:'오마이트립 × APA 호텔 오사카 단독특가 3박', compo:'티웨이항공 왕복 + APA 호텔 3박', price:398000, oldPrice:539000 },
+        { id:'jp-o-2', img:'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
+          title:'[단독] 도쿄 벚꽃 크루즈 3박4일 프리미엄', compo:'대한항공 + 파크하얏트 도쿄 + 스미다강 크루즈', price:1290000, oldPrice:1590000 },
+        { id:'jp-o-3', img:'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=800&q=80',
+          title:'후쿠오카 온천 힐링 2박3일', compo:'제주항공 + 유후인 료칸 + 가이세키 석식', price:589000, oldPrice:780000 },
+        { id:'jp-o-4', img:'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=800&q=80',
+          title:'오사카 유니버설 패밀리 4박5일', compo:'티웨이항공 + 리가로얄 호텔 + USJ 2일권', price:1180000, oldPrice:1450000 }
+      ],
+      flightTabs: [
+        { id:'tokyo',   label:'도쿄' },
+        { id:'osaka',   label:'오사카' },
+        { id:'fukuoka', label:'후쿠오카' }
+      ],
+      flightDeals: {
+        tokyo: [
+          { from:'인천', to:'도쿄(나리타)', date:'5월 3일 왕복', price:259000, airline:'대한항공' },
+          { from:'인천', to:'도쿄(하네다)', date:'5월 10일 왕복', price:289000, airline:'아시아나항공' },
+          { from:'김포', to:'하네다',       date:'5월 1일 왕복',  price:389000, airline:'JAL' },
+          { from:'인천', to:'나리타',       date:'4월 22일 왕복', price:219000, airline:'티웨이항공' },
+          { from:'부산', to:'나리타',       date:'4월 29일 왕복', price:249000, airline:'진에어' },
+          { from:'인천', to:'나리타',       date:'5월 15일 왕복', price:199000, airline:'제주항공' }
+        ],
+        osaka: [
+          { from:'인천', to:'오사카', date:'4월 25일 왕복', price:189000, airline:'티웨이항공' },
+          { from:'인천', to:'오사카', date:'5월 2일 왕복',  price:229000, airline:'제주항공' },
+          { from:'부산', to:'오사카', date:'4월 28일 왕복', price:179000, airline:'에어부산' },
+          { from:'인천', to:'오사카', date:'5월 10일 왕복', price:259000, airline:'대한항공' },
+          { from:'대구', to:'오사카', date:'5월 5일 왕복',  price:249000, airline:'티웨이항공' },
+          { from:'인천', to:'오사카', date:'4월 20일 왕복', price:199000, airline:'진에어' }
+        ],
+        fukuoka: [
+          { from:'부산', to:'후쿠오카', date:'4월 18일 왕복', price:149000, airline:'제주항공' },
+          { from:'인천', to:'후쿠오카', date:'5월 5일 왕복',  price:199000, airline:'티웨이항공' },
+          { from:'부산', to:'후쿠오카', date:'5월 8일 왕복',  price:159000, airline:'에어부산' },
+          { from:'인천', to:'후쿠오카', date:'4월 25일 왕복', price:229000, airline:'대한항공' },
+          { from:'대구', to:'후쿠오카', date:'5월 12일 왕복', price:179000, airline:'티웨이항공' },
+          { from:'인천', to:'후쿠오카', date:'5월 20일 왕복', price:209000, airline:'아시아나항공' }
+        ]
+      },
+      shorts: [
+        { id:'s1', img:'https://images.unsplash.com/photo-1480796927426-f609979314bd?auto=format&fit=crop&w=600&q=80',
+          creator:'일본여행러', initial:'일', subs:'구독자 65만',
+          title:'오사카 2박3일 실제 비용 공개 (항공+호텔+식비)' },
+        { id:'s2', img:'https://images.unsplash.com/photo-1542931287-023b922fa89b?auto=format&fit=crop&w=600&q=80',
+          creator:'트래블재팬', initial:'T', subs:'구독자 92만',
+          title:'도쿄 벚꽃 명소 TOP 10, 현지인도 모르는 스팟' },
+        { id:'s3', img:'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=600&q=80',
+          creator:'온천덕후', initial:'온', subs:'구독자 38만',
+          title:'후쿠오카 온천 료칸 BEST 5, 가성비 끝판왕' }
+      ],
+      hotelTabs: [
+        { id:'tokyo',   label:'도쿄' },
+        { id:'osaka',   label:'오사카' },
+        { id:'fukuoka', label:'후쿠오카' }
+      ],
+      hotels: {
+        tokyo: [
+          { img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+            name:'파크 하얏트 도쿄', area:'신주쿠', stars:5, score:9.4, reviews:'2,847', price:589000 },
+          { img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
+            name:'APA 호텔 신주쿠', area:'신주쿠', stars:4, score:8.7, reviews:'5,284', price:129000 },
+          { img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+            name:'힐튼 도쿄', area:'신주쿠', stars:5, score:9.1, reviews:'3,901', price:358000 }
+        ],
+        osaka: [
+          { img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+            name:'호텔 그란비아 오사카', area:'우메다', stars:5, score:9.2, reviews:'4,127', price:239000 },
+          { img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+            name:'리가로얄 호텔 오사카', area:'나카노시마', stars:5, score:9.0, reviews:'3,528', price:329000 },
+          { img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+            name:'크로스 호텔 오사카', area:'신사이바시', stars:4, score:8.9, reviews:'2,145', price:189000 }
+        ],
+        fukuoka: [
+          { img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+            name:'그랜드 하얏트 후쿠오카', area:'하카타', stars:5, score:9.3, reviews:'1,892', price:268000 },
+          { img:'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80',
+            name:'솔라리아 니시테츠 호텔', area:'텐진', stars:4, score:8.8, reviews:'2,341', price:158000 },
+          { img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+            name:'호텔 뉴오타니 하카타', area:'하카타', stars:4, score:8.6, reviews:'1,564', price:198000 }
+        ]
+      },
+      golf: [
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'미야자키 3박4일 라운딩 3회', compo:'피닉스 컨트리클럽 + 호텔 + 카트/캐디', price:798000 },
+        { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+          title:'기타큐슈 골프 2박3일 라운딩 2회', compo:'기타큐슈 골프CC + 세이부 호텔', price:598000 },
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'홋카이도 니세코 골프 4박5일', compo:'니세코 골프코스 3라운드 + 리조트', price:1380000 }
+      ],
+      builder: {
+        flights: [
+          { id:'f1', label:'인천→오사카 (티웨이)',  price:380000 },
+          { id:'f2', label:'인천→도쿄 (대한항공)',   price:520000 },
+          { id:'f3', label:'부산→후쿠오카 (제주항공)', price:298000 }
+        ],
+        hotels: [
+          { id:'h1', label:'호텔 그란비아 오사카 3박', price:240000 },
+          { id:'h2', label:'리가로얄 오사카 3박',     price:390000 },
+          { id:'h3', label:'APA호텔 난바 3박',        price:180000 }
+        ],
+        activities: [
+          { id:'a0', label:'선택 안 함',              price:0 },
+          { id:'a1', label:'유니버설 스튜디오 1일권', price:89000 },
+          { id:'a2', label:'오사카 성 벚꽃 크루즈',  price:65000 },
+          { id:'a3', label:'오사카 골프 라운딩 1회',  price:120000 }
+        ]
+      }
+    },
+
+    vietnam: {
+      slug:'vietnam', flag:'🇻🇳', name:'한국인의 베트남',
+      tagline:'에메랄드 해변과 따뜻한 미소, 가성비로도 최고의 선택',
+      accentCountry:'#E63946', breadcrumbParent:'동남아시아',
+      heroImages: [
+        'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=1800&q=80'
+      ],
+      cities: [
+        { id:'danang',   label:'다낭',    featured:true },
+        { id:'nhatrang', label:'나트랑',  featured:true },
+        { id:'hanoi',    label:'하노이' },
+        { id:'hcmc',     label:'호치민' },
+        { id:'phuquoc',  label:'푸꾸옥' },
+        { id:'hoian',    label:'호이안' }
+      ],
+      originals: [
+        { id:'vn-o-1', img:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
+          title:'[단독] 다낭 풀빌라 4박5일 올인클루시브', compo:'비엣젯 + 프리미어빌리지 + 조식/석식', price:1290000, oldPrice:1590000 },
+        { id:'vn-o-2', img:'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=800&q=80',
+          title:'나트랑 5성 리조트 3박 단독특가', compo:'베트남항공 + 빈펄 리조트 + 조식', price:798000, oldPrice:980000 },
+        { id:'vn-o-3', img:'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=800&q=80',
+          title:'푸꾸옥 럭셔리 풀빌라 4박', compo:'비엣젯 + JW메리어트 에메랄드베이', price:1580000, oldPrice:1890000 },
+        { id:'vn-o-4', img:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
+          title:'호이안 올드타운 3박4일', compo:'대한항공 다낭 + 포시즌스 남하이', price:1090000, oldPrice:1350000 }
+      ],
+      flightTabs:[
+        { id:'danang', label:'다낭' },
+        { id:'nhatrang', label:'나트랑' },
+        { id:'hanoi', label:'하노이' }
+      ],
+      flightDeals:{
+        danang:[
+          { from:'인천', to:'다낭', date:'4월 27일 왕복', price:329000, airline:'비엣젯항공' },
+          { from:'부산', to:'다낭', date:'5월 5일 왕복',  price:359000, airline:'에어부산' },
+          { from:'인천', to:'다낭', date:'5월 1일 왕복',  price:389000, airline:'대한항공' },
+          { from:'인천', to:'다낭', date:'5월 10일 왕복', price:299000, airline:'티웨이항공' },
+          { from:'부산', to:'다낭', date:'5월 15일 왕복', price:339000, airline:'제주항공' },
+          { from:'대구', to:'다낭', date:'5월 20일 왕복', price:349000, airline:'티웨이항공' }
+        ],
+        nhatrang:[
+          { from:'인천', to:'나트랑', date:'5월 10일 왕복', price:389000, airline:'베트남항공' },
+          { from:'인천', to:'나트랑', date:'5월 18일 왕복', price:359000, airline:'비엣젯항공' },
+          { from:'인천', to:'나트랑', date:'5월 25일 왕복', price:419000, airline:'대한항공' },
+          { from:'부산', to:'나트랑', date:'5월 5일 왕복',  price:429000, airline:'비엣젯항공' },
+          { from:'인천', to:'나트랑', date:'6월 1일 왕복',  price:399000, airline:'베트남항공' },
+          { from:'인천', to:'나트랑', date:'6월 8일 왕복',  price:369000, airline:'비엣젯항공' }
+        ],
+        hanoi:[
+          { from:'인천', to:'하노이', date:'4월 22일 왕복', price:279000, airline:'티웨이항공' },
+          { from:'인천', to:'하노이', date:'5월 3일 왕복',  price:319000, airline:'베트남항공' },
+          { from:'인천', to:'하노이', date:'5월 15일 왕복', price:289000, airline:'진에어' },
+          { from:'부산', to:'하노이', date:'5월 20일 왕복', price:329000, airline:'제주항공' },
+          { from:'인천', to:'하노이', date:'6월 1일 왕복',  price:349000, airline:'대한항공' },
+          { from:'인천', to:'하노이', date:'6월 10일 왕복', price:269000, airline:'티웨이항공' }
+        ]
+      },
+      shorts:[
+        { id:'s1', img:'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=600&q=80',
+          creator:'다낭러버 지노', initial:'지', subs:'구독자 128만',
+          title:'다낭 가성비 호텔 TOP3, 안 가면 후회합니다' },
+        { id:'s2', img:'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=600&q=80',
+          creator:'베트남푸드', initial:'베', subs:'구독자 45만',
+          title:'하노이 쌀국수 현지인만 가는 곳 5곳' },
+        { id:'s3', img:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80',
+          creator:'푸꾸옥 수진', initial:'수', subs:'구독자 27만',
+          title:'푸꾸옥 풀빌라 실제 체류기 + 비용 공개' }
+      ],
+      hotelTabs:[
+        { id:'danang', label:'다낭' },
+        { id:'nhatrang', label:'나트랑' },
+        { id:'hanoi', label:'하노이' }
+      ],
+      hotels:{
+        danang:[
+          { img:'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
+            name:'인터컨티넨탈 다낭 선페닌슐라', area:'선짜 반도', stars:5, score:9.6, reviews:'2,184', price:489000 },
+          { img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+            name:'프리미어빌리지 다낭 리조트', area:'미케 비치', stars:5, score:9.3, reviews:'3,247', price:398000 },
+          { img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+            name:'포시즌스 남하이', area:'다낭 외곽', stars:5, score:9.7, reviews:'1,428', price:789000 }
+        ],
+        nhatrang:[
+          { img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+            name:'빈펄 럭셔리 나트랑', area:'혼째 섬', stars:5, score:9.2, reviews:'4,521', price:298000 },
+          { img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+            name:'아미아나 나트랑', area:'북쪽 해변', stars:5, score:9.0, reviews:'1,867', price:358000 },
+          { img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
+            name:'노보텔 나트랑', area:'시내', stars:4, score:8.6, reviews:'2,934', price:158000 }
+        ],
+        hanoi:[
+          { img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+            name:'소피텔 레전드 메트로폴', area:'구시가지', stars:5, score:9.4, reviews:'3,672', price:458000 },
+          { img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+            name:'인터컨티넨탈 하노이', area:'서호', stars:5, score:9.1, reviews:'2,148', price:328000 },
+          { img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+            name:'라쉬에스타 호텔', area:'구시가지', stars:4, score:8.8, reviews:'1,942', price:129000 }
+        ]
+      },
+      golf:[
+        { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+          title:'다낭 골프 3박4일 라운딩 3회', compo:'BRG 다낭 골프클럽 + 5성 호텔', price:698000 },
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'호이안 골프 4박5일 라운딩 4회', compo:'몽고메리 링크스 + 포시즌스', price:989000 },
+        { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+          title:'푸꾸옥 골프 3박4일 라운딩 2회', compo:'빈펄 골프 + 리조트 숙박', price:798000 }
+      ],
+      builder:{
+        flights:[
+          { id:'f1', label:'인천→다낭 (비엣젯)',   price:329000 },
+          { id:'f2', label:'인천→나트랑 (베트남항공)', price:389000 },
+          { id:'f3', label:'인천→하노이 (티웨이)',  price:279000 }
+        ],
+        hotels:[
+          { id:'h1', label:'프리미어빌리지 다낭 3박', price:1194000 },
+          { id:'h2', label:'빈펄 럭셔리 나트랑 3박',  price:894000 },
+          { id:'h3', label:'노보텔 나트랑 3박',       price:474000 }
+        ],
+        activities:[
+          { id:'a0', label:'선택 안 함',           price:0 },
+          { id:'a1', label:'다낭 바나힐 1일 투어', price:68000 },
+          { id:'a2', label:'호이안 야경 크루즈',   price:45000 },
+          { id:'a3', label:'BRG 골프 라운딩 1회',  price:150000 }
+        ]
+      }
+    },
+
+    thailand: {
+      slug:'thailand', flag:'🇹🇭', name:'한국인의 태국',
+      tagline:'야시장부터 섬까지, 입맛 가득 태국 여행',
+      accentCountry:'#F4A261', breadcrumbParent:'동남아시아',
+      heroImages: [
+        'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1800&q=80'
+      ],
+      cities:[
+        { id:'bangkok',    label:'방콕',     featured:true },
+        { id:'phuket',     label:'푸켓',     featured:true },
+        { id:'chiangmai',  label:'치앙마이', featured:true },
+        { id:'pattaya',    label:'파타야' },
+        { id:'krabi',      label:'끄라비' },
+        { id:'kosamui',    label:'코사무이' }
+      ],
+      originals:[
+        { id:'th-o-1', img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
+          title:'[단독] 방콕+파타야 5박6일 콤비', compo:'타이항공 + ONE15 + 수상시장 투어', price:890000, oldPrice:1180000 },
+        { id:'th-o-2', img:'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=800&q=80',
+          title:'푸켓 올인클루시브 4박5일', compo:'타이항공 + 빈쯔찌 푸켓 + 피피섬 투어', price:1180000, oldPrice:1490000 },
+        { id:'th-o-3', img:'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=800&q=80',
+          title:'치앙마이 힐링 3박4일', compo:'에어아시아 + 포시즌스 치앙마이', price:890000, oldPrice:1150000 },
+        { id:'th-o-4', img:'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=800&q=80',
+          title:'방콕 럭셔리 스파 3박4일', compo:'대한항공 + 만다린오리엔탈 + 스파 2회', price:1290000, oldPrice:1580000 }
+      ],
+      flightTabs:[
+        { id:'bangkok', label:'방콕' },
+        { id:'phuket', label:'푸켓' },
+        { id:'chiangmai', label:'치앙마이' }
+      ],
+      flightDeals:{
+        bangkok:[
+          { from:'인천', to:'방콕', date:'4월 29일 왕복', price:319000, airline:'타이항공' },
+          { from:'인천', to:'방콕', date:'5월 3일 왕복',  price:349000, airline:'대한항공' },
+          { from:'부산', to:'방콕', date:'5월 8일 왕복',  price:399000, airline:'진에어' },
+          { from:'인천', to:'방콕', date:'5월 12일 왕복', price:289000, airline:'타이라이언에어' },
+          { from:'인천', to:'방콕', date:'5월 15일 왕복', price:329000, airline:'제주항공' },
+          { from:'인천', to:'방콕', date:'5월 20일 왕복', price:369000, airline:'아시아나항공' }
+        ],
+        phuket:[
+          { from:'인천', to:'푸켓', date:'5월 5일 왕복',  price:469000, airline:'에어아시아' },
+          { from:'인천', to:'푸켓', date:'5월 10일 왕복', price:498000, airline:'타이항공' },
+          { from:'인천', to:'푸켓', date:'5월 15일 왕복', price:449000, airline:'티웨이항공' },
+          { from:'부산', to:'푸켓', date:'5월 18일 왕복', price:529000, airline:'에어부산' },
+          { from:'인천', to:'푸켓', date:'5월 25일 왕복', price:479000, airline:'에어아시아' },
+          { from:'인천', to:'푸켓', date:'6월 1일 왕복',  price:439000, airline:'제주항공' }
+        ],
+        chiangmai:[
+          { from:'인천', to:'치앙마이', date:'4월 30일 왕복', price:359000, airline:'타이베트남항공' },
+          { from:'인천', to:'치앙마이', date:'5월 8일 왕복',  price:389000, airline:'에어아시아' },
+          { from:'인천', to:'치앙마이', date:'5월 15일 왕복', price:369000, airline:'타이에어아시아' },
+          { from:'인천', to:'치앙마이', date:'5월 22일 왕복', price:419000, airline:'타이항공' },
+          { from:'인천', to:'치앙마이', date:'6월 1일 왕복',  price:399000, airline:'진에어' },
+          { from:'부산', to:'치앙마이', date:'6월 5일 왕복',  price:449000, airline:'제주항공' }
+        ]
+      },
+      shorts:[
+        { id:'s1', img:'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=600&q=80',
+          creator:'방콕러버 수진', initial:'수', subs:'구독자 87만',
+          title:'방콕 루프탑바 BEST 7, 야경 끝판왕' },
+        { id:'s2', img:'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=600&q=80',
+          creator:'치앙마이 한량', initial:'치', subs:'구독자 42만',
+          title:'치앙마이 한 달 살기 실제 비용 (2026)' },
+        { id:'s3', img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=600&q=80',
+          creator:'푸켓 다이버', initial:'푸', subs:'구독자 23만',
+          title:'피피섬 1일 투어 가격 비교 + 꿀팁' }
+      ],
+      hotelTabs:[
+        { id:'bangkok', label:'방콕' },
+        { id:'phuket', label:'푸켓' },
+        { id:'chiangmai', label:'치앙마이' }
+      ],
+      hotels:{
+        bangkok:[
+          { img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+            name:'만다린 오리엔탈 방콕', area:'리버사이드', stars:5, score:9.5, reviews:'3,241', price:529000 },
+          { img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+            name:'시암 켐핀스키 호텔', area:'시암', stars:5, score:9.2, reviews:'2,687', price:389000 },
+          { img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+            name:'노보텔 방콕 수쿰빗', area:'수쿰빗', stars:4, score:8.7, reviews:'4,521', price:148000 }
+        ],
+        phuket:[
+          { img:'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
+            name:'빈쯔찌 푸켓', area:'나이한 비치', stars:5, score:9.4, reviews:'1,824', price:428000 },
+          { img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+            name:'JW 메리어트 푸켓', area:'마이카오', stars:5, score:9.1, reviews:'2,457', price:358000 },
+          { img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+            name:'푸켓 파노라마 리조트', area:'카론 비치', stars:4, score:8.5, reviews:'1,248', price:159000 }
+        ],
+        chiangmai:[
+          { img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+            name:'포시즌스 리조트 치앙마이', area:'매림', stars:5, score:9.7, reviews:'1,128', price:689000 },
+          { img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+            name:'137 필라스 하우스', area:'올드시티', stars:5, score:9.3, reviews:'924', price:429000 },
+          { img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
+            name:'두지트 D2 치앙마이', area:'시내', stars:4, score:8.9, reviews:'2,145', price:119000 }
+        ]
+      },
+      golf:[
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'방콕+파타야 골프 4박5일 라운딩 4회', compo:'시암 컨트리클럽 + 4성 호텔', price:798000 },
+        { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+          title:'치앙마이 골프 3박4일 라운딩 3회', compo:'알파인 골프 + 포시즌스', price:898000 },
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'후아힌 골프 리조트 4박5일', compo:'블랙마운틴 + 힐튼 후아힌', price:998000 }
+      ],
+      builder:{
+        flights:[
+          { id:'f1', label:'인천→방콕 (타이항공)',   price:319000 },
+          { id:'f2', label:'인천→푸켓 (에어아시아)', price:469000 },
+          { id:'f3', label:'인천→치앙마이 (타이베트남항공)', price:359000 }
+        ],
+        hotels:[
+          { id:'h1', label:'만다린 오리엔탈 방콕 3박', price:1587000 },
+          { id:'h2', label:'노보텔 방콕 3박',          price:444000 },
+          { id:'h3', label:'빈쯔찌 푸켓 3박',          price:1284000 }
+        ],
+        activities:[
+          { id:'a0', label:'선택 안 함',         price:0 },
+          { id:'a1', label:'방콕 수상시장 투어', price:58000 },
+          { id:'a2', label:'피피섬 1일 투어',    price:72000 },
+          { id:'a3', label:'치앙마이 코끼리 보호소', price:85000 }
+        ]
+      }
+    },
+
+    philippines: {
+      slug:'philippines', flag:'🇵🇭', name:'한국인의 필리핀',
+      tagline:'에메랄드 바다와 호핑의 천국',
+      accentCountry:'#06A77D', breadcrumbParent:'동남아시아',
+      heroImages:[
+        'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=1800&q=80'
+      ],
+      cities:[
+        { id:'cebu',     label:'세부',     featured:true },
+        { id:'bohol',    label:'보홀',     featured:true },
+        { id:'boracay',  label:'보라카이', featured:true },
+        { id:'manila',   label:'마닐라' },
+        { id:'palawan',  label:'팔라완' },
+        { id:'elnido',   label:'엘니도' }
+      ],
+      originals:[
+        { id:'ph-o-1', img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
+          title:'[단독] 세부 샹그릴라 막탄 4박5일', compo:'세부퍼시픽 + 샹그릴라 막탄 + 호핑투어', price:1580000, oldPrice:1890000 },
+        { id:'ph-o-2', img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80',
+          title:'보라카이 5성 리조트 4박', compo:'필리핀항공 + 헤난 크리스탈샌즈', price:1380000, oldPrice:1690000 },
+        { id:'ph-o-3', img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+          title:'엘니도 풀빌라 단독특가 3박', compo:'세부퍼시픽 + 엘니도 리조트', price:1890000, oldPrice:2290000 },
+        { id:'ph-o-4', img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
+          title:'보홀 초콜릿힐 3박4일', compo:'대한항공 + 아모라 리조트 + 타르시어 투어', price:990000, oldPrice:1250000 }
+      ],
+      flightTabs:[
+        { id:'cebu', label:'세부' },
+        { id:'manila', label:'마닐라' },
+        { id:'boracay', label:'보라카이' }
+      ],
+      flightDeals:{
+        cebu:[
+          { from:'인천', to:'세부', date:'4월 27일 왕복', price:389000, airline:'세부퍼시픽' },
+          { from:'인천', to:'세부', date:'5월 5일 왕복',  price:419000, airline:'필리핀항공' },
+          { from:'부산', to:'세부', date:'5월 8일 왕복',  price:449000, airline:'제주항공' },
+          { from:'인천', to:'세부', date:'5월 15일 왕복', price:399000, airline:'진에어' },
+          { from:'인천', to:'세부', date:'5월 20일 왕복', price:429000, airline:'대한항공' },
+          { from:'대구', to:'세부', date:'5월 25일 왕복', price:459000, airline:'티웨이항공' }
+        ],
+        manila:[
+          { from:'인천', to:'마닐라', date:'4월 30일 왕복', price:349000, airline:'필리핀항공' },
+          { from:'인천', to:'마닐라', date:'5월 10일 왕복', price:379000, airline:'세부퍼시픽' },
+          { from:'인천', to:'마닐라', date:'5월 17일 왕복', price:359000, airline:'아시아나항공' },
+          { from:'부산', to:'마닐라', date:'5월 22일 왕복', price:399000, airline:'에어부산' },
+          { from:'인천', to:'마닐라', date:'6월 1일 왕복',  price:329000, airline:'제주항공' },
+          { from:'인천', to:'마닐라', date:'6월 10일 왕복', price:369000, airline:'필리핀항공' }
+        ],
+        boracay:[
+          { from:'인천', to:'보라카이(칼리보)', date:'5월 3일 왕복',  price:489000, airline:'필리핀항공' },
+          { from:'인천', to:'보라카이(칼리보)', date:'5월 12일 왕복', price:459000, airline:'진에어' },
+          { from:'인천', to:'보라카이(칼리보)', date:'5월 20일 왕복', price:519000, airline:'필리핀항공' },
+          { from:'부산', to:'보라카이(칼리보)', date:'5월 28일 왕복', price:549000, airline:'에어부산' },
+          { from:'인천', to:'보라카이(칼리보)', date:'6월 5일 왕복',  price:479000, airline:'세부퍼시픽' },
+          { from:'인천', to:'보라카이(칼리보)', date:'6월 15일 왕복', price:499000, airline:'티웨이항공' }
+        ]
+      },
+      shorts:[
+        { id:'s1', img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=600&q=80',
+          creator:'필리핀덕후 케빈', initial:'케', subs:'구독자 31만',
+          title:'세부 현지인이 알려주는 진짜 맛집 5곳' },
+        { id:'s2', img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=600&q=80',
+          creator:'보라카이 민수', initial:'민', subs:'구독자 22만',
+          title:'보라카이 풀빌라 3박 실제 비용 공개' },
+        { id:'s3', img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
+          creator:'팔라완 다이버', initial:'팔', subs:'구독자 18만',
+          title:'엘니도 호핑 투어 A/B/C/D 완전 정리' }
+      ],
+      hotelTabs:[
+        { id:'cebu', label:'세부' },
+        { id:'boracay', label:'보라카이' },
+        { id:'manila', label:'마닐라' }
+      ],
+      hotels:{
+        cebu:[
+          { img:'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
+            name:'샹그릴라 막탄 리조트', area:'막탄 섬', stars:5, score:9.5, reviews:'2,847', price:489000 },
+          { img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+            name:'크림슨 리조트 앤 스파', area:'막탄', stars:5, score:9.2, reviews:'1,624', price:358000 },
+          { img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+            name:'레디슨 블루 세부', area:'시티', stars:4, score:8.8, reviews:'2,341', price:168000 }
+        ],
+        boracay:[
+          { img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+            name:'헤난 크리스탈샌즈', area:'화이트 비치', stars:5, score:9.3, reviews:'1,847', price:298000 },
+          { img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+            name:'리조트 모포로고', area:'스테이션2', stars:4, score:8.9, reviews:'2,124', price:189000 },
+          { img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+            name:'샹그릴라 보라카이', area:'푸카 비치', stars:5, score:9.6, reviews:'1,428', price:589000 }
+        ],
+        manila:[
+          { img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+            name:'페닌슐라 마닐라', area:'마카티', stars:5, score:9.3, reviews:'2,847', price:358000 },
+          { img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+            name:'마닐라 마리엇 호텔', area:'파사이', stars:5, score:9.0, reviews:'1,928', price:268000 },
+          { img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
+            name:'시티 가든 그랜드 호텔', area:'마카티', stars:4, score:8.5, reviews:'3,412', price:128000 }
+        ]
+      },
+      golf:[
+        { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
+          title:'세부 골프 3박4일 라운딩 3회', compo:'알타비스타 골프 + 막탄 리조트', price:798000 },
+        { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
+          title:'클락 골프 리조트 4박5일', compo:'민트 밸리 골프 + 5성 호텔', price:898000 }
+      ],
+      builder:{
+        flights:[
+          { id:'f1', label:'인천→세부 (세부퍼시픽)',  price:389000 },
+          { id:'f2', label:'인천→마닐라 (필리핀항공)', price:349000 },
+          { id:'f3', label:'인천→칼리보 (세부퍼시픽)', price:489000 }
+        ],
+        hotels:[
+          { id:'h1', label:'샹그릴라 막탄 리조트 3박', price:1467000 },
+          { id:'h2', label:'크림슨 리조트 3박',        price:1074000 },
+          { id:'h3', label:'헤난 크리스탈샌즈 3박',    price:894000 }
+        ],
+        activities:[
+          { id:'a0', label:'선택 안 함',         price:0 },
+          { id:'a1', label:'세부 호핑 투어',     price:68000 },
+          { id:'a2', label:'보라카이 선셋 세일링', price:49000 },
+          { id:'a3', label:'세부 골프 라운딩 1회', price:120000 }
+        ]
+      }
+    }
+  };
+
+  /* =========================================================================
+     Engine — URL 파싱 + 설정 로드
+     ========================================================================= */
+  const params = new URLSearchParams(location.search);
+  const countrySlug = params.get('c') || 'japan';
+  const cfg = COUNTRY_CONFIGS[countrySlug] || COUNTRY_CONFIGS.japan;
+
+  // Theme accent override
+  document.documentElement.style.setProperty('--accent-country', cfg.accentCountry);
+
+  /* =========================================================================
+     Formatters
+     ========================================================================= */
+  const krw = (n) => n.toLocaleString('ko-KR') + '원';
+
+  /* =========================================================================
+     Head / Hero / Breadcrumb
+     ========================================================================= */
+  function renderHead(){
+    document.title = `${cfg.name} | 오마이트립`;
+    document.getElementById('pageTitle').textContent = `${cfg.name} | 오마이트립`;
+    document.getElementById('bcParent').textContent = cfg.breadcrumbParent;
+    document.getElementById('bcCurrent').textContent = cfg.name;
+    document.getElementById('heroFlag').textContent = cfg.flag;
+    document.getElementById('heroTitle').textContent = cfg.name;
+    document.getElementById('heroTagline').textContent = cfg.tagline;
+
+    // Country name tokens in section titles
+    const shortName = cfg.name.replace('한국인의 ', '');
+    ['origCountry','flightCountry','shortsCountry','builderCountry'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = shortName;
+    });
+    document.getElementById('golfTitle').textContent = `⛳ ${shortName} 골프 여행, 오마이트립에서 가장 저렴하게`;
+
+    // GNB active state
+    document.querySelectorAll('#headerNav a').forEach(a => {
+      a.classList.toggle('active', a.dataset.c === countrySlug);
+    });
+  }
+
+  function renderHeroSlides(){
+    const el = document.getElementById('heroSlides');
+    // TODO: API 연동 필요 - GET /api/countries/${countrySlug}/hero
+    el.innerHTML = cfg.heroImages.map((src, i) =>
+      `<div class="c-hero-slide ${i===0?'active':''}" style="background-image:url('${src}')"></div>`
+    ).join('');
+
+    const slides = el.querySelectorAll('.c-hero-slide');
+    let idx = 0;
+    // A11y: respect reduced motion
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      setInterval(() => {
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+      }, 5500);
+    }
+  }
+
+  // A11y: Escape closes drawer
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.querySelector('.drawer')?.classList.contains('open')){
+      closeDrawer();
+    }
+  });
+
+  function renderPopularCities(){
+    const el = document.getElementById('popularCities');
+    el.innerHTML = `<span class="label">🏙️ 인기 도시</span>` + cfg.cities.map(c => `
+      <a class="city-chip ${c.featured?'featured':''}" href="#" data-city="${c.id}">${c.label}</a>
+    `).join('');
+
+    el.querySelectorAll('[data-city]').forEach(chip => {
+      chip.addEventListener('click', e => {
+        e.preventDefault();
+        // TODO: API 연동 필요 - GET /api/search?country=${countrySlug}&city=${chip.dataset.city}
+        alert(`${chip.textContent} 도시 필터 적용 (프로토타입)`);
+      });
+    });
+  }
+
+  /* =========================================================================
+     Search Bar
+     ========================================================================= */
+  function renderSearchForm(){
+    const sel = document.getElementById('arrCity');
+    sel.innerHTML = cfg.cities
+      .map(c => `<option value="${c.id}">${cfg.flag} ${c.label}</option>`)
+      .join('');
+
+    // Mode tabs
+    document.querySelectorAll('.search-mode-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.search-mode-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  function handleSearch(e){
+    e.preventDefault();
+    const mode = document.querySelector('.search-mode-tabs button.active').dataset.mode;
+    const dep  = document.getElementById('depAirport').value;
+    const arr  = document.getElementById('arrCity').selectedOptions[0].textContent;
+    const date = document.getElementById('travelDate').value;
+    const pax  = document.getElementById('travelerCount').value;
+    // TODO: API 연동 필요 - GET /api/{mode}/search?country=${countrySlug}&dep=...&arr=...&date=...&pax=...
+    alert(`[${mode}] 검색 (프로토타입)\n${dep} → ${arr}\n${date} · ${pax}`);
+  }
+
+  /* =========================================================================
+     Category Strip
+     ========================================================================= */
+  function renderCategoryStrip(){
+    const el = document.getElementById('catStrip');
+    el.innerHTML = CATEGORIES.map((c, i) => `
+      <a class="cat-item ${i===0?'active':''}" href="#" data-cat="${c.id}">
+        <span class="icon" aria-hidden="true">${c.icon}</span>
+        <span>${c.label}</span>
+      </a>
+    `).join('');
+
+    el.querySelectorAll('.cat-item').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        el.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // TODO: API 연동 필요 - GET /api/products?country=${countrySlug}&category=${btn.dataset.cat}
+        const targetId = btn.dataset.cat === 'golf' ? 'secGolf'
+                      : btn.dataset.cat === 'package' ? 'secBuilder'
+                      : btn.dataset.cat === 'hotel'   ? 'secOriginals'
+                      : 'secOriginals';
+        document.getElementById(targetId)?.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+  }
+
+  /* =========================================================================
+     Renderers
+     ========================================================================= */
+  function renderOriginals(){
+    // TODO: API 연동 필요 - GET /api/products/originals?country=${countrySlug}
+    const el = document.getElementById('originalsGrid');
+    el.innerHTML = cfg.originals.map(p => `
+      <a class="product-card" href="/product/${p.id}">
+        <div class="product-thumb" style="background-image:url('${p.img}')">
+          <div class="product-badges">
+            <span class="badge original">ORIGINAL</span>
+            <span class="badge country">${cfg.flag}</span>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-title">${p.title}</div>
+          <div class="product-compo">${p.compo}</div>
+          <div class="product-price-row">
+            <span class="from">최저가</span>
+            <span class="price" style="color: var(--primary);">${krw(p.price)}</span>
+            <span class="unit">~</span>
+          </div>
+          <div class="product-old">${krw(p.oldPrice)}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function renderFlightTabs(){
+    const tabsEl = document.getElementById('flightTabs');
+    tabsEl.innerHTML = cfg.flightTabs.map((t, i) => `
+      <button class="tab ${i===0?'active':''}" data-tab="${t.id}">${t.label}</button>
+    `).join('');
+
+    tabsEl.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabsEl.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderFlights(btn.dataset.tab);
+      });
+    });
+  }
+
+  function renderFlights(cityKey){
+    // TODO: API 연동 필요 - GET /api/flights/deals?country=${countrySlug}&city=${cityKey}
+    const el = document.getElementById('flightsGrid');
+    const list = cfg.flightDeals[cityKey] || [];
+    el.innerHTML = list.map(f => `
+      <a class="flight-card" href="/flights/search?country=${cfg.slug}&from=${encodeURIComponent(f.from)}&to=${encodeURIComponent(f.to)}">
+        <div class="flight-airline"><span class="airline-dot"></span>${f.airline}</div>
+        <div class="flight-route">
+          <span class="city">${f.from}</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span class="city">${f.to}</span>
+        </div>
+        <div class="flight-meta">
+          <span>${f.date}</span>
+          <span class="flight-price">${krw(f.price)}~</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function renderShorts(){
+    // TODO: API 연동 필요 - GET /api/creator/shorts?country=${countrySlug}
+    const el = document.getElementById('shortsGrid');
+    el.innerHTML = cfg.shorts.map(s => `
+      <article class="short-card" style="background-image:url('${s.img}')">
+        <div class="short-play" aria-hidden="true">▶</div>
+        <div class="short-content">
+          <div class="short-creator">
+            <div class="creator-avatar" aria-hidden="true">${s.initial}</div>
+            <div>
+              <div class="creator-name">${s.creator}</div>
+              <div class="creator-subs">${s.subs}</div>
+            </div>
+          </div>
+          <div class="short-title">${s.title}</div>
+          <div class="short-actions">
+            <button class="view" type="button">자세히 보기</button>
+            <button class="book" type="button">지금 예약</button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function renderHotelTabs(){
+    const tabsEl = document.getElementById('hotelTabs');
+    tabsEl.innerHTML = cfg.hotelTabs.map((t, i) => `
+      <button class="tab ${i===0?'active':''}" data-tab="${t.id}">${t.label}</button>
+    `).join('');
+
+    tabsEl.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabsEl.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderHotels(btn.dataset.tab);
+      });
+    });
+  }
+
+  function renderHotels(cityKey){
+    // TODO: API 연동 필요 - GET /api/hotels?country=${countrySlug}&city=${cityKey}
+    const el = document.getElementById('hotelsGrid');
+    const list = cfg.hotels[cityKey] || [];
+    el.innerHTML = list.map(h => `
+      <a class="hotel-card" href="#">
+        <div class="hotel-thumb" style="background-image:url('${h.img}')"></div>
+        <div class="hotel-body">
+          <div class="hotel-stars">${'★'.repeat(h.stars)}</div>
+          <div class="hotel-name">${h.name}</div>
+          <div class="hotel-area">${h.area}</div>
+          <div class="hotel-meta">
+            <span class="hotel-score">${h.score}</span>
+            <span>리뷰 ${h.reviews}</span>
+          </div>
+          <div class="hotel-price-row">
+            <span class="per">1박 기준</span>
+            <span class="price">${krw(h.price)}~</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function renderGolf(){
+    const sec = document.getElementById('secGolf');
+    if(!cfg.golf || cfg.golf.length === 0){ sec.style.display = 'none'; return; }
+    // TODO: API 연동 필요 - GET /api/products/golf?country=${countrySlug}
+    const el = document.getElementById('golfGrid');
+    el.innerHTML = cfg.golf.map(g => `
+      <a class="golf-card" href="#">
+        <div class="golf-thumb" style="background-image:url('${g.img}')"></div>
+        <div class="golf-body">
+          <div class="golf-title">${g.title}</div>
+          <div class="golf-compo">${g.compo}</div>
+          <div class="golf-price">
+            <span style="font-size:12px; opacity:.7;">최저가</span>
+            <span class="price">${krw(g.price)}~</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  /* =========================================================================
+     Dynamic Package Builder (stepper)
+     ========================================================================= */
+  const pkgState = { flight: null, hotel: null, activity: null };
+
+  function renderBuilderStep(containerId, options, stateKey, defaultIdx = 0){
+    const el = document.getElementById(containerId);
+    el.innerHTML = options.map((o, i) => `
+      <button type="button" class="pkg-option ${i===defaultIdx?'active':''}" data-id="${o.id}" data-price="${o.price}" data-label="${o.label}">
+        <div class="opt-title">${o.label}</div>
+        <div class="opt-price">${o.price > 0 ? '+ ' + krw(o.price) : '무료'}</div>
+      </button>
+    `).join('');
+    pkgState[stateKey] = options[defaultIdx];
+
+    el.querySelectorAll('.pkg-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        el.querySelectorAll('.pkg-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        pkgState[stateKey] = {
+          id: btn.dataset.id,
+          label: btn.dataset.label,
+          price: +btn.dataset.price
+        };
+        recalcPackage();
+      });
+    });
+  }
+
+  function recalcPackage(){
+    const items = [pkgState.flight, pkgState.hotel, pkgState.activity].filter(Boolean);
+    const subtotal = items.reduce((s, i) => s + (i.price || 0), 0);
+    const discount = Math.round(subtotal * 0.07); // 번들 7% 할인
+    const finalTotal = subtotal - discount;
+
+    const lines = items.filter(i => i.price > 0).map(i =>
+      `<div class="pkg-line"><span class="l">${i.label}</span><span>${krw(i.price)}</span></div>`
+    ).join('');
+    const discLine = subtotal > 0
+      ? `<div class="pkg-line" style="color: var(--accent);"><span class="l">번들 할인 (7%)</span><span>- ${krw(discount)}</span></div>`
+      : '';
+
+    document.getElementById('pkgLines').innerHTML = lines + discLine;
+    document.getElementById('pkgTotal').textContent = krw(finalTotal);
+  }
+
+  function addPackageToCart(){
+    // TODO: API 연동 필요 - POST /api/cart { country, items: pkgState }
+    alert('장바구니에 조합이 담겼습니다 (프로토타입)');
+  }
+
+  function renderBuilder(){
+    renderBuilderStep('stepFlight',   cfg.builder.flights,    'flight');
+    renderBuilderStep('stepHotel',    cfg.builder.hotels,     'hotel');
+    renderBuilderStep('stepActivity', cfg.builder.activities, 'activity');
+    recalcPackage();
+  }
+
+  /* =========================================================================
+     Drawer / Scroll reveal
+     ========================================================================= */
+  function openDrawer(){
+    document.querySelector('.drawer').classList.add('open');
+    document.querySelector('.drawer-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    document.querySelector('.drawer').classList.remove('open');
+    document.querySelector('.drawer-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* =========================================================================
+     INIT
+     ========================================================================= */
+  renderHead();
+  renderHeroSlides();
+  renderPopularCities();
+  renderSearchForm();
+  renderCategoryStrip();
+  renderOriginals();
+  renderFlightTabs();     renderFlights(cfg.flightTabs[0].id);
+  renderShorts();
+  renderHotelTabs();      renderHotels(cfg.hotelTabs[0].id);
+  renderGolf();
+  renderBuilder();
+  </script>
+</body>
+</html>

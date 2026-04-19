@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상품 상세 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+      --header-h:64px; --max-w:1200px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+
+    .breadcrumb{padding:14px 0;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--line);background:#fff;}
+    .breadcrumb .sep{margin:0 8px;}
+    .breadcrumb a:hover{color:var(--primary);}
+
+    /* Gallery */
+    .gallery{
+      display:grid;grid-template-columns:2fr 1fr 1fr;
+      grid-template-rows:repeat(2, 220px);
+      gap:6px;margin:20px auto;padding:0 24px;max-width:var(--max-w);
+      border-radius:var(--radius-lg);overflow:hidden;
+    }
+    .gallery > div{background-size:cover;background-position:center;background-color:#eee;cursor:pointer;transition:filter .15s;}
+    .gallery > div:hover{filter:brightness(.92);}
+    .gallery .g-main{grid-row:1/span 2;}
+
+    /* Layout */
+    .detail-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;padding:0 24px 80px;max-width:var(--max-w);margin:0 auto;align-items:flex-start;}
+
+    /* Main */
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+    .product-head{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+    .tag{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;background:var(--primary-soft);color:var(--primary);}
+    .tag.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .tag.country{background:var(--secondary);color:#fff;}
+    .p-title{margin:0 0 6px;font-size:26px;font-weight:900;letter-spacing:-0.02em;}
+    .p-sub{margin:0 0 14px;color:var(--ink-2);font-size:14px;}
+    .p-stats{display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap;}
+    .p-stat{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);}
+    .p-stat .v{font-weight:800;color:var(--ink);font-size:14px;}
+    .p-score-badge{padding:4px 10px;background:var(--primary);color:#fff;border-radius:6px;font-weight:900;font-size:13px;}
+
+    /* Tabs */
+    .detail-tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto;}
+    .detail-tabs::-webkit-scrollbar{display:none;}
+    .dt-tab{padding:12px 18px;font-weight:700;font-size:14px;color:var(--ink-3);position:relative;white-space:nowrap;}
+    .dt-tab.active{color:var(--primary);}
+    .dt-tab.active::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:3px;background:var(--primary);border-radius:3px 3px 0 0;}
+
+    .section-h{font-size:18px;font-weight:900;margin:0 0 14px;letter-spacing:-0.02em;}
+    .section-h .sub{font-size:12px;color:var(--ink-3);font-weight:600;margin-left:8px;}
+
+    /* Schedule */
+    .sched{display:flex;flex-direction:column;gap:14px;}
+    .sched-day{display:grid;grid-template-columns:80px 1fr;gap:14px;}
+    .sched-label{
+      font-weight:900;font-size:13px;color:var(--primary);
+      padding-top:4px;
+    }
+    .sched-body{display:flex;flex-direction:column;gap:8px;}
+    .sched-item{
+      display:flex;gap:12px;padding:12px 14px;background:var(--bg-soft);border-radius:10px;
+      font-size:13px;
+    }
+    .sched-item .ic{font-size:18px;flex-shrink:0;}
+    .sched-item strong{font-weight:800;}
+
+    /* Includes / Excludes */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .inc-list, .exc-list{display:flex;flex-direction:column;gap:6px;font-size:13px;}
+    .inc-list li, .exc-list li{display:flex;align-items:flex-start;gap:8px;padding:4px 0;}
+    .inc-list li::before{content:"✓";color:var(--success);font-weight:900;flex-shrink:0;}
+    .exc-list li::before{content:"✕";color:var(--ink-3);font-weight:900;flex-shrink:0;}
+
+    /* Reviews */
+    .review-summary{
+      display:grid;grid-template-columns:auto 1fr;gap:20px;padding:16px;
+      background:var(--bg-soft);border-radius:12px;margin-bottom:16px;
+    }
+    .rs-score{text-align:center;}
+    .rs-score .big{font-size:40px;font-weight:900;color:var(--primary);line-height:1;letter-spacing:-0.04em;}
+    .rs-score .lbl{font-size:12px;color:var(--ink-3);margin-top:4px;}
+    .rs-stars{color:var(--accent);letter-spacing:3px;font-size:14px;}
+    .rs-bars{display:flex;flex-direction:column;gap:8px;}
+    .rs-bar{display:grid;grid-template-columns:60px 1fr 40px;gap:10px;align-items:center;font-size:12px;}
+    .rs-bar-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;}
+    .rs-bar-fill{height:100%;background:var(--primary);border-radius:3px;}
+
+    .review-list{display:flex;flex-direction:column;gap:12px;}
+    .review{padding:14px;border:1px solid var(--line);border-radius:12px;}
+    .rv-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .rv-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;}
+    .rv-name{font-weight:800;font-size:13px;}
+    .rv-meta{font-size:11px;color:var(--ink-3);}
+    .rv-score{margin-left:auto;padding:3px 8px;background:var(--primary);color:#fff;border-radius:5px;font-weight:900;font-size:12px;}
+    .rv-text{font-size:13px;color:var(--ink-2);margin:0;line-height:1.6;}
+
+    /* Booking panel */
+    .book-panel{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;
+      position:sticky;top:calc(var(--header-h) + 16px);
+    }
+    .bp-price-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+    .bp-lb{font-size:12px;color:var(--ink-3);}
+    .bp-old{font-size:13px;color:var(--ink-3);text-decoration:line-through;}
+    .bp-price{font-size:32px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .bp-price small{font-size:13px;font-weight:600;color:var(--ink-2);}
+    .bp-tag{
+      display:inline-block;padding:3px 8px;background:#FEE4DC;color:var(--primary-dark);
+      font-size:11px;font-weight:800;border-radius:5px;margin-top:6px;
+    }
+
+    .bp-field{margin-top:14px;}
+    .bp-field label{display:block;font-size:11px;font-weight:800;color:var(--ink-2);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase;}
+    .bp-field input, .bp-field select{
+      width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;
+      font-size:14px;font-weight:700;color:var(--ink);background:#fff;outline:none;
+    }
+    .pax-steppers{display:flex;gap:8px;}
+    .pax-stepper{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .ps-top{font-size:11px;color:var(--ink-3);font-weight:700;}
+    .ps-ctrl{display:flex;justify-content:space-between;align-items:center;margin-top:3px;}
+    .ps-btn{width:24px;height:24px;border-radius:50%;background:var(--bg-soft);display:grid;place-items:center;font-weight:900;font-size:13px;}
+    .ps-btn:disabled{color:var(--ink-3);cursor:not-allowed;}
+    .ps-val{font-weight:900;font-size:14px;}
+
+    .bp-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding:14px;background:var(--ink);color:#fff;border-radius:10px;}
+    .bp-total .lb{font-size:12px;opacity:.7;}
+    .bp-total .pr{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;}
+
+    .bp-cta{
+      width:100%;padding:15px;border-radius:12px;background:var(--primary);color:#fff;
+      font-weight:900;font-size:15px;margin-top:12px;
+      box-shadow:0 6px 20px rgba(255,107,53,.35);
+    }
+    .bp-cta:hover{background:var(--primary-dark);}
+    .bp-cart{
+      width:100%;padding:12px;border-radius:12px;background:#fff;
+      border:1.5px solid var(--line);color:var(--ink);
+      font-weight:800;font-size:13px;margin-top:8px;
+    }
+    .bp-cart:hover{border-color:var(--primary);color:var(--primary);}
+
+    .bp-trust{margin-top:14px;display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--ink-3);}
+    .bp-trust li::before{content:"✓ ";color:var(--success);font-weight:900;}
+
+    @media (max-width:1024px){
+      .detail-layout{grid-template-columns:1fr;}
+      .book-panel{position:static;}
+      .gallery{grid-template-columns:1fr 1fr;grid-template-rows:200px 150px 150px;}
+      .gallery .g-main{grid-row:1;grid-column:1/-1;}
+      .two-col{grid-template-columns:1fr;}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .gallery{grid-template-columns:1fr;grid-template-rows:240px;margin:0;padding:0;border-radius:0;}
+      .gallery > div:not(.g-main){display:none;}
+      .card{padding:18px;border-radius:var(--radius);}
+      .p-title{font-size:20px;}
+      .detail-layout{padding:0 14px 100px;gap:14px;}
+      .bp-price{font-size:24px;}
+      /* Mobile sticky book bar */
+      .mobile-book-bar{
+        display:flex;position:fixed;left:0;right:0;bottom:0;z-index:55;
+        background:#fff;border-top:1px solid var(--line);
+        padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+        align-items:center;gap:10px;box-shadow:0 -4px 20px rgba(0,0,0,.08);
+      }
+      .mobile-book-bar .info{flex:1;}
+      .mobile-book-bar .info .lb{font-size:10px;color:var(--ink-3);font-weight:700;}
+      .mobile-book-bar .info .pr{font-size:18px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+      .mobile-book-bar button{padding:13px 22px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:14px;}
+    }
+    .mobile-book-bar{display:none;}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <div class="header-actions">
+        <a href="cart.html" class="btn-ghost">🛒 장바구니</a>
+        <a href="ai-planner.html" class="btn-ghost">✦ AI</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumb">
+    <div class="container">
+      <a href="index.html">홈</a><span class="sep">›</span>
+      <a href="country.html?c=japan">🇯🇵 일본</a><span class="sep">›</span>
+      <a href="hotels.html">호텔</a><span class="sep">›</span>
+      <span id="bcCurrent">상품 상세</span>
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <div class="gallery">
+    <div class="g-main" style="background-image:url('https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1600&q=80')"></div>
+    <div style="background-image:url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80')"></div>
+    <div style="background-image:url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80')"></div>
+    <div style="background-image:url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80')"></div>
+    <div style="background-image:url('https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80')"></div>
+  </div>
+
+  <main id="omt-main" class="detail-layout">
+    <section>
+      <!-- Title + Meta -->
+      <div class="card">
+        <div class="product-head">
+          <span class="tag orig">ORIGINAL</span>
+          <span class="tag country">🇯🇵 일본 · 오사카</span>
+          <span class="tag">패키지</span>
+        </div>
+        <h1 class="p-title">[오마이트립 단독] 오사카 3박4일 도톤보리 프리미엄 패키지</h1>
+        <p class="p-sub">티웨이항공 왕복 + 호텔 그란비아 오사카 3박 + 유니버설 스튜디오 1일권 + 공항 픽업</p>
+        <div class="p-stats">
+          <span class="p-stat"><span class="p-score-badge">9.4</span><span class="v">매우 좋음</span></span>
+          <span class="p-stat">리뷰 <span class="v">2,847개</span></span>
+          <span class="p-stat">재구매 <span class="v">89%</span></span>
+          <span class="p-stat">예약 중 <span class="v" style="color:var(--primary);">1,284명이 보는 중</span></span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="card">
+        <div class="detail-tabs" role="tablist">
+          <button class="dt-tab active" data-tab="schedule">일정</button>
+          <button class="dt-tab" data-tab="includes">포함/불포함</button>
+          <button class="dt-tab" data-tab="info">상세 정보</button>
+          <button class="dt-tab" data-tab="reviews">리뷰 (2,847)</button>
+          <button class="dt-tab" data-tab="refund">취소/환불</button>
+        </div>
+
+        <!-- Schedule -->
+        <div class="tab-panel" data-panel="schedule">
+          <h2 class="section-h">여행 일정 <span class="sub">3박 4일</span></h2>
+          <div class="sched">
+            <div class="sched-day">
+              <div class="sched-label">DAY 1<br><small style="color:var(--ink-3);font-weight:600;font-size:11px;">도착·체크인</small></div>
+              <div class="sched-body">
+                <div class="sched-item"><span class="ic">✈️</span><div><strong>인천 → 오사카</strong><br>티웨이항공 TW283 · 08:30 출발 · 10:15 도착</div></div>
+                <div class="sched-item"><span class="ic">🚐</span><div><strong>공항 픽업</strong><br>전용 차량으로 호텔까지 샌딩 (한국어 드라이버)</div></div>
+                <div class="sched-item"><span class="ic">🏨</span><div><strong>호텔 체크인</strong><br>호텔 그란비아 오사카 · 우메다역 직결 (15:00~)</div></div>
+                <div class="sched-item"><span class="ic">🍱</span><div><strong>자유시간</strong><br>도톤보리·신사이바시 자유 산책 권장</div></div>
+              </div>
+            </div>
+            <div class="sched-day">
+              <div class="sched-label">DAY 2<br><small style="color:var(--ink-3);font-weight:600;font-size:11px;">유니버설</small></div>
+              <div class="sched-body">
+                <div class="sched-item"><span class="ic">🎢</span><div><strong>유니버설 스튜디오 1일권</strong><br>슈퍼 닌텐도 월드 · 해리포터 · 미니언 파크 (전일)</div></div>
+              </div>
+            </div>
+            <div class="sched-day">
+              <div class="sched-label">DAY 3<br><small style="color:var(--ink-3);font-weight:600;font-size:11px;">자유여행</small></div>
+              <div class="sched-body">
+                <div class="sched-item"><span class="ic">🗓️</span><div><strong>자유 일정</strong><br>옵션 투어 추가 가능 (고베 1일 · 교토 1일 · 나라 반일)</div></div>
+              </div>
+            </div>
+            <div class="sched-day">
+              <div class="sched-label">DAY 4<br><small style="color:var(--ink-3);font-weight:600;font-size:11px;">귀국</small></div>
+              <div class="sched-body">
+                <div class="sched-item"><span class="ic">🚐</span><div><strong>공항 샌딩</strong><br>호텔 → 간사이 공항 (출발 3시간 전 픽업)</div></div>
+                <div class="sched-item"><span class="ic">✈️</span><div><strong>오사카 → 인천</strong><br>티웨이항공 TW284 · 11:00 출발 · 13:00 도착</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Includes -->
+        <div class="tab-panel" data-panel="includes" hidden>
+          <h2 class="section-h">포함 / 불포함</h2>
+          <div class="two-col">
+            <div>
+              <h3 style="font-size:14px;margin:0 0 10px;color:var(--success);">✓ 포함 사항</h3>
+              <ul class="inc-list">
+                <li>왕복 항공권 (티웨이항공, 이코노미)</li>
+                <li>수하물 15kg + 기내 7kg</li>
+                <li>호텔 3박 (호텔 그란비아 오사카)</li>
+                <li>호텔 조식 3회</li>
+                <li>공항 픽업/샌딩 (전용 차량)</li>
+                <li>유니버설 스튜디오 1일권</li>
+                <li>간사이 스루패스 2일권</li>
+                <li>24시간 한국어 카카오 상담</li>
+                <li>여행자 보험 기본형</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="font-size:14px;margin:0 0 10px;color:var(--ink-3);">✕ 불포함 사항</h3>
+              <ul class="exc-list">
+                <li>현지 교통비 (택시/지하철 추가 이용)</li>
+                <li>개인 쇼핑 및 기념품</li>
+                <li>중식/석식 (조식만 포함)</li>
+                <li>옵션 투어 (별도 선택 가능)</li>
+                <li>가이드 투어 팁 (현지 결제)</li>
+                <li>호텔 미니바/룸서비스</li>
+                <li>여행자 보험 업그레이드</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="tab-panel" data-panel="info" hidden>
+          <h2 class="section-h">상세 정보</h2>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;">
+            오사카를 제대로 즐기고 싶은 분들을 위해 오마이트립이 단독 기획한 프리미엄 패키지입니다.
+            우메다역에 직결된 호텔 그란비아에 묵으며 어디든 편하게 이동할 수 있고,
+            유니버설 스튜디오 1일권과 간사이 스루패스까지 포함되어 있어
+            입장권과 교통권 구매의 번거로움을 덜어드립니다.
+          </p>
+          <h3 style="font-size:14px;margin:20px 0 8px;">✦ 이 상품 이런 분께 추천합니다</h3>
+          <ul style="padding-left:18px;font-size:13px;color:var(--ink-2);">
+            <li>오사카가 처음이지만 편하고 알차게 즐기고 싶은 분</li>
+            <li>유니버설 스튜디오를 방문 계획인 가족/커플</li>
+            <li>역세권 호텔을 선호하는 분 (우메다역 직결)</li>
+          </ul>
+          <h3 style="font-size:14px;margin:20px 0 8px;">✦ 유의사항</h3>
+          <ul style="padding-left:18px;font-size:13px;color:var(--ink-2);">
+            <li>여권 유효기간 6개월 이상 필수</li>
+            <li>항공권 발권 후 이름 변경 불가</li>
+            <li>호텔 체크인 15:00 / 체크아웃 11:00</li>
+          </ul>
+        </div>
+
+        <!-- Reviews -->
+        <div class="tab-panel" data-panel="reviews" hidden>
+          <h2 class="section-h">고객 리뷰 <span class="sub">2,847개</span></h2>
+          <div class="review-summary">
+            <div class="rs-score">
+              <div class="big">9.4</div>
+              <div class="rs-stars">★★★★★</div>
+              <div class="lbl">매우 좋음</div>
+            </div>
+            <div class="rs-bars">
+              <div class="rs-bar"><span>호텔 위치</span><span class="rs-bar-track"><span class="rs-bar-fill" style="width:96%;"></span></span><span>9.6</span></div>
+              <div class="rs-bar"><span>청결도</span><span class="rs-bar-track"><span class="rs-bar-fill" style="width:94%;"></span></span><span>9.4</span></div>
+              <div class="rs-bar"><span>시설</span><span class="rs-bar-track"><span class="rs-bar-fill" style="width:91%;"></span></span><span>9.1</span></div>
+              <div class="rs-bar"><span>가성비</span><span class="rs-bar-track"><span class="rs-bar-fill" style="width:89%;"></span></span><span>8.9</span></div>
+              <div class="rs-bar"><span>서비스</span><span class="rs-bar-track"><span class="rs-bar-fill" style="width:95%;"></span></span><span>9.5</span></div>
+            </div>
+          </div>
+          <div class="review-list">
+            <div class="review">
+              <div class="rv-head">
+                <div class="rv-av">김</div>
+                <div><div class="rv-name">김○○</div><div class="rv-meta">2026.04.10 · 커플 여행 · 3박4일</div></div>
+                <span class="rv-score">9.8</span>
+              </div>
+              <p class="rv-text">역 직결이라 정말 편했어요. 체크인 후 바로 도톤보리 산책하고 유니버설 다녀왔는데 피로도가 확실히 덜했습니다. 조식 퀄리티도 훌륭!</p>
+            </div>
+            <div class="review">
+              <div class="rv-head">
+                <div class="rv-av">박</div>
+                <div><div class="rv-name">박○○</div><div class="rv-meta">2026.04.05 · 가족 여행 · 3박4일</div></div>
+                <span class="rv-score">9.2</span>
+              </div>
+              <p class="rv-text">아이 둘 데리고 갔는데 공항 픽업이 있어서 너무 편했어요. 유니버설 티켓 포함된 게 가장 좋았습니다. 다음에도 오마이트립으로 예약할게요.</p>
+            </div>
+            <div class="review">
+              <div class="rv-head">
+                <div class="rv-av">이</div>
+                <div><div class="rv-name">이○○</div><div class="rv-meta">2026.03.28 · 친구 여행 · 3박4일</div></div>
+                <span class="rv-score">9.5</span>
+              </div>
+              <p class="rv-text">간사이 스루패스 덕분에 교토·나라까지 알차게 돌았어요. 가성비 끝판왕입니다. 호텔 뷰도 끝내줘요.</p>
+            </div>
+          </div>
+          <button style="width:100%;margin-top:14px;padding:12px;background:var(--bg-soft);border-radius:10px;font-weight:700;font-size:13px;color:var(--ink-2);">리뷰 더 보기 (2,844개) →</button>
+        </div>
+
+        <!-- Refund -->
+        <div class="tab-panel" data-panel="refund" hidden>
+          <h2 class="section-h">취소 및 환불 규정</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:var(--bg-soft);">
+                <th style="padding:10px;text-align:left;font-weight:800;">취소 시점</th>
+                <th style="padding:10px;text-align:right;font-weight:800;">환불율</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">출발 30일 전</td><td style="padding:10px;text-align:right;color:var(--success);font-weight:800;">100%</td></tr>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">출발 21일 전</td><td style="padding:10px;text-align:right;font-weight:800;">90%</td></tr>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">출발 14일 전</td><td style="padding:10px;text-align:right;font-weight:800;">70%</td></tr>
+              <tr style="border-bottom:1px solid var(--line);"><td style="padding:10px;">출발 7일 전</td><td style="padding:10px;text-align:right;font-weight:800;">50%</td></tr>
+              <tr><td style="padding:10px;">출발 3일 전 이내</td><td style="padding:10px;text-align:right;color:var(--primary);font-weight:800;">환불 불가</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:14px;font-size:12px;color:var(--ink-3);">
+            ※ 천재지변, 항공사 결항 등 불가항력 사유는 별도 안내됩니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING PANEL -->
+    <aside class="book-panel" id="bookPanel">
+      <div class="bp-price-row"><span class="bp-lb">1인 최저가</span><span class="bp-old">1,280,000원</span></div>
+      <div class="bp-price">898,000원<small>~</small></div>
+      <span class="bp-tag">30% 할인 · 단독 특가</span>
+
+      <div class="bp-field">
+        <label>출발 날짜</label>
+        <select id="bpDate">
+          <option>2026.05.10 (금)</option>
+          <option>2026.05.17 (금)</option>
+          <option>2026.05.24 (금)</option>
+          <option>2026.06.07 (금)</option>
+        </select>
+      </div>
+
+      <div class="bp-field">
+        <label>인원 선택</label>
+        <div class="pax-steppers">
+          <div class="pax-stepper">
+            <div class="ps-top">성인</div>
+            <div class="ps-ctrl">
+              <button class="ps-btn" onclick="stepPax('adults',-1)">−</button>
+              <span class="ps-val" id="adultVal">2</span>
+              <button class="ps-btn" onclick="stepPax('adults',1)">+</button>
+            </div>
+          </div>
+          <div class="pax-stepper">
+            <div class="ps-top">아동</div>
+            <div class="ps-ctrl">
+              <button class="ps-btn" onclick="stepPax('children',-1)">−</button>
+              <span class="ps-val" id="childVal">0</span>
+              <button class="ps-btn" onclick="stepPax('children',1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bp-total">
+        <div>
+          <div class="lb">총 결제 금액</div>
+          <div style="font-size:11px;opacity:.6;" id="paxSum">성인 2명</div>
+        </div>
+        <div class="pr" id="bpTotal">1,796,000원</div>
+      </div>
+
+      <button class="bp-cta" onclick="bookNow()">바로 예약하기 →</button>
+      <button class="bp-cart" onclick="addToCart()">🛒 장바구니 담기</button>
+
+      <ul class="bp-trust" style="list-style:none;padding:14px 0 0;margin:0;">
+        <li>오마이트립 오리지널 단독 특가</li>
+        <li>출발 30일 전 무료 취소</li>
+        <li>24시간 한국어 카카오 상담</li>
+      </ul>
+    </aside>
+  </main>
+
+  <!-- Mobile book bar -->
+  <div class="mobile-book-bar">
+    <div class="info">
+      <div class="lb">1인부터</div>
+      <div class="pr">898,000원~</div>
+    </div>
+    <button onclick="bookNow()">예약하기 →</button>
+  </div>
+
+  <script>
+  const BASE_PRICE = 898000;
+  const STATE = { adults:2, children:0 };
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  function computeTotal(){
+    return BASE_PRICE * STATE.adults + Math.round(BASE_PRICE * 0.7) * STATE.children;
+  }
+  function update(){
+    document.getElementById('adultVal').textContent = STATE.adults;
+    document.getElementById('childVal').textContent = STATE.children;
+    const sum = `성인 ${STATE.adults}명${STATE.children>0?' + 아동 '+STATE.children+'명':''}`;
+    document.getElementById('paxSum').textContent = sum;
+    document.getElementById('bpTotal').textContent = krw(computeTotal());
+  }
+  function stepPax(key, delta){
+    if(key === 'adults'){
+      STATE.adults = Math.max(1, Math.min(9, STATE.adults + delta));
+    } else {
+      STATE.children = Math.max(0, Math.min(6, STATE.children + delta));
+    }
+    update();
+  }
+
+  // Tabs
+  document.querySelectorAll('.dt-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.dt-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.hidden = p.dataset.panel !== btn.dataset.tab);
+    });
+  });
+
+  function bookNow(){
+    // TODO: API 연동 - POST /api/cart/checkout { productId, date, adults, children }
+    const payload = {
+      flight:{airline:'티웨이항공', number:'TW283', out:{dep:'08:30',arr:'10:15',depAp:'ICN',arrAp:'KIX',dur:'1h 45m'}, ret:{dep:'11:00',arr:'13:00',depAp:'KIX',arrAp:'ICN',dur:'2h 00m'}, direct:true, price:Math.round(BASE_PRICE*0.3)},
+      hotel:{name:'호텔 그란비아 오사카', areaLabel:'우메다 (역 직결)', price:Math.round(BASE_PRICE*0.6/3)},
+      activities:[{title:'유니버설 스튜디오 1일권', meta:'입장권 포함', price:0},{title:'간사이 스루패스 2일권', meta:'교통권 포함', price:0}],
+      paxCount: STATE.adults + STATE.children,
+      nights: 3,
+      dates: document.getElementById('bpDate').value,
+      final: computeTotal(),
+      source:'product-detail',
+      productId:'prod-osaka-01'
+    };
+    sessionStorage.setItem('omt_package', JSON.stringify(payload));
+    location.href = 'checkout.html';
+  }
+
+  function addToCart(){
+    // TODO: API 연동 - POST /api/cart { productId:..., adults, children }
+    alert('🛒 장바구니에 담겼습니다');
+    location.href = 'cart.html';
+  }
+
+  // URL ?id=... (for future prod-specific routing)
+  const params = new URLSearchParams(location.search);
+  if(params.get('id')){
+    document.getElementById('bcCurrent').textContent = '상품 ' + params.get('id');
+  }
+
+  update();
+  </script>
+</body>
+</html>

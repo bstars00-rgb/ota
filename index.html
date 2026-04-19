@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="오마이트립 - 오, 내가 찾는 모든 여행. 한국인 아웃바운드 여행 OTA + 크리에이터 플랫폼" />
+  <title>오마이트립 | 오, 내가 찾는 모든 여행</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       OhMyTrip Design Tokens
+       ========================================= */
+    :root{
+      --primary: #FF6B35;
+      --primary-dark: #E85826;
+      --primary-soft: #FFF0E8;
+      --secondary: #1E88E5;
+      --secondary-dark: #1565C0;
+      --accent: #FFD23F;
+      --ink: #1A1A1A;
+      --ink-2: #4B5563;
+      --ink-3: #9CA3AF;
+      --line: #E5E7EB;
+      --bg: #FFFFFF;
+      --bg-soft: #F7F7F9;
+      --success: #10B981;
+      --danger: #EF4444;
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+      --shadow: 0 6px 20px rgba(0,0,0,.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.12);
+      --header-h: 72px;
+      --max-w: 1280px;
+    }
+
+    /* =========================================
+       Reset
+       ========================================= */
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a{color:inherit; text-decoration:none;}
+    button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+    img{display:block; max-width:100%;}
+    ul{list-style:none; margin:0; padding:0;}
+    input{font-family:inherit;}
+
+    .container{
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section{padding: 64px 0;}
+    .section-title{
+      font-size: 28px;
+      font-weight: 900;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+    .section-sub{
+      color: var(--ink-2);
+      margin: 0 0 28px;
+      font-size: 15px;
+    }
+    .section-head-row{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      margin-bottom:28px;
+    }
+    .section-head-row .section-title, .section-head-row .section-sub{margin:0;}
+    .see-all{
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 14px;
+      white-space:nowrap;
+      display:inline-flex; align-items:center; gap:4px;
+    }
+
+    /* =========================================
+       Header — PC
+       ========================================= */
+    .header{
+      position: sticky; top:0; z-index: 50;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner{
+      height: var(--header-h);
+      display:flex; align-items:center; gap:24px;
+    }
+    .logo{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight: 900; font-size: 22px; letter-spacing:-0.02em;
+      color: var(--ink);
+    }
+    .logo-mark{
+      width:34px; height:34px; border-radius:10px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; display:grid; place-items:center;
+      font-weight:900; font-size:18px;
+      box-shadow: 0 4px 12px rgba(255,107,53,.35);
+    }
+    .logo-mark::after{content:"O";}
+    .gnb{
+      display:flex; align-items:center; gap:6px; margin-left:16px;
+    }
+    .gnb a{
+      padding: 10px 14px; border-radius: 10px;
+      font-weight: 600; font-size: 15px; color: var(--ink-2);
+      transition: background .15s, color .15s;
+    }
+    .gnb a:hover{background: var(--bg-soft); color: var(--ink);}
+    .gnb a.active{color: var(--primary);}
+    .header-actions{
+      margin-left:auto;
+      display:flex; align-items:center; gap:8px;
+    }
+    .btn-ai{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:700; font-size:14px;
+      box-shadow: 0 4px 14px rgba(255,107,53,.3);
+    }
+    .btn-ai::before{content:"✦"; font-size:14px;}
+    .btn-ghost{
+      padding: 10px 14px; border-radius: 10px;
+      font-weight: 600; font-size: 14px; color: var(--ink-2);
+    }
+    .btn-ghost:hover{background: var(--bg-soft); color: var(--ink);}
+
+    /* Mobile header */
+    .m-hamburger{
+      display:none;
+      width:40px; height:40px; border-radius:10px;
+      align-items:center; justify-content:center;
+    }
+    .m-hamburger:hover{background: var(--bg-soft);}
+    .m-hamburger svg{width:24px; height:24px;}
+
+    /* =========================================
+       Hero
+       ========================================= */
+    .hero{
+      position: relative;
+      height: clamp(520px, 70vh, 680px);
+      overflow: hidden;
+      color:#fff;
+      isolation: isolate;
+    }
+    .hero-slides{position:absolute; inset:0; z-index:-2;}
+    .hero-slide{
+      position:absolute; inset:0;
+      background-size: cover;
+      background-position: center;
+      opacity:0;
+      transition: opacity 1.2s ease;
+    }
+    .hero-slide.active{opacity:1;}
+    .hero::after{
+      content:"";
+      position:absolute; inset:0; z-index:-1;
+      background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.55) 100%);
+    }
+
+    .hero-inner{
+      height:100%;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      text-align:center;
+      padding: 80px 24px 60px;
+    }
+    .hero-kicker{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+      font-size: 13px; font-weight:600;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .hero h1{
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 900;
+      letter-spacing:-0.03em;
+      margin: 0 0 8px;
+      text-shadow: 0 4px 24px rgba(0,0,0,.35);
+    }
+    .hero h1 span{color: var(--accent);}
+    .hero-desc{
+      font-size: clamp(14px, 1.4vw, 17px);
+      opacity:.92;
+      margin: 0 0 32px;
+      max-width: 560px;
+    }
+
+    /* AI search */
+    .ai-search{
+      width: min(720px, 100%);
+      background: #fff;
+      border-radius: 999px;
+      box-shadow: var(--shadow-lg);
+      display:flex; align-items:center;
+      padding: 8px 8px 8px 22px;
+      gap: 10px;
+    }
+    .ai-search .icon{color: var(--primary); font-size:20px; flex-shrink:0;}
+    .ai-search input{
+      flex:1; border:none; outline:none;
+      font-size: 15px; color: var(--ink);
+      background: transparent;
+      padding: 12px 0;
+    }
+    .ai-search button{
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:700; font-size:14px;
+      border-radius: 999px;
+      display:inline-flex; align-items:center; gap:6px;
+      white-space:nowrap;
+      box-shadow: 0 4px 14px rgba(255,107,53,.35);
+    }
+
+    /* Quick tabs */
+    .quick-tabs{
+      margin-top: 22px;
+      display:flex; gap: 8px; flex-wrap:wrap; justify-content:center;
+    }
+    .quick-tab{
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.25);
+      backdrop-filter: blur(8px);
+      color:#fff; font-weight:600; font-size:14px;
+      display:inline-flex; align-items:center; gap:6px;
+      transition: background .15s, transform .15s;
+    }
+    .quick-tab:hover{background: rgba(255,255,255,.28); transform: translateY(-1px);}
+
+    /* Hero slide dots */
+    .hero-dots{
+      position:absolute; bottom: 24px; left:50%; transform:translateX(-50%);
+      display:flex; gap:8px;
+    }
+    .hero-dots button{
+      width:8px; height:8px; border-radius:50%;
+      background: rgba(255,255,255,.5);
+      transition: width .2s, background .2s;
+    }
+    .hero-dots button.active{width:24px; background:#fff;}
+
+    /* =========================================
+       Country sectors
+       ========================================= */
+    .countries-grid{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+    }
+    .country-card{
+      display:block;
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      padding: 22px 18px;
+      border: 1px solid var(--line);
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      position:relative;
+      overflow:hidden;
+    }
+    .country-card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(135deg, transparent 40%, var(--primary-soft) 100%);
+      opacity:0; transition: opacity .2s;
+    }
+    .country-card:hover{transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary);}
+    .country-card:hover::before{opacity:1;}
+    .country-card > *{position:relative;}
+    .country-flag{font-size: 36px; line-height:1; margin-bottom: 12px;}
+    .country-name{font-weight: 800; font-size: 17px; letter-spacing:-0.02em;}
+    .country-cities{font-size: 12px; color: var(--ink-3); margin: 4px 0 10px;}
+    .country-count{font-size: 12px; color: var(--primary); font-weight:700;}
+
+    /* =========================================
+       Originals
+       ========================================= */
+    .originals-grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .product-card{
+      border-radius: var(--radius);
+      overflow:hidden;
+      background:#fff;
+      border:1px solid var(--line);
+      transition: transform .2s, box-shadow .2s;
+      display:flex; flex-direction:column;
+    }
+    .product-card:hover{transform:translateY(-4px); box-shadow: var(--shadow-lg);}
+    .product-thumb{
+      position:relative;
+      aspect-ratio: 4/3;
+      background-size:cover; background-position:center;
+      background-color: #eee;
+    }
+    .product-badges{
+      position:absolute; top:12px; left:12px;
+      display:flex; gap:6px; flex-wrap:wrap;
+    }
+    .badge{
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px; font-weight:700;
+      background: rgba(0,0,0,.7); color:#fff;
+      backdrop-filter: blur(6px);
+    }
+    .badge.original{
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+    }
+    .badge.country{background: rgba(255,255,255,.92); color: var(--ink);}
+    .product-body{padding: 16px; display:flex; flex-direction:column; flex:1;}
+    .product-title{font-weight:800; font-size:15px; line-height:1.4; letter-spacing:-0.01em;}
+    .product-compo{font-size:12px; color: var(--ink-3); margin:6px 0 14px; flex:1;}
+    .product-price-row{display:flex; align-items:baseline; gap:6px;}
+    .product-price-row .from{font-size:11px; color: var(--ink-3);}
+    .product-price-row .price{font-size:20px; font-weight:900; color: var(--ink); letter-spacing:-0.02em;}
+    .product-price-row .unit{font-size:12px; color: var(--ink-2); font-weight:600;}
+    .product-old{font-size:12px; color:var(--ink-3); text-decoration:line-through;}
+
+    /* =========================================
+       Creator feed preview
+       ========================================= */
+    .creator-scroll{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .short-card{
+      position:relative;
+      aspect-ratio: 9/16;
+      border-radius: var(--radius);
+      overflow:hidden;
+      background-size:cover; background-position:center;
+      background-color:#222;
+      cursor:pointer;
+      transition: transform .2s;
+    }
+    .short-card:hover{transform:translateY(-4px);}
+    .short-card::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.85) 100%);
+    }
+    .short-play{
+      position:absolute; top: 14px; right:14px; z-index:2;
+      width:36px; height:36px; border-radius:50%;
+      background: rgba(0,0,0,.55); color:#fff;
+      display:grid; place-items:center;
+      backdrop-filter: blur(8px);
+    }
+    .short-content{
+      position:absolute; left:14px; right:14px; bottom:14px; z-index:2;
+      color:#fff;
+    }
+    .short-creator{
+      display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    }
+    .creator-avatar{
+      width:28px; height:28px; border-radius:50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: 2px solid #fff;
+      display:grid; place-items:center;
+      font-weight:900; font-size:12px; color:#fff;
+    }
+    .creator-name{font-weight:700; font-size:13px;}
+    .creator-subs{font-size:11px; opacity:.85;}
+    .short-title{font-weight:800; font-size:14px; line-height:1.35; margin-bottom:10px;}
+    .short-actions{display:flex; gap:6px;}
+    .short-actions button{
+      flex:1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px; font-weight:700;
+      transition: background .15s;
+    }
+    .short-actions .view{
+      background: rgba(255,255,255,.2);
+      color:#fff; border: 1px solid rgba(255,255,255,.4);
+    }
+    .short-actions .book{
+      background: var(--primary); color:#fff;
+    }
+
+    /* =========================================
+       Dynamic Package Builder
+       ========================================= */
+    .pkg-builder{
+      background: linear-gradient(135deg, #FFF5EE, #FFFBEB);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      border: 1px solid var(--line);
+    }
+    .pkg-grid{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 28px;
+      margin-top: 20px;
+    }
+    .pkg-slots{display:flex; flex-direction:column; gap:14px;}
+    .pkg-slot{
+      background:#fff;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      display:flex; align-items:center; gap:16px;
+    }
+    .pkg-slot .icon{
+      width:44px; height:44px; border-radius:12px;
+      background: var(--primary-soft); color: var(--primary);
+      display:grid; place-items:center; font-size:22px;
+      flex-shrink:0;
+    }
+    .pkg-slot .info{flex:1; min-width:0;}
+    .pkg-slot .label{font-size:12px; color:var(--ink-3); font-weight:600;}
+    .pkg-slot select{
+      width:100%;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      background:#fff;
+      margin-top: 2px;
+      color: var(--ink);
+    }
+    .pkg-summary{
+      background: var(--ink);
+      color:#fff;
+      border-radius: var(--radius);
+      padding: 24px;
+      display:flex; flex-direction:column;
+    }
+    .pkg-summary h4{margin:0 0 12px; font-size:14px; opacity:.7; font-weight:600;}
+    .pkg-lines{display:flex; flex-direction:column; gap:8px; margin-bottom: 16px;}
+    .pkg-line{display:flex; justify-content:space-between; font-size:13px; opacity:.85;}
+    .pkg-divider{height:1px; background: rgba(255,255,255,.15); margin: 10px 0;}
+    .pkg-total{display:flex; justify-content:space-between; align-items:baseline;}
+    .pkg-total .label{font-size:14px; opacity:.7;}
+    .pkg-total .price{font-size: 28px; font-weight:900; color: var(--accent); letter-spacing:-0.02em;}
+    .pkg-cta{
+      margin-top:18px;
+      padding: 14px;
+      border-radius: 10px;
+      background: var(--primary);
+      color:#fff; font-weight:800; font-size:15px;
+      text-align:center;
+    }
+
+    /* =========================================
+       Flight Deals
+       ========================================= */
+    .tabs{
+      display:flex; gap:8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tab{
+      padding: 10px 18px;
+      font-weight:700; font-size:15px;
+      color: var(--ink-3);
+      position:relative;
+      transition: color .15s;
+    }
+    .tab.active{color: var(--primary);}
+    .tab.active::after{
+      content:"";
+      position:absolute; left:0; right:0; bottom:-1px;
+      height:3px; background: var(--primary); border-radius: 3px 3px 0 0;
+    }
+    .flights-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .flight-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .flight-card:hover{border-color: var(--primary); transform:translateY(-2px); box-shadow: var(--shadow);}
+    .flight-airline{
+      font-size:12px; color: var(--ink-3); font-weight:600;
+      display:flex; align-items:center; gap:6px;
+    }
+    .airline-dot{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--secondary);
+    }
+    .flight-route{
+      display:flex; align-items:center; gap:10px;
+      margin: 10px 0;
+    }
+    .flight-route .city{font-weight:800; font-size:18px; letter-spacing:-0.02em;}
+    .flight-route .arrow{color: var(--ink-3);}
+    .flight-meta{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; color: var(--ink-2);
+      padding-top: 10px; border-top: 1px dashed var(--line);
+    }
+    .flight-price{
+      font-size: 18px; font-weight:900; color: var(--primary); letter-spacing:-0.02em;
+    }
+
+    /* =========================================
+       Creator Partner Banner
+       ========================================= */
+    .partner-banner{
+      position:relative;
+      overflow:hidden;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #1A1A1A, #2D1810 50%, #FF6B35);
+      color:#fff;
+      padding: 48px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 32px;
+    }
+    .partner-banner::before{
+      content:"";
+      position:absolute; right:-40px; top:-40px;
+      width: 240px; height: 240px;
+      border-radius:50%;
+      background: radial-gradient(circle, var(--accent), transparent 70%);
+      opacity:.3;
+    }
+    .partner-text{position:relative; z-index:1;}
+    .partner-text h3{font-size: 26px; font-weight:900; margin:0 0 8px; letter-spacing:-0.02em;}
+    .partner-text p{margin:0; opacity:.88; font-size:15px; max-width: 560px;}
+    .partner-cta{
+      position:relative; z-index:1;
+      padding: 16px 28px;
+      background:#fff; color: var(--primary);
+      font-weight: 800; font-size: 15px;
+      border-radius: 999px;
+      white-space:nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      display:inline-flex; align-items:center; gap:6px;
+    }
+
+    /* =========================================
+       Footer
+       ========================================= */
+    .footer{
+      background: var(--bg-soft);
+      padding: 48px 0 32px;
+      margin-top: 48px;
+      border-top: 1px solid var(--line);
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 36px;
+    }
+    .footer h5{font-size:14px; font-weight:800; margin:0 0 12px;}
+    .footer ul li{margin-bottom:8px;}
+    .footer a{color: var(--ink-2); font-size:13px;}
+    .footer a:hover{color: var(--primary);}
+    .footer .socials{display:flex; gap:10px; margin-top:14px;}
+    .socials a{
+      width:36px; height:36px; border-radius:50%;
+      background:#fff; border:1px solid var(--line);
+      display:grid; place-items:center;
+      color: var(--ink-2);
+      transition: background .15s, color .15s;
+    }
+    .socials a:hover{background: var(--primary); color:#fff; border-color:var(--primary);}
+    .footer-bottom{
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 12px; color: var(--ink-3);
+      display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    }
+
+    /* =========================================
+       Floating AI Planner
+       ========================================= */
+    .fab-ai{
+      position: fixed;
+      right: 24px; bottom: 24px;
+      z-index: 60;
+      display:flex; align-items:center; gap:10px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; font-weight:800; font-size:14px;
+      border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(255,107,53,.45);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .fab-ai .sparkle{
+      width:24px; height:24px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.25);
+      border-radius:50%;
+      font-size:13px;
+    }
+    @keyframes pulse{
+      0%,100%{box-shadow: 0 12px 32px rgba(255,107,53,.45);}
+      50%{box-shadow: 0 12px 40px rgba(255,107,53,.65);}
+    }
+    .fab-ai:hover{transform: translateY(-2px);}
+
+    /* =========================================
+       Mobile Bottom Tab
+       ========================================= */
+    .bottom-tab{display:none;}
+
+    /* =========================================
+       Mobile Drawer
+       ========================================= */
+    .drawer-overlay{
+      position:fixed; inset:0; z-index:70;
+      background: rgba(0,0,0,.5);
+      opacity:0; pointer-events:none;
+      transition: opacity .2s;
+    }
+    .drawer-overlay.open{opacity:1; pointer-events:auto;}
+    .drawer{
+      position:fixed; top:0; right:0; bottom:0; z-index:71;
+      width: min(320px, 85%);
+      background:#fff;
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      display:flex; flex-direction:column;
+    }
+    .drawer.open{transform:translateX(0);}
+    .drawer-head{
+      padding:18px 20px;
+      display:flex; justify-content:space-between; align-items:center;
+      border-bottom:1px solid var(--line);
+    }
+    .drawer-head .close{
+      width:36px; height:36px; border-radius:8px;
+    }
+    .drawer-list{padding: 12px 0; flex:1; overflow-y:auto;}
+    .drawer-list a{
+      display:flex; align-items:center; gap:10px;
+      padding: 14px 20px;
+      font-weight:600; font-size:15px; color: var(--ink);
+    }
+    .drawer-list a:hover{background: var(--bg-soft);}
+    .drawer-foot{padding: 16px 20px; border-top: 1px solid var(--line); display:flex; gap:8px;}
+    .drawer-foot button{flex:1; padding:12px; border-radius:10px; background: var(--bg-soft); font-weight:700; font-size:13px;}
+
+    /* =========================================
+       Scroll Animations
+       ========================================= */
+    .reveal{
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.in{opacity: 1; transform: translateY(0);}
+
+    /* =========================================
+       Responsive — Tablet (max 1024)
+       ========================================= */
+    @media (max-width: 1024px){
+      .countries-grid{grid-template-columns: repeat(3, 1fr);}
+      .originals-grid{grid-template-columns: repeat(2, 1fr);}
+      .creator-scroll{grid-template-columns: repeat(3, 1fr);}
+      .flights-grid{grid-template-columns: repeat(2, 1fr);}
+      .pkg-grid{grid-template-columns: 1fr;}
+      .footer-grid{grid-template-columns: 1fr 1fr;}
+      .partner-banner{padding: 36px; flex-direction:column; align-items:flex-start;}
+    }
+
+    /* =========================================
+       Responsive — Mobile (max 768)
+       ========================================= */
+    @media (max-width: 768px){
+      :root{--header-h: 60px;}
+      .container{padding: 0 16px;}
+      .section{padding: 40px 0;}
+      .section-title{font-size: 22px;}
+
+      /* Hide PC nav, show hamburger */
+      .gnb{display:none;}
+      .header-actions{display:none;}
+      .m-hamburger{display:inline-flex;}
+
+      .hero{height: clamp(480px, 82vh, 620px);}
+      .hero-inner{padding: 40px 16px 60px;}
+      .ai-search{
+        padding: 6px 6px 6px 16px;
+      }
+      .ai-search input{font-size:14px; padding:10px 0;}
+      .ai-search button{padding: 11px 16px; font-size:13px;}
+      .quick-tab{padding:8px 14px; font-size:13px;}
+
+      /* Country cards: horizontal scroll */
+      .countries-grid{
+        display:flex;
+        grid-template-columns: unset;
+        gap: 10px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 8px;
+        margin: 0 -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      .countries-grid::-webkit-scrollbar{display:none;}
+      .country-card{
+        flex: 0 0 44%;
+        scroll-snap-align: start;
+        min-width: 150px;
+      }
+
+      .originals-grid{grid-template-columns: repeat(2, 1fr); gap:12px;}
+      .product-body{padding:12px;}
+      .product-title{font-size:14px;}
+      .product-price-row .price{font-size:17px;}
+
+      .creator-scroll{
+        display:flex;
+        grid-template-columns: unset;
+        overflow-x:auto;
+        gap:12px;
+        scroll-snap-type: x mandatory;
+        margin: 0 -16px;
+        padding: 0 16px 8px;
+      }
+      .creator-scroll::-webkit-scrollbar{display:none;}
+      .short-card{flex: 0 0 68%; min-width:220px; scroll-snap-align: start;}
+
+      .pkg-builder{padding: 24px 18px;}
+      .pkg-grid{margin-top: 16px;}
+      .pkg-slot{padding:12px 14px;}
+
+      .flights-grid{grid-template-columns: 1fr; gap:10px;}
+      .flight-card{padding:14px;}
+
+      .partner-banner{padding: 28px 24px; flex-direction:column; align-items:flex-start; gap:20px;}
+      .partner-text h3{font-size:20px;}
+      .partner-text p{font-size:13px;}
+
+      .footer{padding: 36px 0 100px;}
+      .footer-grid{grid-template-columns: 1fr; gap:24px;}
+
+      /* Bottom tab bar */
+      .bottom-tab{
+        display:flex;
+        position: fixed; left:0; right:0; bottom:0; z-index:55;
+        background:#fff;
+        border-top: 1px solid var(--line);
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        justify-content: space-around;
+      }
+      .bottom-tab a{
+        flex:1;
+        display:flex; flex-direction:column; align-items:center; gap:2px;
+        padding: 4px;
+        color: var(--ink-3);
+        font-size: 10px; font-weight:600;
+      }
+      .bottom-tab a.active{color: var(--primary);}
+      .bottom-tab svg{width: 22px; height:22px;}
+
+      /* Push fab up above bottom tab */
+      .fab-ai{bottom: 80px; right: 16px; padding: 12px 16px; font-size:13px;}
+      .fab-ai .sparkle{width:20px; height:20px;}
+    }
+
+    @media (max-width: 375px){
+      .hero h1{font-size:26px;}
+      .hero-desc{font-size:13px;}
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation-duration:.01ms!important; transition-duration:.01ms!important;}
+      .reveal{opacity:1; transform:none;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- A11y: Skip link -->
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+  <style>.skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;}.skip-link:focus{left:0;}</style>
+
+  <!-- ================================
+       HEADER
+       ================================ -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="logo" aria-label="오마이트립 홈">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </a>
+
+      <nav class="gnb" aria-label="주요 메뉴">
+        <a href="/japan">🇯🇵 일본</a>
+        <a href="/vietnam">🇻🇳 베트남</a>
+        <a href="/thailand">🇹🇭 태국</a>
+        <a href="/philippines">🇵🇭 필리핀</a>
+        <a href="/southeast-asia">🌏 동남아</a>
+        <a href="/world">🌍 전세계 호텔</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/ai-planner" class="btn-ai">AI 플래너</a>
+        <a href="/login" class="btn-ghost">로그인</a>
+        <a href="/mypage" class="btn-ghost">마이페이지</a>
+      </div>
+
+      <button class="m-hamburger" aria-label="메뉴 열기" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================================
+       MOBILE DRAWER
+       ================================ -->
+  <div class="drawer-overlay" onclick="closeDrawer()"></div>
+  <aside class="drawer" aria-label="모바일 메뉴">
+    <div class="drawer-head">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </div>
+      <button class="close" onclick="closeDrawer()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="drawer-list">
+      <a href="/japan">🇯🇵 한국인의 일본</a>
+      <a href="/vietnam">🇻🇳 한국인의 베트남</a>
+      <a href="/thailand">🇹🇭 한국인의 태국</a>
+      <a href="/philippines">🇵🇭 한국인의 필리핀</a>
+      <a href="/southeast-asia">🌏 동남아 기타</a>
+      <a href="/world">🌍 전세계 호텔</a>
+      <a href="/ai-planner">✦ AI 여행 플래너</a>
+      <a href="/feed">▶ 크리에이터 피드</a>
+      <a href="/creator">크리에이터 파트너 신청</a>
+    </nav>
+    <div class="drawer-foot">
+      <button>로그인</button>
+      <button>회원가입</button>
+    </div>
+  </aside>
+
+  <!-- ================================
+       HERO
+       ================================ -->
+  <section class="hero">
+    <div class="hero-slides" aria-hidden="true">
+      <!-- TODO: API 연동 필요 - /api/hero/slides (큐레이션된 히어로 배경 이미지 리스트) -->
+      <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1800&q=80')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1800&q=80')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=1800&q=80')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=1800&q=80')"></div>
+    </div>
+
+    <div class="container hero-inner">
+      <span class="hero-kicker">✦ 한국인을 위한 아웃바운드 여행 플랫폼</span>
+      <h1>오, 내가 찾는 <span>모든 여행</span></h1>
+      <p class="hero-desc">AI가 추천하고, 크리에이터가 큐레이션하며, 단독 특가로 완성되는 스마트한 여행.</p>
+
+      <form class="ai-search" onsubmit="handleAISearch(event)" role="search">
+        <span class="icon" aria-hidden="true">✦</span>
+        <input id="aiQuery" type="text" placeholder="어디로 떠나고 싶으세요? AI에게 물어보세요" aria-label="AI 검색" />
+        <button type="submit">검색하기</button>
+      </form>
+
+      <div class="quick-tabs" role="tablist">
+        <button class="quick-tab" data-type="flight">✈️ 항공</button>
+        <button class="quick-tab" data-type="hotel">🏨 호텔</button>
+        <button class="quick-tab" data-type="package">📦 패키지</button>
+        <button class="quick-tab" data-type="golf">⛳ 골프</button>
+        <button class="quick-tab" data-type="tour">🎫 투어</button>
+      </div>
+    </div>
+
+    <div class="hero-dots" role="tablist" aria-label="히어로 슬라이드">
+      <button class="active" aria-label="슬라이드 1" onclick="setHeroSlide(0)"></button>
+      <button aria-label="슬라이드 2" onclick="setHeroSlide(1)"></button>
+      <button aria-label="슬라이드 3" onclick="setHeroSlide(2)"></button>
+      <button aria-label="슬라이드 4" onclick="setHeroSlide(3)"></button>
+    </div>
+  </section>
+
+  <!-- ================================
+       COUNTRY SECTORS
+       ================================ -->
+  <section class="section reveal" id="countries">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">국가별로 떠나는 여행</h2>
+          <p class="section-sub">한국인이 가장 사랑하는 여행지를 국가별로 큐레이션했어요</p>
+        </div>
+      </div>
+      <div class="countries-grid" id="countriesGrid">
+        <!-- Rendered by JS — see /api/countries/sectors -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       OHMYTRIP ORIGINALS
+       ================================ -->
+  <section class="section reveal" style="background:var(--bg-soft);">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">🔥 오마이트립에서만 만나는 단독 특가</h2>
+          <p class="section-sub">항공+호텔까지 한 번에, 오마이트립 오리지널 큐레이션 상품</p>
+        </div>
+        <a href="/originals" class="see-all">전체보기 →</a>
+      </div>
+      <div class="originals-grid" id="originalsGrid">
+        <!-- Rendered by JS — see /api/products/originals -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       CREATOR FEED PREVIEW
+       ================================ -->
+  <section class="section reveal">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">▶ 여행 크리에이터가 직접 추천하는 특가</h2>
+          <p class="section-sub">영상으로 보고, 바로 예약하세요</p>
+        </div>
+        <a href="/feed" class="see-all">피드 전체보기 →</a>
+      </div>
+      <div class="creator-scroll" id="creatorScroll">
+        <!-- Rendered by JS — see /api/creator/shorts?featured=true -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       DYNAMIC PACKAGE BUILDER
+       ================================ -->
+  <section class="section reveal">
+    <div class="container">
+      <div class="pkg-builder">
+        <div class="section-head-row" style="margin-bottom:8px;">
+          <div>
+            <h2 class="section-title">나만의 여행을 조합하세요</h2>
+            <p class="section-sub">항공·호텔·액티비티를 자유롭게 조합하면 더 저렴해집니다</p>
+          </div>
+        </div>
+
+        <div class="pkg-grid">
+          <div class="pkg-slots">
+            <div class="pkg-slot">
+              <div class="icon" aria-hidden="true">✈️</div>
+              <div class="info">
+                <div class="label">항공</div>
+                <select id="pkgFlight" onchange="recalcPackage()">
+                  <option value="380000" data-label="인천→오사카 티웨이항공">인천 → 오사카 (티웨이항공) · 380,000원</option>
+                  <option value="520000" data-label="인천→도쿄 대한항공">인천 → 도쿄 (대한항공) · 520,000원</option>
+                  <option value="298000" data-label="부산→후쿠오카 제주항공">부산 → 후쿠오카 (제주항공) · 298,000원</option>
+                </select>
+              </div>
+            </div>
+            <div class="pkg-slot">
+              <div class="icon" aria-hidden="true">🏨</div>
+              <div class="info">
+                <div class="label">호텔 (3박)</div>
+                <select id="pkgHotel" onchange="recalcPackage()">
+                  <option value="240000" data-label="호텔 그란비아 오사카">호텔 그란비아 오사카 · 240,000원</option>
+                  <option value="390000" data-label="리가로얄 오사카">리가로얄 오사카 · 390,000원</option>
+                  <option value="180000" data-label="APA호텔 난바">APA호텔 난바 · 180,000원</option>
+                </select>
+              </div>
+            </div>
+            <div class="pkg-slot">
+              <div class="icon" aria-hidden="true">🌸</div>
+              <div class="info">
+                <div class="label">액티비티 (선택)</div>
+                <select id="pkgActivity" onchange="recalcPackage()">
+                  <option value="0" data-label="선택 안 함">선택 안 함 · 0원</option>
+                  <option value="89000" data-label="유니버설 스튜디오">유니버설 스튜디오 1일권 · 89,000원</option>
+                  <option value="65000" data-label="벚꽃 크루즈">오사카 성 벚꽃 크루즈 · 65,000원</option>
+                  <option value="120000" data-label="골프라운딩">오사카 골프라운딩 1회 · 120,000원</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <aside class="pkg-summary" aria-live="polite">
+            <h4>예상 비용</h4>
+            <div class="pkg-lines" id="pkgLines">
+              <!-- Rendered by JS -->
+            </div>
+            <div class="pkg-divider"></div>
+            <div class="pkg-total">
+              <span class="label">총 예상 가격</span>
+              <span class="price" id="pkgTotal">620,000원</span>
+            </div>
+            <button class="pkg-cta" onclick="alert('장바구니에 담겼습니다 (프로토타입)')">이 조합으로 예약하기</button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       FLIGHT DEALS
+       ================================ -->
+  <section class="section reveal" style="background: var(--bg-soft);">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <h2 class="section-title">✈️ 지금 가장 저렴한 항공권</h2>
+          <p class="section-sub">실시간 최저가 · 지금 예약하면 이 가격</p>
+        </div>
+        <a href="/flights/search" class="see-all">항공권 전체보기 →</a>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="japan">🇯🇵 일본</button>
+        <button class="tab" data-tab="vietnam">🇻🇳 베트남</button>
+        <button class="tab" data-tab="thailand">🇹🇭 태국</button>
+      </div>
+
+      <div class="flights-grid" id="flightsGrid">
+        <!-- Rendered by JS — see /api/flights/deals?country={country} -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       CREATOR PARTNER BANNER
+       ================================ -->
+  <section class="section reveal">
+    <div class="container">
+      <div class="partner-banner">
+        <div class="partner-text">
+          <h3>여행 크리에이터라면 오마이트립과 함께 수익을 만들어보세요</h3>
+          <p>호텔·항공 인벤토리를 영상으로 연결하고, 판매 발생 시 커미션을 받으세요. 지금 파트너 등록하면 프로모션 노출 우선권 제공.</p>
+        </div>
+        <a href="/creator" class="partner-cta">파트너 신청하기 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================
+       FOOTER
+       ================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="logo" style="margin-bottom:10px;">
+            <span class="logo-mark" aria-hidden="true"></span>
+            <span>오마이트립</span>
+          </div>
+          <p style="margin:0; font-size:13px; color:var(--ink-2); max-width:320px;">
+            한국인이 만드는 한국인을 위한 아웃바운드 여행 플랫폼.<br/>
+            오, 내가 찾는 모든 여행.
+          </p>
+          <div class="socials" aria-label="소셜 미디어">
+            <a href="#" aria-label="유튜브"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2 31 31 0 000 12a31 31 0 00.5 5.8 3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1 31 31 0 00.5-5.8 31 31 0 00-.5-5.8zM9.6 15.6v-7.2l6.3 3.6-6.3 3.6z"/></svg></a>
+            <a href="#" aria-label="인스타그램"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+            <a href="#" aria-label="카카오톡 채널"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.9 1.9 5.4 4.8 6.8l-1 3.7c-.1.4.3.7.7.5L11 20c.3 0 .6.1 1 .1 5.5 0 10-3.6 10-8s-4.5-9.1-10-9.1z"/></svg></a>
+          </div>
+        </div>
+
+        <div>
+          <h5>서비스</h5>
+          <ul>
+            <li><a href="/flights/search">항공권</a></li>
+            <li><a href="/hotels/search">호텔</a></li>
+            <li><a href="/packages">다이나믹 패키지</a></li>
+            <li><a href="/feed">크리에이터 피드</a></li>
+            <li><a href="/ai-planner">AI 플래너</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5>회사</h5>
+          <ul>
+            <li><a href="/about">회사 소개</a></li>
+            <li><a href="/creator">크리에이터 파트너</a></li>
+            <li><a href="/supplier">공급자 제휴</a></li>
+            <li><a href="/careers">채용</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5>고객 지원</h5>
+          <ul>
+            <li><a href="/help">이용 가이드</a></li>
+            <li><a href="/terms">이용약관</a></li>
+            <li><a href="/privacy">개인정보처리방침</a></li>
+            <li><a href="/cs">1:1 문의</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          <strong>(주)오마이트립</strong> · 대표: 홍길동 · 사업자등록번호: 123-45-67890 · 통신판매업 제2026-서울강남-00000호<br/>
+          서울특별시 강남구 테헤란로 000 · Tel 1588-0000 · hello@ohmytrip.kr
+        </div>
+        <div>© 2026 OhMyTrip Inc. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================
+       FLOATING AI PLANNER BUTTON
+       ================================ -->
+  <a href="/ai-planner" class="fab-ai" aria-label="AI 여행 플래너 열기">
+    <span class="sparkle" aria-hidden="true">✦</span>
+    <span>AI 플래너</span>
+  </a>
+
+  <!-- ================================
+       MOBILE BOTTOM TAB
+       ================================ -->
+  <nav class="bottom-tab" aria-label="모바일 하단 메뉴">
+    <a href="/" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+      <span>홈</span>
+    </a>
+    <a href="/flights/search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <span>검색</span>
+    </a>
+    <a href="/feed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>피드</span>
+    </a>
+    <a href="/cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg>
+      <span>장바구니</span>
+    </a>
+    <a href="/mypage">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>MY</span>
+    </a>
+  </nav>
+
+  <!-- ================================
+       SCRIPTS
+       ================================ -->
+  <script>
+  /* =========================================
+     Mock Data — will be replaced by API
+     ========================================= */
+  // TODO: API 연동 필요 - GET /api/countries/sectors
+  const COUNTRIES = [
+    { slug:'japan',        flag:'🇯🇵', name:'한국인의 일본',   cities:'도쿄·오사카·후쿠오카',     count:'2,847개 상품'  },
+    { slug:'vietnam',      flag:'🇻🇳', name:'한국인의 베트남', cities:'다낭·나트랑·푸꾸옥',       count:'1,923개 상품'  },
+    { slug:'thailand',     flag:'🇹🇭', name:'한국인의 태국',   cities:'방콕·치앙마이·푸켓',       count:'1,658개 상품'  },
+    { slug:'philippines',  flag:'🇵🇭', name:'한국인의 필리핀', cities:'세부·보홀·보라카이',       count:'1,204개 상품'  },
+    { slug:'southeast-asia', flag:'🌏', name:'동남아 기타',    cities:'싱가포르·말레이시아·인니', count:'986개 상품'    },
+    { slug:'world',        flag:'🌍', name:'전세계 호텔',     cities:'유럽·미주·오세아니아',     count:'12,340개 호텔' }
+  ];
+
+  // TODO: API 연동 필요 - GET /api/products/originals?limit=4
+  const ORIGINALS = [
+    {
+      id: 'orig-jp-01',
+      img: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80',
+      country: '🇯🇵 일본',
+      title: '[단독] 오사카 벚꽃 3박4일 프리미엄',
+      compo: '티웨이항공 + 호텔 그란비아 + 벚꽃 크루즈',
+      price: 689000, oldPrice: 890000
+    },
+    {
+      id: 'orig-vn-01',
+      img: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
+      country: '🇻🇳 베트남',
+      title: '[단독] 다낭 풀빌라 4박5일 올인클루시브',
+      compo: '비엣젯항공 + 프리미어빌리지 + 조식/석식',
+      price: 1290000, oldPrice: 1590000
+    },
+    {
+      id: 'orig-th-01',
+      img: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
+      country: '🇹🇭 태국',
+      title: '[단독] 방콕+파타야 5박6일 콤비',
+      compo: '타이항공 + ONE15 + 수상시장 투어',
+      price: 890000, oldPrice: 1180000
+    },
+    {
+      id: 'orig-ph-01',
+      img: 'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
+      country: '🇵🇭 필리핀',
+      title: '[단독] 세부 샹그릴라 막탄 4박5일',
+      compo: '세부퍼시픽 + 샹그릴라 막탄 + 호핑투어',
+      price: 1580000, oldPrice: 1890000
+    }
+  ];
+
+  // TODO: API 연동 필요 - GET /api/creator/shorts?featured=true&limit=4
+  const SHORTS = [
+    {
+      id:'sh-01',
+      img:'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80',
+      creator:'여행유튜버 지노',
+      initial:'지',
+      subs:'구독자 128만',
+      title:'다낭 가성비 호텔 TOP3, 안 가면 후회합니다'
+    },
+    {
+      id:'sh-02',
+      img:'https://images.unsplash.com/photo-1480796927426-f609979314bd?auto=format&fit=crop&w=600&q=80',
+      creator:'트래블로그 민지',
+      initial:'민',
+      subs:'구독자 54만',
+      title:'도쿄 벚꽃 시즌 현지인만 아는 숨겨진 맛집'
+    },
+    {
+      id:'sh-03',
+      img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=600&q=80',
+      creator:'필리핀덕후 케빈',
+      initial:'케',
+      subs:'구독자 31만',
+      title:'세부 현지인이 알려주는 진짜 맛집 5곳'
+    },
+    {
+      id:'sh-04',
+      img:'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=600&q=80',
+      creator:'방콕러버 수진',
+      initial:'수',
+      subs:'구독자 87만',
+      title:'방콕 루프탑바 BEST 7, 야경 끝판왕'
+    }
+  ];
+
+  // TODO: API 연동 필요 - GET /api/flights/deals?country={country}
+  const FLIGHTS = {
+    japan: [
+      { from:'인천', to:'오사카',  date:'4월 25일 왕복', price:189000, airline:'티웨이항공' },
+      { from:'인천', to:'도쿄',    date:'5월 3일 왕복',  price:259000, airline:'대한항공' },
+      { from:'부산', to:'후쿠오카',date:'4월 18일 왕복', price:149000, airline:'제주항공' },
+      { from:'인천', to:'삿포로',  date:'5월 12일 왕복', price:329000, airline:'진에어' },
+      { from:'인천', to:'나고야',  date:'4월 28일 왕복', price:219000, airline:'에어서울' },
+      { from:'김포', to:'하네다',  date:'5월 1일 왕복',  price:389000, airline:'아시아나항공' }
+    ],
+    vietnam: [
+      { from:'인천', to:'다낭',    date:'4월 27일 왕복', price:329000, airline:'비엣젯항공' },
+      { from:'인천', to:'나트랑',  date:'5월 10일 왕복', price:389000, airline:'베트남항공' },
+      { from:'인천', to:'하노이',  date:'4월 22일 왕복', price:279000, airline:'티웨이항공' },
+      { from:'부산', to:'다낭',    date:'5월 5일 왕복',  price:359000, airline:'에어부산' },
+      { from:'인천', to:'호치민',  date:'4월 30일 왕복', price:319000, airline:'대한항공' },
+      { from:'인천', to:'푸꾸옥',  date:'5월 15일 왕복', price:449000, airline:'비엣젯항공' }
+    ],
+    thailand: [
+      { from:'인천', to:'방콕',      date:'4월 29일 왕복', price:319000, airline:'타이항공' },
+      { from:'인천', to:'푸켓',      date:'5월 5일 왕복',  price:469000, airline:'에어아시아' },
+      { from:'인천', to:'치앙마이',  date:'4월 30일 왕복', price:359000, airline:'타이베트남항공' },
+      { from:'부산', to:'방콕',      date:'5월 8일 왕복',  price:399000, airline:'진에어' },
+      { from:'인천', to:'코사무이',  date:'5월 20일 왕복', price:519000, airline:'방콕항공' },
+      { from:'인천', to:'끄라비',    date:'5월 2일 왕복',  price:489000, airline:'타이항공' }
+    ]
+  };
+
+  /* =========================================
+     Formatters & helpers
+     ========================================= */
+  const krw = (n) => n.toLocaleString('ko-KR') + '원';
+
+  /* =========================================
+     Renderers
+     ========================================= */
+  function renderCountries(){
+    const el = document.getElementById('countriesGrid');
+    el.innerHTML = COUNTRIES.map(c => `
+      <a class="country-card" href="/${c.slug}">
+        <div class="country-flag" aria-hidden="true">${c.flag}</div>
+        <div class="country-name">${c.name}</div>
+        <div class="country-cities">${c.cities}</div>
+        <div class="country-count">${c.count} →</div>
+      </a>
+    `).join('');
+  }
+
+  function renderOriginals(){
+    const el = document.getElementById('originalsGrid');
+    el.innerHTML = ORIGINALS.map(p => `
+      <a class="product-card" href="/product/${p.id}">
+        <div class="product-thumb" style="background-image:url('${p.img}')">
+          <div class="product-badges">
+            <span class="badge original">ORIGINAL</span>
+            <span class="badge country">${p.country}</span>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-title">${p.title}</div>
+          <div class="product-compo">${p.compo}</div>
+          <div class="product-price-row">
+            <span class="from">최저가</span>
+            <span class="price">${krw(p.price)}</span>
+            <span class="unit">~</span>
+          </div>
+          <div class="product-old">${krw(p.oldPrice)}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function renderShorts(){
+    const el = document.getElementById('creatorScroll');
+    el.innerHTML = SHORTS.map(s => `
+      <article class="short-card" style="background-image:url('${s.img}')">
+        <div class="short-play" aria-hidden="true">▶</div>
+        <div class="short-content">
+          <div class="short-creator">
+            <div class="creator-avatar" aria-hidden="true">${s.initial}</div>
+            <div>
+              <div class="creator-name">${s.creator}</div>
+              <div class="creator-subs">${s.subs}</div>
+            </div>
+          </div>
+          <div class="short-title">${s.title}</div>
+          <div class="short-actions">
+            <button class="view" type="button">자세히 보기</button>
+            <button class="book" type="button">지금 예약</button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function renderFlights(country){
+    const el = document.getElementById('flightsGrid');
+    const list = FLIGHTS[country] || [];
+    el.innerHTML = list.map(f => `
+      <a class="flight-card" href="/flights/search?from=${encodeURIComponent(f.from)}&to=${encodeURIComponent(f.to)}">
+        <div class="flight-airline"><span class="airline-dot"></span>${f.airline}</div>
+        <div class="flight-route">
+          <span class="city">${f.from}</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span class="city">${f.to}</span>
+        </div>
+        <div class="flight-meta">
+          <span>${f.date}</span>
+          <span class="flight-price">${krw(f.price)}~</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  /* =========================================
+     Flight deal tabs
+     ========================================= */
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFlights(btn.dataset.tab);
+    });
+  });
+
+  /* =========================================
+     Hero slider
+     ========================================= */
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dots button');
+  let slideIdx = 0;
+  function setHeroSlide(i){
+    slideIdx = i % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === slideIdx));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === slideIdx));
+  }
+  // A11y: respect reduced motion — skip auto-advance
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    setInterval(() => setHeroSlide(slideIdx + 1), 5500);
+  }
+
+  // A11y: Escape closes drawer
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.querySelector('.drawer')?.classList.contains('open')){
+      closeDrawer();
+    }
+  });
+
+  /* =========================================
+     AI search & quick tabs
+     ========================================= */
+  function handleAISearch(e){
+    e.preventDefault();
+    const q = document.getElementById('aiQuery').value.trim();
+    if(!q){ alert('여행지나 원하는 여행을 입력해주세요'); return; }
+    // TODO: API 연동 필요 - POST /api/ai/search { query }
+    alert(`AI 플래너로 이동 (프로토타입)\n입력: "${q}"`);
+  }
+  document.querySelectorAll('.quick-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // TODO: API 연동 필요 - 각 카테고리 검색 엔드포인트 (/api/{type}/search)
+      alert(`${btn.dataset.type} 검색으로 이동 (프로토타입)`);
+    });
+  });
+
+  /* =========================================
+     Dynamic Package Builder
+     ========================================= */
+  function recalcPackage(){
+    const flight   = document.getElementById('pkgFlight');
+    const hotel    = document.getElementById('pkgHotel');
+    const activity = document.getElementById('pkgActivity');
+
+    const parts = [
+      { label: flight.selectedOptions[0].dataset.label,   value: +flight.value },
+      { label: hotel.selectedOptions[0].dataset.label,    value: +hotel.value },
+      { label: activity.selectedOptions[0].dataset.label, value: +activity.value }
+    ];
+    const total = parts.reduce((s, p) => s + p.value, 0);
+    const bundleDiscount = Math.round(total * 0.07); // 번들 7% 할인 (더미)
+    const finalTotal = total - bundleDiscount;
+
+    const lines = parts
+      .filter(p => p.value > 0)
+      .map(p => `<div class="pkg-line"><span>${p.label}</span><span>${krw(p.value)}</span></div>`)
+      .join('');
+    const discountLine = `<div class="pkg-line" style="color:#FFD23F;"><span>번들 할인 (7%)</span><span>- ${krw(bundleDiscount)}</span></div>`;
+
+    document.getElementById('pkgLines').innerHTML = lines + discountLine;
+    document.getElementById('pkgTotal').textContent = krw(finalTotal);
+  }
+
+  /* =========================================
+     Mobile drawer
+     ========================================= */
+  function openDrawer(){
+    document.querySelector('.drawer').classList.add('open');
+    document.querySelector('.drawer-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    document.querySelector('.drawer').classList.remove('open');
+    document.querySelector('.drawer-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* =========================================
+     Scroll reveal (IntersectionObserver)
+     ========================================= */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* =========================================
+     Init
+     ========================================= */
+  renderCountries();
+  renderOriginals();
+  renderShorts();
+  renderFlights('japan');
+  recalcPackage();
+  </script>
+</body>
+</html>

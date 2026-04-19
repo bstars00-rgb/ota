@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>호텔 검색 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35; --primary-dark:#E85826; --primary-soft:#FFF0E8;
+      --secondary:#1E88E5; --accent:#FFD23F; --success:#10B981;
+      --ink:#1A1A1A; --ink-2:#4B5563; --ink-3:#9CA3AF;
+      --line:#E5E7EB; --bg:#fff; --bg-soft:#F7F7F9;
+      --radius:14px; --radius-lg:20px;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+      --header-h:64px; --max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .page-title{margin-left:16px;font-size:15px;font-weight:700;color:var(--ink-2);}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+    .btn-ghost:hover{background:var(--bg-soft);color:var(--ink);}
+
+    /* Search strip */
+    .search-strip{background:#fff;border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:var(--header-h);z-index:40;}
+    .search-form{
+      display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0;
+      border:1.5px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;
+    }
+    .sf-field{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;}
+    .sf-field:last-of-type{border-right:none;}
+    .sf-field label{font-size:10px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;}
+    .sf-field select,.sf-field input{border:none;outline:none;padding:4px 0;font-size:14px;font-weight:700;color:var(--ink);background:transparent;}
+    .sf-btn{padding:0 28px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;font-weight:900;font-size:14px;}
+    .sf-btn:hover{background:var(--primary-dark);}
+
+    /* Layout */
+    .results-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;padding:24px 24px 80px;max-width:var(--max-w);margin:0 auto;align-items:flex-start;}
+
+    .filter-side{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;position:sticky;top:calc(var(--header-h) + 104px);}
+    .filter-side h3{margin:0 0 12px;font-size:14px;font-weight:900;}
+    .f-group{padding:14px 0;border-top:1px solid var(--line);}
+    .f-group:first-of-type{border-top:none;padding-top:0;}
+    .f-group h4{margin:0 0 10px;font-size:12px;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;}
+    .f-row{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:var(--ink-2);cursor:pointer;}
+    .f-row:hover{color:var(--ink);}
+    .f-check{width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px;position:relative;flex-shrink:0;}
+    .f-check.checked{background:var(--primary);border-color:var(--primary);}
+    .f-check.checked::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+    .f-count{margin-left:auto;font-size:11px;color:var(--ink-3);}
+    .f-range{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--ink-3);}
+    .f-range input{flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;}
+    .f-reset{width:100%;margin-top:12px;padding:10px;background:var(--bg-soft);border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-2);}
+
+    /* Results */
+    .results-main{min-width:0;}
+    .results-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+    .results-count{font-size:14px;color:var(--ink-2);}
+    .results-count strong{color:var(--ink);}
+    .sort-tabs{display:flex;gap:4px;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--line);}
+    .sort-tab{padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .sort-tab.active{background:var(--ink);color:#fff;}
+
+    /* Hotel card */
+    .hotel-list{display:flex;flex-direction:column;gap:14px;}
+    .hotel-card{
+      background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-lg);
+      display:grid;grid-template-columns:280px 1fr auto;gap:0;overflow:hidden;
+      transition:transform .2s, box-shadow .2s, border-color .15s;
+    }
+    .hotel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--primary);}
+    .hc-thumb{
+      aspect-ratio:4/3;background-size:cover;background-position:center;
+      background-color:#eee;position:relative;
+    }
+    .hc-badge{
+      position:absolute;top:12px;left:12px;
+      padding:5px 10px;border-radius:6px;
+      background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;
+      font-size:11px;font-weight:800;
+    }
+    .hc-body{padding:18px 22px;display:flex;flex-direction:column;gap:6px;min-width:0;}
+    .hc-stars{color:var(--accent);font-size:13px;letter-spacing:2px;}
+    .hc-name{font-size:17px;font-weight:900;letter-spacing:-0.01em;}
+    .hc-area{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:5px;}
+    .hc-area::before{content:"📍";}
+    .hc-score-row{display:flex;align-items:center;gap:10px;margin:6px 0;}
+    .hc-score{
+      padding:4px 10px;background:var(--primary);color:#fff;
+      border-radius:6px;font-weight:900;font-size:14px;
+    }
+    .hc-review{font-size:13px;}
+    .hc-review strong{font-weight:800;}
+    .hc-review small{color:var(--ink-3);margin-left:3px;}
+    .hc-amenities{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+    .hc-amenity{
+      padding:4px 9px;border-radius:6px;background:var(--bg-soft);
+      font-size:11px;color:var(--ink-2);font-weight:600;
+    }
+    .hc-right{
+      border-left:1px dashed var(--line);padding:18px 22px;
+      display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:8px;min-width:180px;
+    }
+    .hc-price-label{font-size:11px;color:var(--ink-3);}
+    .hc-price-row{display:flex;flex-direction:column;align-items:flex-end;}
+    .hc-old{font-size:12px;color:var(--ink-3);text-decoration:line-through;}
+    .hc-price{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+    .hc-price small{font-size:11px;color:var(--ink-2);font-weight:600;}
+    .hc-total{font-size:11px;color:var(--ink-3);}
+    .hc-select-btn{
+      padding:10px 20px;border-radius:10px;background:var(--ink);color:#fff;
+      font-weight:900;font-size:13px;white-space:nowrap;margin-top:6px;
+    }
+    .hc-select-btn:hover{background:var(--primary);}
+
+    @media (max-width:1024px){
+      .results-layout{grid-template-columns:1fr;}
+      .filter-side{position:static;}
+      .hotel-card{grid-template-columns:1fr;}
+      .hc-thumb{aspect-ratio:16/9;}
+      .hc-right{border-left:none;border-top:1px dashed var(--line);flex-direction:row;justify-content:space-between;align-items:center;min-width:0;}
+      .search-form{grid-template-columns:1fr 1fr;}
+      .sf-field{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+      .sf-field:nth-child(2n){border-right:none;}
+      .sf-btn{grid-column:1/-1;padding:14px;}
+    }
+    @media (max-width:768px){
+      :root{--header-h:56px;}
+      .page-title{display:none;}
+      .hc-body{padding:14px;}
+      .hc-right{padding:14px;}
+      .hc-name{font-size:15px;}
+      .hc-price{font-size:18px;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
+      <span class="page-title">호텔 검색</span>
+      <div class="header-actions">
+        <a href="flights.html" class="btn-ghost">✈️ 항공</a>
+        <a href="ai-planner.html" class="btn-ghost">✦ AI 플래너</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="search-strip">
+    <div class="container">
+      <form class="search-form" onsubmit="event.preventDefault();render();">
+        <div class="sf-field"><label>목적지</label>
+          <select id="dest"><option>오사카, 일본</option><option>도쿄, 일본</option><option>다낭, 베트남</option><option>방콕, 태국</option><option>세부, 필리핀</option></select>
+        </div>
+        <div class="sf-field"><label>체크인 - 체크아웃</label>
+          <input type="text" value="2026.05.10 - 2026.05.13 (3박)" readonly style="cursor:pointer;"/>
+        </div>
+        <div class="sf-field"><label>객실/인원</label>
+          <select><option>객실 1개, 성인 2명</option><option>객실 1개, 성인 1명</option><option>객실 2개, 성인 4명</option></select>
+        </div>
+        <button type="submit" class="sf-btn">🔍 검색</button>
+      </form>
+    </div>
+  </div>
+
+  <main id="omt-main" class="results-layout">
+    <aside class="filter-side">
+      <h3>필터</h3>
+      <div class="f-group">
+        <h4>1박 가격</h4>
+        <div class="f-range">
+          <input type="number" id="priceMin" value="0" min="0"/>
+          <span>~</span>
+          <input type="number" id="priceMax" value="1000000"/>
+        </div>
+      </div>
+      <div class="f-group">
+        <h4>성급</h4>
+        <div id="filterStars"></div>
+      </div>
+      <div class="f-group">
+        <h4>지역</h4>
+        <div id="filterAreas"></div>
+      </div>
+      <div class="f-group">
+        <h4>편의시설</h4>
+        <div id="filterAmen"></div>
+      </div>
+      <button class="f-reset" onclick="resetFilters()">필터 초기화</button>
+    </aside>
+
+    <section class="results-main">
+      <div class="results-head">
+        <div class="results-count">오사카 · 총 <strong id="resCount">0</strong>개 호텔</div>
+        <div class="sort-tabs">
+          <button class="sort-tab active" data-sort="recommend">추천순</button>
+          <button class="sort-tab" data-sort="price">가격 낮은순</button>
+          <button class="sort-tab" data-sort="rating">평점 높은순</button>
+          <button class="sort-tab" data-sort="reviews">리뷰 많은순</button>
+        </div>
+      </div>
+      <div class="hotel-list" id="hotelList"></div>
+    </section>
+  </main>
+
+  <script>
+  // TODO: API 연동 - GET /api/hotels?destination=osaka&checkin=...&checkout=...
+  const HOTELS = [
+    { id:'h1', img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+      name:'호텔 그란비아 오사카', area:'우메다', areaId:'umeda', stars:5, score:9.2, reviews:4127,
+      badge:'오마이트립 추천', amenities:['조식 포함','와이파이','수영장','피트니스','역 직결'],
+      price:239000, oldPrice:289000, total:717000 },
+    { id:'h2', img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+      name:'리가로얄 호텔 오사카', area:'나카노시마', areaId:'nakanoshima', stars:5, score:9.0, reviews:3528,
+      amenities:['조식 포함','와이파이','수영장','스파','비즈니스 센터'],
+      price:329000, oldPrice:389000, total:987000 },
+    { id:'h3', img:'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+      name:'크로스 호텔 오사카', area:'신사이바시', areaId:'shinsaibashi', stars:4, score:8.9, reviews:2145,
+      amenities:['조식 포함','와이파이','바/라운지','역 인근'],
+      price:189000, oldPrice:229000, total:567000 },
+    { id:'h4', img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      name:'APA 호텔 난바', area:'난바', areaId:'namba', stars:4, score:8.5, reviews:5284,
+      amenities:['와이파이','24시간 프론트','역 도보 3분'],
+      price:129000, oldPrice:159000, total:387000 },
+    { id:'h5', img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
+      name:'호텔 몬터레이 그래스미어', area:'난바', areaId:'namba', stars:4, score:8.7, reviews:1842,
+      amenities:['조식 포함','와이파이','스카이오 연결'],
+      price:169000, oldPrice:199000, total:507000 },
+    { id:'h6', img:'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=800&q=80',
+      name:'하나 호텔 신사이바시', area:'신사이바시', areaId:'shinsaibashi', stars:3, score:8.2, reviews:941,
+      amenities:['와이파이','24시간 프론트'],
+      price:89000, oldPrice:109000, total:267000 },
+    { id:'h7', img:'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+      name:'인터컨티넨탈 호텔 오사카', area:'우메다', areaId:'umeda', stars:5, score:9.5, reviews:2184,
+      badge:'럭셔리', amenities:['조식 포함','스파','수영장','피트니스','라운지','역 직결'],
+      price:489000, oldPrice:589000, total:1467000 },
+    { id:'h8', img:'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
+      name:'호텔 닛코 오사카', area:'신사이바시', areaId:'shinsaibashi', stars:4, score:8.8, reviews:3012,
+      amenities:['조식 포함','와이파이','피트니스','바/라운지'],
+      price:219000, oldPrice:259000, total:657000 }
+  ];
+
+  const STATE = {
+    sort:'recommend',
+    priceMin:0, priceMax:1000000,
+    stars:{5:true,4:true,3:true},
+    areas:{},
+    amenities:{}
+  };
+
+  const krw = n => n.toLocaleString('ko-KR') + '원';
+
+  function applyFilters(){
+    return HOTELS.filter(h => {
+      if(h.price < STATE.priceMin || h.price > STATE.priceMax) return false;
+      if(!STATE.stars[h.stars]) return false;
+      if(STATE.areas[h.areaId] === false) return false;
+      // amenity: all selected must be present
+      const selAmen = Object.keys(STATE.amenities).filter(a => STATE.amenities[a]);
+      if(selAmen.length > 0){
+        if(!selAmen.every(a => h.amenities.includes(a))) return false;
+      }
+      return true;
+    }).sort((a,b) => {
+      if(STATE.sort === 'price') return a.price - b.price;
+      if(STATE.sort === 'rating') return b.score - a.score;
+      if(STATE.sort === 'reviews') return b.reviews - a.reviews;
+      // recommend: score * log(reviews)
+      return (b.score * Math.log10(b.reviews+1)) - (a.score * Math.log10(a.reviews+1));
+    });
+  }
+
+  function render(){
+    const list = applyFilters();
+    document.getElementById('resCount').textContent = list.length;
+    const el = document.getElementById('hotelList');
+    if(list.length === 0){
+      el.innerHTML = `<div style="padding:60px;text-align:center;color:var(--ink-3);background:#fff;border-radius:16px;border:1px dashed var(--line);">
+        <h3 style="margin:0 0 6px;">조건에 맞는 호텔이 없어요</h3>
+        <p style="margin:0;font-size:13px;">필터를 완화해보세요</p>
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(h => `
+      <article class="hotel-card">
+        <div class="hc-thumb" style="background-image:url('${h.img}')">
+          ${h.badge ? `<span class="hc-badge">${h.badge}</span>` : ''}
+        </div>
+        <div class="hc-body">
+          <div class="hc-stars">${'★'.repeat(h.stars)}</div>
+          <div class="hc-name">${h.name}</div>
+          <div class="hc-area">${h.area}</div>
+          <div class="hc-score-row">
+            <span class="hc-score">${h.score}</span>
+            <span class="hc-review"><strong>${h.score >= 9 ? '최고' : h.score >= 8.5 ? '매우 좋음' : '좋음'}</strong><small>리뷰 ${h.reviews.toLocaleString('ko-KR')}개</small></span>
+          </div>
+          <div class="hc-amenities">
+            ${h.amenities.slice(0,5).map(a => `<span class="hc-amenity">${a}</span>`).join('')}
+            ${h.amenities.length > 5 ? `<span class="hc-amenity">+${h.amenities.length-5}</span>` : ''}
+          </div>
+        </div>
+        <div class="hc-right">
+          <span class="hc-price-label">1박 기준</span>
+          <div class="hc-price-row">
+            <span class="hc-old">${krw(h.oldPrice)}</span>
+            <span class="hc-price">${krw(h.price)}<small>~</small></span>
+          </div>
+          <span class="hc-total">3박 ${krw(h.total)}</span>
+          <button class="hc-select-btn" onclick="selectHotel('${h.id}')">선택 →</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function renderFilterUI(){
+    // Stars
+    document.getElementById('filterStars').innerHTML = [5,4,3].map(n => `
+      <div class="f-row" onclick="toggleStars(${n})">
+        <span class="f-check ${STATE.stars[n]?'checked':''}"></span>${n}성급 ${'★'.repeat(n)}
+        <span class="f-count">${HOTELS.filter(h=>h.stars===n).length}</span>
+      </div>
+    `).join('');
+    // Areas
+    const areas = [...new Set(HOTELS.map(h => h.areaId))];
+    areas.forEach(a => { if(!(a in STATE.areas)) STATE.areas[a] = true; });
+    document.getElementById('filterAreas').innerHTML = areas.map(a => {
+      const label = HOTELS.find(h => h.areaId === a).area;
+      return `<div class="f-row" onclick="toggleArea('${a}')">
+        <span class="f-check ${STATE.areas[a]?'checked':''}"></span>${label}
+        <span class="f-count">${HOTELS.filter(h=>h.areaId===a).length}</span>
+      </div>`;
+    }).join('');
+    // Amenities
+    const amens = ['조식 포함','수영장','스파','피트니스','와이파이','역 직결'];
+    document.getElementById('filterAmen').innerHTML = amens.map(a => `
+      <div class="f-row" onclick="toggleAmen('${a}')">
+        <span class="f-check ${STATE.amenities[a]?'checked':''}"></span>${a}
+      </div>
+    `).join('');
+  }
+  function toggleStars(n){ STATE.stars[n] = !STATE.stars[n]; renderFilterUI(); render(); }
+  function toggleArea(a){ STATE.areas[a] = !STATE.areas[a]; renderFilterUI(); render(); }
+  function toggleAmen(a){ STATE.amenities[a] = !STATE.amenities[a]; renderFilterUI(); render(); }
+  function resetFilters(){
+    STATE.priceMin=0;STATE.priceMax=1000000;
+    STATE.stars={5:true,4:true,3:true};
+    Object.keys(STATE.areas).forEach(a => STATE.areas[a]=true);
+    STATE.amenities={};
+    document.getElementById('priceMin').value=0;
+    document.getElementById('priceMax').value=1000000;
+    renderFilterUI();render();
+  }
+  document.querySelectorAll('.sort-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      STATE.sort = btn.dataset.sort;
+      render();
+    });
+  });
+  ['priceMin','priceMax'].forEach(id => {
+    document.getElementById(id).addEventListener('input', (e) => {
+      STATE[id] = +e.target.value || 0;
+      render();
+    });
+  });
+
+  function selectHotel(id){
+    const h = HOTELS.find(x => x.id === id);
+    // TODO: API 연동 - POST /api/cart { type:'hotel', hotelId:id, checkin:..., checkout:... }
+    location.href = 'product.html?id=' + id;
+  }
+
+  renderFilterUI();
+  render();
+  </script>
+</body>
+</html>
