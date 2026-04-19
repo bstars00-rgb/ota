@@ -679,7 +679,7 @@
               <div class="ico">💰</div>
               <div class="info">
                 <div class="t">크리에이터가 되어 수익을 만들어보세요</div>
-                <div class="s">평균 월 수익 180만원 · 커미션 15%</div>
+                <div class="s">일반 5% · 직영 10% · 평균 월 80만원</div>
               </div>
               <div class="go">지원 →</div>
             </div>
@@ -1087,13 +1087,13 @@
             <div class="source-opt-ico alt3">💼</div>
             <div class="source-opt-info">
               <div class="source-opt-t">크리에이터 지원하기</div>
-              <div class="source-opt-s">수익 창출 파트너 등록 (커미션 15%)</div>
+              <div class="source-opt-s">수익 창출 파트너 등록 (일반 5% · 직영 10%)</div>
             </div>
             <span style="opacity:.5;">›</span>
           </button>
         </div>
         <div style="margin-top:22px;padding:14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:11px;color:rgba(255,255,255,.6);">
-          💡 <strong style="color:#fff;">TIP</strong> 크리에이터는 영상 판매 시 <strong style="color:var(--accent);">15% 커미션</strong>을 받을 수 있어요. 상세는 "크리에이터 지원하기"에서.
+          💡 <strong style="color:#fff;">TIP</strong> 크리에이터는 영상 판매 시 일반 상품 <strong style="color:var(--accent);">5%</strong>, OMT 직영 상품 <strong style="color:var(--accent);">10%</strong> 커미션. 직영 위주로 판매하면 수익 2배.
         </div>
       `;
     } else if(cmStep === 1){
@@ -1164,7 +1164,7 @@
               <option value="">연결 없음</option>
               ${products.map(p => `<option value="${p.id}" ${cmData.productId===p.id?'selected':''}>${p.name}</option>`).join('')}
             </select>
-            <div class="hint">영상에서 상품이 판매되면 15% 커미션 지급</div>
+            <div class="hint">판매 시 커미션 자동 지급 (일반 5% · 🏠 직영 10%)</div>
           </div>
 
           <div class="edit-field">
