@@ -1,6 +1,11 @@
 # 오마이트립 프론트엔드 프로토타입 — QA 체크리스트
 
-> **대상 파일**: `index.html` · `country.html` · `ai-planner.html` · `packages.html` · `checkout.html` · `complete.html`
+> **⚠️ v2 업데이트 (2026-04-19)**: 이 체크리스트는 초기 6 페이지 기준으로 작성됨.
+> 그 후 추가된 페이지 · 기능은 `PROJECT_STATUS.md`를 우선 참조할 것.
+> 추가된 페이지: `feed.html` · `flights.html` · `hotels.html` · `product.html` · `cart.html` · `mypage.html` · `creator.html` · `creator-dashboard.html` · `login.html` · `mobile.html`
+> 신규 시스템: 크리에이터 등급 (4단) · 90일 온보딩 보너스 · 2단 커미션 (5%/10%) · 직영 호텔 · Draft/Applied 검색 패턴 · 2개월 달력 + 객실 구성기
+
+> **대상 파일**: `index.html` · `country.html` · `ai-planner.html` · `packages.html` · `checkout.html` · `complete.html` (v1) + 10개 추가 (v2)
 > **테스트 환경**: Chrome 최신 / Safari 최신 / Firefox 최신 · DevTools Device Toolbar
 > **체크리스트 포맷**: `[ ] 항목 — 확인 방법 — 통과 기준`
 
