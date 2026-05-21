@@ -289,19 +289,42 @@
   <script src="data.js"></script>
   <script src="state.js"></script>
   <script>
+  // ===========================================================================
+  // 데이터 소스: OMT.DATA.FLIGHTS (data.js) — 중앙화
+  // 이 페이지는 표시용 필드(logoClass, 한글 좌석명, 시간 포맷)만 덧붙여 사용
   // TODO: API 연동 - GET /api/flights/search?from=ICN&to=KIX&date=...&pax=...
-  const ALL_FLIGHTS = [
-    { id:'f1', code:'TW', logoClass:'tw', airline:'티웨이항공', number:'TW283', out:{dep:'08:30',arr:'10:15',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'11:00',arr:'13:00',depAp:'KIX',arrAp:'ICN',dur:'2시간 00분'}, stops:0, price:189000, seat:'이코노미', depTime:'morning' },
-    { id:'f2', code:'7C', logoClass:'jj', airline:'제주항공', number:'7C1156', out:{dep:'10:20',arr:'12:00',depAp:'ICN',arrAp:'KIX',dur:'1시간 40분'}, ret:{dep:'14:30',arr:'16:40',depAp:'KIX',arrAp:'ICN',dur:'2시간 10분'}, stops:0, price:229000, seat:'이코노미', depTime:'morning' },
-    { id:'f3', code:'KE', logoClass:'ke', airline:'대한항공', number:'KE723', out:{dep:'13:00',arr:'14:45',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'18:20',arr:'20:30',depAp:'KIX',arrAp:'ICN',dur:'2시간 10분'}, stops:0, price:329000, seat:'이코노미', depTime:'afternoon' },
-    { id:'f4', code:'LJ', logoClass:'lj', airline:'진에어', number:'LJ201', out:{dep:'18:15',arr:'19:55',depAp:'ICN',arrAp:'KIX',dur:'1시간 40분'}, ret:{dep:'21:10',arr:'23:25',depAp:'KIX',arrAp:'ICN',dur:'2시간 15분'}, stops:0, price:209000, seat:'이코노미', depTime:'evening' },
-    { id:'f5', code:'OZ', logoClass:'oz', airline:'아시아나항공', number:'OZ112', out:{dep:'20:40',arr:'22:25',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'09:30',arr:'11:40',depAp:'KIX',arrAp:'ICN',dur:'2시간 10분'}, stops:0, price:279000, seat:'이코노미', depTime:'evening' },
-    { id:'f6', code:'BX', logoClass:'bx', airline:'에어부산', number:'BX142', out:{dep:'07:15',arr:'09:00',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'13:00',arr:'15:15',depAp:'KIX',arrAp:'ICN',dur:'2시간 15분'}, stops:0, price:199000, seat:'이코노미', depTime:'morning' },
-    { id:'f7', code:'TW', logoClass:'tw', airline:'티웨이항공', number:'TW295', out:{dep:'15:45',arr:'17:30',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'20:00',arr:'22:15',depAp:'KIX',arrAp:'ICN',dur:'2시간 15분'}, stops:0, price:219000, seat:'이코노미', depTime:'afternoon' },
-    { id:'f8', code:'KE', logoClass:'ke', airline:'대한항공', number:'KE721', out:{dep:'09:20',arr:'11:05',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'12:30',arr:'14:40',depAp:'KIX',arrAp:'ICN',dur:'2시간 10분'}, stops:0, price:359000, seat:'비즈니스', depTime:'morning' },
-    { id:'f9', code:'OZ', logoClass:'oz', airline:'아시아나항공', number:'OZ174', out:{dep:'14:20',arr:'16:05',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'19:30',arr:'21:45',depAp:'KIX',arrAp:'ICN',dur:'2시간 15분'}, stops:1, price:169000, seat:'이코노미', depTime:'afternoon' },
-    { id:'f10', code:'7C', logoClass:'jj', airline:'제주항공', number:'7C1178', out:{dep:'06:10',arr:'07:55',depAp:'ICN',arrAp:'KIX',dur:'1시간 45분'}, ret:{dep:'10:00',arr:'12:15',depAp:'KIX',arrAp:'ICN',dur:'2시간 15분'}, stops:0, price:179000, seat:'이코노미', depTime:'morning' }
-  ];
+  // ===========================================================================
+
+  // 항공사 코드 → 페이지 로고 클래스 매핑 (스타일 전용)
+  const LOGO_CLASS = {
+    TW:'tw', '7C':'jj', KE:'ke', LJ:'lj', OZ:'oz', BX:'bx', RS:'rs',
+    VN:'vn', VJ:'vj', TG:'tg', FD:'fd', '5J':'cz', PR:'pr'
+  };
+  const SEAT_LABEL = { economy:'이코노미', business:'비즈니스', first:'퍼스트' };
+
+  // "1h 45m" → "1시간 45분"
+  function fmtDuration(d){
+    if(!d) return '';
+    return d.replace(/(\d+)h/,'$1시간').replace(/(\d+)m/,'$1분').replace(/\s+/g,' ').trim();
+  }
+
+  // data.js FLIGHTS → 페이지 디스플레이 셰이프로 변환
+  const ALL_FLIGHTS = OMT.DATA.FLIGHTS.map(f => {
+    const airline = OMT.getAirline(f.code);
+    return {
+      id: f.id,
+      code: f.code,
+      logoClass: LOGO_CLASS[f.code] || 'ke',
+      airline: airline?.name || f.code,
+      number: f.number,
+      out: { dep:f.outDep, arr:f.outArr, depAp:f.from, arrAp:f.to, dur:fmtDuration(f.outDur) },
+      ret: { dep:f.retDep, arr:f.retArr, depAp:f.to, arrAp:f.from, dur:fmtDuration(f.retDur) },
+      stops: f.stops,
+      price: f.price,
+      seat: SEAT_LABEL[f.class] || '이코노미',
+      depTime: f.depTime
+    };
+  });
 
   const STATE = {
     sort:'price',

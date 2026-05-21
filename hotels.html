@@ -648,8 +648,15 @@
     { type:'area', id:'mactan',      label:'막탄 섬',      sub:'세부 · 필리핀', flag:'🏝️', country:'philippines', parent:'cebu' }
   ];
 
-  // Enriched hotels
-  const HOTELS = [
+  // ===========================================================================
+  // 호텔 데이터 — 부분 중앙화
+  // 1차 소스: 아래 LOCAL_HOTELS (Trip.com급 enriched 디스플레이 필드)
+  // 2차 소스: OMT.DATA.HOTELS (data.js) — LOCAL에 없는 항목은 자동 병합
+  //
+  // TODO: ELLIS 백엔드 연동 시 enrichment 필드(deals/chain/memberPrice/distance)도
+  //       data.js HOTELS 스키마로 흡수해서 LOCAL_HOTELS 제거 → 완전 중앙화
+  // ===========================================================================
+  const LOCAL_HOTELS = [
     { id:'h-granvia-osaka', type:'hotel', typeLabel:'호텔', city:'osaka', country:'japan', area:'우메다', areaId:'umeda',
       name:'호텔 그란비아 오사카', englishName:'Hotel Granvia Osaka', chain:'JR Hotel Group',
       stars:5, rating:9.2, reviews:4127, distance:0.1,
@@ -781,6 +788,32 @@
       deals:['breakfast','popular','original'],
       desc:'가족·허니문 최적 풀빌라 리조트' }
   ];
+
+  // data.js HOTELS 중 LOCAL에 없는 항목 자동 병합 (중앙화 어댑터)
+  const _localIds = new Set(LOCAL_HOTELS.map(h => h.id));
+  const _extraFromCentral = OMT.DATA.HOTELS.filter(h => !_localIds.has(h.id)).map(h => ({
+    id: h.id, type:'hotel', typeLabel:'호텔', city: h.city, country: h.country,
+    area: h.area, areaId: h.areaId || (h.area || '').toLowerCase().replace(/\s/g,''),
+    name: h.name, englishName: h.name, chain: 'Independent',
+    stars: h.stars, rating: h.score || 8.5, reviews: h.reviews || 0, distance: 2.0,
+    images: h.gallery && h.gallery.length ? h.gallery : [h.img],
+    price: h.price, oldPrice: h.oldPrice, memberPrice: null,
+    amenities: (h.amenities || []).slice(0,4).map(a => {
+      // Korean label → 코드 매핑 (대략)
+      if(a.includes('와이파이')) return 'wifi';
+      if(a.includes('조식'))   return 'breakfast';
+      if(a.includes('석식'))   return 'dinner';
+      if(a.includes('수영장')) return 'pool';
+      if(a.includes('스파'))   return 'spa';
+      if(a.includes('피트니스'))return 'fitness';
+      if(a.includes('비치'))   return 'beach';
+      if(a.includes('역'))     return 'station';
+      return 'wifi';
+    }),
+    deals: ['free-cancel'],
+    desc: h.description || ''
+  }));
+  const HOTELS = [...LOCAL_HOTELS, ..._extraFromCentral];
 
   const AMENITY_MAP = {
     wifi:{label:'무료 와이파이',icon:'📶'},
