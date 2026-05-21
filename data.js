@@ -583,6 +583,201 @@
   ];
 
   /* =====================================================================
+     6-A) Product Types (ELLIS backend enum)
+     - 백엔드 상품 분류 키. UI 라벨과 분리되어 있어야 마이그레이션 용이
+     ===================================================================== */
+  const PRODUCT_TYPES = {
+    GOLFTEL:     'golftel',      // 골프 + 호텔 (메인 SKU)
+    GOLFTEL_AIR: 'golftel-air',  // 골프 + 호텔 + 항공 (별도 상품 언어)
+    PACKAGE:     'package',      // 일반 자유여행 패키지 (기존)
+    HOTEL:       'hotel',        // 단품 호텔
+    FLIGHT:      'flight',       // 단품 항공
+    ACTIVITY:    'activity',     // 액티비티/티켓 (공급사 연동)
+    RENT:        'rent'          // 렌트카 (공급사 연동)
+  };
+
+  /* =====================================================================
+     6-B) Country Ownership Matrix
+     - 직영(direct) vs 프랜차이즈(franchise) 운영 모델
+     - 직영: OMT가 골프장·호텔 직접 운영, 마진 20-25%
+     - 프랜차이즈: OMT 브랜드 위탁, 마진 일반 수준
+     ===================================================================== */
+  const OWNERSHIP = {
+    japan:       { model:'direct',     label:'OMT 직영', margin:0.225 },
+    vietnam:     { model:'direct',     label:'OMT 직영', margin:0.225 },
+    thailand:    { model:'franchise',  label:'OMT 파트너', margin:0.15 },
+    philippines: { model:'franchise',  label:'OMT 파트너', margin:0.15 }
+  };
+
+  /* =====================================================================
+     6-C) Golf Courses (ELLIS-ready normalized catalog)
+     - 골프텔 상품이 참조하는 코스 마스터
+     ===================================================================== */
+  const GOLF_COURSES = [
+    // Japan
+    { id:'gc-jp-kanucha',     name:'카누차 골프코스',       country:'japan',      city:'okinawa',  holes:18, par:72, designer:'Pete Dye', greens:'벤트' },
+    { id:'gc-jp-okinawa-cc',  name:'오키나와 컨트리클럽',   country:'japan',      city:'okinawa',  holes:18, par:72, designer:'-',        greens:'벤트' },
+    { id:'gc-jp-kita-ko',     name:'기타큐슈 골프CC',       country:'japan',      city:'fukuoka',  holes:18, par:72, designer:'-',        greens:'고려' },
+    // Vietnam
+    { id:'gc-vn-ba-na-hills', name:'바나힐스 골프클럽',     country:'vietnam',    city:'danang',   holes:18, par:72, designer:'Luke Donald', greens:'벤트' },
+    { id:'gc-vn-montgomerie', name:'몽고메리 링크스',       country:'vietnam',    city:'danang',   holes:18, par:72, designer:'Colin Montgomerie', greens:'벤트' },
+    { id:'gc-vn-vinpearl-pq', name:'빈펄 골프 푸꾸옥',      country:'vietnam',    city:'phuquoc',  holes:27, par:72, designer:'IMG',      greens:'씨쇼어' },
+    // Thailand
+    { id:'gc-th-thana-city',  name:'타나시티 컨트리클럽',   country:'thailand',   city:'bangkok',  holes:18, par:72, designer:'Greg Norman', greens:'씨쇼어' },
+    { id:'gc-th-siam-cc',     name:'사이암 컨트리클럽',     country:'thailand',   city:'pattaya',  holes:18, par:72, designer:'-',        greens:'씨쇼어' },
+    // Philippines
+    { id:'gc-ph-alta-vista',  name:'알타비스타 골프코스',   country:'philippines',city:'cebu',     holes:18, par:72, designer:'-',        greens:'버뮤다' },
+    { id:'gc-ph-mimosa',      name:'미모사+ 골프코스',      country:'philippines',city:'clark',    holes:36, par:72, designer:'-',        greens:'버뮤다' }
+  ];
+
+  /* =====================================================================
+     6-D) GOLFTELS — 메인 SKU
+     ELLIS 백엔드 호환 스키마:
+       - id              : 안정적 슬러그 (URL-safe)
+       - type            : PRODUCT_TYPES.GOLFTEL | GOLFTEL_AIR
+       - country/city    : 국가·도시 ID
+       - hotelId         : HOTELS 참조 (없으면 hotelInline)
+       - courseIds[]     : GOLF_COURSES 참조 배열
+       - nights / rounds : 박수·라운딩 횟수
+       - inclusions      : 그린피·카트피·캐디피·픽업·식사 boolean flags
+       - pricePerPerson  : 2인 1실 기준
+       - priceBasis      : 가격 산정 단위 (per-person-twin / per-person-single)
+     ===================================================================== */
+  const GOLFTELS = [
+    // ===== JAPAN (직영) =====
+    { id:'gt-jp-okinawa-kanucha-3n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'japan', city:'okinawa',
+      name:'오키나와 카누차 베이 골프&리조트 3박4일',
+      tagline:'리조트 내 18홀 + 셀프 라운딩 2회',
+      hotelId:'h-kanucha-okinawa',
+      hotelName:'카누차 베이 호텔&빌라', roomType:'디럭스 트윈 오션뷰',
+      nights:3, rounds:2,
+      courseIds:['gc-jp-kanucha'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:false, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:1180000, oldPricePerPerson:1390000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['리조트 부지 내 골프장','셀프 라운딩 가능','오션뷰 객실 보장'],
+      includes:['카누차 베이 호텔 3박 (조식 포함)','그린피·카트피 (2라운딩)','공항-호텔 왕복 픽업','골프장 셔틀'],
+      excludes:['항공권','캐디피','중식/석식','개인 경비'],
+      rating:9.4, reviews:184 },
+
+    { id:'gt-jp-fukuoka-kitakyushu-2n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'japan', city:'fukuoka',
+      name:'기타큐슈 골프 2박3일 (라운딩 2회)',
+      tagline:'후쿠오카 인기 코스 + 텐진 시내 호텔',
+      hotelId:'h-nishitetsu-tenjin',
+      hotelName:'솔라리아 니시테츠 호텔', roomType:'스탠다드 트윈',
+      nights:2, rounds:2,
+      courseIds:['gc-jp-kita-ko'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:598000, oldPricePerPerson:720000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['텐진 쇼핑 도보권','한국인 캐디 가능','당일 라운딩 셔틀'],
+      includes:['솔라리아 호텔 2박 (조식 포함)','그린피·카트피·캐디피 (2라운딩)','공항-호텔 왕복','골프장 셔틀'],
+      excludes:['항공권','석식','개인 경비'],
+      rating:9.2, reviews:127 },
+
+    // ===== VIETNAM (직영) =====
+    { id:'gt-vn-danang-ba-na-4n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'vietnam', city:'danang',
+      name:'다낭 바나힐스 골프 4박5일 (라운딩 3회)',
+      tagline:'루크 도널드 설계 코스 + 미케 비치 5성',
+      hotelId:'h-premier-danang',
+      hotelName:'프리미어빌리지 다낭 리조트', roomType:'1베드룸 풀빌라',
+      nights:4, rounds:3,
+      courseIds:['gc-vn-ba-na-hills','gc-vn-montgomerie'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:true },
+      pricePerPerson:1380000, oldPricePerPerson:1680000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['풀빌라 + 조식·석식 전일 포함','한국인 캐디 보장','다낭 인기 2개 코스'],
+      includes:['프리미어빌리지 풀빌라 4박','조식·석식 전일','그린피·카트피·캐디피 (3라운딩)','공항-리조트 왕복','코스 셔틀'],
+      excludes:['항공권','주류','개인 경비'],
+      rating:9.6, reviews:312 },
+
+    { id:'gt-vn-phuquoc-vinpearl-5n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'vietnam', city:'phuquoc',
+      name:'푸꾸옥 빈펄 골프 5박6일 (언리미티드 라운딩)',
+      tagline:'27홀 무제한 + 워터파크 무료',
+      hotelId:'h-vinpearl-nhatrang',
+      hotelName:'빈펄 리조트 푸꾸옥', roomType:'디럭스 가든뷰',
+      nights:5, rounds:4,
+      courseIds:['gc-vn-vinpearl-pq'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:1580000, oldPricePerPerson:1980000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1592919505780-303950717480?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['27홀 무제한 라운딩','빈펄 워터파크·사파리 무료','풀빌라 옵션 가능'],
+      includes:['빈펄 리조트 5박 (조식 포함)','그린피·카트피·캐디피','워터파크·사파리 입장','공항 왕복'],
+      excludes:['항공권','석식','주류'],
+      rating:9.4, reviews:248 },
+
+    // ===== THAILAND (프랜차이즈) =====
+    { id:'gt-th-bangkok-thanacity-3n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'thailand', city:'bangkok',
+      name:'방콕 타나시티 골프 3박4일 (라운딩 2회)',
+      tagline:'그렉 노먼 설계 + 수쿰빗 4성',
+      hotelId:'h-novotel-bangkok',
+      hotelName:'노보텔 방콕 수쿰빗', roomType:'슈피리어 트윈',
+      nights:3, rounds:2,
+      courseIds:['gc-th-thana-city'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:780000, oldPricePerPerson:920000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['그렉 노먼 설계 코스','BTS 아속역 직결','시내 + 골프 동시'],
+      includes:['노보텔 방콕 3박 (조식 포함)','그린피·카트피·캐디피 (2라운딩)','공항-호텔 왕복','골프장 셔틀'],
+      excludes:['항공권','석식','팁'],
+      rating:9.1, reviews:96 },
+
+    { id:'gt-th-pattaya-siamcc-4n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'thailand', city:'pattaya',
+      name:'파타야 사이암CC 4박5일 (라운딩 3회)',
+      tagline:'태국 명문 코스 + 해변 리조트',
+      hotelId:'h-novotel-bangkok',
+      hotelName:'센타라 그랜드 파타야', roomType:'디럭스 오션뷰',
+      nights:4, rounds:3,
+      courseIds:['gc-th-siam-cc'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:1080000, oldPricePerPerson:1290000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['태국 베스트 코스 TOP 10','오션뷰 객실','시내 + 해변 + 골프'],
+      includes:['센타라 그랜드 4박 (조식 포함)','그린피·카트피·캐디피 (3라운딩)','방콕-파타야 전용차','골프장 셔틀'],
+      excludes:['항공권','석식','팁'],
+      rating:9.0, reviews:142 },
+
+    // ===== PHILIPPINES (프랜차이즈) =====
+    { id:'gt-ph-cebu-alta-vista-4n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'philippines', city:'cebu',
+      name:'세부 알타비스타 골프 4박5일 (라운딩 3회)',
+      tagline:'산속 골프장 + 막탄 해변 리조트',
+      hotelId:'h-shangrila-mactan',
+      hotelName:'샹그릴라 막탄 리조트', roomType:'디럭스 시뷰',
+      nights:4, rounds:3,
+      courseIds:['gc-ph-alta-vista'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
+      pricePerPerson:1180000, oldPricePerPerson:1390000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1592919505780-303950717480?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['세부 시내 전망','샹그릴라 프라이빗 비치','한국인 캐디'],
+      includes:['샹그릴라 막탄 4박 (조식 포함)','그린피·카트피·캐디피 (3라운딩)','공항-리조트 왕복','코스 셔틀'],
+      excludes:['항공권','석식','팁','캐디 보너스'],
+      rating:9.3, reviews:178 },
+
+    { id:'gt-ph-clark-mimosa-5n', type:PRODUCT_TYPES.GOLFTEL,
+      country:'philippines', city:'clark',
+      name:'클락 미모사 36홀 5박6일 (언리미티드)',
+      tagline:'한국인 운영 코스 + 마닐라 1시간',
+      hotelId:'h-shangrila-mactan',
+      hotelName:'미모사 골프 리조트', roomType:'스탠다드 트윈',
+      nights:5, rounds:5,
+      courseIds:['gc-ph-mimosa'],
+      inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:true },
+      pricePerPerson:980000, oldPricePerPerson:1180000, priceBasis:'per-person-twin',
+      images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
+      highlights:['36홀 무제한 라운딩','한국인 캐디 100%','조식·석식 전일'],
+      includes:['미모사 리조트 5박','조식·석식 전일','그린피·카트피·캐디피 무제한','마닐라-클락 픽업'],
+      excludes:['항공권','중식','팁','주류'],
+      rating:9.5, reviews:421 }
+  ];
+
+  /* =====================================================================
      7) Creators & Feed Posts
      ===================================================================== */
   const CREATORS = [
@@ -792,14 +987,14 @@
       sales: Math.round(80000 + Math.random() * 200000 + (i > 20 ? 150000 : 0)),
       direct: Math.round(40000 + Math.random() * 140000 + (i > 20 ? 80000 : 0))
     })),
-    // 최근 판매 피드
+    // 최근 판매 피드 (골프텔 포함)
     recentSales: [
-      { id:'s1', minutesAgo:12,   productId:'prod-jp-01', buyerInitial:'김', buyerName:'김○○', price:689000, commission:82680, postTitle:'오사카 2박3일 가성비 완벽 루트' },
-      { id:'s2', minutesAgo:47,   productId:'prod-vn-01', buyerInitial:'박', buyerName:'박○○', price:1290000, commission:154800, postTitle:'다낭 신혼여행 5박 리얼 후기' },
-      { id:'s3', minutesAgo:134,  productId:'prod-ph-01', buyerInitial:'이', buyerName:'이○○', price:1580000, commission:189600, postTitle:'필리핀 세부 골프 패키지' },
-      { id:'s4', minutesAgo:312,  productId:'prod-jp-02', buyerInitial:'최', buyerName:'최○○', price:589000, commission:29450,  postTitle:'도쿄 3박4일 인기 코스' },
-      { id:'s5', minutesAgo:628,  productId:'prod-th-01', buyerInitial:'정', buyerName:'정○○', price:890000, commission:106800, postTitle:'방콕+파타야 5박6일' },
-      { id:'s6', minutesAgo:1127, productId:'prod-jp-01', buyerInitial:'윤', buyerName:'윤○○', price:689000, commission:82680, postTitle:'오사카 2박3일 가성비 완벽 루트' }
+      { id:'s1', minutesAgo:8,    productId:'gt-vn-danang-ba-na-4n',    buyerInitial:'서', buyerName:'서○○', price:2760000, commission:330400, postTitle:'다낭 골프 4박5일 - 바나힐스 완벽 후기' },
+      { id:'s2', minutesAgo:42,   productId:'gt-jp-okinawa-kanucha-3n', buyerInitial:'한', buyerName:'한○○', price:2360000, commission:283200, postTitle:'오키나와 골프텔 3박 — OMT 직영 첫 후기' },
+      { id:'s3', minutesAgo:134,  productId:'prod-vn-01',               buyerInitial:'박', buyerName:'박○○', price:1290000, commission:154800, postTitle:'다낭 신혼여행 5박 리얼 후기' },
+      { id:'s4', minutesAgo:312,  productId:'gt-ph-clark-mimosa-5n',    buyerInitial:'최', buyerName:'최○○', price:1960000, commission:98000,  postTitle:'클락 36홀 무제한 — 골프 입문자 추천' },
+      { id:'s5', minutesAgo:628,  productId:'prod-jp-01',               buyerInitial:'김', buyerName:'김○○', price:689000,  commission:82680,  postTitle:'오사카 2박3일 가성비 완벽 루트' },
+      { id:'s6', minutesAgo:1127, productId:'gt-th-bangkok-thanacity-3n',buyerInitial:'윤', buyerName:'윤○○', price:1560000, commission:78000,  postTitle:'방콕 그렉 노먼 코스 라운딩' }
     ],
     // 인기 콘텐츠 TOP 3 (by 수익)
     topContent: [
@@ -819,7 +1014,8 @@
      ===================================================================== */
   root.DATA = {
     COUNTRIES, CITIES, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
-    PRODUCTS, CREATORS, FEED_POSTS, REVIEWS, USER,
+    PRODUCTS, PRODUCT_TYPES, OWNERSHIP, GOLF_COURSES, GOLFTELS,
+    CREATORS, FEED_POSTS, REVIEWS, USER,
     INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY,
     CREATOR_GRADES, NEW_CREATOR_BONUS, CREATOR_MOCK_STATS
   };
@@ -855,6 +1051,24 @@
   root.getAirport    = (code) => CITIES[code];
   root.getAirline    = (code) => AIRLINES[code];
   root.getReviewsFor = (productId) => REVIEWS.filter(r => r.productId === productId);
+
+  // 골프텔 + 오너십 helpers
+  root.getGolftel    = (id) => GOLFTELS.find(g => g.id === id);
+  root.getGolfCourse = (id) => GOLF_COURSES.find(c => c.id === id);
+  root.getOwnership  = (country) => OWNERSHIP[country] || { model:'partner', label:'파트너', margin:0.15 };
+  root.isDirectRun   = (country) => OWNERSHIP[country]?.model === 'direct';
+
+  root.searchGolftels = (opts={}) => {
+    const {country, city, minRounds, maxPrice, ownership} = opts;
+    return GOLFTELS.filter(g => {
+      if(country && g.country !== country) return false;
+      if(city && g.city !== city) return false;
+      if(minRounds && g.rounds < minRounds) return false;
+      if(maxPrice && g.pricePerPerson > maxPrice) return false;
+      if(ownership && OWNERSHIP[g.country]?.model !== ownership) return false;
+      return true;
+    });
+  };
 
   root.searchFlights = (opts={}) => {
     const {from, to, maxPrice, airlines, stops, depTime} = opts;
