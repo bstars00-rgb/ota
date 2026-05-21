@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>골프텔 상세 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --secondary:#1E88E5;--accent:#FFD23F;
+      --golf:#0B6E4F;--golf-dark:#075440;--golf-soft:#E6F4EE;
+      --success:#10B981;--danger:#EF4444;
+      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
+      --radius:14px;--radius-lg:20px;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+      --shadow-lg:0 20px 40px rgba(0,0,0,.15);
+      --header-h:64px;--max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;}
+    .skip-link:focus{left:0;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:18px;color:var(--ink);}
+    .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
+    .logo-mark::after{content:"O";}
+    .breadcrumb{font-size:13px;color:var(--ink-3);font-weight:600;}
+    .breadcrumb a{color:var(--ink-2);}
+    .breadcrumb a:hover{color:var(--golf);}
+    .header-actions{margin-left:auto;display:flex;gap:6px;}
+    .btn-ghost{padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--ink-2);}
+    .btn-ghost:hover{background:var(--bg-soft);color:var(--ink);}
+
+    /* Gallery */
+    .gallery{
+      display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:repeat(2, 220px);gap:6px;
+      max-width:var(--max-w);margin:20px auto 0;padding:0 24px;border-radius:var(--radius-lg);overflow:hidden;
+    }
+    .gallery > div{
+      background-size:cover;background-position:center;background-color:var(--bg-soft);
+      transition:filter .15s;border-radius:8px;
+    }
+    .gallery .g-main{grid-row:1/span 2;border-radius:14px;}
+
+    /* Layout */
+    .main-wrap{
+      display:grid;grid-template-columns:1fr 380px;gap:32px;
+      padding:32px 24px 80px;max-width:var(--max-w);margin:0 auto;
+    }
+    .main-col{min-width:0;}
+
+    /* Title block */
+    .title-block{margin-bottom:24px;}
+    .badge{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:5px 11px;border-radius:999px;font-size:11px;font-weight:900;
+      letter-spacing:.02em;margin-bottom:10px;
+    }
+    .badge-direct{background:linear-gradient(135deg, var(--golf-dark), var(--golf));color:#fff;}
+    .badge-direct::before{content:"⭐";}
+    .badge-franchise{background:#fff;color:var(--ink);border:1px solid var(--line);}
+    .badge-franchise::before{content:"🤝";}
+    .title{font-size:30px;font-weight:900;letter-spacing:-0.02em;line-height:1.2;margin:6px 0 8px;}
+    .subtitle{font-size:15px;color:var(--ink-2);font-weight:500;margin:0;}
+    .quick-meta{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
+    .rating{
+      display:inline-flex;align-items:center;gap:4px;background:var(--primary-soft);color:var(--primary-dark);
+      font-weight:900;padding:3px 10px;border-radius:6px;font-size:13px;
+    }
+
+    /* Quick facts strip */
+    .facts{
+      display:grid;grid-template-columns:repeat(4, 1fr);gap:1px;
+      background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+      margin-bottom:28px;
+    }
+    .fact{background:#fff;padding:16px 18px;text-align:center;}
+    .fact .lb{font-size:11px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+    .fact .vl{font-size:18px;font-weight:900;color:var(--ink);letter-spacing:-0.01em;}
+    .fact .vl .unit{font-size:12px;color:var(--ink-2);font-weight:700;margin-left:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{
+      padding:14px 20px;font-weight:800;font-size:15px;color:var(--ink-3);position:relative;
+      white-space:nowrap;transition:color .15s;
+    }
+    .tab.active{color:var(--golf);}
+    .tab.active::after{content:"";position:absolute;left:12px;right:12px;bottom:-2px;height:3px;background:var(--golf);border-radius:3px 3px 0 0;}
+
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    .panel h3{font-size:18px;font-weight:900;margin:0 0 12px;letter-spacing:-0.01em;}
+    .panel p{color:var(--ink-2);margin:0 0 12px;}
+
+    /* Hotel panel */
+    .hotel-row{
+      display:grid;grid-template-columns:160px 1fr;gap:18px;
+      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;
+    }
+    .hotel-thumb{
+      background-size:cover;background-position:center;background-color:var(--bg-soft);
+      border-radius:10px;min-height:120px;
+    }
+    .hotel-info .name{font-size:16px;font-weight:900;margin:0 0 4px;}
+    .hotel-info .area{font-size:13px;color:var(--ink-2);margin:0 0 8px;}
+    .amenity{
+      display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;
+      background:var(--bg-soft);color:var(--ink-2);margin-right:4px;margin-bottom:4px;
+    }
+
+    /* Course panel */
+    .course-card{
+      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;
+    }
+    .course-card .name{font-size:16px;font-weight:900;margin:0 0 6px;color:var(--golf-dark);}
+    .course-card .meta{display:flex;gap:14px;font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
+    .course-card .meta strong{color:var(--ink);font-weight:800;}
+
+    /* Inclusions */
+    .incl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .incl-row{
+      display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;
+      background:#fff;border:1px solid var(--line);font-size:14px;font-weight:600;
+    }
+    .incl-row.on{background:var(--golf-soft);border-color:var(--golf);color:var(--golf-dark);}
+    .incl-row.off{color:var(--ink-3);text-decoration:line-through;background:var(--bg-soft);}
+    .incl-row .check{font-size:18px;}
+
+    .list{margin:0;padding-left:20px;color:var(--ink-2);}
+    .list li{margin:6px 0;}
+
+    /* Book panel (sticky) */
+    .book-panel{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;
+      position:sticky;top:calc(var(--header-h) + 16px);box-shadow:var(--shadow);
+    }
+    .bp-price-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+    .bp-lb{font-size:12px;color:var(--ink-3);font-weight:700;}
+    .bp-old{font-size:13px;color:var(--ink-3);text-decoration:line-through;}
+    .bp-price{font-size:30px;font-weight:900;color:var(--golf-dark);letter-spacing:-0.02em;}
+    .bp-price small{font-size:13px;font-weight:600;color:var(--ink-2);}
+    .bp-basis{font-size:12px;color:var(--ink-3);margin-top:2px;}
+
+    /* Air toggle */
+    .air-toggle{
+      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:12px;
+      display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;
+      transition:all .15s;
+    }
+    .air-toggle:hover{background:var(--primary-soft);}
+    .air-toggle.on{background:var(--primary-soft);border-color:var(--primary);}
+    .at-switch{
+      width:42px;height:24px;background:var(--line);border-radius:999px;position:relative;flex-shrink:0;
+      transition:background .15s;
+    }
+    .at-switch::after{
+      content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+      background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s;
+    }
+    .air-toggle.on .at-switch{background:var(--primary);}
+    .air-toggle.on .at-switch::after{left:20px;}
+    .at-text{flex:1;}
+    .at-title{font-weight:900;font-size:14px;color:var(--ink);}
+    .at-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
+    .at-add{font-weight:900;font-size:13px;color:var(--primary);}
+
+    /* Pax row */
+    .pax-row{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:12px;
+    }
+    .pax-row .lb{font-size:13px;font-weight:700;color:var(--ink-2);}
+    .pax-ctrl{display:flex;align-items:center;gap:12px;}
+    .pax-ctrl button{
+      width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);
+      background:#fff;font-weight:900;font-size:16px;color:var(--ink);
+    }
+    .pax-ctrl button:hover{border-color:var(--golf);color:var(--golf);}
+    .pax-ctrl .num{min-width:24px;text-align:center;font-weight:900;font-size:16px;}
+
+    /* Total */
+    .total-row{
+      display:flex;justify-content:space-between;align-items:baseline;
+      margin-top:18px;padding-top:18px;border-top:1px solid var(--line);
+    }
+    .total-row .lb{font-size:13px;font-weight:700;color:var(--ink-2);}
+    .total-row .vl{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-0.02em;}
+
+    .product-label{
+      display:inline-block;font-size:11px;font-weight:900;padding:3px 8px;border-radius:6px;
+      background:var(--golf-soft);color:var(--golf-dark);margin-top:4px;
+    }
+    .product-label.air{background:var(--primary-soft);color:var(--primary-dark);}
+
+    .bp-cta{
+      width:100%;padding:15px;border-radius:12px;background:var(--golf);color:#fff;
+      font-weight:900;font-size:15px;margin-top:14px;
+      box-shadow:0 6px 20px rgba(11,110,79,.35);transition:background .15s;
+    }
+    .bp-cta:hover{background:var(--golf-dark);}
+    .bp-cta.air{background:var(--primary);box-shadow:0 6px 20px rgba(255,107,53,.35);}
+    .bp-cta.air:hover{background:var(--primary-dark);}
+
+    .bp-note{font-size:11px;color:var(--ink-3);text-align:center;margin-top:10px;}
+
+    /* Loading / Empty */
+    .loading{padding:80px 20px;text-align:center;color:var(--ink-3);}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .main-wrap{grid-template-columns:1fr;}
+      .book-panel{position:static;}
+      .gallery{grid-template-columns:1fr 1fr;grid-template-rows:200px 150px 150px;}
+      .gallery .g-main{grid-row:1;grid-column:1/-1;}
+      .facts{grid-template-columns:repeat(2, 1fr);}
+      .title{font-size:24px;}
+      .hotel-row{grid-template-columns:1fr;}
+      .incl-grid{grid-template-columns:1fr;}
+    }
+    @media (max-width:640px){
+      .gallery{grid-template-columns:1fr;grid-template-rows:240px;margin:0;padding:0;border-radius:0;}
+      .gallery > div:not(.g-main){display:none;}
+      .gallery .g-main{border-radius:0;}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="오마이트립 홈">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </a>
+      <div class="breadcrumb">
+        <a href="golftels.html">⛳ 골프텔</a> ›
+        <span id="bcCountry">로딩...</span>
+      </div>
+      <div class="header-actions">
+        <a href="golftels.html" class="btn-ghost">← 목록으로</a>
+        <a href="mypage.html" class="btn-ghost">마이페이지</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div id="content">
+      <div class="loading">상품 정보를 불러오는 중...</div>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const D = window.OMT.DATA;
+    const State = window.OMT.State;
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    // ===== Render =====
+    function render(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g){
+        document.getElementById('content').innerHTML = `
+          <div class="loading">
+            <div style="font-size:48px;margin-bottom:12px;">⛳</div>
+            <div style="font-size:18px;font-weight:800;color:#4B5563;margin-bottom:6px;">상품을 찾을 수 없습니다</div>
+            <div>잘못된 ID이거나 삭제된 상품일 수 있어요.</div>
+            <a href="golftels.html" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#0B6E4F;color:#fff;border-radius:10px;font-weight:800;">⛳ 골프텔 목록으로</a>
+          </div>`;
+        return;
+      }
+
+      const own = D.OWNERSHIP[g.country] || { model:'partner', label:'파트너' };
+      const country = D.COUNTRIES[g.country] || {};
+      const hotel = D.HOTELS.find(h => h.id === g.hotelId) || {};
+      const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)).filter(Boolean);
+      const inc = g.inclusions || {};
+      document.title = `${g.name} | 오마이트립 골프텔`;
+      document.getElementById('bcCountry').textContent = `${country.name || g.country} · ${g.city}`;
+
+      const badgeHtml = own.model === 'direct'
+        ? `<span class="badge badge-direct">${own.label}</span>`
+        : `<span class="badge badge-franchise">${own.label}</span>`;
+
+      const gallery = (g.images?.length ? g.images : [hotel.img]).slice(0, 5);
+      const galleryHtml = `
+        <div class="g-main" style="background-image:url('${gallery[0] || ''}')"></div>
+        <div style="background-image:url('${gallery[1] || hotel.img || ''}')"></div>
+        <div style="background-image:url('${gallery[2] || (hotel.gallery?.[0]) || ''}')"></div>
+        <div style="background-image:url('${gallery[3] || (hotel.gallery?.[1]) || ''}')"></div>
+        <div style="background-image:url('${gallery[4] || (hotel.gallery?.[2]) || ''}')"></div>
+      `;
+
+      const incRow = (label, on) => `
+        <div class="incl-row ${on ? 'on' : 'off'}">
+          <span class="check">${on ? '✓' : '✕'}</span>
+          <span>${label}</span>
+        </div>`;
+
+      const courseHtml = courses.map(c => `
+        <div class="course-card">
+          <div class="name">⛳ ${c.name}</div>
+          <div class="meta">
+            <span><strong>${c.holes}</strong>홀 · Par <strong>${c.par}</strong></span>
+            <span>설계 · ${c.designer || '-'}</span>
+            <span>그린 · ${c.greens || '-'}</span>
+          </div>
+        </div>
+      `).join('') || '<p>코스 정보 준비 중</p>';
+
+      const hotelHtml = hotel.name ? `
+        <div class="hotel-row">
+          <div class="hotel-thumb" style="background-image:url('${hotel.img}')"></div>
+          <div class="hotel-info">
+            <div class="name">${hotel.name}</div>
+            <div class="area">📍 ${hotel.area} · ${'★'.repeat(hotel.stars || 0)}</div>
+            <div>${hotel.description || ''}</div>
+            <div style="margin-top:10px;">
+              ${(hotel.amenities || []).map(a => `<span class="amenity">${a}</span>`).join('')}
+            </div>
+            <div style="margin-top:10px;font-size:13px;color:var(--ink-2);"><strong>객실</strong> · ${g.roomType}</div>
+          </div>
+        </div>
+      ` : `
+        <div class="hotel-row" style="grid-template-columns:1fr;">
+          <div class="hotel-info">
+            <div class="name">${g.hotelName}</div>
+            <div class="area">📍 ${country.name} · ${g.city}</div>
+            <div style="margin-top:10px;font-size:13px;color:var(--ink-2);"><strong>객실</strong> · ${g.roomType}</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('content').innerHTML = `
+        <div class="gallery">${galleryHtml}</div>
+
+        <div class="main-wrap">
+          <div class="main-col">
+            <div class="title-block">
+              ${badgeHtml}
+              <h1 class="title">${g.name}</h1>
+              <p class="subtitle">${g.tagline || ''}</p>
+              <div class="quick-meta">
+                <span class="rating">★ ${(g.rating/2).toFixed(1)}</span>
+                <span>리뷰 ${g.reviews || 0}건</span>
+                <span>· ${country.name || g.country} ${g.city}</span>
+              </div>
+            </div>
+
+            <div class="facts">
+              <div class="fact"><div class="lb">기간</div><div class="vl">${g.nights}<span class="unit">박${g.nights+1}일</span></div></div>
+              <div class="fact"><div class="lb">라운딩</div><div class="vl">${g.rounds}<span class="unit">회</span></div></div>
+              <div class="fact"><div class="lb">코스</div><div class="vl">${courses.length}<span class="unit">개</span></div></div>
+              <div class="fact"><div class="lb">기준</div><div class="vl">2<span class="unit">인 1실</span></div></div>
+            </div>
+
+            <div class="tabs" id="tabs" role="tablist">
+              <button class="tab active" data-tab="hotel">🏨 호텔</button>
+              <button class="tab" data-tab="course">⛳ 골프 코스</button>
+              <button class="tab" data-tab="includes">포함/불포함</button>
+              <button class="tab" data-tab="info">예약 안내</button>
+            </div>
+
+            <section class="panel active" data-panel="hotel">
+              <h3>숙박 정보</h3>
+              ${hotelHtml}
+              <h3 style="margin-top:24px;">하이라이트</h3>
+              <ul class="list">
+                ${(g.highlights || []).map(h => `<li>${h}</li>`).join('')}
+              </ul>
+            </section>
+
+            <section class="panel" data-panel="course">
+              <h3>골프 코스 (${courses.length}개)</h3>
+              ${courseHtml}
+              <p style="margin-top:16px;font-size:13px;color:var(--ink-3);">※ 실제 라운딩 코스는 시즌·예약 상황에 따라 조정될 수 있습니다.</p>
+            </section>
+
+            <section class="panel" data-panel="includes">
+              <h3>포함 사항</h3>
+              <div class="incl-grid" style="margin-bottom:20px;">
+                ${incRow('그린피', inc.greenFee)}
+                ${incRow('카트피', inc.cartFee)}
+                ${incRow('캐디피', inc.caddyFee)}
+                ${incRow('공항 픽업', inc.airportPickup)}
+                ${incRow('골프장 셔틀', inc.golfShuttle)}
+                ${incRow('조식', inc.breakfast)}
+                ${incRow('석식', inc.dinner)}
+              </div>
+              <h3>상품 포함</h3>
+              <ul class="list">${(g.includes || []).map(x => `<li>${x}</li>`).join('')}</ul>
+              <h3 style="margin-top:20px;">상품 불포함</h3>
+              <ul class="list">${(g.excludes || []).map(x => `<li>${x}</li>`).join('')}</ul>
+            </section>
+
+            <section class="panel" data-panel="info">
+              <h3>예약 & 취소 안내</h3>
+              <ul class="list">
+                <li>가격은 <strong>2인 1실 기준 1인 가격</strong>입니다. 1인 객실 사용 시 추가 요금이 발생합니다.</li>
+                <li>골프 그린피·카트피·캐디피는 위 포함 사항을 따릅니다. 코스에 따라 별도 추가 비용이 발생할 수 있습니다.</li>
+                <li>출발 21일 전: 위약금 없음 / 14일 전: 30% / 7일 전: 50% / 출발일 기준 3일 이내: 100%</li>
+                <li>여권 잔여 유효기간 6개월 이상 필수.</li>
+                <li>${own.model === 'direct' ? '<strong>OMT 직영 상품</strong> · 한국어 카카오 24h 상담 / 현지 OMT 라운저 대응' : '<strong>OMT 파트너 상품</strong> · 한국어 상담 / 현지 파트너 운영'}</li>
+              </ul>
+            </section>
+          </div>
+
+          <aside>
+            <div class="book-panel">
+              <div class="product-label" id="prodLabel">⛳ 골프텔 (호텔+골프)</div>
+              <div class="bp-price-row" style="margin-top:8px;">
+                <span class="bp-lb">1인 최저가</span>
+                ${g.oldPricePerPerson ? `<span class="bp-old">${g.oldPricePerPerson.toLocaleString('ko-KR')}원</span>` : ''}
+              </div>
+              <div class="bp-price" id="bpPrice">${g.pricePerPerson.toLocaleString('ko-KR')}원<small> ~</small></div>
+              <div class="bp-basis">2인 1실 기준 · 항공 별도</div>
+
+              <div class="air-toggle" id="airToggle" onclick="toggleAir()">
+                <div class="at-switch"></div>
+                <div class="at-text">
+                  <div class="at-title">항공권 함께 예약</div>
+                  <div class="at-sub" id="airSub">+ 인천 왕복 항공 약 ${(getAirEstimate()).toLocaleString('ko-KR')}원/인</div>
+                </div>
+              </div>
+
+              <div class="pax-row">
+                <span class="lb">인원</span>
+                <div class="pax-ctrl">
+                  <button onclick="changePax(-1)" aria-label="감소">−</button>
+                  <span class="num" id="paxNum">2</span>
+                  <button onclick="changePax(1)" aria-label="증가">+</button>
+                </div>
+              </div>
+
+              <div class="total-row">
+                <span class="lb">총 결제 (<span id="paxLabel">2명</span>)</span>
+                <span class="vl" id="totalPrice">${(g.pricePerPerson * 2).toLocaleString('ko-KR')}원</span>
+              </div>
+
+              <button class="bp-cta" id="ctaBtn" onclick="bookNow()">예약 진행하기 →</button>
+              <p class="bp-note">결제는 다음 단계에서 확정합니다.</p>
+            </div>
+          </aside>
+        </div>
+      `;
+
+      bindTabs();
+    }
+
+    // ===== Air price estimate (mock — country/city based) =====
+    function getAirEstimate(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return 0;
+      const map = { japan:380000, vietnam:430000, thailand:450000, philippines:420000 };
+      return map[g.country] || 400000;
+    }
+
+    // ===== State =====
+    let pax = 2;
+    let airOn = false;
+
+    function changePax(delta){
+      pax = Math.max(1, Math.min(8, pax + delta));
+      document.getElementById('paxNum').textContent = pax;
+      document.getElementById('paxLabel').textContent = pax + '명';
+      updateTotal();
+    }
+
+    function toggleAir(){
+      airOn = !airOn;
+      const t = document.getElementById('airToggle');
+      const label = document.getElementById('prodLabel');
+      const cta = document.getElementById('ctaBtn');
+      t.classList.toggle('on', airOn);
+      if(airOn){
+        label.textContent = '✈️ 골프투어 (골프텔 + 항공)';
+        label.classList.add('air');
+        cta.classList.add('air');
+        cta.textContent = '골프투어로 예약 →';
+      } else {
+        label.textContent = '⛳ 골프텔 (호텔+골프)';
+        label.classList.remove('air');
+        cta.classList.remove('air');
+        cta.textContent = '예약 진행하기 →';
+      }
+      updateTotal();
+    }
+
+    function updateTotal(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      const per = g.pricePerPerson + (airOn ? getAirEstimate() : 0);
+      document.getElementById('totalPrice').textContent = (per * pax).toLocaleString('ko-KR') + '원';
+      document.getElementById('bpPrice').innerHTML = per.toLocaleString('ko-KR') + '원<small> ~</small>';
+    }
+
+    function bookNow(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      const productType = airOn ? 'golftel-air' : 'golftel';
+      const per = g.pricePerPerson + (airOn ? getAirEstimate() : 0);
+      const total = per * pax;
+
+      // localStorage에 임시 저장 → checkout이 읽음
+      try {
+        sessionStorage.setItem('omt_pending_booking', JSON.stringify({
+          source:'golftel',
+          productType,
+          productId: g.id,
+          productName: g.name + (airOn ? ' (+ 항공)' : ''),
+          productImage: g.images?.[0],
+          country: g.country,
+          city: g.city,
+          nights: g.nights,
+          rounds: g.rounds,
+          pax,
+          pricePerPerson: per,
+          total,
+          ownership: D.OWNERSHIP[g.country]?.model
+        }));
+      } catch(e){}
+
+      location.href = `checkout.html?gt=${encodeURIComponent(g.id)}&pax=${pax}&air=${airOn ? 1 : 0}`;
+    }
+
+    function bindTabs(){
+      document.querySelectorAll('#tabs .tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#tabs .tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.dataset.tab;
+          document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+        });
+      });
+    }
+
+    // Close popups on Esc (consistency w/ rest of site)
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') document.activeElement?.blur();
+    });
+
+    render();
+  </script>
+</body>
+</html>

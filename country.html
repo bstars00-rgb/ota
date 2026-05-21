@@ -974,6 +974,7 @@
             <h2 class="section-title" id="golfTitle">⛳ 일본 골프 여행, 오마이트립에서 가장 저렴하게</h2>
             <p class="section-sub" id="golfSub">한국인 특화 골프 패키지 · 라운딩 픽업 포함</p>
           </div>
+          <a id="golfSeeAll" href="golftels.html" class="see-all" style="color:var(--accent);">⛳ 골프텔 전체 보기 →</a>
         </div>
         <div class="golf-grid" id="golfGrid"></div>
       </div>
@@ -1679,6 +1680,8 @@
     // Hotel "전체" 링크를 국가 필터링으로 설정
     const hotelSeeAll = document.getElementById('hotelSeeAll');
     if(hotelSeeAll) hotelSeeAll.href = 'hotels.html?c=' + countrySlug;
+    const golfSeeAll = document.getElementById('golfSeeAll');
+    if(golfSeeAll) golfSeeAll.href = 'golftels.html?c=' + countrySlug;
   }
 
   function renderHeroSlides(){

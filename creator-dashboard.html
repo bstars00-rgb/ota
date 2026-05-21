@@ -436,6 +436,9 @@
           <div class="card-head" style="margin-bottom:0;">
             <h3 class="card-title">🎯 이번달 직영 비중</h3>
           </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:-6px;margin-bottom:6px;text-align:center;">
+            직영국 = 🗻 일본 · 🌊 베트남 (커미션 10%)
+          </div>
           <div class="gauge-wrap">
             <svg class="gauge-svg" viewBox="0 0 120 120">
               <circle class="gauge-bg" cx="60" cy="60" r="52"/>
@@ -448,10 +451,20 @@
             </div>
           </div>
           <div class="ratio-breakdown">
-            <div class="ratio-item"><div class="ratio-label">직영</div><div class="ratio-val direct" id="ratioDirect">0원</div></div>
-            <div class="ratio-item"><div class="ratio-label">일반</div><div class="ratio-val" id="ratioGen">0원</div></div>
+            <div class="ratio-item"><div class="ratio-label">⭐ 직영</div><div class="ratio-val direct" id="ratioDirect">0원</div></div>
+            <div class="ratio-item"><div class="ratio-label">🤝 파트너</div><div class="ratio-val" id="ratioGen">0원</div></div>
           </div>
           <div style="margin-top:12px;padding:12px;background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.2);border-radius:10px;font-size:11px;color:var(--accent);font-weight:700;line-height:1.6;" id="ratioTip"></div>
+        </div>
+
+        <!-- ⛳ 추천 골프텔 SKU -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-head" style="margin-bottom:12px;">
+            <h3 class="card-title">⛳ 추천 골프텔 SKU</h3>
+            <a href="golftels.html" class="card-more">전체 →</a>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:10px;">직영국 우선 — 1건당 커미션 +50% 이상</div>
+          <div id="golftelRecList" style="display:flex;flex-direction:column;gap:8px;"></div>
         </div>
 
         <div class="payout-card">
@@ -579,9 +592,46 @@
   document.getElementById('ratioGen').textContent = krw(S.thisMonth.totalSales - S.thisMonth.directSales);
 
   const tipEl = document.getElementById('ratioTip');
-  if(ratio >= 70) tipEl.innerHTML = '🏆 직영 중심 전략 완벽 · 다음달도 이대로!';
-  else if(ratio >= 50) tipEl.innerHTML = '💡 직영 비중 더 늘리면 수익이 빠르게 상승합니다';
-  else tipEl.innerHTML = `💡 직영 1건 추가 시 평균 ${krw(80000)} 추가 수익 · 이번달 목표 50% 이상`;
+  if(ratio >= 70) tipEl.innerHTML = '🏆 직영 골프텔 중심 전략 완벽 · 다음달도 이대로!';
+  else if(ratio >= 50) tipEl.innerHTML = '💡 일본·베트남 직영 골프텔 비중 더 늘리면 수익이 빠르게 상승합니다';
+  else tipEl.innerHTML = `💡 직영 골프텔 1건 추가 시 평균 ${krw(120000)} 추가 수익 · 일본·베트남 우선`;
+
+  /* ======================================================
+     ⛳ RECOMMENDED GOLFTEL SKUs (직영 우선)
+     ====================================================== */
+  const recList = document.getElementById('golftelRecList');
+  if(recList){
+    const sorted = [...OMT.DATA.GOLFTELS].sort((a,b) => {
+      const aDir = OMT.DATA.OWNERSHIP[a.country]?.model === 'direct' ? 1 : 0;
+      const bDir = OMT.DATA.OWNERSHIP[b.country]?.model === 'direct' ? 1 : 0;
+      if(aDir !== bDir) return bDir - aDir;
+      return (b.rating || 0) - (a.rating || 0);
+    }).slice(0, 4);
+
+    recList.innerHTML = sorted.map(g => {
+      const own = OMT.DATA.OWNERSHIP[g.country] || {};
+      const isDir = own.model === 'direct';
+      const commRate = isDir ? 0.10 : 0.05;
+      const expCom = Math.round(g.pricePerPerson * 2 * commRate);
+      const tagColor = isDir ? 'rgba(255,210,63,.18);color:var(--accent)' : 'rgba(255,255,255,.1);color:rgba(255,255,255,.6)';
+      return `
+        <a href="golftel.html?id=${g.id}" style="display:flex;gap:10px;padding:10px;background:rgba(255,255,255,.04);border-radius:10px;align-items:center;text-decoration:none;color:inherit;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+          <div style="width:44px;height:44px;border-radius:8px;background-size:cover;background-position:center;background-image:url('${g.images?.[0] || ''}');flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;line-height:1.3;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${g.name}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;">
+              <span style="padding:1px 5px;background:${tagColor};border-radius:3px;font-weight:800;">${isDir ? '⭐ 직영' : '🤝 파트너'}</span>
+              · ${g.rounds}라운딩 · ${g.nights}박
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:900;color:var(--accent);">+${krw(expCom)}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);">1건 커미션</div>
+          </div>
+        </a>
+      `;
+    }).join('');
+  }
 
   /* ======================================================
      RECENT SALES
@@ -591,16 +641,40 @@
     if(min < 1440) return Math.floor(min/60) + '시간 전';
     return Math.floor(min/1440) + '일 전';
   }
+  // 골프텔 또는 일반 상품 통합 조회
+  function resolveSaleProduct(productId){
+    if(!productId) return null;
+    if(productId.startsWith('gt-')){
+      const g = OMT.DATA.GOLFTELS.find(x => x.id === productId);
+      if(!g) return null;
+      const own = OMT.DATA.OWNERSHIP[g.country] || {};
+      return {
+        name: g.name,
+        isDirect: own.model === 'direct',
+        skuLabel: '⛳ 골프텔',
+        countryLabel: (OMT.DATA.COUNTRIES[g.country]?.name || g.country)
+      };
+    }
+    const p = OMT.getProduct(productId);
+    if(!p) return null;
+    return { name: p.name, isDirect: !!p.directRun, skuLabel: '📦 패키지', countryLabel: '' };
+  }
+
   document.getElementById('salesList').innerHTML = S.recentSales.map(s => {
-    const product = OMT.getProduct(s.productId);
-    const isDirect = product?.directRun;
+    const r = resolveSaleProduct(s.productId);
+    const tag = r?.isDirect
+      ? '<span class="sale-direct-tag">⭐ 직영 10%</span>'
+      : '<span class="sale-direct-tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);">파트너 5%</span>';
+    const skuChip = r?.skuLabel
+      ? `<span class="sale-direct-tag" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);margin-left:4px;">${r.skuLabel}</span>`
+      : '';
     return `
       <div class="sale-row">
         <div class="sale-avatar">${s.buyerInitial}</div>
         <div class="sale-info">
           <div class="sale-action">
-            <strong>${s.buyerName}</strong>님이 <span class="prod">${product?.name || '상품'}</span> 구매
-            ${isDirect ? '<span class="sale-direct-tag">🏠 직영 10%</span>' : '<span class="sale-direct-tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);">일반 5%</span>'}
+            <strong>${s.buyerName}</strong>님이 <span class="prod">${r?.name || '상품'}</span> 구매
+            ${tag}${skuChip}
           </div>
           <div class="sale-meta">${fmtTime(s.minutesAgo)} · ${s.postTitle}</div>
         </div>

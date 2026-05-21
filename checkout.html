@@ -478,11 +478,50 @@
   <script src="state.js"></script>
   <script>
   /* =========================================================================
-     Load package from sessionStorage
+     Load package or golftel booking from sessionStorage
+     - omt_pending_booking (NEW): set by golftel.html for golftel / golftel-air
+     - omt_package        (LEGACY): set by cart/product/builder flows
      ========================================================================= */
-  const pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
+  let pkg = null;
+  let isGolftel = false;
 
-  if(!pkg || !pkg.flight || !pkg.hotel){
+  const pending = JSON.parse(sessionStorage.getItem('omt_pending_booking') || 'null');
+  if(pending && pending.source === 'golftel'){
+    isGolftel = true;
+    const g = OMT.DATA.GOLFTELS.find(x => x.id === pending.productId);
+    const hotel = g ? OMT.DATA.HOTELS.find(h => h.id === g.hotelId) : null;
+    const today = new Date();
+    const fmt = (d) => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    const start = new Date(today); start.setDate(start.getDate() + 30);
+    const end   = new Date(start);  end.setDate(end.getDate() + (g?.nights || pending.nights || 3));
+
+    pkg = {
+      source: 'golftel',
+      productType: pending.productType,   // 'golftel' | 'golftel-air'
+      productId: pending.productId,
+      productName: pending.productName,
+      productImage: pending.productImage,
+      country: pending.country,
+      city: pending.city,
+      ownership: pending.ownership,
+      paxCount: pending.pax || 2,
+      nights: g?.nights || pending.nights || 3,
+      rounds: g?.rounds || pending.rounds,
+      dates: `${fmt(start)} - ${fmt(end)}`,
+      pricePerPerson: pending.pricePerPerson,
+      isAir: pending.productType === 'golftel-air',
+      hotel: hotel
+        ? { name: hotel.name, areaLabel: hotel.area, price: 0 }
+        : { name: g?.hotelName || pending.productName, areaLabel: pending.city, price: 0 },
+      flight: null,  // golftel-air는 가격에 이미 포함되어 별도 라인으로 렌더만
+      golftel: g,
+      _explicitTotal: pending.total
+    };
+  } else {
+    pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
+  }
+
+  if(!pkg || (!isGolftel && (!pkg.flight || !pkg.hotel))){
     document.getElementById('emptyState').hidden = false;
     document.getElementById('checkoutMain').style.display = 'none';
     document.querySelector('.m-pay-bar').style.display = 'none';
@@ -658,6 +697,8 @@
      Summary render
      ========================================================================= */
   function renderSummary(){
+    if(isGolftel) return renderGolftelSummary();
+
     const items = [];
     items.push({
       type:'항공', icon:'✈️',
@@ -694,6 +735,64 @@
       <div class="sum-row"><span>소계</span><span>${krw(sub)}</span></div>
       <div class="sum-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
       <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>
+    `;
+    document.getElementById('sumTotal').textContent = krw(total);
+    document.getElementById('mTotal').textContent = krw(total);
+
+    return total;
+  }
+
+  /* =========================================================================
+     골프텔 전용 요약 (호텔 + 라운딩 + 항공 옵션)
+     ========================================================================= */
+  function renderGolftelSummary(){
+    const g = pkg.golftel;
+    const ownLabel = pkg.ownership === 'direct' ? '⭐ OMT 직영' : '🤝 OMT 파트너';
+    const items = [];
+
+    items.push({
+      type:'⛳ 골프텔', icon:'🏨',
+      title: pkg.hotel.name,
+      sub: `${pkg.hotel.areaLabel} · ${pkg.nights}박 · ${ownLabel}`,
+      price: 0
+    });
+    if(g){
+      items.push({
+        type:'골프 라운딩', icon:'⛳',
+        title: `${g.rounds}회 라운딩`,
+        sub: (g.courseIds || []).map(cid => OMT.DATA.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean).join(' · ') || '명문 코스',
+        price: 0
+      });
+    }
+    if(pkg.isAir){
+      items.push({
+        type:'✈️ 항공권', icon:'✈️',
+        title:'인천 ↔ ' + (pkg.city || '현지') + ' 왕복',
+        sub:'골프투어 결합 상품',
+        price: 0
+      });
+    }
+
+    document.getElementById('sumItems').innerHTML = items.map(i => `
+      <div class="sum-item">
+        <div class="sum-icon">${i.icon}</div>
+        <div>
+          <div class="sum-t">${i.type}</div>
+          <div class="sum-n">${i.title}</div>
+          <div class="sum-s">${i.sub}</div>
+        </div>
+        <div class="sum-p" style="color:#9CA3AF;font-size:12px;">패키지 포함</div>
+      </div>
+    `).join('');
+
+    const perPerson = pkg.pricePerPerson;
+    const sub = perPerson * pkg.paxCount;
+    const total = pkg._explicitTotal || sub;
+
+    document.getElementById('sumRows').innerHTML = `
+      <div class="sum-row"><span>1인 가격 (2인 1실)</span><span>${krw(perPerson)}</span></div>
+      <div class="sum-row"><span>여행자 수</span><span>성인 ${pkg.paxCount}명</span></div>
+      ${pkg.isAir ? '<div class="sum-row" style="color:#FF6B35;font-weight:700;"><span>✈️ 골프투어 (항공 포함)</span><span></span></div>' : ''}
     `;
     document.getElementById('sumTotal').textContent = krw(total);
     document.getElementById('mTotal').textContent = krw(total);
@@ -773,8 +872,20 @@
       travelers: paxData,
       specialRequest: document.getElementById('specialReq').value,
       source: pkg.source || 'checkout',
+      // 골프텔 전용 필드 (ELLIS 백엔드 호환)
+      productType: pkg.productType || (isGolftel ? 'golftel' : 'package'),
+      country: pkg.country || null,
+      city: pkg.city || null,
+      ownership: pkg.ownership || null,
+      nights: pkg.nights || null,
+      rounds: isGolftel ? pkg.rounds : null,
       packageSnapshot: pkg
     });
+
+    // 골프텔 예약 완료 시 임시 데이터 정리
+    if(isGolftel){
+      try { sessionStorage.removeItem('omt_pending_booking'); } catch(e){}
+    }
 
     // Award points (1% of total)
     OMT.State.addPoints(Math.round(total * 0.01), '예약 적립');
@@ -806,6 +917,7 @@
   }
 
   function computeTotal(){
+    if(isGolftel) return pkg._explicitTotal || (pkg.pricePerPerson * pkg.paxCount);
     let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
     (pkg.activities||[]).forEach(a => sub += a.price);
     return sub - Math.round(sub * 0.07);
