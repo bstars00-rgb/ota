@@ -118,6 +118,81 @@
     .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;z-index:110;transition:transform .3s;}
     .toast.show{transform:translateX(-50%) translateY(0);}
 
+    /* ===== 🏠 홈 대시보드 ===== */
+    .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+    .dash-stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;text-align:center;cursor:pointer;transition:transform .15s, box-shadow .15s;}
+    .dash-stat:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.06);}
+    .ds-ic{font-size:24px;line-height:1;margin-bottom:8px;}
+    .ds-val{font-size:18px;font-weight:900;color:var(--ink);letter-spacing:-0.01em;}
+    .ds-lb{font-size:11px;color:var(--ink-3);margin-top:4px;font-weight:700;}
+
+    .dash-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+    /* 다가오는 예약 강조 카드 */
+    .upcoming-card{
+      background:linear-gradient(135deg, #0B6E4F 0%, #075440 100%);
+      color:#fff;border-radius:14px;padding:20px;margin-bottom:10px;position:relative;overflow:hidden;
+    }
+    .upcoming-card::before{content:"⛳";position:absolute;top:-10px;right:0;font-size:120px;opacity:.08;}
+    .uc-dday{display:inline-block;padding:4px 10px;background:var(--accent);color:#1A1A1A;border-radius:999px;font-size:12px;font-weight:900;margin-bottom:8px;}
+    .uc-title{font-size:18px;font-weight:900;letter-spacing:-0.01em;margin:0 0 4px;}
+    .uc-meta{font-size:13px;opacity:.85;}
+    .uc-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+    .uc-btn{padding:8px 14px;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;font-weight:800;font-size:12px;backdrop-filter:blur(4px);}
+    .uc-btn:hover{background:rgba(255,255,255,.25);}
+    .uc-btn.solid{background:var(--accent);color:#1A1A1A;}
+    .uc-btn.solid:hover{background:#FFD23F;}
+
+    /* SKU 뱃지 (예약 카드) */
+    .sku-badge{
+      display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;
+      font-size:10px;font-weight:900;letter-spacing:-0.01em;margin-right:4px;
+    }
+    .sku-badge.golftel{background:var(--golf-soft, #E6F4EE);color:#075440;}
+    .sku-badge.golftel-air{background:#FFF0E8;color:#E85826;}
+    .sku-badge.package{background:#EEF2FF;color:#4338CA;}
+    .sku-badge.activity{background:#FEF3C7;color:#92400E;}
+
+    .bc-rounds{
+      display:inline-block;padding:2px 7px;background:var(--bg-soft);color:var(--ink-2);
+      border-radius:5px;font-size:11px;font-weight:700;margin-left:4px;
+    }
+    .bc-tee{font-size:11px;color:var(--ink-2);margin-top:4px;}
+    .bc-tee strong{color:var(--ink);}
+
+    /* ===== 🔔 알림함 ===== */
+    .notif-item{
+      display:flex;gap:12px;padding:14px;border-radius:12px;cursor:pointer;transition:background .15s;
+      border:1px solid var(--line);margin-bottom:8px;background:#fff;align-items:flex-start;
+    }
+    .notif-item.unread{background:linear-gradient(90deg, rgba(255,107,53,.04), #fff);border-left:3px solid var(--primary);}
+    .notif-item:hover{background:var(--bg-soft);}
+    .notif-ic{width:40px;height:40px;border-radius:10px;background:var(--bg-soft);display:grid;place-items:center;font-size:20px;flex-shrink:0;}
+    .notif-body{flex:1;min-width:0;}
+    .notif-title{font-size:14px;font-weight:800;color:var(--ink);}
+    .notif-text{font-size:12px;color:var(--ink-2);margin-top:3px;line-height:1.5;}
+    .notif-meta{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:4px;}
+    .notif-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:8px;}
+
+    /* ===== 💬 문의 채팅 카드 ===== */
+    .inq-card{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px;background:#fff;cursor:pointer;}
+    .inq-card:hover{border-color:var(--primary);}
+    .inq-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .inq-subject{font-weight:900;font-size:14px;color:var(--ink);}
+    .inq-status{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.02em;}
+    .inq-status.answered{background:#E8F5E9;color:var(--success);}
+    .inq-status.pending{background:#FFF3E0;color:#F57C00;}
+    .inq-bubbles{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+    .inq-bubble{padding:10px 12px;border-radius:12px;font-size:13px;max-width:85%;line-height:1.5;}
+    .inq-bubble.me{background:var(--primary-soft);color:var(--ink);align-self:flex-end;border-bottom-right-radius:4px;}
+    .inq-bubble.omt{background:var(--bg-soft);color:var(--ink-2);align-self:flex-start;border-bottom-left-radius:4px;}
+    .inq-bubble .when{display:block;font-size:10px;color:var(--ink-3);margin-top:4px;font-weight:600;}
+
+    @media (max-width:768px){
+      .dash-stats{grid-template-columns:1fr 1fr;}
+      .dash-row{grid-template-columns:1fr;}
+    }
+
     @media (max-width:1024px){.my-layout{grid-template-columns:1fr;margin-top:-20px;}.side-nav{position:static;display:flex;overflow-x:auto;padding:10px;}.side-nav::-webkit-scrollbar{display:none;}.sn-item{white-space:nowrap;}.sn-divider{display:none;}.wish-grid{grid-template-columns:1fr 1fr;}.coupon-grid{grid-template-columns:1fr;}}
     @media (max-width:768px){:root{--header-h:56px;}.profile-hero{padding:30px 18px 50px;}.panel-card{padding:18px;border-radius:var(--radius);}.book-card{grid-template-columns:72px 1fr;}.bc-right{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;flex-direction:row;justify-content:space-between;flex-wrap:wrap;}.wish-grid{grid-template-columns:1fr;}}
   </style>
@@ -149,11 +224,16 @@
 
   <main id="omt-main" class="my-layout">
     <aside class="side-nav">
-      <div class="sn-item active" data-tab="bookings"><span class="ic">🎫</span><span>예약 내역</span><span class="badge" id="badgeBookings">0</span></div>
+      <div class="sn-item active" data-tab="home"><span class="ic">🏠</span><span>마이페이지 홈</span></div>
+      <div class="sn-item" data-tab="bookings"><span class="ic">🎫</span><span>예약 내역</span><span class="badge" id="badgeBookings">0</span></div>
+      <div class="sn-item" data-tab="notifications"><span class="ic">🔔</span><span>알림함</span><span class="badge" id="badgeNotifs">0</span></div>
       <div class="sn-item" data-tab="wishlist"><span class="ic">❤️</span><span>찜한 상품</span><span class="badge" id="badgeWish">0</span></div>
+      <div class="sn-item" data-tab="recent"><span class="ic">👀</span><span>최근 본 상품</span></div>
+      <div class="sn-divider"></div>
       <div class="sn-item" data-tab="coupons"><span class="ic">🎟️</span><span>쿠폰함</span><span class="badge" id="badgeCoupons">0</span></div>
       <div class="sn-item" data-tab="points"><span class="ic">💰</span><span>포인트</span></div>
       <div class="sn-item" data-tab="reviews"><span class="ic">✏️</span><span>리뷰</span></div>
+      <div class="sn-item" data-tab="inquiries"><span class="ic">💬</span><span>문의 내역</span></div>
       <div class="sn-divider"></div>
       <div class="sn-item" data-tab="profile"><span class="ic">👤</span><span>내 정보</span></div>
       <div class="sn-item" data-tab="travelers"><span class="ic">👥</span><span>여행자 관리</span></div>
@@ -162,7 +242,70 @@
     </aside>
 
     <section class="my-main">
-      <div class="tab-panel" data-panel="bookings">
+      <!-- 🏠 홈 대시보드 -->
+      <div class="tab-panel" data-panel="home">
+        <!-- 다가오는 예약 -->
+        <div class="panel-card" id="upcomingCard">
+          <div class="panel-head">
+            <h2 class="panel-title">⛳ 다가오는 여행</h2>
+            <button class="sub-tab" onclick="goTab('bookings')">전체 예약 →</button>
+          </div>
+          <div id="upcomingList"></div>
+        </div>
+
+        <!-- 빠른 통계 카드 (포인트/쿠폰/등급) -->
+        <div class="dash-stats">
+          <div class="dash-stat" onclick="goTab('points')">
+            <div class="ds-ic">💰</div>
+            <div class="ds-val" id="dashPoints">0 P</div>
+            <div class="ds-lb">사용 가능 포인트</div>
+          </div>
+          <div class="dash-stat" onclick="goTab('coupons')">
+            <div class="ds-ic">🎟️</div>
+            <div class="ds-val" id="dashCoupons">0장</div>
+            <div class="ds-lb">사용 가능 쿠폰</div>
+          </div>
+          <div class="dash-stat">
+            <div class="ds-ic">⭐</div>
+            <div class="ds-val" style="color:var(--accent);">GOLD</div>
+            <div class="ds-lb">현재 등급</div>
+          </div>
+          <div class="dash-stat" onclick="goTab('bookings')">
+            <div class="ds-ic">🏖️</div>
+            <div class="ds-val" id="dashTrips">0회</div>
+            <div class="ds-lb">총 여행</div>
+          </div>
+        </div>
+
+        <!-- 알림 프리뷰 + 추천 골프텔 (2열) -->
+        <div class="dash-row">
+          <div class="panel-card">
+            <div class="panel-head">
+              <h2 class="panel-title">🔔 최근 알림</h2>
+              <button class="sub-tab" onclick="goTab('notifications')">전체 →</button>
+            </div>
+            <div id="notifPreview"></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-head">
+              <h2 class="panel-title">⛳ 추천 골프텔</h2>
+              <a href="golftels.html" class="sub-tab">전체 →</a>
+            </div>
+            <div id="golftelRecommend"></div>
+          </div>
+        </div>
+
+        <!-- 최근 본 상품 -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <h2 class="panel-title">👀 최근 본 상품</h2>
+            <button class="sub-tab" onclick="goTab('recent')">전체 →</button>
+          </div>
+          <div id="recentPreview"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="bookings" hidden>
         <div class="panel-card">
           <div class="panel-head">
             <div><h2 class="panel-title">예약 내역</h2><div class="panel-sub" id="bookingsSub">로딩 중...</div></div>
@@ -175,6 +318,36 @@
             </div>
           </div>
           <div class="book-list" id="bookingList"></div>
+        </div>
+      </div>
+
+      <!-- 🔔 알림함 -->
+      <div class="tab-panel" data-panel="notifications" hidden>
+        <div class="panel-card">
+          <div class="panel-head">
+            <div><h2 class="panel-title">🔔 알림함</h2><div class="panel-sub" id="notifSub"></div></div>
+            <button class="sub-tab" onclick="markAllRead()">모두 읽음 처리</button>
+          </div>
+          <div id="notifList"></div>
+        </div>
+      </div>
+
+      <!-- 👀 최근 본 상품 -->
+      <div class="tab-panel" data-panel="recent" hidden>
+        <div class="panel-card">
+          <div class="panel-head"><h2 class="panel-title">👀 최근 본 상품</h2><div class="panel-sub" id="recentSub"></div></div>
+          <div class="wish-grid" id="recentGrid"></div>
+        </div>
+      </div>
+
+      <!-- 💬 문의 내역 -->
+      <div class="tab-panel" data-panel="inquiries" hidden>
+        <div class="panel-card">
+          <div class="panel-head">
+            <div><h2 class="panel-title">💬 문의 내역</h2><div class="panel-sub" id="inquirySub"></div></div>
+            <button class="sub-tab" onclick="alert('새 문의 작성 (프로토타입)')">+ 새 문의</button>
+          </div>
+          <div id="inquiryList"></div>
         </div>
       </div>
 
@@ -274,6 +447,56 @@
   /* ===== Bookings ===== */
   let bookingFilter = 'all';
   const PAY_LABELS = { kakao:'카카오페이', naver:'네이버페이', card:'신용카드', bank:'무통장입금' };
+  const SKU_LABEL = {
+    'golftel':     '⛳ 골프텔',
+    'golftel-air': '✈️ 골프투어',
+    'package':     '📦 패키지',
+    'activity':    '🎫 액티비티',
+    'hotel':       '🏨 호텔',
+    'flight':      '✈️ 항공'
+  };
+
+  // 예약 → 골프텔 디테일 가져오기 (productId 가 gt-...)
+  function resolveBookingMeta(b){
+    const isGolftel = b.productId && b.productId.startsWith('gt-');
+    if(isGolftel){
+      const g = OMT.DATA.GOLFTELS.find(x => x.id === b.productId);
+      if(g){
+        const courses = (g.courseIds || []).map(cid => OMT.DATA.GOLF_COURSES.find(c => c.id === cid)).filter(Boolean);
+        return {
+          name: b.productName || g.name,
+          img: g.images?.[0] || b.productImage,
+          productLink: `golftel.html?id=${g.id}`,
+          isGolftel: true,
+          nights: g.nights, rounds: g.rounds,
+          courses: courses.map(c => c.name).join(' · '),
+          productType: b.productType || 'golftel',
+          country: g.country, city: g.city,
+          tee: b.packageSnapshot?.selectedSlots?.[0],   // 첫 슬롯 정보
+          roomOption: b.packageSnapshot?.roomOption
+        };
+      }
+    }
+    const product = b.productId ? OMT.getProduct(b.productId) : null;
+    return {
+      name: product?.name || b.productName || '예약 상품',
+      img: product?.images?.[0] || b.productImage || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80',
+      productLink: b.productId ? `product.html?id=${b.productId}` : null,
+      isGolftel: false,
+      productType: b.productType || 'package'
+    };
+  }
+
+  // D-day 계산 (dates 문자열 "2026.05.10 - 2026.05.13" → 시작일 기준)
+  function calcDday(dates){
+    if(!dates) return null;
+    const m = String(dates).match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+    if(!m) return null;
+    const start = new Date(+m[1], +m[2]-1, +m[3]);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((start - today) / 86400000);
+    return diff;
+  }
 
   function renderBookings(){
     const all = OMT.State.getBookings();
@@ -286,10 +509,24 @@
     }
 
     document.getElementById('bookingList').innerHTML = filtered.map(b => {
-      const product = b.productId ? OMT.getProduct(b.productId) : null;
-      const img = product?.images?.[0] || b.productImage || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80';
-      const name = product?.name || b.productName || '예약 상품';
+      const meta = resolveBookingMeta(b);
       const statusLabel = { confirmed:'● 예약 확정', pending:'● 입금 대기', completed:'● 여행 완료', cancelled:'● 취소됨' }[b.status];
+      const dday = calcDday(b.dates);
+      const ddayBadge = (dday !== null && dday >= 0 && b.status !== 'cancelled')
+        ? `<span class="bc-rounds" style="background:var(--accent);color:#1A1A1A;">D-${dday === 0 ? 'DAY' : dday}</span>` : '';
+
+      const skuClass = (meta.productType || 'package').replace('-air','');
+      const skuLabel = SKU_LABEL[meta.productType] || SKU_LABEL.package;
+      const golftelExtra = meta.isGolftel ? `
+        <div class="bc-meta" style="margin-top:6px;">
+          <span class="bc-rounds">⛳ ${meta.rounds}라운딩</span>
+          <span class="bc-rounds">🏨 ${meta.nights}박</span>
+          ${meta.roomOption ? `<span class="bc-rounds">${meta.roomOption}</span>` : ''}
+          ${ddayBadge}
+        </div>
+        ${meta.courses ? `<div class="bc-tee">🎯 코스: <strong>${meta.courses}</strong></div>` : ''}
+        ${meta.tee ? `<div class="bc-tee">🕐 첫 라운딩: <strong>${meta.tee.time}</strong> · ${meta.tee.courseName}</div>` : ''}
+      ` : (ddayBadge ? `<div class="bc-meta" style="margin-top:4px;">${ddayBadge}</div>` : '');
 
       const actions = [];
       if(b.status === 'confirmed' || b.status === 'pending'){
@@ -305,16 +542,18 @@
         }
       }
       if(b.productId){
-        actions.push(`<button class="bc-action ghost" onclick="rebook('${b.productId}')">다시 예약</button>`);
+        actions.push(`<button class="bc-action ghost" onclick="rebook('${b.productId}', '${meta.productType}')">다시 예약</button>`);
       }
 
       return `
         <div class="book-card ${b.status==='cancelled'?'cancelled':''}">
-          <div class="bc-thumb" style="background-image:url('${img}')" onclick="${b.productId?`location.href='product.html?id=${b.productId}'`:''}"></div>
+          <div class="bc-thumb" style="background-image:url('${meta.img}')" onclick="${meta.productLink?`location.href='${meta.productLink}'`:''}"></div>
           <div>
             <span class="bc-status ${b.status}">${statusLabel}</span>
-            <div class="bc-name" onclick="${b.productId?`location.href='product.html?id=${b.productId}'`:''}">${name}</div>
+            <span class="sku-badge ${skuClass}">${skuLabel}</span>
+            <div class="bc-name" onclick="${meta.productLink?`location.href='${meta.productLink}'`:''}">${meta.name}</div>
             <div class="bc-meta">${b.dates} · 성인 ${b.paxCount}명 · ${PAY_LABELS[b.paymentMethod]||b.paymentMethod}</div>
+            ${golftelExtra}
             <div class="bc-num">예약번호: ${b.bookingNumber}</div>
           </div>
           <div class="bc-right">
@@ -330,11 +569,15 @@
   window.cancelBooking = (id) => {
     if(confirm('예약을 취소하시겠습니까?\n(출발 3일 전 이후는 환불 불가)')){
       OMT.State.cancelBooking(id);
-      renderBookings(); renderProfileStats();
+      renderBookings(); renderProfileStats(); renderHomeDashboard();
       toast('예약이 취소되었어요');
     }
   };
-  window.rebook = (pid) => { location.href = 'product.html?id=' + pid; };
+  window.rebook = (pid, pt) => {
+    if(pid && pid.startsWith('gt-')) location.href = 'golftel.html?id=' + pid;
+    else location.href = 'product.html?id=' + pid;
+  };
+  window.goTab = (t) => document.querySelector(`.sn-item[data-tab="${t}"]`)?.click();
 
   document.querySelectorAll('[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -499,6 +742,176 @@
     `).join('') + `<button style="width:100%;margin-top:14px;padding:12px;background:var(--bg-soft);color:var(--ink);border-radius:10px;font-weight:700;font-size:13px;">+ 여행자 추가</button>`;
   }
 
+  /* ===== 🏠 홈 대시보드 ===== */
+  function renderHomeDashboard(){
+    // 다가오는 예약 (status: confirmed/pending, dates 미래)
+    const upcoming = OMT.State.getBookings()
+      .filter(b => (b.status === 'confirmed' || b.status === 'pending'))
+      .map(b => ({ ...b, dday: calcDday(b.dates) }))
+      .filter(b => b.dday !== null && b.dday >= 0)
+      .sort((a,b) => a.dday - b.dday);
+
+    const upcomingEl = document.getElementById('upcomingList');
+    if(!upcomingEl) return;
+    if(upcoming.length === 0){
+      upcomingEl.innerHTML = `<div class="empty-inner"><h3>다가오는 여행이 없어요</h3><p>골프텔 상품을 둘러보세요</p>
+        <a href="golftels.html" style="display:inline-block;margin-top:12px;padding:10px 20px;background:var(--golf,#0B6E4F);color:#fff;border-radius:8px;font-weight:800;font-size:13px;">⛳ 골프텔 보러가기</a></div>`;
+    } else {
+      upcomingEl.innerHTML = upcoming.slice(0, 2).map(b => {
+        const meta = resolveBookingMeta(b);
+        const ddayLabel = b.dday === 0 ? 'D-DAY' : 'D-' + b.dday;
+        return `
+          <div class="upcoming-card">
+            <span class="uc-dday">${ddayLabel}</span>
+            <h3 class="uc-title">${meta.name}</h3>
+            <div class="uc-meta">
+              ${b.dates} · 성인 ${b.paxCount}명
+              ${meta.isGolftel ? ` · ⛳ ${meta.rounds}라운딩 · 🏨 ${meta.nights}박` : ''}
+            </div>
+            <div class="uc-actions">
+              <button class="uc-btn solid" onclick="viewBooking('${b.bookingNumber}')">예약 상세 →</button>
+              <button class="uc-btn" onclick="goTab('inquiries')">💬 문의</button>
+              ${meta.productLink ? `<a class="uc-btn" href="${meta.productLink}">상품 보기</a>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // 통계 카드
+    document.getElementById('dashPoints').textContent = OMT.State.getPointsBalance().toLocaleString('ko-KR') + ' P';
+    document.getElementById('dashCoupons').textContent = OMT.State.getAvailableCoupons().length + '장';
+    document.getElementById('dashTrips').textContent = OMT.State.getBookings().filter(b => b.status === 'completed').length + '회';
+
+    // 알림 프리뷰 (최근 3건)
+    const notifs = OMT.State.getNotifications().slice(0, 3);
+    document.getElementById('notifPreview').innerHTML = notifs.map(n => `
+      <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}');goTab('notifications')">
+        <div class="notif-ic">${n.icon}</div>
+        <div class="notif-body">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-text">${n.body}</div>
+          <div class="notif-meta">${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}</div>
+        </div>
+        ${n.read ? '' : '<div class="notif-unread-dot"></div>'}
+      </div>
+    `).join('') || '<div class="empty-inner" style="padding:30px 10px;"><p>새 알림이 없어요</p></div>';
+
+    // 추천 골프텔 (직영 4개 — 다낭/오키나와/푸꾸옥/후쿠오카)
+    const rec = OMT.DATA.GOLFTELS
+      .filter(g => OMT.DATA.OWNERSHIP[g.country]?.model === 'direct')
+      .sort((a,b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, 3);
+    document.getElementById('golftelRecommend').innerHTML = rec.map(g => {
+      const country = OMT.DATA.COUNTRIES[g.country];
+      return `
+        <a href="golftel.html?id=${g.id}" style="display:flex;gap:10px;padding:10px;border-radius:10px;text-decoration:none;color:inherit;transition:background .15s;border-bottom:1px solid var(--line);" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+          <div style="width:60px;height:48px;border-radius:8px;background:url('${g.images?.[0]}') center/cover;background-color:#eee;flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:800;color:var(--ink);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${g.name}</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${country?.name} · ${g.city} · ⭐ 직영 · ★ ${(g.reviewStats?.rating || g.rating/2).toFixed(1)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:13px;font-weight:900;color:var(--primary);">${(g.pricePerPerson/10000).toFixed(0)}만원~</div>
+            <div style="font-size:10px;color:var(--ink-3);">1인 (2인1실)</div>
+          </div>
+        </a>`;
+    }).join('');
+
+    // 최근 본 상품 프리뷰 (가로 4개)
+    const recent = OMT.State.getRecentlyViewed().slice(0, 4);
+    const recentEl = document.getElementById('recentPreview');
+    if(!recent.length){
+      recentEl.innerHTML = `<div class="empty-inner" style="padding:20px;"><p>최근 본 상품이 없어요. 골프텔을 둘러보세요!</p></div>`;
+    } else {
+      recentEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        ${recent.map(pid => {
+          const isGolftel = pid.startsWith('gt-');
+          const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+          if(!item) return '';
+          const link = isGolftel ? `golftel.html?id=${pid}` : `product.html?id=${pid}`;
+          return `<a href="${link}" style="display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);text-decoration:none;color:inherit;">
+            <div style="aspect-ratio:4/3;background:url('${item.images?.[0]}') center/cover;background-color:#eee;"></div>
+            <div style="padding:8px;font-size:12px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${item.name}</div>
+          </a>`;
+        }).join('')}
+      </div>`;
+    }
+  }
+
+  /* ===== 🔔 알림함 ===== */
+  function renderNotifications(){
+    const list = OMT.State.getNotifications();
+    document.getElementById('notifSub').textContent = `전체 ${list.length}건 · 안 읽음 ${OMT.State.getUnreadNotifCount()}건`;
+    document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
+    document.getElementById('notifList').innerHTML = list.map(n => `
+      <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}')">
+        <div class="notif-ic">${n.icon}</div>
+        <div class="notif-body">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-text">${n.body}</div>
+          <div class="notif-meta">${n.date} · ${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}</div>
+        </div>
+        ${n.read ? '' : '<div class="notif-unread-dot"></div>'}
+      </div>
+    `).join('');
+  }
+  window.markRead = (id) => {
+    OMT.State.markNotifRead(id);
+    renderNotifications();
+    document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
+  };
+  window.markAllRead = () => {
+    OMT.State.markAllNotifsRead();
+    renderNotifications();
+    document.getElementById('badgeNotifs').textContent = 0;
+    toast('모든 알림을 읽음 처리했어요');
+  };
+
+  /* ===== 👀 최근 본 상품 ===== */
+  function renderRecent(){
+    const ids = OMT.State.getRecentlyViewed();
+    document.getElementById('recentSub').textContent = `최근 ${ids.length}개`;
+    const el = document.getElementById('recentGrid');
+    if(!ids.length){
+      el.innerHTML = `<div class="empty-inner" style="grid-column:1/-1;"><h3>최근 본 상품이 없어요</h3><p>골프텔이나 상품 상세를 본 후 다시 확인해 주세요</p></div>`;
+      return;
+    }
+    el.innerHTML = ids.map(pid => {
+      const isGolftel = pid.startsWith('gt-');
+      const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+      if(!item) return '';
+      const link = isGolftel ? `golftel.html?id=${pid}` : `product.html?id=${pid}`;
+      const price = isGolftel ? item.pricePerPerson : item.price;
+      return `<div class="wish-card" onclick="location.href='${link}'">
+        <div class="wish-thumb" style="background-image:url('${item.images?.[0]}')"></div>
+        ${isGolftel ? '<span class="wish-heart" style="background:var(--golf,#0B6E4F);">⛳</span>' : ''}
+        <div class="wish-body"><div class="wish-name">${item.name}</div><div class="wish-price">${krw(price)}~</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ===== 💬 문의 내역 ===== */
+  function renderInquiries(){
+    const list = OMT.DATA.INQUIRIES || [];
+    document.getElementById('inquirySub').textContent = `총 ${list.length}건 · 답변 대기 ${list.filter(i=>i.status==='pending').length}건`;
+    document.getElementById('inquiryList').innerHTML = list.map(q => `
+      <div class="inq-card">
+        <div class="inq-head">
+          <span class="inq-subject">${q.subject}</span>
+          <span class="inq-status ${q.status}">${q.status === 'answered' ? '답변 완료' : '답변 대기'}</span>
+        </div>
+        <div class="inq-bubbles">
+          ${q.messages.map(m => `
+            <div class="inq-bubble ${m.who}">
+              ${m.body}
+              <span class="when">${m.when || m.date || ''}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('') || `<div class="empty-inner"><h3>문의 내역이 없어요</h3></div>`;
+  }
+
   /* ===== Tab switching ===== */
   document.querySelectorAll('.sn-item[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -507,18 +920,24 @@
       const tab = btn.dataset.tab;
       document.querySelectorAll('.tab-panel').forEach(p => p.hidden = p.dataset.panel !== tab);
       // Lazy render per tab
-      if(tab === 'wishlist') renderWishlist();
-      if(tab === 'coupons') renderCoupons();
-      if(tab === 'points') renderPoints();
-      if(tab === 'reviews') renderMyReviews();
-      if(tab === 'profile') renderProfileForm();
-      if(tab === 'travelers') renderTravelers();
+      if(tab === 'home')          renderHomeDashboard();
+      if(tab === 'bookings')      renderBookings();
+      if(tab === 'notifications') renderNotifications();
+      if(tab === 'wishlist')      renderWishlist();
+      if(tab === 'recent')        renderRecent();
+      if(tab === 'coupons')       renderCoupons();
+      if(tab === 'points')        renderPoints();
+      if(tab === 'reviews')       renderMyReviews();
+      if(tab === 'inquiries')     renderInquiries();
+      if(tab === 'profile')       renderProfileForm();
+      if(tab === 'travelers')     renderTravelers();
     });
   });
 
   /* INIT */
   renderProfileStats();
-  renderBookings();
+  document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
+  renderHomeDashboard();    // 첫 진입 = 홈 대시보드
   // Open tab from URL hash (#bookings, #wishlist, etc.)
   if(location.hash){
     const t = location.hash.slice(1);

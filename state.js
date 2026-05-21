@@ -21,8 +21,29 @@
     searchHistory: 'omt_search_history',
     recentlyViewed:'omt_recently_viewed',
     user:          'omt_user_session',
-    membership:    'omt_membership_v1'
+    membership:    'omt_membership_v1',
+    notifReadIds:  'omt_notif_read_v1'   // 읽은 알림 ID 목록
   };
+
+  // ============================================================
+  // 알림 (NOTIFICATIONS) — data.js mock + localStorage 읽음 상태
+  // ============================================================
+  function getNotifications(){
+    const allNotifs = (window.OMT?.DATA?.NOTIFICATIONS || []);
+    const readIds = read(KEYS.notifReadIds, []);
+    return allNotifs.map(n => ({ ...n, read: n.read || readIds.includes(n.id) }));
+  }
+  function getUnreadNotifCount(){
+    return getNotifications().filter(n => !n.read).length;
+  }
+  function markNotifRead(id){
+    const readIds = read(KEYS.notifReadIds, []);
+    if(!readIds.includes(id)){ readIds.push(id); write(KEYS.notifReadIds, readIds); }
+  }
+  function markAllNotifsRead(){
+    const all = (window.OMT?.DATA?.NOTIFICATIONS || []).map(n => n.id);
+    write(KEYS.notifReadIds, all);
+  }
 
   /* =====================================================================
      MEMBERSHIP (Subscription) — 오마이트립 PASS
@@ -345,6 +366,8 @@
     // Search / Recents
     getSearchHistory, addSearchHistory,
     getRecentlyViewed, addRecentlyViewed,
+    // Notifications
+    getNotifications, getUnreadNotifCount, markNotifRead, markAllNotifsRead,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

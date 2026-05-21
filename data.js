@@ -1450,12 +1450,51 @@
   /* =====================================================================
      Expose + Helpers
      ===================================================================== */
+  /* =====================================================================
+     12) 알림 / 문의 (마이페이지 mock)
+     ===================================================================== */
+  const NOTIFICATIONS = [
+    { id:'n1', type:'booking',   icon:'✅', title:'예약 확정',         body:'다낭 바나힐스 골프 4박5일 예약이 확정되었어요. 예약번호: OMT-3DK21A',  date:'2026-05-19', daysAgo:1,  read:false },
+    { id:'n2', type:'reminder',  icon:'⛳', title:'골프 라운딩 D-7',    body:'오키나와 카누차 골프&리조트 라운딩이 7일 남았어요. 필요 장비 준비 안내.',  date:'2026-05-14', daysAgo:6,  read:false },
+    { id:'n3', type:'promotion', icon:'🔥', title:'단독 특가 알림',     body:'다낭 직영 풀빌라가 한정 수량 -25% 할인 중! 5/25까지.',                date:'2026-05-13', daysAgo:7,  read:false },
+    { id:'n4', type:'coupon',    icon:'🎟️', title:'쿠폰 만료 임박',     body:'10% 할인 쿠폰이 3일 후 만료됩니다. 예약 시 자동 적용 가능.',           date:'2026-05-17', daysAgo:3,  read:true  },
+    { id:'n5', type:'points',    icon:'💰', title:'포인트 적립',         body:'결제 1% 적립 — 12,890P가 적립되었어요. 다음 예약 시 사용 가능.',      date:'2026-05-12', daysAgo:8,  read:true  },
+    { id:'n6', type:'review',    icon:'✏️', title:'리뷰 작성 요청',     body:'세부 알타비스타 골프 4박5일 잘 다녀오셨어요? 리뷰 작성 시 5,000P 적립.',date:'2026-05-11', daysAgo:9,  read:true  },
+    { id:'n7', type:'system',    icon:'📢', title:'시스템 공지',         body:'5/22(목) 02:00~05:00 정기점검으로 예약 시스템이 일시 중단됩니다.',   date:'2026-05-10', daysAgo:10, read:true  },
+    { id:'n8', type:'booking',   icon:'⛳', title:'티타임 확정',         body:'다낭 바나힐스 골프 첫 라운딩 시간이 06:00로 확정되었습니다.',          date:'2026-05-19', daysAgo:1,  read:true  },
+    { id:'n9', type:'promotion', icon:'🎁', title:'GOLD 등급 혜택',      body:'GOLD 등급 한정 — 다낭 직영 골프텔 추가 5% 할인 코드: GOLDDA5',         date:'2026-05-05', daysAgo:15, read:true  },
+    { id:'n10',type:'reminder',  icon:'✈️', title:'출국 D-3 체크리스트', body:'여권 유효기간 6개월 이상, 골프 클럽 휴대수하물 규정 확인 필요.',        date:'2026-05-22', daysAgo:0,  read:false }
+  ];
+
+  const INQUIRIES = [
+    { id:'q1', subject:'다낭 골프텔 캐디 한국인 신청',         status:'answered',  date:'2026-05-15',
+      messages:[
+        { who:'me',  body:'안녕하세요, 다낭 골프텔 예약했는데 한국인 캐디 신청 가능한가요?',  date:'2026-05-15 14:22' },
+        { who:'omt', body:'안녕하세요 고객님! 한국인 캐디 100% 보장 골프텔입니다. 추가 비용 없이 자동 배정됩니다 :)', date:'2026-05-15 14:38' }
+      ] },
+    { id:'q2', subject:'클럽 렌탈 사이즈 문의',                status:'answered',  date:'2026-05-08',
+      messages:[
+        { who:'me',  body:'미모사 골프 리조트에서 여성 왼손 클럽 가능한가요?',                date:'2026-05-08 11:05' },
+        { who:'omt', body:'네 고객님, 여성 왼손 세트도 보유 중입니다. 카카오채널로 예약번호+희망 세트수 보내주시면 사전 예약 도와드릴게요.', date:'2026-05-08 11:32' }
+      ] },
+    { id:'q3', subject:'우천 시 환불 가능 여부',                status:'pending',   date:'2026-05-18',
+      messages:[
+        { who:'me',  body:'다음 주 출발인데 우기라 비 예보가 있어요. 우천 시 환불되나요?',     date:'2026-05-18 16:40' }
+      ] },
+    { id:'q4', subject:'2인 1실 → 1인 1실 변경 가능?',          status:'answered',  date:'2026-04-30',
+      messages:[
+        { who:'me',  body:'결제 후에 1인 1실로 변경할 수 있나요? 동행자 일정 변동.',          date:'2026-04-30 09:12' },
+        { who:'omt', body:'출발 14일 전까지 변경 가능합니다. 1인 1실 서플리먼트 차액 결제 안내드릴게요.', date:'2026-04-30 09:50' }
+      ] }
+  ];
+
   root.DATA = {
     COUNTRIES, CITIES, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
     PRODUCTS, PRODUCT_TYPES, OWNERSHIP, GOLF_COURSES, GOLFTELS, CHANNEL_MANAGERS,
     CREATORS, FEED_POSTS, REVIEWS, USER,
     INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY,
-    CREATOR_GRADES, NEW_CREATOR_BONUS, CREATOR_MOCK_STATS
+    CREATOR_GRADES, NEW_CREATOR_BONUS, CREATOR_MOCK_STATS,
+    NOTIFICATIONS, INQUIRIES
   };
 
   // 누적 직영 판매액 기준 등급 조회
