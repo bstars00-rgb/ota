@@ -217,6 +217,72 @@
 
     .bp-note{font-size:11px;color:var(--ink-3);text-align:center;margin-top:10px;}
 
+    /* ★ 1박=1라운드 매칭 배너 (몽키 표준) */
+    .match-banner{
+      display:flex;align-items:center;gap:14px;padding:14px 18px;
+      background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);
+      border:1px solid var(--golf);border-radius:12px;margin-bottom:18px;
+    }
+    .match-banner .ic{font-size:32px;line-height:1;flex-shrink:0;}
+    .match-banner .text{flex:1;}
+    .match-banner .t{font-weight:900;font-size:14px;color:var(--golf-dark);}
+    .match-banner .s{font-size:12px;color:var(--ink-2);margin-top:2px;}
+
+    /* 시설 칩 */
+    .fac-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+    .fac{
+      display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+      padding:4px 9px;border-radius:6px;background:var(--bg-soft);color:var(--ink-2);
+    }
+    .fac.korean{background:#FEF3C7;color:#92400E;}
+
+    /* 운영 정보 시간표 */
+    .op-table{
+      display:grid;grid-template-columns:120px 1fr;gap:0;
+      background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+      font-size:13px;
+    }
+    .op-table > div{padding:11px 14px;border-bottom:1px solid var(--line);}
+    .op-table > div:nth-last-child(-n+2){border-bottom:none;}
+    .op-table .op-key{background:var(--bg-soft);font-weight:800;color:var(--ink-2);}
+    .op-table .op-val{font-weight:600;color:var(--ink);}
+    .op-table .op-val .sub{display:block;font-size:11px;color:var(--ink-3);font-weight:600;margin-top:2px;}
+
+    /* 규정 리스트 */
+    .rules-list{
+      background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:14px 18px;
+      margin-top:14px;
+    }
+    .rules-list .title{font-weight:900;font-size:13px;color:#9A3412;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .rules-list ul{margin:0;padding-left:18px;}
+    .rules-list li{font-size:13px;color:var(--ink-2);margin:4px 0;line-height:1.5;}
+
+    /* book-panel — 객실 옵션 / 티타임 */
+    .opt-block{
+      margin-top:14px;padding:12px;background:var(--bg-soft);border-radius:10px;
+    }
+    .opt-block .lb{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .room-list, .tee-list{display:flex;flex-direction:column;gap:6px;}
+    .room-item, .tee-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;
+      cursor:pointer;font-size:13px;transition:all .15s;
+    }
+    .room-item:hover, .tee-item:hover{border-color:var(--golf);}
+    .room-item.on, .tee-item.on{border-color:var(--golf);background:var(--golf-soft);}
+    .room-item .nm, .tee-item .nm{font-weight:700;color:var(--ink);}
+    .room-item .pr{font-weight:800;color:var(--golf-dark);font-size:12px;}
+    .room-item.on .pr{color:var(--golf-dark);}
+    .tee-item .pr{font-size:11px;color:var(--ink-2);font-weight:600;}
+
+    .tee-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+
+    /* Cart policy chip */
+    .cart-chip{
+      display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;
+      padding:4px 10px;border-radius:6px;background:#EEF2FF;color:#4338CA;margin-top:6px;
+    }
+
     /* Loading / Empty */
     .loading{padding:80px 20px;text-align:center;color:var(--ink-3);}
 
@@ -318,11 +384,27 @@
           <div class="name">⛳ ${c.name}</div>
           <div class="meta">
             <span><strong>${c.holes}</strong>홀 · Par <strong>${c.par}</strong></span>
+            ${c.yardage ? `<span><strong>${c.yardage.toLocaleString()}</strong>야드</span>` : ''}
             <span>설계 · ${c.designer || '-'}</span>
             <span>그린 · ${c.greens || '-'}</span>
           </div>
+          ${g.cartPolicy ? `<div class="cart-chip">🚗 카트 정책: ${g.cartPolicy}</div>` : ''}
         </div>
       `).join('') || '<p>코스 정보 준비 중</p>';
+
+      const distanceLine = g.distance ?
+        `<div style="margin-top:6px;font-size:12px;color:var(--ink-2);font-weight:600;">📏 ${g.distance.city} · ${g.distance.airport}</div>` : '';
+
+      const FACILITY_LABELS = {
+        pool:'🏊 수영장', spa:'💆 스파', fitness:'🏋️ 피트니스', restaurant:'🍽️ 레스토랑',
+        beach:'🏖️ 프라이빗 비치', kidsclub:'👶 키즈클럽',
+        'driving-range':'🎯 드라이빙 레인지', shuttle:'🚐 무료 셔틀',
+        'korean-staff':'🇰🇷 한국인 상주'
+      };
+      const facHtml = (g.facilities || []).length ? `
+        <div class="fac-row">
+          ${(g.facilities || []).map(f => `<span class="fac ${f==='korean-staff'?'korean':''}">${FACILITY_LABELS[f] || f}</span>`).join('')}
+        </div>` : '';
 
       const hotelHtml = hotel.name ? `
         <div class="hotel-row">
@@ -330,10 +412,12 @@
           <div class="hotel-info">
             <div class="name">${hotel.name}</div>
             <div class="area">📍 ${hotel.area} · ${'★'.repeat(hotel.stars || 0)}</div>
-            <div>${hotel.description || ''}</div>
+            ${distanceLine}
+            <div style="margin-top:8px;">${hotel.description || ''}</div>
             <div style="margin-top:10px;">
               ${(hotel.amenities || []).map(a => `<span class="amenity">${a}</span>`).join('')}
             </div>
+            ${facHtml}
             <div style="margin-top:10px;font-size:13px;color:var(--ink-2);"><strong>객실</strong> · ${g.roomType}</div>
           </div>
         </div>
@@ -342,6 +426,8 @@
           <div class="hotel-info">
             <div class="name">${g.hotelName}</div>
             <div class="area">📍 ${country.name} · ${g.city}</div>
+            ${distanceLine}
+            ${facHtml}
             <div style="margin-top:10px;font-size:13px;color:var(--ink-2);"><strong>객실</strong> · ${g.roomType}</div>
           </div>
         </div>
@@ -360,6 +446,15 @@
                 <span class="rating">★ ${(g.rating/2).toFixed(1)}</span>
                 <span>리뷰 ${g.reviews || 0}건</span>
                 <span>· ${country.name || g.country} ${g.city}</span>
+              </div>
+            </div>
+
+            <!-- ★ 1박 = 1라운드 자동 매칭 (몽키 표준) -->
+            <div class="match-banner">
+              <div class="ic">🏨⛳</div>
+              <div class="text">
+                <div class="t">${g.nights}박 = ${g.rounds}회 라운딩 자동 매칭</div>
+                <div class="s">호텔 투숙 기간 내 ${g.rounds}회의 라운딩이 포함됩니다. 티타임은 예약 시 선택하세요.</div>
               </div>
             </div>
 
@@ -410,12 +505,37 @@
             </section>
 
             <section class="panel" data-panel="info">
-              <h3>예약 & 취소 안내</h3>
+              <h3>🕘 운영 시간</h3>
+              ${g.operatingInfo ? `
+                <div class="op-table">
+                  <div class="op-key">체크인</div>
+                  <div class="op-val">${g.operatingInfo.checkIn}</div>
+                  <div class="op-key">체크아웃</div>
+                  <div class="op-val">${g.operatingInfo.checkOut}</div>
+                  <div class="op-key">조식</div>
+                  <div class="op-val">${g.operatingInfo.breakfast}</div>
+                  <div class="op-key">티오프 시간</div>
+                  <div class="op-val">
+                    ${Object.entries(g.operatingInfo.teeOff || {}).map(([k,v]) => {
+                      const lb = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[k] || k;
+                      return `<div>${lb} <strong>${v}</strong></div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : '<p>운영 시간 준비 중</p>'}
+
+              ${(g.rules || []).length ? `
+                <div class="rules-list">
+                  <div class="title">⚠️ 알아두실 점</div>
+                  <ul>${g.rules.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+              ` : ''}
+
+              <h3 style="margin-top:24px;">예약 & 취소 안내</h3>
               <ul class="list">
-                <li>가격은 <strong>2인 1실 기준 1인 가격</strong>입니다. 1인 객실 사용 시 추가 요금이 발생합니다.</li>
+                <li>가격은 <strong>2인 1실 기준 1인 가격</strong>입니다. 1인 1실 선택 시 추가 요금이 적용됩니다.</li>
                 <li>골프 그린피·카트피·캐디피는 위 포함 사항을 따릅니다. 코스에 따라 별도 추가 비용이 발생할 수 있습니다.</li>
                 <li>출발 21일 전: 위약금 없음 / 14일 전: 30% / 7일 전: 50% / 출발일 기준 3일 이내: 100%</li>
-                <li>여권 잔여 유효기간 6개월 이상 필수.</li>
                 <li>${own.model === 'direct' ? '<strong>OMT 직영 상품</strong> · 한국어 카카오 24h 상담 / 현지 OMT 라운저 대응' : '<strong>OMT 파트너 상품</strong> · 한국어 상담 / 현지 파트너 운영'}</li>
               </ul>
             </section>
@@ -430,6 +550,35 @@
               </div>
               <div class="bp-price" id="bpPrice">${g.pricePerPerson.toLocaleString('ko-KR')}원<small> ~</small></div>
               <div class="bp-basis">2인 1실 기준 · 항공 별도</div>
+
+              <!-- 객실 옵션 -->
+              <div class="opt-block">
+                <div class="lb">🏨 객실 옵션</div>
+                <div class="room-list" id="roomList">
+                  ${(g.roomOptions || []).map((r, i) => `
+                    <div class="room-item ${r.isDefault ? 'on' : ''}" data-idx="${i}">
+                      <span class="nm">${r.type}</span>
+                      <span class="pr">${r.supplement > 0 ? '+' + r.supplement.toLocaleString('ko-KR') + '원/인' : '기본'}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- 티타임 -->
+              ${(g.teeTimeWindows || []).length ? `
+                <div class="opt-block">
+                  <div class="lb">🕐 티타임 선택</div>
+                  <div class="tee-list" id="teeList">
+                    ${g.teeTimeWindows.map((t, i) => {
+                      const map = { morning:['오전','06~10시'], afternoon:['오후','11~13시'], twilight:['트와일라잇','14~15시'], night:['야간','17시~'] };
+                      const [lb, sub] = map[t] || [t, ''];
+                      return `<div class="tee-item ${i===0?'on':''}" data-tee="${t}">
+                        <span class="nm">${lb}</span><span class="pr">${sub}</span>
+                      </div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
 
               <div class="air-toggle" id="airToggle" onclick="toggleAir()">
                 <div class="at-switch"></div>
@@ -461,6 +610,29 @@
       `;
 
       bindTabs();
+      bindRoomOption();
+      bindTeeTime();
+    }
+
+    // ===== 객실/티타임 바인딩 =====
+    function bindRoomOption(){
+      document.querySelectorAll('#roomList .room-item').forEach(el => {
+        el.addEventListener('click', () => {
+          document.querySelectorAll('#roomList .room-item').forEach(x => x.classList.remove('on'));
+          el.classList.add('on');
+          selectedRoomIdx = +el.dataset.idx;
+          updateTotal();
+        });
+      });
+    }
+    function bindTeeTime(){
+      document.querySelectorAll('#teeList .tee-item').forEach(el => {
+        el.addEventListener('click', () => {
+          document.querySelectorAll('#teeList .tee-item').forEach(x => x.classList.remove('on'));
+          el.classList.add('on');
+          selectedTee = el.dataset.tee;
+        });
+      });
     }
 
     // ===== Air price estimate (mock — country/city based) =====
@@ -474,6 +646,8 @@
     // ===== State =====
     let pax = 2;
     let airOn = false;
+    let selectedRoomIdx = 0;  // roomOptions[0] = 기본 (2인 1실)
+    let selectedTee = null;
 
     function changePax(delta){
       pax = Math.max(1, Math.min(8, pax + delta));
@@ -505,7 +679,8 @@
     function updateTotal(){
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
-      const per = g.pricePerPerson + (airOn ? getAirEstimate() : 0);
+      const room = g.roomOptions?.[selectedRoomIdx] || { supplement:0 };
+      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
       document.getElementById('totalPrice').textContent = (per * pax).toLocaleString('ko-KR') + '원';
       document.getElementById('bpPrice').innerHTML = per.toLocaleString('ko-KR') + '원<small> ~</small>';
     }
@@ -514,7 +689,8 @@
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
       const productType = airOn ? 'golftel-air' : 'golftel';
-      const per = g.pricePerPerson + (airOn ? getAirEstimate() : 0);
+      const room = g.roomOptions?.[selectedRoomIdx] || { type:'2인 1실', supplement:0 };
+      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
       const total = per * pax;
 
       // localStorage에 임시 저장 → checkout이 읽음
@@ -532,7 +708,11 @@
           pax,
           pricePerPerson: per,
           total,
-          ownership: D.OWNERSHIP[g.country]?.model
+          ownership: D.OWNERSHIP[g.country]?.model,
+          // 사용자 선택 (예약 확정 시 백엔드로 전달)
+          roomOption: room.type,
+          roomSupplement: room.supplement || 0,
+          teeTime: selectedTee
         }));
       } catch(e){}
 

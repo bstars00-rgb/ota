@@ -615,19 +615,19 @@
      ===================================================================== */
   const GOLF_COURSES = [
     // Japan
-    { id:'gc-jp-kanucha',     name:'카누차 골프코스',       country:'japan',      city:'okinawa',  holes:18, par:72, designer:'Pete Dye', greens:'벤트' },
-    { id:'gc-jp-okinawa-cc',  name:'오키나와 컨트리클럽',   country:'japan',      city:'okinawa',  holes:18, par:72, designer:'-',        greens:'벤트' },
-    { id:'gc-jp-kita-ko',     name:'기타큐슈 골프CC',       country:'japan',      city:'fukuoka',  holes:18, par:72, designer:'-',        greens:'고려' },
+    { id:'gc-jp-kanucha',     name:'카누차 골프코스',       country:'japan',      city:'okinawa',  holes:18, par:72, yardage:6798, designer:'Pete Dye',          greens:'벤트' },
+    { id:'gc-jp-okinawa-cc',  name:'오키나와 컨트리클럽',   country:'japan',      city:'okinawa',  holes:18, par:72, yardage:7142, designer:'-',                 greens:'벤트' },
+    { id:'gc-jp-kita-ko',     name:'기타큐슈 골프CC',       country:'japan',      city:'fukuoka',  holes:18, par:72, yardage:6845, designer:'-',                 greens:'고려' },
     // Vietnam
-    { id:'gc-vn-ba-na-hills', name:'바나힐스 골프클럽',     country:'vietnam',    city:'danang',   holes:18, par:72, designer:'Luke Donald', greens:'벤트' },
-    { id:'gc-vn-montgomerie', name:'몽고메리 링크스',       country:'vietnam',    city:'danang',   holes:18, par:72, designer:'Colin Montgomerie', greens:'벤트' },
-    { id:'gc-vn-vinpearl-pq', name:'빈펄 골프 푸꾸옥',      country:'vietnam',    city:'phuquoc',  holes:27, par:72, designer:'IMG',      greens:'씨쇼어' },
+    { id:'gc-vn-ba-na-hills', name:'바나힐스 골프클럽',     country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7857, designer:'Luke Donald',       greens:'벤트' },
+    { id:'gc-vn-montgomerie', name:'몽고메리 링크스',       country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7159, designer:'Colin Montgomerie', greens:'벤트' },
+    { id:'gc-vn-vinpearl-pq', name:'빈펄 골프 푸꾸옥',      country:'vietnam',    city:'phuquoc',  holes:27, par:72, yardage:7548, designer:'IMG',               greens:'씨쇼어' },
     // Thailand
-    { id:'gc-th-thana-city',  name:'타나시티 컨트리클럽',   country:'thailand',   city:'bangkok',  holes:18, par:72, designer:'Greg Norman', greens:'씨쇼어' },
-    { id:'gc-th-siam-cc',     name:'사이암 컨트리클럽',     country:'thailand',   city:'pattaya',  holes:18, par:72, designer:'-',        greens:'씨쇼어' },
+    { id:'gc-th-thana-city',  name:'타나시티 컨트리클럽',   country:'thailand',   city:'bangkok',  holes:18, par:72, yardage:6928, designer:'Greg Norman',       greens:'씨쇼어' },
+    { id:'gc-th-siam-cc',     name:'사이암 컨트리클럽',     country:'thailand',   city:'pattaya',  holes:18, par:72, yardage:7308, designer:'-',                 greens:'씨쇼어' },
     // Philippines
-    { id:'gc-ph-alta-vista',  name:'알타비스타 골프코스',   country:'philippines',city:'cebu',     holes:18, par:72, designer:'-',        greens:'버뮤다' },
-    { id:'gc-ph-mimosa',      name:'미모사+ 골프코스',      country:'philippines',city:'clark',    holes:36, par:72, designer:'-',        greens:'버뮤다' }
+    { id:'gc-ph-alta-vista',  name:'알타비스타 골프코스',   country:'philippines',city:'cebu',     holes:18, par:72, yardage:6916, designer:'-',                 greens:'버뮤다' },
+    { id:'gc-ph-mimosa',      name:'미모사+ 골프코스',      country:'philippines',city:'clark',    holes:36, par:72, yardage:7204, designer:'-',                 greens:'버뮤다' }
   ];
 
   /* =====================================================================
@@ -643,6 +643,26 @@
        - pricePerPerson  : 2인 1실 기준
        - priceBasis      : 가격 산정 단위 (per-person-twin / per-person-single)
      ===================================================================== */
+  // ===========================================================================
+  // 6-E) GOLFTELS 공통 기본값 (몽키 표준 패턴)
+  // - cartPolicy / teeTimeWindows / operatingInfo / roomOptions / facilities / rules
+  // - 각 골프텔에서 override 가능
+  // ===========================================================================
+  const _DEFAULT_TEE_WINDOWS = ['morning','afternoon','twilight'];
+  const _DEFAULT_OPERATING = {
+    checkIn:'14:00', checkOut:'12:00', breakfast:'06:30~10:00',
+    teeOff:{ morning:'06:00~10:30', afternoon:'11:00~13:30', twilight:'14:00~15:30' }
+  };
+  const _DEFAULT_ROOM_OPTIONS = [
+    { type:'2인 1실', occupancy:2, supplement:0,      isDefault:true },
+    { type:'1인 1실', occupancy:1, supplement:300000, isDefault:false }
+  ];
+  const _DEFAULT_RULES = [
+    '티오프 30분 전 골프장 도착·체크인 필수',
+    '우천 시 코스 캔슬 불가 — 레인체크(추후 사용권) 제공',
+    '여권 잔여 유효기간 6개월 이상 필수'
+  ];
+
   const GOLFTELS = [
     // ===== JAPAN (직영) =====
     { id:'gt-jp-okinawa-kanucha-3n', type:PRODUCT_TYPES.GOLFTEL,
@@ -655,6 +675,12 @@
       courseIds:['gc-jp-kanucha'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:false, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:1180000, oldPricePerPerson:1390000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'나하 시내 50km', airport:'나하 공항 65km' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','spa','restaurant','beach','korean-staff','driving-range'],
+      rules:['셀프 라운딩 가능 (캐디 옵션)','리조트 내 코스 — 도보 5분', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
       highlights:['리조트 부지 내 골프장','셀프 라운딩 가능','오션뷰 객실 보장'],
       includes:['카누차 베이 호텔 3박 (조식 포함)','그린피·카트피 (2라운딩)','공항-호텔 왕복 픽업','골프장 셔틀'],
@@ -671,6 +697,12 @@
       courseIds:['gc-jp-kita-ko'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:598000, oldPricePerPerson:720000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'후쿠오카 시내 도보권', airport:'후쿠오카 공항 8km' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['fitness','restaurant','korean-staff','shuttle'],
+      rules:['한국인 캐디 가능 (사전 신청)','텐진역 도보 5분', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
       highlights:['텐진 쇼핑 도보권','한국인 캐디 가능','당일 라운딩 셔틀'],
       includes:['솔라리아 호텔 2박 (조식 포함)','그린피·카트피·캐디피 (2라운딩)','공항-호텔 왕복','골프장 셔틀'],
@@ -688,6 +720,16 @@
       courseIds:['gc-vn-ba-na-hills','gc-vn-montgomerie'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:true },
       pricePerPerson:1380000, oldPricePerPerson:1680000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트 (페어웨이 진입가능)', teeTimeWindows:['morning','afternoon','twilight','night'],
+      operatingInfo:{ checkIn:'15:00', checkOut:'12:00', breakfast:'06:00~10:00',
+        teeOff:{ morning:'05:30~10:30', afternoon:'11:00~13:30', twilight:'14:00~15:30', night:'17:00~19:00' }},
+      distance:{ city:'다낭 시내 6km', airport:'다낭 공항 8km' },
+      roomOptions:[
+        { type:'2인 1실 (풀빌라)', occupancy:2, supplement:0,      isDefault:true },
+        { type:'1인 1실 (풀빌라)', occupancy:1, supplement:450000, isDefault:false }
+      ],
+      facilities:['pool','spa','beach','kidsclub','fitness','restaurant','korean-staff','shuttle','driving-range'],
+      rules:['한국인 캐디 100% 보장','야간 라운딩 가능 (16시 이후)', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
       highlights:['풀빌라 + 조식·석식 전일 포함','한국인 캐디 보장','다낭 인기 2개 코스'],
       includes:['프리미어빌리지 풀빌라 4박','조식·석식 전일','그린피·카트피·캐디피 (3라운딩)','공항-리조트 왕복','코스 셔틀'],
@@ -704,6 +746,12 @@
       courseIds:['gc-vn-vinpearl-pq'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:1580000, oldPricePerPerson:1980000, priceBasis:'per-person-twin',
+      cartPolicy:'1인 1카트 (언리미티드)', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'즈엉동 시내 18km', airport:'푸꾸옥 공항 12km' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','spa','beach','kidsclub','restaurant','korean-staff','shuttle','driving-range'],
+      rules:['투숙 기간 내 무제한 라운딩','워터파크·사파리 1회 입장 무료', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1592919505780-303950717480?auto=format&fit=crop&w=1600&q=80'],
       highlights:['27홀 무제한 라운딩','빈펄 워터파크·사파리 무료','풀빌라 옵션 가능'],
       includes:['빈펄 리조트 5박 (조식 포함)','그린피·카트피·캐디피','워터파크·사파리 입장','공항 왕복'],
@@ -721,6 +769,12 @@
       courseIds:['gc-th-thana-city'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:780000, oldPricePerPerson:920000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'방콕 시내 28km (BTS 아속역 직결)', airport:'수완나품 공항 25km' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','fitness','restaurant','shuttle','korean-staff'],
+      rules:['BTS 아속역 직결 호텔','캐디 팁 별도 (한화 약 5천원/라운드)', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
       highlights:['그렉 노먼 설계 코스','BTS 아속역 직결','시내 + 골프 동시'],
       includes:['노보텔 방콕 3박 (조식 포함)','그린피·카트피·캐디피 (2라운딩)','공항-호텔 왕복','골프장 셔틀'],
@@ -737,6 +791,12 @@
       courseIds:['gc-th-siam-cc'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:1080000, oldPricePerPerson:1290000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'파타야 비치 1km', airport:'수완나품 공항 130km (전용차 1.5h)' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','spa','beach','restaurant','shuttle','korean-staff'],
+      rules:['방콕 공항 ↔ 파타야 전용차 무료 (왕복)','캐디 팁 별도', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1600&q=80'],
       highlights:['태국 베스트 코스 TOP 10','오션뷰 객실','시내 + 해변 + 골프'],
       includes:['센타라 그랜드 4박 (조식 포함)','그린피·카트피·캐디피 (3라운딩)','방콕-파타야 전용차','골프장 셔틀'],
@@ -754,6 +814,12 @@
       courseIds:['gc-ph-alta-vista'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:false },
       pricePerPerson:1180000, oldPricePerPerson:1390000, priceBasis:'per-person-twin',
+      cartPolicy:'2인 1카트', teeTimeWindows:_DEFAULT_TEE_WINDOWS,
+      operatingInfo:_DEFAULT_OPERATING,
+      distance:{ city:'세부 시내 20km', airport:'세부 막탄 공항 5km' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','spa','beach','kidsclub','fitness','restaurant','korean-staff','shuttle','driving-range'],
+      rules:['한국인 캐디 100%','캐디 보너스 별도 (한화 약 1만원/라운드)', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1592919505780-303950717480?auto=format&fit=crop&w=1600&q=80'],
       highlights:['세부 시내 전망','샹그릴라 프라이빗 비치','한국인 캐디'],
       includes:['샹그릴라 막탄 4박 (조식 포함)','그린피·카트피·캐디피 (3라운딩)','공항-리조트 왕복','코스 셔틀'],
@@ -770,6 +836,13 @@
       courseIds:['gc-ph-mimosa'],
       inclusions:{ greenFee:true, cartFee:true, caddyFee:true, golfShuttle:true, airportPickup:true, breakfast:true, dinner:true },
       pricePerPerson:980000, oldPricePerPerson:1180000, priceBasis:'per-person-twin',
+      cartPolicy:'1인 1카트 가능', teeTimeWindows:['morning','afternoon','twilight','night'],
+      operatingInfo:{ checkIn:'14:00', checkOut:'12:00', breakfast:'06:00~10:00',
+        teeOff:{ morning:'05:30~10:30', afternoon:'11:00~13:30', twilight:'14:00~15:30', night:'17:00~18:30' }},
+      distance:{ city:'클락 시내 5km', airport:'클락 공항 8km (마닐라 공항 90km)' },
+      roomOptions:_DEFAULT_ROOM_OPTIONS,
+      facilities:['pool','fitness','restaurant','driving-range','korean-staff','shuttle'],
+      rules:['한국인 운영 100%','36홀 무제한 라운딩','마닐라 공항 픽업 시 +50,000원/인', ..._DEFAULT_RULES],
       images:['https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=80'],
       highlights:['36홀 무제한 라운딩','한국인 캐디 100%','조식·석식 전일'],
       includes:['미모사 리조트 5박','조식·석식 전일','그린피·카트피·캐디피 무제한','마닐라-클락 픽업'],

@@ -298,6 +298,19 @@
         <button type="button" class="chip" data-quick="halfboard">조·석식 포함</button>
         <a href="golftel-builder.html" style="margin-left:auto;padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,var(--golf-dark),var(--golf));color:#fff;font-weight:900;font-size:13px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;box-shadow:0 4px 12px rgba(11,110,79,.25);">🛠️ 직접 조립하기 →</a>
       </div>
+
+      <!-- 상세 필터 (몽키 스타일) -->
+      <div class="filters" style="padding-top:0;">
+        <span class="label">카트</span>
+        <button type="button" class="chip" data-cart="1-1">🚗 1인 1카트</button>
+        <button type="button" class="chip" data-cart="2-1">🚗 2인 1카트</button>
+        <span class="label" style="margin-left:14px;">시설</span>
+        <button type="button" class="chip" data-fac="korean-staff">🇰🇷 한국인 상주</button>
+        <button type="button" class="chip" data-fac="pool">🏊 수영장</button>
+        <button type="button" class="chip" data-fac="beach">🏖️ 프라이빗 비치</button>
+        <button type="button" class="chip" data-fac="shuttle">🚐 셔틀</button>
+        <button type="button" class="chip" data-fac="driving-range">🎯 드라이빙 레인지</button>
+      </div>
     </div>
 
     <div class="container">
@@ -327,6 +340,8 @@
     const resCount = document.getElementById('resCount');
 
     let quick = 'all';
+    let cartFilter = null;     // '1-1' or '2-1'
+    let facFilters = new Set(); // 'korean-staff' etc.
     let workingList = [...D.GOLFTELS];
 
     // City options bound to country
@@ -350,6 +365,36 @@
       });
     });
 
+    // Cart filter (single-select toggle)
+    document.querySelectorAll('.chip[data-cart]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.cart;
+        if(cartFilter === v){
+          cartFilter = null;
+          btn.classList.remove('active');
+        } else {
+          cartFilter = v;
+          document.querySelectorAll('.chip[data-cart]').forEach(b => b.classList.toggle('active', b === btn));
+        }
+        applyFilters();
+      });
+    });
+
+    // Facility filters (multi-select toggle)
+    document.querySelectorAll('.chip[data-fac]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.fac;
+        if(facFilters.has(f)){
+          facFilters.delete(f);
+          btn.classList.remove('active');
+        } else {
+          facFilters.add(f);
+          btn.classList.add('active');
+        }
+        applyFilters();
+      });
+    });
+
     function applyFilters(){
       const country = fCountry.value;
       const city = fCity.value;
@@ -367,6 +412,15 @@
         if(quick === 'franchise' && ownership !== 'franchise') return false;
         if(quick === 'unlimited' && !/언리미티드|무제한/.test(g.name)) return false;
         if(quick === 'halfboard' && !(g.inclusions?.breakfast && g.inclusions?.dinner)) return false;
+
+        // 카트 필터
+        if(cartFilter === '1-1' && !/1인 1카트/.test(g.cartPolicy || '')) return false;
+        if(cartFilter === '2-1' && !/2인 1카트/.test(g.cartPolicy || '')) return false;
+        // 시설 필터 (AND — 모든 선택된 시설 보유)
+        if(facFilters.size > 0){
+          const gFac = new Set(g.facilities || []);
+          for(const f of facFilters) if(!gFac.has(f)) return false;
+        }
         return true;
       });
       renderList();
@@ -454,6 +508,8 @@
                 <span class="rating">★ ${(g.rating/2).toFixed(1)}</span>
                 <span>리뷰 ${g.reviews || 0}건</span>
                 <span>· ${g.hotelName}</span>
+                ${g.cartPolicy ? `<span style="color:var(--ink-3);">· 🚗 ${g.cartPolicy}</span>` : ''}
+                ${(g.facilities || []).includes('korean-staff') ? `<span style="padding:1px 6px;background:#FEF3C7;color:#92400E;border-radius:4px;font-weight:800;font-size:11px;">🇰🇷 한국인 상주</span>` : ''}
               </div>
             </div>
             <div class="card-side">
