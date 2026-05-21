@@ -277,53 +277,103 @@
 
     .tee-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 
-    /* ★ 티타임 슬롯 그리드 (몽키 패턴) */
-    .tee-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    /* ★ 티오프 선택 섹션 (몽키 스타일 카드 그리드) */
+    .tee-section{
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:22px;margin-bottom:24px;
+    }
+    .tee-section-head{
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:12px;margin-bottom:14px;
+    }
+    .tee-section-head h3{margin:0;font-size:18px;font-weight:900;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;}
+    .tee-required{
+      display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;
+      background:var(--golf-soft);color:var(--golf-dark);margin-left:4px;
+    }
+    .tee-options{display:flex;gap:14px;}
+    .opt-check{
+      display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;
+    }
+    .opt-check input{width:16px;height:16px;accent-color:var(--golf);}
+
+    /* 필터 칩 */
+    .tee-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
     .tw{
-      padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
-      font-size:12px;font-weight:800;color:var(--ink-2);transition:all .15s;cursor:pointer;
+      padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+      font-size:13px;font-weight:800;color:var(--ink-2);transition:all .15s;cursor:pointer;
     }
     .tw:hover{border-color:var(--golf);color:var(--golf);}
-    .tw.on{background:var(--golf);border-color:var(--golf);color:#fff;}
+    .tw.on{background:#000;border-color:#000;color:#fff;}
 
-    .tee-group{margin-bottom:14px;}
-    .tee-group:last-child{margin-bottom:0;}
-    .tg-head{
-      display:flex;align-items:center;justify-content:space-between;
-      font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px;padding:6px 10px;
-      background:#fff;border-radius:8px;border-left:3px solid var(--golf);
-    }
-    .tg-head .range{font-weight:600;color:var(--ink-3);font-size:11px;margin-left:6px;}
-    .tg-tag{
-      font-size:10px;font-weight:900;padding:2px 7px;border-radius:5px;
-      background:var(--golf-soft);color:var(--golf-dark);letter-spacing:.02em;
-    }
-    .tg-tag.discount{background:#FEE2E2;color:#B91C1C;}
-    .tg-tag.deep{background:#DBEAFE;color:#1E40AF;}
+    /* 시 단위 그룹 */
+    .tee-hour-group{margin-bottom:22px;}
+    .tee-hour-group:last-child{margin-bottom:0;}
+    .th-head{font-size:15px;font-weight:900;color:var(--ink);margin-bottom:10px;padding-left:2px;}
 
-    .tg-slots{
-      display:grid;grid-template-columns:repeat(5, 1fr);gap:4px;
+    .th-slots{
+      display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;
     }
-    .ts{
-      padding:8px 4px;border-radius:7px;border:1.5px solid var(--line);background:#fff;
-      font-weight:800;font-size:12px;color:var(--ink);cursor:pointer;transition:all .12s;
-      letter-spacing:-0.01em;
-    }
-    .ts:hover:not(:disabled){border-color:var(--golf);color:var(--golf-dark);background:var(--golf-soft);}
-    .ts.on{background:var(--golf);border-color:var(--golf);color:#fff;box-shadow:0 2px 8px rgba(11,110,79,.3);}
-    .ts:disabled{opacity:.35;cursor:not-allowed;background:var(--bg-soft);}
-    .ts.weekend::after{content:"·주";display:block;font-size:9px;font-weight:700;color:#B91C1C;margin-top:1px;}
-    .ts.on.weekend::after{color:#FECACA;}
 
+    /* 슬롯 카드 — 몽키 스타일 */
+    .ts-card{
+      padding:14px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
+      cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px;
+      text-align:left;width:100%;
+    }
+    .ts-card:hover:not(:disabled){border-color:var(--golf);background:var(--golf-soft);}
+    .ts-card.on{border-color:var(--golf);border-width:2px;background:var(--golf-soft);}
+    .ts-card:disabled{opacity:.4;cursor:not-allowed;}
+
+    .ts-top{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+    }
+    .ts-time{font-size:16px;font-weight:900;color:var(--ink);letter-spacing:-0.01em;}
+    .ts-course{
+      font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;
+      background:var(--accent);color:var(--ink);letter-spacing:-0.01em;
+      max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .ts-course.alt{background:#A7F3D0;}
+
+    .ts-bot{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      padding-top:6px;border-top:1px dashed var(--line);
+    }
+    .ts-incl{font-size:11px;color:var(--ink-2);font-weight:600;}
+    .ts-price{font-size:14px;font-weight:900;color:var(--ink);letter-spacing:-0.01em;}
+    .ts-price.discount{color:#B91C1C;}
+    .ts-price small{font-size:10px;color:var(--ink-3);font-weight:600;margin-left:2px;}
+
+    /* 푸터 */
+    .tee-footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
+    .tee-counter{
+      display:inline-block;font-size:13px;font-weight:900;color:var(--golf-dark);
+      background:var(--golf-soft);padding:6px 12px;border-radius:8px;margin-bottom:10px;
+    }
+    .tee-counter.full{background:var(--success);color:#fff;}
     .tee-note{
-      font-size:11px;color:var(--ink-3);margin-top:10px;padding:8px 10px;
-      background:#fff;border-radius:8px;border:1px dashed var(--line);line-height:1.5;
+      font-size:11px;color:var(--ink-3);line-height:1.5;
     }
-    .tee-selected{
-      font-size:12px;font-weight:800;color:var(--golf-dark);background:var(--golf-soft);
-      padding:6px 10px;border-radius:8px;margin-top:8px;display:none;
+
+    /* book-panel 미니 요약 */
+    .tee-mini-summary{
+      margin-top:14px;padding:10px 12px;background:var(--golf-soft);border-radius:8px;
+      font-size:12px;color:var(--golf-dark);font-weight:700;display:none;
     }
-    .tee-selected.on{display:block;}
+    .tee-mini-summary.on{display:block;}
+    .tee-mini-summary .tms-line{margin-top:4px;padding-top:4px;border-top:1px dashed rgba(11,110,79,.2);}
+    .tee-mini-summary .tms-line:first-child{margin-top:0;padding-top:0;border-top:none;}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .th-slots{grid-template-columns:repeat(2, 1fr);}
+      .ts-course{max-width:90px;}
+    }
+    @media (max-width: 640px){
+      .th-slots{grid-template-columns:1fr;}
+      .tee-section-head{flex-direction:column;align-items:flex-start;}
+    }
 
     /* Cart policy chip */
     .cart-chip{
@@ -513,6 +563,31 @@
               <div class="fact"><div class="lb">기준</div><div class="vl">2<span class="unit">인 1실</span></div></div>
             </div>
 
+            <!-- ★ 티오프 선택 (몽키 스타일 슬롯 카드 그리드) -->
+            ${(g.teeTimeWindows || []).length ? `
+              <section class="tee-section" id="teeSection">
+                <div class="tee-section-head">
+                  <h3>🕐 티오프 선택 <span class="tee-required">선호 ${g.rounds}슬롯 (선택 사항)</span></h3>
+                  <div class="tee-options">
+                    <label class="opt-check"><input type="checkbox" id="optCheapest"> 최저가만</label>
+                    <label class="opt-check"><input type="checkbox" id="optRealtime"> 실시간 예약</label>
+                  </div>
+                </div>
+                <div class="tee-filter" id="teeFilter">
+                  <button type="button" class="tw on" data-w="all">전체</button>
+                  ${g.teeTimeWindows.map(t => {
+                    const lb = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[t] || t;
+                    return `<button type="button" class="tw" data-w="${t}">${lb}</button>`;
+                  }).join('')}
+                </div>
+                <div id="teeGrid" class="tee-grid-wrap"></div>
+                <div class="tee-footer">
+                  <div class="tee-counter" id="teeCounter">슬롯 0/${g.rounds} 선택</div>
+                  <div class="tee-note">📌 패키지 가격은 슬롯 가격과 별개로 동일 — 슬롯 가격은 단품 라운딩 정가(참고). 미선택 슬롯은 OMT가 골프장과 협의해 최적 시간으로 확정합니다.</div>
+                </div>
+              </section>
+            ` : ''}
+
             <div class="tabs" id="tabs" role="tablist">
               <button class="tab active" data-tab="hotel">🏨 호텔</button>
               <button class="tab" data-tab="course">⛳ 골프 코스</button>
@@ -612,22 +687,8 @@
                 </div>
               </div>
 
-              <!-- 티타임 슬롯 그리드 (몽키 패턴) -->
-              ${(g.teeTimeWindows || []).length ? `
-                <div class="opt-block">
-                  <div class="lb">🕐 선호 티타임</div>
-                  <div class="tee-filter" id="teeFilter">
-                    <button type="button" class="tw on" data-w="all">전체</button>
-                    ${g.teeTimeWindows.map(t => {
-                      const lb = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[t] || t;
-                      return `<button type="button" class="tw" data-w="${t}">${lb}</button>`;
-                    }).join('')}
-                  </div>
-                  <div id="teeGrid"></div>
-                  <div class="tee-selected" id="teeSelected"></div>
-                  <div class="tee-note">📌 패키지 가격은 동일 — 선호 시간대는 OMT 예약 시 우선순위로 사용됩니다. 주말(·주)은 코스 정책상 가격 인상 가능.</div>
-                </div>
-              ` : ''}
+              <!-- 티타임 슬롯은 좌측 메인 콘텐츠로 이동 -->
+              <div id="teeMiniSummary" class="tee-mini-summary"></div>
 
               <div class="air-toggle" id="airToggle" onclick="toggleAir()">
                 <div class="at-switch"></div>
@@ -661,7 +722,8 @@
       bindTabs();
       bindRoomOption();
       bindTeeFilters();
-      renderTeeSlots('all');  // 초기: 전체 시간대
+      bindTeeOptions();
+      renderTeeSlots();
     }
 
     // ===== 객실 옵션 바인딩 =====
@@ -676,16 +738,19 @@
       });
     }
 
-    // ===== 티타임 슬롯 (몽키 패턴) =====
-    const TIME_META = {
-      morning:   { label:'오전',       tag:'기본',  tagClass:'',         range:'06:00~10:30 (가장 인기)' },
-      afternoon: { label:'오후',       tag:'-10%', tagClass:'discount', range:'11:00~13:30 (한가)' },
-      twilight:  { label:'트와일라잇', tag:'-30%', tagClass:'discount', range:'14:00~15:30 (가성비)' },
-      night:     { label:'야간',       tag:'-50%', tagClass:'deep',     range:'17:00~ (조명 라운딩)' }
-    };
+    // ============================================================
+    // 티오프 슬롯 시스템 (몽키 카드 그리드 패턴)
+    // ============================================================
 
-    // "06:00~10:30" → ['06:00','06:30','07:00',...,'10:30'] (30분 간격)
-    function expandSlots(range, interval=30){
+    // 국가별 기본 그린피 (1라운딩 1인 정가)
+    const BASE_GREEN_FEE = { japan:180000, vietnam:200000, thailand:140000, philippines:150000 };
+    // 시간대별 모디파이어
+    const TIME_MOD = { morning:1.0, afternoon:0.9, twilight:0.7, night:0.5 };
+    // 시간대 라벨
+    const WINDOW_LABEL = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' };
+
+    // "06:00~10:30" → 8분 간격 슬롯 배열
+    function expandSlots(range, interval=8){
       const [start, end] = range.split('~').map(s => s.trim());
       const [sh, sm] = start.split(':').map(Number);
       const [eh, em] = end.split(':').map(Number);
@@ -694,73 +759,186 @@
       while(h < eh || (h === eh && m <= em)){
         out.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
         m += interval;
-        if(m >= 60){ h += Math.floor(m / 60); m %= 60; }
+        while(m >= 60){ h++; m -= 60; }
       }
       return out;
     }
 
-    // 슬롯이 주말 인 척 표시 (mock — 일부 슬롯 랜덤)
-    function isWeekendSlot(window, time){
-      // 데모용: 토요일/일요일 같은 인기 시간을 짙은 색으로 마킹
-      // 오전 06:30/07:00/07:30/08:00을 주말 인기 슬롯으로 표시 (mock)
-      if(window === 'morning' && ['06:30','07:00','07:30','08:00'].includes(time)) return true;
-      return false;
+    // 포함사항 라벨 자동 생성: "캐디+1/2카트 포함" / "1/2카트 포함" 등
+    function buildInclusionLabel(g){
+      const inc = g.inclusions || {};
+      const parts = [];
+      if(inc.caddyFee) parts.push('캐디');
+      if(inc.cartFee){
+        // cartPolicy로 1/2카트 또는 1카트 구분
+        const half = /2인 1카트/.test(g.cartPolicy || '');
+        parts.push(half ? '1/2카트' : '1카트');
+      }
+      return parts.length ? parts.join('+') + ' 포함' : '그린피만';
     }
 
-    function renderTeeSlots(filter){
+    // 슬롯 가격 계산
+    function computeSlotPrice(g, course, window){
+      const base = BASE_GREEN_FEE[g.country] || 180000;
+      const mod  = TIME_MOD[window] || 1.0;
+      const designerPremium = course?.designer && course.designer !== '-' ? 1.1 : 1.0;
+      const cart  = g.inclusions?.cartFee  ? 25000 : 0;
+      const caddy = g.inclusions?.caddyFee ? 30000 : 0;
+      return Math.round(base * mod * designerPremium + cart + caddy);
+    }
+
+    // 모든 슬롯 생성 (시간 × 코스)
+    function generateAllSlots(g){
+      const teeOff = g.operatingInfo?.teeOff || {};
+      const courseIds = g.courseIds || [];
+      const slots = [];
+      (g.teeTimeWindows || []).forEach(w => {
+        const range = teeOff[w];
+        if(!range) return;
+        const times = expandSlots(range, 8);
+        times.forEach(t => {
+          courseIds.forEach((cid, ci) => {
+            const course = D.GOLF_COURSES.find(c => c.id === cid);
+            if(!course) return;
+            const price = computeSlotPrice(g, course, w);
+            slots.push({
+              key: `${w}:${t}:${cid}`,
+              window: w,
+              time: t,
+              hour: parseInt(t.split(':')[0]),
+              courseId: cid,
+              courseName: course.name,
+              courseIdx: ci,
+              inclLabel: buildInclusionLabel(g),
+              price
+            });
+          });
+        });
+      });
+      return slots;
+    }
+
+    // 시 단위로 그룹화
+    function groupByHour(slots){
+      const map = new Map();
+      slots.forEach(s => {
+        const h = String(s.hour).padStart(2,'0') + '시';
+        if(!map.has(h)) map.set(h, []);
+        map.get(h).push(s);
+      });
+      // 시간 정렬
+      return Array.from(map.entries()).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+    }
+
+    function renderTeeSlots(){
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
-      const teeOff = g.operatingInfo?.teeOff || {};
-      const windows = (g.teeTimeWindows || []).filter(w => filter === 'all' || w === filter);
-
       const grid = document.getElementById('teeGrid');
       if(!grid) return;
 
-      grid.innerHTML = windows.map(w => {
-        const meta = TIME_META[w] || { label:w, tag:'', tagClass:'', range:'' };
-        const range = teeOff[w];
-        if(!range) return '';
-        const slots = expandSlots(range, 30);
-        return `
-          <div class="tee-group">
-            <div class="tg-head">
-              <span>${meta.label} <span class="range">${range}</span></span>
-              ${meta.tag ? `<span class="tg-tag ${meta.tagClass}">${meta.tag}</span>` : ''}
-            </div>
-            <div class="tg-slots">
-              ${slots.map(t => {
-                const wk = isWeekendSlot(w, t);
-                const slotKey = `${w}:${t}`;
-                const on = selectedTee === slotKey;
-                return `<button type="button" class="ts ${wk?'weekend':''} ${on?'on':''}" data-slot="${slotKey}">${t}</button>`;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
+      // 1. 모든 슬롯 생성
+      let allSlots = generateAllSlots(g);
 
-      // Bind slot clicks
-      grid.querySelectorAll('.ts').forEach(btn => {
-        btn.addEventListener('click', () => {
-          grid.querySelectorAll('.ts').forEach(x => x.classList.remove('on'));
-          btn.classList.add('on');
-          selectedTee = btn.dataset.slot;
-          updateTeeSelected();
+      // 2. 필터 적용
+      if(teeFilter !== 'all'){
+        allSlots = allSlots.filter(s => s.window === teeFilter);
+      }
+
+      // 3. "최저가만" — 같은 시간대에서 가장 싼 슬롯만 (코스 여러개 중 최저)
+      if(teeOptions.cheapest){
+        const byTime = new Map();
+        allSlots.forEach(s => {
+          const k = `${s.window}:${s.time}`;
+          if(!byTime.has(k) || byTime.get(k).price > s.price) byTime.set(k, s);
         });
-      });
-    }
+        allSlots = Array.from(byTime.values());
+      }
 
-    function updateTeeSelected(){
-      const el = document.getElementById('teeSelected');
-      if(!el) return;
-      if(!selectedTee){
-        el.classList.remove('on'); el.textContent = '';
+      if(allSlots.length === 0){
+        grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--ink-3);font-size:13px;">조건에 맞는 슬롯이 없습니다. 필터를 풀어보세요.</div>`;
         return;
       }
-      const [w, t] = selectedTee.split(':');
-      const meta = TIME_META[w];
-      el.textContent = `✓ 선택: ${meta?.label || w} ${t}${meta?.tag && meta.tag !== '기본' ? ' · '+meta.tag+' 할인 시간대' : ''}`;
+
+      // 4. 시 단위로 그룹화
+      const groups = groupByHour(allSlots);
+
+      // 5. HTML 렌더
+      grid.innerHTML = groups.map(([hourLabel, slots]) => `
+        <div class="tee-hour-group">
+          <div class="th-head">${hourLabel}</div>
+          <div class="th-slots">
+            ${slots.map(s => {
+              const on = selectedSlots.some(x => x.key === s.key);
+              const discount = s.window !== 'morning';
+              const courseClass = s.courseIdx === 0 ? '' : 'alt';
+              return `
+                <button type="button" class="ts-card ${on?'on':''}" data-key="${s.key}" aria-pressed="${on}">
+                  <div class="ts-top">
+                    <span class="ts-time">${s.time}</span>
+                    <span class="ts-course ${courseClass}" title="${s.courseName}">${s.courseName}</span>
+                  </div>
+                  <div class="ts-bot">
+                    <span class="ts-incl">${s.inclLabel}</span>
+                    <span class="ts-price ${discount?'discount':''}">${s.price.toLocaleString('ko-KR')}원</span>
+                  </div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // 6. 슬롯 클릭 → 다중 선택 (rounds 횟수까지)
+      grid.querySelectorAll('.ts-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const key = card.dataset.key;
+          const existing = selectedSlots.findIndex(x => x.key === key);
+          if(existing >= 0){
+            // 이미 선택됨 → 해제
+            selectedSlots.splice(existing, 1);
+          } else {
+            // 새로 선택 — rounds 초과 시 가장 오래된 것 자동 제거 (FIFO)
+            if(selectedSlots.length >= g.rounds){
+              selectedSlots.shift();
+            }
+            const slot = allSlots.find(s => s.key === key);
+            if(slot) selectedSlots.push(slot);
+          }
+          renderTeeSlots();   // 재렌더 (선택 상태 반영)
+          updateTeeCounter();
+          updateTeeMiniSummary();
+        });
+      });
+
+      updateTeeCounter();
+      updateTeeMiniSummary();
+    }
+
+    function updateTeeCounter(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      const el = document.getElementById('teeCounter');
+      if(!el) return;
+      const n = selectedSlots.length;
+      el.textContent = `슬롯 ${n}/${g.rounds} 선택`;
+      el.classList.toggle('full', n === g.rounds);
+    }
+
+    function updateTeeMiniSummary(){
+      const el = document.getElementById('teeMiniSummary');
+      if(!el) return;
+      if(selectedSlots.length === 0){
+        el.classList.remove('on');
+        el.innerHTML = '';
+        return;
+      }
       el.classList.add('on');
+      el.innerHTML = `<div style="font-weight:900;margin-bottom:4px;">✓ 선택된 티오프</div>` +
+        selectedSlots.map(s => `
+          <div class="tms-line">
+            ${WINDOW_LABEL[s.window] || ''} ${s.time} · ${s.courseName.replace(/^[^a-zA-Z가-힣]+/,'')}
+          </div>
+        `).join('');
     }
 
     function bindTeeFilters(){
@@ -768,9 +946,17 @@
         btn.addEventListener('click', () => {
           document.querySelectorAll('#teeFilter .tw').forEach(b => b.classList.remove('on'));
           btn.classList.add('on');
-          renderTeeSlots(btn.dataset.w);
+          teeFilter = btn.dataset.w;
+          renderTeeSlots();
         });
       });
+    }
+
+    function bindTeeOptions(){
+      const cheap = document.getElementById('optCheapest');
+      const real  = document.getElementById('optRealtime');
+      if(cheap) cheap.addEventListener('change', () => { teeOptions.cheapest = cheap.checked; renderTeeSlots(); });
+      if(real)  real.addEventListener('change', () => { teeOptions.realtime = real.checked; renderTeeSlots(); });
     }
 
     // ===== Air price estimate (mock — country/city based) =====
@@ -785,7 +971,9 @@
     let pax = 2;
     let airOn = false;
     let selectedRoomIdx = 0;  // roomOptions[0] = 기본 (2인 1실)
-    let selectedTee = null;
+    let selectedSlots = [];   // [{ slotKey, window, time, courseId, courseName, price, includesLabel }]
+    let teeFilter = 'all';
+    let teeOptions = { cheapest:false, realtime:false };
 
     function changePax(delta){
       pax = Math.max(1, Math.min(8, pax + delta));
@@ -850,7 +1038,10 @@
           // 사용자 선택 (예약 확정 시 백엔드로 전달)
           roomOption: room.type,
           roomSupplement: room.supplement || 0,
-          teeTime: selectedTee
+          // 선택 슬롯들 (각 라운딩별 시간·코스) — ELLIS 백엔드가 골프장에 부킹 요청
+          selectedSlots: selectedSlots.map(s => ({
+            window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price
+          }))
         }));
       } catch(e){}
 
