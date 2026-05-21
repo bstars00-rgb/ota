@@ -773,6 +773,56 @@
   const _omtReplyTo = (highlight, suggestion) =>
     `안녕하세요, 고객님! 오마이트립입니다. 😊\n소중한 후기 감사드립니다.\n\n${highlight ? highlight + '\n\n' : ''}${suggestion ? suggestion + '\n\n' : ''}다음 이용 시에도 더 좋은 서비스로 준비하겠습니다. 오늘도 좋은 하루 보내세요 🥰`;
 
+  // ============================================================
+  // 6-E.1) 갤러리 이미지 풀 (Unsplash CDN)
+  // 카테고리별로 묶어두고 _GOLFTEL_GALLERIES에서 골프텔별 8장 조립
+  // ============================================================
+  const _IMG = (id, w=1600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+  const _IMAGE_POOL = {
+    // 골프 코스 / 라운딩 풍경
+    golf: [
+      _IMG('1535131749006-b7f58c99034b'),  // 골프공 + 홀
+      _IMG('1587174486073-ae5e5cff23aa'),  // 페어웨이 와이드
+      _IMG('1592919505780-303950717480'),  // 그린 잔디
+      _IMG('1530648787-d8e2e1cffa4f'),     // 골프 카트
+      _IMG('1606744824163-985d376605aa'),  // 골프 플래그
+      _IMG('1593114175017-30056d3a3a8b'),  // 클럽하우스
+      _IMG('1606744837616-56c9a5c6a6eb'),  // 골프 스윙
+      _IMG('1531058020387-3be344556be6'),  // 코스 경로
+      _IMG('1592822874642-9eb15b7a0c34')   // 항공샷
+    ],
+    // 호텔 / 리조트 외관 + 공간
+    resort: [
+      _IMG('1551882547-ff40c63fe5fa'),     // 럭셔리 호텔
+      _IMG('1564501049412-61c2a3083791'),  // 호텔 외관
+      _IMG('1611892440504-42a792e24d32'),  // 모던 호텔
+      _IMG('1566073771259-6a8506099945'),  // 호텔 빌딩
+      _IMG('1578683010236-d716f9a3f461'),  // 로비
+      _IMG('1545569341-9eb8b30979d9'),     // 리조트 외부
+      _IMG('1582719478250-c89cae4dc85b'),  // 리조트 풀
+      _IMG('1571896349842-33c89424de2d'),  // 풀빌라
+      _IMG('1559592413-7cec4d0cae2b')      // 비치 리조트
+    ],
+    // 객실 / 인테리어
+    room: [
+      _IMG('1445019980597-93fa8acb246c'),
+      _IMG('1522383225653-ed111181a951'),
+      _IMG('1596436889106-be35e843f974')   // 레스토랑
+    ]
+  };
+  // 골프텔별 갤러리 (메인 1 + 작은 4 + 더보기 슬롯 = 시각 6, 실제 8장 권장)
+  const _pick = (arr, idxs) => idxs.map(i => arr[i % arr.length]);
+  const _GOLFTEL_GALLERIES = {
+    'gt-jp-okinawa-kanucha-3n':  [..._pick(_IMAGE_POOL.golf,[0,1,4]), ..._pick(_IMAGE_POOL.resort,[7,5,8,2]), _IMAGE_POOL.room[0]],
+    'gt-jp-fukuoka-kitakyushu-2n':[..._pick(_IMAGE_POOL.golf,[2,7,5]), ..._pick(_IMAGE_POOL.resort,[1,2,3,4]), _IMAGE_POOL.room[2]],
+    'gt-vn-danang-ba-na-4n':     [..._pick(_IMAGE_POOL.golf,[1,0,8,6]), ..._pick(_IMAGE_POOL.resort,[7,5,6]), _IMAGE_POOL.room[1]],
+    'gt-vn-phuquoc-vinpearl-5n': [..._pick(_IMAGE_POOL.golf,[4,1,3]), ..._pick(_IMAGE_POOL.resort,[8,7,5,6]), _IMAGE_POOL.room[0]],
+    'gt-th-bangkok-thanacity-3n':[..._pick(_IMAGE_POOL.golf,[5,2,7]), ..._pick(_IMAGE_POOL.resort,[0,2,3,4]), _IMAGE_POOL.room[2]],
+    'gt-th-pattaya-siamcc-4n':   [..._pick(_IMAGE_POOL.golf,[3,1,8]), ..._pick(_IMAGE_POOL.resort,[8,7,5,6]), _IMAGE_POOL.room[1]],
+    'gt-ph-cebu-alta-vista-4n':  [..._pick(_IMAGE_POOL.golf,[6,2,0]), ..._pick(_IMAGE_POOL.resort,[7,5,8,3]), _IMAGE_POOL.room[0]],
+    'gt-ph-clark-mimosa-5n':     [..._pick(_IMAGE_POOL.golf,[5,7,1,6]), ..._pick(_IMAGE_POOL.resort,[1,3,4]), _IMAGE_POOL.room[2]]
+  };
+
   // 공통 FAQ 6종
   const _DEFAULT_FAQS = [
     { q:'예약 후 결제는 언제 되나요?',
@@ -1013,8 +1063,13 @@
       coords:{ lat:33.5849, lng:130.3973 },
       holidays:_JP_HOLIDAYS_2026,
       reviewStats: { rating:4.6, count:127,
-        positives:[{tag:'시내 호텔','n':89},{tag:'한국인 캐디','n':72},{tag:'가성비','n':54}],
-        negatives:[{tag:'골프장 이동시간','n':28},{tag:'코스 난이도','n':12}] }
+        positives:[{tag:'시내 호텔', n:89},{tag:'한국인 캐디', n:72},{tag:'가성비', n:54},{tag:'쇼핑 도보', n:38}],
+        negatives:[{tag:'골프장 이동시간', n:28},{tag:'코스 난이도', n:12}] },
+      reviews: [
+        { id:'r1', author:'lee_fk', initial:'이', rating:5, date:'2026-05-10', text:'텐진 한복판 호텔이라 골프 끝나고 시내 쇼핑까지 한 번에. 2박3일이 짧게 느껴질 만큼 알찼습니다. 한국인 캐디 신청은 강추!', positives:['시내 호텔','한국인 캐디'], reply:_omtReplyTo('텐진의 도심+골프 조합 만족해 주셔서 감사합니다!','다음 방문 시 인근 코스 추가 라운딩도 추천드려요.') },
+        { id:'r2', author:'kim_fukuoka', initial:'김', rating:4, date:'2026-04-22', text:'호텔에서 골프장까지 약 1시간 이동이 좀 부담. 그래도 후쿠오카 시내가 좋아서 만족.', positives:['시내 호텔','가성비'], negatives:['골프장 이동시간'], reply:_omtReplyTo('','이동 시간 단축을 위해 골프장 인근 호텔 옵션도 신규 도입 검토 중입니다.') },
+        { id:'r3', author:'shin_yj', initial:'신', rating:5, date:'2026-04-08', text:'가성비 최고. 2박에 그린피·캐디까지 다 포함이라 한국 1박 골프보다 싸요.', positives:['가성비','쇼핑 도보'], reply:'' }
+      ]
     },
 
     // ----- VIETNAM -----
@@ -1049,7 +1104,15 @@
       address:'Vinpearl Golf Phu Quoc, Long Beach, Phu Quoc',
       phone:'+84-297-3550-555',
       coords:{ lat:10.0500, lng:103.9700 },
-      holidays:_VN_HOLIDAYS_2026
+      holidays:_VN_HOLIDAYS_2026,
+      reviewStats: { rating:4.7, count:248,
+        positives:[{tag:'27홀 무제한', n:198},{tag:'워터파크 무료', n:172},{tag:'1인 1카트', n:124},{tag:'섬 풍경', n:102}],
+        negatives:[{tag:'섬 외부 이동', n:36},{tag:'식당 옵션', n:21}] },
+      reviews: [
+        { id:'r1', author:'cho_golfer', initial:'조', rating:5, date:'2026-05-09', text:'5박 동안 4라운딩 했는데 매번 1인 1카트라 정말 쾌적했어요. 빈펄 워터파크도 가족이 좋아했고 진짜 풀패키지 그 자체.', positives:['27홀 무제한','워터파크 무료','1인 1카트'], reply:_omtReplyTo('1인 1카트의 쾌적함 + 워터파크 만족도가 푸꾸옥의 장점이지요!','') },
+        { id:'r2', author:'na_phuquoc', initial:'나', rating:5, date:'2026-04-14', text:'섬이라 한적하고 코스 자체도 27홀로 다양해서 4박 5박이 짧게 느껴졌어요. 빈펄 사파리도 무료라 가성비 최고.', positives:['섬 풍경','27홀 무제한'], reply:'' },
+        { id:'r3', author:'park_pq', initial:'박', rating:4, date:'2026-03-28', text:'리조트 내부는 완벽한데 섬 외부로 나가려면 차량 부르기 좀 번거롭습니다. 그래도 무제한 라운딩이 좋아서 만족.', positives:['27홀 무제한'], negatives:['섬 외부 이동'], reply:'' }
+      ]
     },
 
     // ----- THAILAND -----
@@ -1062,7 +1125,12 @@
       coords:{ lat:13.6500, lng:100.7800 },
       reviewStats: { rating:4.5, count:96,
         positives:[{tag:'그렉 노먼 설계 코스', n:68},{tag:'BTS 직결', n:54},{tag:'시내 + 골프', n:42}],
-        negatives:[{tag:'캐디팁', n:24},{tag:'식당 가격', n:12}] }
+        negatives:[{tag:'캐디팁', n:24},{tag:'식당 가격', n:12}] },
+      reviews: [
+        { id:'r1', author:'lee_bkk', initial:'이', rating:5, date:'2026-05-11', text:'시내 호텔에서 골프장까지 30분이 적당. 그렉 노먼 설계라 그런지 진짜 챔피언십 분위기 나요. 시내 쇼핑·맛집 즐기면서 골프까지 한 번에.', positives:['그렉 노먼 설계 코스','시내 + 골프'], reply:_omtReplyTo('타나시티 코스의 진가를 알아봐 주셨네요!','') },
+        { id:'r2', author:'choi_bkk', initial:'최', rating:4, date:'2026-04-19', text:'코스는 만족. 다만 캐디팁이 500바트인 줄 모르고 갔다가 4인 합치니 부담. 사전 안내 강조 부탁드려요.', positives:['BTS 직결'], negatives:['캐디팁'], reply:_omtReplyTo('캐디팁 안내 강조 즉시 반영하겠습니다.','') },
+        { id:'r3', author:'kim_thana', initial:'김', rating:5, date:'2026-04-02', text:'BTS 아속역 직결이라 짐 들고 이동 정말 편해요. 골프 안 치는 가족도 시내 구경하기 좋고.', positives:['BTS 직결','시내 + 골프'], reply:'' }
+      ]
     },
     'gt-th-pattaya-siamcc-4n': {
       caddyTip:    { included:false, amount:'18홀당 약 500바트', note:'사이암CC 한국인 캐디 가능' },
@@ -1070,7 +1138,15 @@
       pickupZones: [{ zone:'파타야 비치/조이', fee:'무료' },{ zone:'방콕 ↔ 파타야', fee:'무료 (왕복 1회)' }],
       address:'50 Moo 9, Pattaya, Chonburi, Thailand',
       phone:'+66-38-909-300',
-      coords:{ lat:12.9236, lng:100.8825 }
+      coords:{ lat:12.9236, lng:100.8825 },
+      reviewStats: { rating:4.5, count:142,
+        positives:[{tag:'사이암CC 명문', n:108},{tag:'오션뷰 객실', n:86},{tag:'해변 + 골프', n:72},{tag:'방콕→파타야 전용차', n:54}],
+        negatives:[{tag:'캐디팁', n:32},{tag:'성수기 가격', n:18}] },
+      reviews: [
+        { id:'r1', author:'han_pty', initial:'한', rating:5, date:'2026-05-06', text:'사이암CC 처음 가봤는데 진짜 명불허전. 4박 동안 3라운딩 모두 다른 코스로 돌았어요. 센타라 오션뷰 객실에서 일출 보며 시작하는 라운딩이 일품.', positives:['사이암CC 명문','오션뷰 객실','해변 + 골프'], reply:_omtReplyTo('태국 베스트 코스 TOP 10을 경험해 주셔서 감사합니다!','') },
+        { id:'r2', author:'min_thai', initial:'민', rating:4, date:'2026-04-20', text:'방콕→파타야 전용차 무료가 컸어요. 짐 들고 이동할 일 없이 편하게.', positives:['방콕→파타야 전용차'], reply:'' },
+        { id:'r3', author:'oh_pty', initial:'오', rating:4, date:'2026-03-30', text:'성수기라 그런지 캐디팁이랑 추가 비용이 약간 부담스러웠지만 코스 자체는 훌륭.', positives:['사이암CC 명문'], negatives:['캐디팁','성수기 가격'], reply:'' }
+      ]
     },
 
     // ----- PHILIPPINES -----
@@ -1082,8 +1158,13 @@
       phone:'+63-32-417-0888',
       coords:{ lat:10.2856, lng:123.8347 },
       reviewStats: { rating:4.7, count:178,
-        positives:[{tag:'한국인 캐디', n:142},{tag:'시내 전망', n:96},{tag:'샹그릴라 비치', n:88}],
-        negatives:[{tag:'캐디 보너스', n:32}] }
+        positives:[{tag:'한국인 캐디', n:142},{tag:'시내 전망', n:96},{tag:'샹그릴라 비치', n:88},{tag:'산속 코스', n:62}],
+        negatives:[{tag:'캐디 보너스', n:32},{tag:'시내 ↔ 골프장 이동', n:24}] },
+      reviews: [
+        { id:'r1', author:'song_cebu', initial:'송', rating:5, date:'2026-05-13', text:'알타비스타 산속 코스라 시내 전망 끝내줘요. 샹그릴라 막탄 비치 + 산속 골프 조합이 일품.', positives:['시내 전망','산속 코스','샹그릴라 비치'], reply:_omtReplyTo('알타비스타의 시내 전망 + 샹그릴라 막탄의 비치 조합은 세부만의 매력입니다!','') },
+        { id:'r2', author:'kang_ph', initial:'강', rating:5, date:'2026-04-26', text:'한국인 캐디라 처음 필리핀 가는데도 편했어요. 코스 난이도도 적당.', positives:['한국인 캐디'], reply:'' },
+        { id:'r3', author:'jung_pdc', initial:'정', rating:4, date:'2026-04-11', text:'막탄 ↔ 알타비스타 골프장 이동이 좀 멉니다 (1시간). 그래도 코스 좋아서 만족.', positives:['산속 코스'], negatives:['시내 ↔ 골프장 이동'], reply:_omtReplyTo('이동시간 단축을 위해 셔틀 시간 최적화를 진행 중입니다.','') }
+      ]
     },
     'gt-ph-clark-mimosa-5n': {
       caddyTip:    { included:true, amount:'한국인 캐디 — 라운드 보너스 1,000페소 정도', note:'한국인 운영' },
@@ -1094,13 +1175,22 @@
       coords:{ lat:15.1700, lng:120.5500 },
       reviewStats: { rating:4.8, count:421,
         positives:[{tag:'36홀 무제한', n:312},{tag:'한국인 캐디 100%', n:284},{tag:'조식·석식 전일', n:198},{tag:'가성비', n:172}],
-        negatives:[{tag:'마닐라 공항 픽업비', n:48}] }
+        negatives:[{tag:'마닐라 공항 픽업비', n:48},{tag:'클락 외 관광 부족', n:22}] },
+      reviews: [
+        { id:'r1', author:'baek_clark', initial:'백', rating:5, date:'2026-05-15', text:'5박 동안 매일 라운딩하고도 시간이 남아 18홀 추가까지. 진짜 무제한 맞아요. 한국인 운영이라 의사소통도 편하고.', positives:['36홀 무제한','한국인 캐디 100%'], reply:_omtReplyTo('미모사 36홀 무제한은 골프 매니아들의 성지죠!','') },
+        { id:'r2', author:'oh_clark', initial:'오', rating:5, date:'2026-04-30', text:'조식·석식 전일 포함이라 5박 동안 추가 식비가 거의 없었어요. 클럽도 좋은 거 빌릴 수 있고.', positives:['조식·석식 전일','가성비'], reply:'' },
+        { id:'r3', author:'park_mimosa', initial:'박', rating:4, date:'2026-04-18', text:'마닐라 공항으로 들어가시는 분들은 픽업비 2,500페소 별도라 약간 부담. 가능하면 클락 공항 추천.', positives:['한국인 캐디 100%'], negatives:['마닐라 공항 픽업비'], reply:_omtReplyTo('','클락 공항 직항이 가장 효율적입니다. 필요 시 안내드릴게요.') },
+        { id:'r4', author:'kim_omc', initial:'김', rating:5, date:'2026-04-02', text:'골프만 하기엔 완벽한데, 5박 동안 클락 외 관광지가 좀 부족. 그래도 골프 목적이면 진짜 추천!', positives:['36홀 무제한','한국인 캐디 100%'], negatives:['클락 외 관광 부족'], reply:'' }
+      ]
     }
   };
 
   // 모든 GOLFTELS에 default + 디테일 머지
   GOLFTELS.forEach(g => {
     const detail = _GOLFTEL_DETAILS[g.id] || {};
+    // 갤러리 풀에서 8장 적용 (메인 + 작은 7장)
+    const gallery = _GOLFTEL_GALLERIES[g.id];
+    if(gallery && gallery.length) g.images = gallery;
     g.facilityHours       = g.facilityHours    || _DEFAULT_FACILITY_HOURS;
     g.dresscode           = g.dresscode        || _DEFAULT_DRESSCODE;
     g.weatherPolicy       = g.weatherPolicy    || _DEFAULT_WEATHER_POLICY;

@@ -49,9 +49,55 @@
     }
     .gallery > div{
       background-size:cover;background-position:center;background-color:var(--bg-soft);
-      transition:filter .15s;border-radius:8px;
+      transition:filter .15s;border-radius:8px;position:relative;
     }
+    .gallery > div:not(.g-main):hover{filter:brightness(.95);}
     .gallery .g-main{grid-row:1/span 2;border-radius:14px;}
+
+    /* 마지막 슬롯 "+N장 더보기" 오버레이 */
+    .gallery .g-more{
+      cursor:pointer;
+    }
+    .gallery .g-more::after{
+      content:attr(data-more);
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.55);color:#fff;font-weight:900;font-size:18px;
+      border-radius:8px;letter-spacing:-0.01em;
+      transition:background .15s;
+    }
+    .gallery .g-more:hover::after{background:rgba(0,0,0,.7);}
+
+    /* 갤러리 모달 */
+    .lightbox{
+      position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:none;
+      align-items:center;justify-content:center;flex-direction:column;padding:40px 20px;
+    }
+    .lightbox.on{display:flex;}
+    .lightbox-img{
+      max-width:min(1100px, 95vw);max-height:78vh;border-radius:12px;background:#000;
+      object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.5);
+    }
+    .lightbox-thumbs{
+      display:flex;gap:6px;margin-top:14px;overflow-x:auto;padding:8px;
+      max-width:min(1100px, 95vw);
+    }
+    .lightbox-thumbs img{
+      width:72px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;
+      opacity:.6;transition:opacity .15s, transform .15s;flex-shrink:0;
+    }
+    .lightbox-thumbs img:hover{opacity:1;}
+    .lightbox-thumbs img.on{opacity:1;outline:2px solid var(--accent);}
+    .lightbox-close{
+      position:absolute;top:20px;right:24px;width:40px;height:40px;border-radius:50%;
+      background:rgba(255,255,255,.1);color:#fff;font-size:22px;font-weight:900;
+      display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);
+    }
+    .lightbox-close:hover{background:rgba(255,255,255,.2);}
+    .lightbox-counter{
+      position:absolute;top:24px;left:24px;color:#fff;font-weight:800;font-size:14px;
+      background:rgba(255,255,255,.1);padding:6px 14px;border-radius:999px;backdrop-filter:blur(8px);
+    }
 
     /* Layout */
     .main-wrap{
@@ -438,26 +484,30 @@
     .pickup-row .fee{font-weight:800;color:var(--golf-dark);}
     .pickup-row .fee.free{color:var(--success);}
 
-    /* 위치 — 지도 placeholder */
+    /* 위치 — OpenStreetMap iframe 임베드 */
     .map-box{
-      background:#E8F0EA;border:1px solid var(--line);border-radius:12px;height:280px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-      color:var(--ink-2);font-weight:700;background-image:
-        linear-gradient(135deg, #E6F4EE 25%, transparent 25%),
-        linear-gradient(225deg, #E6F4EE 25%, transparent 25%),
-        linear-gradient(45deg, #E6F4EE 25%, transparent 25%),
-        linear-gradient(315deg, #E6F4EE 25%, #F0FAF5 25%);
-      background-size:20px 20px;background-position:0 0,10px 0,10px -10px,0 10px;
-      position:relative;
+      border:1px solid var(--line);border-radius:12px;overflow:hidden;
+      position:relative;background:var(--bg-soft);
     }
-    .map-pin{
-      position:absolute;width:36px;height:36px;border-radius:50% 50% 50% 0;
-      background:var(--golf);transform:rotate(-45deg);
-      display:grid;place-items:center;color:#fff;font-weight:900;font-size:14px;
-      box-shadow:0 4px 12px rgba(11,110,79,.4);
-      top:50%;left:50%;margin:-44px 0 0 -18px;
+    .map-box iframe{
+      width:100%;height:320px;border:none;display:block;
     }
-    .map-pin span{transform:rotate(45deg);}
+    .map-box .map-overlay{
+      position:absolute;top:14px;left:14px;
+      background:#fff;padding:8px 14px;border-radius:8px;
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
+      font-weight:800;font-size:13px;color:var(--golf-dark);
+      display:flex;align-items:center;gap:6px;pointer-events:none;
+    }
+    .map-box .map-link{
+      position:absolute;bottom:14px;right:14px;
+      background:#fff;padding:8px 14px;border-radius:8px;
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
+      font-weight:800;font-size:12px;color:var(--ink);
+      display:flex;align-items:center;gap:4px;text-decoration:none;
+      transition:background .15s;
+    }
+    .map-box .map-link:hover{background:var(--golf-soft);color:var(--golf-dark);}
 
     .address-card{
       margin-top:12px;padding:14px;background:var(--bg-soft);border-radius:10px;
@@ -590,6 +640,14 @@
     </div>
   </main>
 
+  <!-- 갤러리 lightbox 모달 -->
+  <div class="lightbox" id="lightbox" onclick="closeLightboxIfBg(event)">
+    <button type="button" class="lightbox-close" onclick="closeLightbox()" aria-label="닫기">✕</button>
+    <div class="lightbox-counter" id="lbCounter">1 / 1</div>
+    <img class="lightbox-img" id="lbImg" src="" alt="갤러리 이미지" />
+    <div class="lightbox-thumbs" id="lbThumbs"></div>
+  </div>
+
   <script src="data.js"></script>
   <script src="state.js"></script>
   <script>
@@ -624,13 +682,21 @@
         ? `<span class="badge badge-direct">${own.label}</span>`
         : `<span class="badge badge-franchise">${own.label}</span>`;
 
-      const gallery = (g.images?.length ? g.images : [hotel.img]).slice(0, 5);
+      const allImages = (g.images?.length ? g.images : [hotel.img]).filter(Boolean);
+      // 풀백: 갤러리가 5장 미만이면 호텔 갤러리로 보강
+      while(allImages.length < 5 && hotel.gallery?.length){
+        const next = hotel.gallery[allImages.length - 1];
+        if(next && !allImages.includes(next)) allImages.push(next);
+        else break;
+      }
+      const visible = allImages.slice(0, 5);
+      const remaining = Math.max(0, allImages.length - 5);
       const galleryHtml = `
-        <div class="g-main" style="background-image:url('${gallery[0] || ''}')"></div>
-        <div style="background-image:url('${gallery[1] || hotel.img || ''}')"></div>
-        <div style="background-image:url('${gallery[2] || (hotel.gallery?.[0]) || ''}')"></div>
-        <div style="background-image:url('${gallery[3] || (hotel.gallery?.[1]) || ''}')"></div>
-        <div style="background-image:url('${gallery[4] || (hotel.gallery?.[2]) || ''}')"></div>
+        <div class="g-main" style="background-image:url('${visible[0] || ''}')" onclick="openLightbox(0)"></div>
+        <div style="background-image:url('${visible[1] || ''}')" onclick="openLightbox(1)"></div>
+        <div style="background-image:url('${visible[2] || ''}')" onclick="openLightbox(2)"></div>
+        <div style="background-image:url('${visible[3] || ''}')" onclick="openLightbox(3)"></div>
+        <div class="${remaining > 0 ? 'g-more' : ''}" data-more="📷 +${remaining}장 더보기" style="background-image:url('${visible[4] || ''}')" onclick="openLightbox(4)"></div>
       `;
 
       const incRow = (label, on) => `
@@ -877,11 +943,25 @@
             <!-- 📍 위치 -->
             <section class="panel" data-panel="location">
               <h3>오시는 길</h3>
-              <div class="map-box">
-                <div class="map-pin"><span>⛳</span></div>
-                <div style="position:absolute;bottom:14px;left:14px;font-size:11px;color:var(--ink-3);background:#fff;padding:4px 10px;border-radius:6px;font-weight:700;">📍 ${g.coords?.lat?.toFixed(4) || '-'}, ${g.coords?.lng?.toFixed(4) || '-'}</div>
-                <div style="position:absolute;top:14px;right:14px;font-size:11px;color:var(--ink-3);background:#fff;padding:4px 10px;border-radius:6px;font-weight:700;">지도 (mock)</div>
-              </div>
+              ${(() => {
+                const lat = g.coords?.lat || 0;
+                const lng = g.coords?.lng || 0;
+                if(!lat || !lng){
+                  return `<div style="padding:60px;text-align:center;background:var(--bg-soft);border-radius:12px;color:var(--ink-3);">📍 지도 좌표 준비 중</div>`;
+                }
+                // OpenStreetMap bbox = lng-0.02, lat-0.01, lng+0.02, lat+0.01 (zoom ~13)
+                const d = 0.015;
+                const bbox = `${lng-d},${lat-d},${lng+d},${lat+d}`;
+                const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+                const openUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=14/${lat}/${lng}`;
+                return `
+                  <div class="map-box">
+                    <iframe src="${embedUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${g.name} 지도"></iframe>
+                    <div class="map-overlay">⛳ ${g.hotelName || g.name}</div>
+                    <a class="map-link" href="${openUrl}" target="_blank" rel="noopener">🗺️ 큰 지도</a>
+                  </div>
+                `;
+              })()}
               <div class="address-card">
                 <div class="ic">📍</div>
                 <div class="body">
@@ -1116,6 +1196,55 @@
         q.addEventListener('click', () => item.classList.toggle('open'));
       });
     }
+
+    // ===== 갤러리 Lightbox =====
+    let lbImages = [];
+    let lbIdx = 0;
+
+    function openLightbox(startIdx){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      lbImages = (g.images || []).filter(Boolean);
+      if(!lbImages.length) return;
+      lbIdx = Math.min(startIdx || 0, lbImages.length - 1);
+      const box = document.getElementById('lightbox');
+      box.classList.add('on');
+      document.body.style.overflow = 'hidden';
+      renderLightbox();
+    }
+
+    function closeLightbox(){
+      document.getElementById('lightbox').classList.remove('on');
+      document.body.style.overflow = '';
+    }
+
+    function closeLightboxIfBg(e){
+      if(e.target.id === 'lightbox') closeLightbox();
+    }
+
+    function renderLightbox(){
+      const img = document.getElementById('lbImg');
+      const counter = document.getElementById('lbCounter');
+      const thumbs = document.getElementById('lbThumbs');
+      if(!img || !counter || !thumbs) return;
+      img.src = lbImages[lbIdx];
+      counter.textContent = `${lbIdx + 1} / ${lbImages.length}`;
+      thumbs.innerHTML = lbImages.map((src, i) => `
+        <img src="${src}" class="${i===lbIdx?'on':''}" data-i="${i}" alt="thumb ${i+1}" />
+      `).join('');
+      thumbs.querySelectorAll('img').forEach(t => {
+        t.addEventListener('click', () => { lbIdx = +t.dataset.i; renderLightbox(); });
+      });
+    }
+
+    // 키보드 네비
+    document.addEventListener('keydown', e => {
+      const box = document.getElementById('lightbox');
+      if(!box || !box.classList.contains('on')) return;
+      if(e.key === 'Escape') closeLightbox();
+      else if(e.key === 'ArrowLeft' && lbIdx > 0){ lbIdx--; renderLightbox(); }
+      else if(e.key === 'ArrowRight' && lbIdx < lbImages.length - 1){ lbIdx++; renderLightbox(); }
+    });
 
     // ===== 객실 옵션 바인딩 =====
     function bindRoomOption(){
