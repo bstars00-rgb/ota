@@ -612,23 +612,47 @@
   /* =====================================================================
      6-C) Golf Courses (ELLIS-ready normalized catalog)
      - 골프텔 상품이 참조하는 코스 마스터
+     - channelManager: ELLIS가 연동하는 외부 티시트/CMS 시스템 (호텔의 PMS-Channel Manager 대응)
+       · direct       — OMT 직영 자체 인벤토리 (실시간 100%)
+       · gdo          — Golf Digest Online (일본, 2,000+ 코스 마켓플레이스 겸 PMS)
+       · gora         — Rakuten GORA (일본)
+       · golfnow      — GolfNow Business (NBC Sports Next, 글로벌)
+       · golfmanager  — Golfmanager (유럽 200+ 클럽, V3 REST API)
+       · kakaogolf    — 카카오골프예약 (한국)
+       · xgolf        — XGOLF / 신멤버스 (한국 400+)
+       · golfdigg     — Golfdigg (태국 #1, 150+ 코스)
+       · partner      — 직접 협약 (현지 골프장 직거래)
+     - realTimeBooking: 슬롯 클릭 즉시 확정 가능 여부 (false면 24h 견적 모드)
      ===================================================================== */
   const GOLF_COURSES = [
-    // Japan
-    { id:'gc-jp-kanucha',     name:'카누차 골프코스',       country:'japan',      city:'okinawa',  holes:18, par:72, yardage:6798, designer:'Pete Dye',          greens:'벤트' },
-    { id:'gc-jp-okinawa-cc',  name:'오키나와 컨트리클럽',   country:'japan',      city:'okinawa',  holes:18, par:72, yardage:7142, designer:'-',                 greens:'벤트' },
-    { id:'gc-jp-kita-ko',     name:'기타큐슈 골프CC',       country:'japan',      city:'fukuoka',  holes:18, par:72, yardage:6845, designer:'-',                 greens:'고려' },
-    // Vietnam
-    { id:'gc-vn-ba-na-hills', name:'바나힐스 골프클럽',     country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7857, designer:'Luke Donald',       greens:'벤트' },
-    { id:'gc-vn-montgomerie', name:'몽고메리 링크스',       country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7159, designer:'Colin Montgomerie', greens:'벤트' },
-    { id:'gc-vn-vinpearl-pq', name:'빈펄 골프 푸꾸옥',      country:'vietnam',    city:'phuquoc',  holes:27, par:72, yardage:7548, designer:'IMG',               greens:'씨쇼어' },
-    // Thailand
-    { id:'gc-th-thana-city',  name:'타나시티 컨트리클럽',   country:'thailand',   city:'bangkok',  holes:18, par:72, yardage:6928, designer:'Greg Norman',       greens:'씨쇼어' },
-    { id:'gc-th-siam-cc',     name:'사이암 컨트리클럽',     country:'thailand',   city:'pattaya',  holes:18, par:72, yardage:7308, designer:'-',                 greens:'씨쇼어' },
-    // Philippines
-    { id:'gc-ph-alta-vista',  name:'알타비스타 골프코스',   country:'philippines',city:'cebu',     holes:18, par:72, yardage:6916, designer:'-',                 greens:'버뮤다' },
-    { id:'gc-ph-mimosa',      name:'미모사+ 골프코스',      country:'philippines',city:'clark',    holes:36, par:72, yardage:7204, designer:'-',                 greens:'버뮤다' }
+    // Japan — 직영 OMT (수도권) + GDO 마켓플레이스 (지방)
+    { id:'gc-jp-kanucha',     name:'카누차 골프코스',       country:'japan',      city:'okinawa',  holes:18, par:72, yardage:6798, designer:'Pete Dye',          greens:'벤트',  channelManager:'direct',  realTimeBooking:true },
+    { id:'gc-jp-okinawa-cc',  name:'오키나와 컨트리클럽',   country:'japan',      city:'okinawa',  holes:18, par:72, yardage:7142, designer:'-',                 greens:'벤트',  channelManager:'gdo',     realTimeBooking:true },
+    { id:'gc-jp-kita-ko',     name:'기타큐슈 골프CC',       country:'japan',      city:'fukuoka',  holes:18, par:72, yardage:6845, designer:'-',                 greens:'고려',  channelManager:'gdo',     realTimeBooking:true },
+    // Vietnam — 직영 OMT (다낭) + Partner 직거래 (그 외)
+    { id:'gc-vn-ba-na-hills', name:'바나힐스 골프클럽',     country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7857, designer:'Luke Donald',       greens:'벤트',  channelManager:'direct',  realTimeBooking:true },
+    { id:'gc-vn-montgomerie', name:'몽고메리 링크스',       country:'vietnam',    city:'danang',   holes:18, par:72, yardage:7159, designer:'Colin Montgomerie', greens:'벤트',  channelManager:'direct',  realTimeBooking:true },
+    { id:'gc-vn-vinpearl-pq', name:'빈펄 골프 푸꾸옥',      country:'vietnam',    city:'phuquoc',  holes:27, par:72, yardage:7548, designer:'IMG',               greens:'씨쇼어',channelManager:'partner', realTimeBooking:false },
+    // Thailand — Golfdigg 마켓플레이스 + 프랜차이즈 직거래
+    { id:'gc-th-thana-city',  name:'타나시티 컨트리클럽',   country:'thailand',   city:'bangkok',  holes:18, par:72, yardage:6928, designer:'Greg Norman',       greens:'씨쇼어',channelManager:'golfdigg',realTimeBooking:true },
+    { id:'gc-th-siam-cc',     name:'사이암 컨트리클럽',     country:'thailand',   city:'pattaya',  holes:18, par:72, yardage:7308, designer:'-',                 greens:'씨쇼어',channelManager:'golfdigg',realTimeBooking:true },
+    // Philippines — Partner 직거래 (분산된 시장)
+    { id:'gc-ph-alta-vista',  name:'알타비스타 골프코스',   country:'philippines',city:'cebu',     holes:18, par:72, yardage:6916, designer:'-',                 greens:'버뮤다',channelManager:'partner', realTimeBooking:false },
+    { id:'gc-ph-mimosa',      name:'미모사+ 골프코스',      country:'philippines',city:'clark',    holes:36, par:72, yardage:7204, designer:'-',                 greens:'버뮤다',channelManager:'partner', realTimeBooking:true }
   ];
+
+  // 채널 매니저 메타 (UI 라벨용)
+  const CHANNEL_MANAGERS = {
+    direct:      { label:'OMT 직영 인벤토리', short:'OMT', tier:'tier-1' },
+    gdo:         { label:'Golf Digest Online (일본)', short:'GDO', tier:'tier-1' },
+    gora:        { label:'Rakuten GORA (일본)', short:'GORA', tier:'tier-2' },
+    golfnow:     { label:'GolfNow Business (글로벌)', short:'GolfNow', tier:'tier-1' },
+    golfmanager: { label:'Golfmanager (유럽)', short:'GM', tier:'tier-2' },
+    kakaogolf:   { label:'카카오골프예약 (한국)', short:'카카오', tier:'tier-2' },
+    xgolf:       { label:'XGOLF / 신멤버스 (한국)', short:'XGOLF', tier:'tier-2' },
+    golfdigg:    { label:'Golfdigg (태국 #1)', short:'Golfdigg', tier:'tier-1' },
+    partner:     { label:'직접 협약 파트너', short:'Partner', tier:'tier-3' }
+  };
 
   /* =====================================================================
      6-D) GOLFTELS — 메인 SKU
@@ -1087,7 +1111,7 @@
      ===================================================================== */
   root.DATA = {
     COUNTRIES, CITIES, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
-    PRODUCTS, PRODUCT_TYPES, OWNERSHIP, GOLF_COURSES, GOLFTELS,
+    PRODUCTS, PRODUCT_TYPES, OWNERSHIP, GOLF_COURSES, GOLFTELS, CHANNEL_MANAGERS,
     CREATORS, FEED_POSTS, REVIEWS, USER,
     INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY,
     CREATOR_GRADES, NEW_CREATOR_BONUS, CREATOR_MOCK_STATS

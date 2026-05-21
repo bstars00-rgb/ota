@@ -345,6 +345,16 @@
     .ts-price.discount{color:#B91C1C;}
     .ts-price small{font-size:10px;color:var(--ink-3);font-weight:600;margin-left:2px;}
 
+    /* 실시간 / 견적 뱃지 */
+    .ts-rt{
+      display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:900;
+      padding:2px 6px;border-radius:4px;
+      background:linear-gradient(135deg, #FFD23F, #FFA500);color:#7C2D12;
+      margin-right:auto;
+    }
+    .ts-rt.quote{background:var(--bg-soft);color:var(--ink-3);}
+    .ts-rt-row{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-3);font-weight:600;}
+
     /* 푸터 */
     .tee-footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
     .tee-counter{
@@ -477,7 +487,12 @@
           <span>${label}</span>
         </div>`;
 
-      const courseHtml = courses.map(c => `
+      const courseHtml = courses.map(c => {
+        const ch = D.CHANNEL_MANAGERS[c.channelManager] || D.CHANNEL_MANAGERS.partner;
+        const rtBadge = c.realTimeBooking
+          ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:900;padding:3px 8px;border-radius:5px;background:linear-gradient(135deg,#FFD23F,#FFA500);color:#7C2D12;">⚡ 실시간 예약</span>`
+          : `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:900;padding:3px 8px;border-radius:5px;background:var(--bg-soft);color:var(--ink-3);">⏱ 견적 24시간</span>`;
+        return `
         <div class="course-card">
           <div class="name">⛳ ${c.name}</div>
           <div class="meta">
@@ -486,9 +501,13 @@
             <span>설계 · ${c.designer || '-'}</span>
             <span>그린 · ${c.greens || '-'}</span>
           </div>
+          <div style="margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            ${rtBadge}
+            <span style="font-size:11px;color:var(--ink-2);font-weight:600;">📡 ${ch.label}</span>
+          </div>
           ${g.cartPolicy ? `<div class="cart-chip">🚗 카트 정책: ${g.cartPolicy}</div>` : ''}
         </div>
-      `).join('') || '<p>코스 정보 준비 중</p>';
+      `;}).join('') || '<p>코스 정보 준비 중</p>';
 
       const distanceLine = g.distance ?
         `<div style="margin-top:6px;font-size:12px;color:var(--ink-2);font-weight:600;">📏 ${g.distance.city} · ${g.distance.airport}</div>` : '';
@@ -801,6 +820,7 @@
             const course = D.GOLF_COURSES.find(c => c.id === cid);
             if(!course) return;
             const price = computeSlotPrice(g, course, w);
+            const channel = D.CHANNEL_MANAGERS[course.channelManager] || D.CHANNEL_MANAGERS.partner;
             slots.push({
               key: `${w}:${t}:${cid}`,
               window: w,
@@ -810,7 +830,11 @@
               courseName: course.name,
               courseIdx: ci,
               inclLabel: buildInclusionLabel(g),
-              price
+              price,
+              // 채널 매니저 메타 (ELLIS가 어떤 시스템에 부킹 요청을 보낼지)
+              channelManager: course.channelManager,
+              channelShort: channel.short,
+              realTime: !!course.realTimeBooking
             });
           });
         });
@@ -854,6 +878,11 @@
         allSlots = Array.from(byTime.values());
       }
 
+      // 3-1. "실시간 예약" 토글 — 실시간 가능 슬롯만 (채널 매니저 연동된 코스)
+      if(teeOptions.realtime){
+        allSlots = allSlots.filter(s => s.realTime);
+      }
+
       if(allSlots.length === 0){
         grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--ink-3);font-size:13px;">조건에 맞는 슬롯이 없습니다. 필터를 풀어보세요.</div>`;
         return;
@@ -876,6 +905,12 @@
                   <div class="ts-top">
                     <span class="ts-time">${s.time}</span>
                     <span class="ts-course ${courseClass}" title="${s.courseName}">${s.courseName}</span>
+                  </div>
+                  <div class="ts-rt-row">
+                    ${s.realTime
+                      ? `<span class="ts-rt">⚡ 실시간</span>`
+                      : `<span class="ts-rt quote">⏱ 견적 24h</span>`}
+                    <span>· ${s.channelShort}</span>
                   </div>
                   <div class="ts-bot">
                     <span class="ts-incl">${s.inclLabel}</span>
