@@ -391,8 +391,160 @@
       padding:4px 10px;border-radius:6px;background:#EEF2FF;color:#4338CA;margin-top:6px;
     }
 
+    /* ====== 이용 안내 / 위치 / 리뷰 / FAQ 공통 ====== */
+    .info-card{
+      background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;
+    }
+    .info-card h4{
+      margin:0 0 10px;font-size:14px;font-weight:900;color:var(--ink);
+      display:flex;align-items:center;gap:6px;letter-spacing:-0.01em;
+    }
+    .info-card .body{font-size:13px;color:var(--ink-2);line-height:1.6;}
+    .info-card ul{margin:0;padding-left:18px;}
+    .info-card li{margin:4px 0;}
+    .info-card .kv{
+      display:grid;grid-template-columns:100px 1fr;gap:10px 14px;font-size:13px;
+    }
+    .info-card .kv dt{color:var(--ink-2);font-weight:700;}
+    .info-card .kv dd{margin:0;color:var(--ink);font-weight:600;}
+
+    /* 시설 운영 시간 표 */
+    .fac-table{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
+    }
+    .fac-table .frow{
+      display:flex;justify-content:space-between;padding:10px 12px;background:var(--bg-soft);border-radius:8px;font-size:13px;
+    }
+    .fac-table .fname{font-weight:700;color:var(--ink);}
+    .fac-table .fhours{color:var(--golf-dark);font-weight:800;}
+
+    /* 캐디팁 알림 */
+    .tip-banner{
+      padding:14px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:10px;
+      display:flex;gap:12px;align-items:center;margin-bottom:10px;
+    }
+    .tip-banner .ic{font-size:28px;}
+    .tip-banner .body{flex:1;}
+    .tip-banner .t{font-weight:900;font-size:14px;color:#7C2D12;}
+    .tip-banner .s{font-size:12px;color:#92400E;margin-top:2px;line-height:1.4;}
+
+    /* 픽업 지역 표 */
+    .pickup-list{display:flex;flex-direction:column;gap:6px;}
+    .pickup-row{
+      display:flex;justify-content:space-between;padding:8px 12px;
+      background:var(--bg-soft);border-radius:8px;font-size:13px;
+    }
+    .pickup-row .zone{font-weight:700;color:var(--ink);}
+    .pickup-row .fee{font-weight:800;color:var(--golf-dark);}
+    .pickup-row .fee.free{color:var(--success);}
+
+    /* 위치 — 지도 placeholder */
+    .map-box{
+      background:#E8F0EA;border:1px solid var(--line);border-radius:12px;height:280px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+      color:var(--ink-2);font-weight:700;background-image:
+        linear-gradient(135deg, #E6F4EE 25%, transparent 25%),
+        linear-gradient(225deg, #E6F4EE 25%, transparent 25%),
+        linear-gradient(45deg, #E6F4EE 25%, transparent 25%),
+        linear-gradient(315deg, #E6F4EE 25%, #F0FAF5 25%);
+      background-size:20px 20px;background-position:0 0,10px 0,10px -10px,0 10px;
+      position:relative;
+    }
+    .map-pin{
+      position:absolute;width:36px;height:36px;border-radius:50% 50% 50% 0;
+      background:var(--golf);transform:rotate(-45deg);
+      display:grid;place-items:center;color:#fff;font-weight:900;font-size:14px;
+      box-shadow:0 4px 12px rgba(11,110,79,.4);
+      top:50%;left:50%;margin:-44px 0 0 -18px;
+    }
+    .map-pin span{transform:rotate(45deg);}
+
+    .address-card{
+      margin-top:12px;padding:14px;background:var(--bg-soft);border-radius:10px;
+      display:flex;gap:14px;align-items:flex-start;
+    }
+    .address-card .ic{font-size:24px;line-height:1;}
+    .address-card .body{flex:1;font-size:13px;color:var(--ink-2);}
+    .address-card .body strong{display:block;color:var(--ink);font-weight:900;font-size:14px;margin-bottom:4px;}
+    .address-card .phone{margin-top:4px;color:var(--golf-dark);font-weight:800;}
+
+    /* 리뷰 — 별점 분포 */
+    .rev-head{
+      display:grid;grid-template-columns:200px 1fr;gap:24px;
+      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:14px;
+    }
+    .rev-score{
+      text-align:center;padding:14px;background:linear-gradient(135deg,var(--golf-soft),#fff);
+      border-radius:12px;
+    }
+    .rev-score .big{font-size:46px;font-weight:900;color:var(--golf-dark);line-height:1;}
+    .rev-score .stars{font-size:16px;color:#F59E0B;margin:6px 0;letter-spacing:2px;}
+    .rev-score .count{font-size:12px;color:var(--ink-2);font-weight:700;}
+    .rev-tags-block{flex:1;}
+    .rev-tags-title{font-size:12px;font-weight:800;color:var(--ink-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+    .rev-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+    .rev-tag{
+      display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;
+      font-size:12px;font-weight:700;
+    }
+    .rev-tag.pos{background:var(--golf-soft);color:var(--golf-dark);}
+    .rev-tag.neg{background:#FEE2E2;color:#B91C1C;}
+    .rev-tag .n{font-weight:900;}
+
+    /* 리뷰 카드 */
+    .rev-list{display:flex;flex-direction:column;gap:12px;}
+    .rev-card{
+      padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    }
+    .rev-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .rev-avatar{
+      width:36px;height:36px;border-radius:50%;background:var(--golf-soft);
+      display:grid;place-items:center;font-weight:900;color:var(--golf-dark);font-size:14px;flex-shrink:0;
+    }
+    .rev-author{font-weight:800;font-size:13px;color:var(--ink);}
+    .rev-meta{font-size:11px;color:var(--ink-3);font-weight:600;display:flex;gap:8px;align-items:center;}
+    .rev-stars{color:#F59E0B;font-size:13px;}
+    .rev-text{font-size:14px;color:var(--ink);line-height:1.6;margin:8px 0;}
+    .rev-pn{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+    .rev-pn-tag{
+      font-size:11px;padding:2px 8px;border-radius:5px;font-weight:700;
+    }
+    .rev-pn-tag.pos{background:var(--golf-soft);color:var(--golf-dark);}
+    .rev-pn-tag.neg{background:#FEE2E2;color:#B91C1C;}
+    .rev-reply{
+      margin-top:10px;padding:12px;background:var(--bg-soft);border-left:3px solid var(--golf);
+      border-radius:0 8px 8px 0;font-size:13px;color:var(--ink-2);line-height:1.6;white-space:pre-line;
+    }
+    .rev-reply-head{font-weight:800;color:var(--golf-dark);margin-bottom:4px;font-size:12px;}
+
+    /* FAQ — 아코디언 */
+    .faq-list{display:flex;flex-direction:column;gap:8px;}
+    .faq-item{
+      background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    }
+    .faq-q{
+      padding:14px 16px;font-weight:800;font-size:14px;color:var(--ink);cursor:pointer;
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      width:100%;text-align:left;background:#fff;
+    }
+    .faq-q:hover{background:var(--bg-soft);}
+    .faq-q::after{
+      content:"+";font-size:20px;font-weight:900;color:var(--ink-3);transition:transform .15s;
+    }
+    .faq-item.open .faq-q::after{transform:rotate(45deg);color:var(--golf);}
+    .faq-a{
+      max-height:0;overflow:hidden;transition:max-height .25s ease, padding .25s;
+      padding:0 16px;font-size:13px;color:var(--ink-2);line-height:1.6;
+    }
+    .faq-item.open .faq-a{max-height:400px;padding:0 16px 14px;}
+
     /* Loading / Empty */
     .loading{padding:80px 20px;text-align:center;color:var(--ink-3);}
+
+    @media (max-width: 980px){
+      .fac-table{grid-template-columns:1fr;}
+      .rev-head{grid-template-columns:1fr;}
+    }
 
     /* Responsive */
     @media (max-width: 980px){
@@ -609,8 +761,12 @@
 
             <div class="tabs" id="tabs" role="tablist">
               <button class="tab active" data-tab="hotel">🏨 호텔</button>
-              <button class="tab" data-tab="course">⛳ 골프 코스</button>
+              <button class="tab" data-tab="course">⛳ 코스·시설</button>
               <button class="tab" data-tab="includes">포함/불포함</button>
+              <button class="tab" data-tab="guide">📋 이용 안내</button>
+              <button class="tab" data-tab="location">📍 위치</button>
+              <button class="tab" data-tab="reviews">⭐ 리뷰 ${g.reviewStats?.count ? '('+g.reviewStats.count+')' : ''}</button>
+              <button class="tab" data-tab="faq">❓ FAQ</button>
               <button class="tab" data-tab="info">예약 안내</button>
             </div>
 
@@ -627,6 +783,212 @@
               <h3>골프 코스 (${courses.length}개)</h3>
               ${courseHtml}
               <p style="margin-top:16px;font-size:13px;color:var(--ink-3);">※ 실제 라운딩 코스는 시즌·예약 상황에 따라 조정될 수 있습니다.</p>
+
+              <h3 style="margin-top:24px;">⏰ 시설 운영 시간</h3>
+              <div class="fac-table">
+                ${(g.facilityHours || []).map(f => `
+                  <div class="frow"><span class="fname">${f.label}</span><span class="fhours">${f.hours}</span></div>
+                `).join('')}
+              </div>
+            </section>
+
+            <!-- 📋 이용 안내 -->
+            <section class="panel" data-panel="guide">
+              <div class="info-card">
+                <h4>💸 캐디팁</h4>
+                <div class="tip-banner">
+                  <div class="ic">💰</div>
+                  <div class="body">
+                    <div class="t">${g.caddyTip?.included ? '캐디팁 포함' : '캐디팁 불포함 — 현장 결제'}</div>
+                    <div class="s">적정 금액: <strong>${g.caddyTip?.amount || '국가별 안내'}</strong> · ${g.caddyTip?.note || ''}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <h4>🚗 카트 이용 안내</h4>
+                <div class="body">
+                  <p style="margin:0 0 8px;"><strong>카트 정책:</strong> ${g.cartPolicy || '-'}</p>
+                  <ul>${(g.cartRules || []).map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <h4>👨‍👩‍👧 동반자(갤러리) · 어린이 라운드</h4>
+                <div class="body">
+                  ${g.companionPolicy ? `
+                    <p style="margin:0 0 6px;"><strong>동반자 입장:</strong> ${g.companionPolicy.allowed ? '가능' : '불가'} (만 ${g.companionPolicy.minAge}세 이상)</p>
+                    <p style="margin:0 0 6px;font-size:12px;color:var(--ink-3);">${g.companionPolicy.note}</p>
+                    <p style="margin:0 0 12px;font-size:13px;">주중 <strong>${g.companionPolicy.weekdayFee}</strong> · 주말 <strong>${g.companionPolicy.weekendFee}</strong></p>
+                  ` : ''}
+                  ${g.juniorPolicy ? `
+                    <p style="margin:8px 0 6px;padding-top:8px;border-top:1px dashed var(--line);"><strong>주니어 (만 ${g.juniorPolicy.minAge}~${g.juniorPolicy.maxAge}세):</strong></p>
+                    <p style="margin:0;font-size:13px;">${g.juniorPolicy.weekdayRate} / ${g.juniorPolicy.weekendRate}</p>
+                    <p style="margin:4px 0 0;font-size:12px;color:var(--ink-3);">${g.juniorPolicy.note}</p>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="info-card">
+                <h4>👔 복장 규정</h4>
+                <div class="body"><ul>${(g.dresscode || []).map(d => `<li>${d}</li>`).join('')}</ul></div>
+              </div>
+
+              <div class="info-card">
+                <h4>🏌️ 장비 렌탈</h4>
+                <div class="body">
+                  ${g.equipmentRental ? `
+                    <p style="margin:0 0 4px;"><strong>${g.equipmentRental.available ? '대여 가능' : '대여 불가'}</strong> ${g.equipmentRental.price ? '· ' + g.equipmentRental.price : ''}</p>
+                    ${g.equipmentRental.brands?.length ? `<p style="margin:0 0 6px;font-size:13px;">브랜드: ${g.equipmentRental.brands.join(', ')} (당일 재고 중 선택)</p>` : ''}
+                    ${g.equipmentRental.note ? `<p style="margin:6px 0 0;font-size:12px;color:var(--ink-3);">${g.equipmentRental.note}</p>` : ''}
+                  ` : '<p>준비 중</p>'}
+                </div>
+              </div>
+
+              <div class="info-card">
+                <h4>👥 예약 인원 규정</h4>
+                <div class="body"><ul>${(g.partyRules || []).map(r => `<li>${r}</li>`).join('')}</ul></div>
+              </div>
+
+              <div class="info-card">
+                <h4>🌧️ 악천후 정책</h4>
+                <div class="body"><ul>${(g.weatherPolicy || []).map(r => `<li>${r}</li>`).join('')}</ul></div>
+              </div>
+
+              <div class="info-card">
+                <h4>⏰ 시간대별 안내</h4>
+                <div class="body">
+                  <p style="margin:0 0 6px;">${g.lateNote}</p>
+                  <p style="margin:0;font-size:12px;color:var(--ink-3);">${g.onsiteNote}</p>
+                </div>
+              </div>
+
+              ${(g.holidays || []).length ? `
+                <div class="info-card">
+                  <h4>📅 ${g.country === 'japan' ? '일본' : g.country === 'vietnam' ? '베트남' : g.country === 'thailand' ? '태국' : '필리핀'} 2026 공휴일</h4>
+                  <div class="body">
+                    <p style="margin:0 0 6px;">아래 기간은 주말 가격 적용 + 캐디·카트 운영 변동 가능:</p>
+                    <ul>${g.holidays.map(h => `<li>${h}</li>`).join('')}</ul>
+                  </div>
+                </div>
+              ` : ''}
+            </section>
+
+            <!-- 📍 위치 -->
+            <section class="panel" data-panel="location">
+              <h3>오시는 길</h3>
+              <div class="map-box">
+                <div class="map-pin"><span>⛳</span></div>
+                <div style="position:absolute;bottom:14px;left:14px;font-size:11px;color:var(--ink-3);background:#fff;padding:4px 10px;border-radius:6px;font-weight:700;">📍 ${g.coords?.lat?.toFixed(4) || '-'}, ${g.coords?.lng?.toFixed(4) || '-'}</div>
+                <div style="position:absolute;top:14px;right:14px;font-size:11px;color:var(--ink-3);background:#fff;padding:4px 10px;border-radius:6px;font-weight:700;">지도 (mock)</div>
+              </div>
+              <div class="address-card">
+                <div class="ic">📍</div>
+                <div class="body">
+                  <strong>${hotel.name || g.hotelName}</strong>
+                  ${g.address || ''}
+                  <div class="phone">📞 ${g.phone || ''}</div>
+                </div>
+              </div>
+
+              ${(g.pickupZones || []).length ? `
+                <div class="info-card" style="margin-top:14px;">
+                  <h4>🚐 픽업·샌딩 지역별 추가 요금</h4>
+                  <div class="pickup-list">
+                    ${g.pickupZones.map(p => `
+                      <div class="pickup-row">
+                        <span class="zone">📍 ${p.zone}</span>
+                        <span class="fee ${/무료|0/.test(p.fee) ? 'free' : ''}">${p.fee}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <p style="margin:10px 0 0;font-size:11px;color:var(--ink-3);">※ 픽업 추가 요금은 회당(편도) 기준. 현장에서 기사님께 직접 지불.</p>
+                </div>
+              ` : ''}
+
+              <div class="info-card" style="margin-top:14px;">
+                <h4>📏 거리 정보</h4>
+                <div class="body">
+                  ${g.distance ? `<p style="margin:0;">시내: <strong>${g.distance.city}</strong></p><p style="margin:6px 0 0;">공항: <strong>${g.distance.airport}</strong></p>` : '<p>준비 중</p>'}
+                </div>
+              </div>
+            </section>
+
+            <!-- ⭐ 리뷰 -->
+            <section class="panel" data-panel="reviews">
+              ${g.reviewStats ? `
+                <div class="rev-head">
+                  <div class="rev-score">
+                    <div class="big">${g.reviewStats.rating?.toFixed(1) || '-'}</div>
+                    <div class="stars">${'★'.repeat(Math.round(g.reviewStats.rating || 0))}${'☆'.repeat(5 - Math.round(g.reviewStats.rating || 0))}</div>
+                    <div class="count">${(g.reviewStats.count || 0).toLocaleString('ko-KR')}개의 후기</div>
+                  </div>
+                  <div class="rev-tags-block">
+                    ${(g.reviewStats.positives || []).length ? `
+                      <div class="rev-tags-title">👍 이런 점이 좋았어요</div>
+                      <div class="rev-tags">
+                        ${g.reviewStats.positives.map(p => `<span class="rev-tag pos">${p.tag} <span class="n">${p.n}</span></span>`).join('')}
+                      </div>
+                    ` : ''}
+                    ${(g.reviewStats.negatives || []).length ? `
+                      <div class="rev-tags-title">👎 이런 점은 개선이 필요해요</div>
+                      <div class="rev-tags">
+                        ${g.reviewStats.negatives.map(p => `<span class="rev-tag neg">${p.tag} <span class="n">${p.n}</span></span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              ` : ''}
+
+              ${(g.reviews || []).length ? `
+                <div class="rev-list">
+                  ${g.reviews.map(r => `
+                    <div class="rev-card">
+                      <div class="rev-card-head">
+                        <div class="rev-avatar">${r.initial || r.author?.[0] || '?'}</div>
+                        <div style="flex:1;">
+                          <div class="rev-author">${r.author}</div>
+                          <div class="rev-meta">
+                            <span class="rev-stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</span>
+                            <span>· ${r.date || ''}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="rev-text">${r.text}</div>
+                      ${(r.positives || []).length || (r.negatives || []).length ? `
+                        <div class="rev-pn">
+                          ${(r.positives || []).map(t => `<span class="rev-pn-tag pos">+ ${t}</span>`).join('')}
+                          ${(r.negatives || []).map(t => `<span class="rev-pn-tag neg">− ${t}</span>`).join('')}
+                        </div>
+                      ` : ''}
+                      ${r.reply ? `
+                        <div class="rev-reply">
+                          <div class="rev-reply-head">🌴 OMT ${country.name || ''}</div>
+                          ${r.reply}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <div style="padding:40px;text-align:center;color:var(--ink-3);background:#fff;border:1px dashed var(--line);border-radius:12px;">
+                  <div style="font-size:36px;">⛳</div>
+                  <p style="margin-top:10px;font-weight:700;">아직 작성된 리뷰가 없습니다.</p>
+                  <p style="font-size:13px;">첫 라운딩 다녀오신 분의 후기를 기다리고 있어요!</p>
+                </div>
+              `}
+            </section>
+
+            <!-- ❓ FAQ -->
+            <section class="panel" data-panel="faq">
+              <div class="faq-list" id="faqList">
+                ${(g.faqs || []).map((f, i) => `
+                  <div class="faq-item ${i===0 ? 'open' : ''}" data-faq-idx="${i}">
+                    <button type="button" class="faq-q">${f.q}</button>
+                    <div class="faq-a">${f.a}</div>
+                  </div>
+                `).join('')}
+              </div>
             </section>
 
             <section class="panel" data-panel="includes">
@@ -743,6 +1105,16 @@
       bindTeeFilters();
       bindTeeOptions();
       renderTeeSlots();
+      bindFAQ();
+    }
+
+    // FAQ 아코디언
+    function bindFAQ(){
+      document.querySelectorAll('#faqList .faq-item').forEach(item => {
+        const q = item.querySelector('.faq-q');
+        if(!q) return;
+        q.addEventListener('click', () => item.classList.toggle('open'));
+      });
     }
 
     // ===== 객실 옵션 바인딩 =====

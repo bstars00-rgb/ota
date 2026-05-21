@@ -687,6 +687,112 @@
     '여권 잔여 유효기간 6개월 이상 필수'
   ];
 
+  // 시설 운영 시간 (몽키 표준)
+  const _DEFAULT_FACILITY_HOURS = [
+    { key:'proshop',       label:'프로샵',         hours:'06:00~20:00' },
+    { key:'drivingRange',  label:'드라이빙 레인지', hours:'05:30~19:30' },
+    { key:'chippingGreen', label:'치핑 그린',      hours:'06:00~17:00' },
+    { key:'puttingGreen',  label:'퍼팅 그린',      hours:'06:00~17:00' },
+    { key:'practiceBunker',label:'연습 벙커',      hours:'06:00~17:00' },
+    { key:'restaurant',    label:'레스토랑',       hours:'05:30~20:00' },
+    { key:'locker',        label:'락커룸',         hours:'24시간' },
+    { key:'shower',        label:'샤워실',         hours:'24시간' }
+  ];
+
+  // 복장 규정 (글로벌 공통)
+  const _DEFAULT_DRESSCODE = [
+    '라운드 티/축구 유니폼/보드 셔츠/청바지/짧은 반바지 입장 불가',
+    '카라티(피케티) 권장 — 차이나 카라티는 일부 클럽 입장 불가',
+    '무릎 길이의 반바지는 허용',
+    '메탈 스파이크 골프화 금지 — 소프트 스파이크 권장'
+  ];
+
+  // 악천후 / 우천 규정 (몽키 베트남 표준)
+  const _DEFAULT_WEATHER_POLICY = [
+    '골프장에서 사전 폐장 결정한 경우가 아니면 우천에도 골프장 방문 필수',
+    '비바람 심해도 골프장 결정 전엔 환불 불가 — 1일~3개월 사용 가능한 레인체크(바우처) 발급',
+    '9홀만 완료 후 폐장 시 18홀 요금의 약 70% 차지 + 9홀 분 환불',
+    '현장 환불 거부 시 OMT 비상연락망으로 즉시 문의'
+  ];
+
+  // 예약 인원 규정 (베트남 표준)
+  const _DEFAULT_PARTY_RULES = [
+    '1~3인 예약 가능 — 골프장 측 4인 1조 조인 플레이로 진행',
+    '단독 플레이 불가 — 골프장에서 임의 조인',
+    '5인 1팀 플레이 불가 — 3/2 또는 4/1로 임의 배정',
+    '예약 없는 시간엔 조인 안 됨'
+  ];
+
+  // 카트 이용 안내 (공통)
+  const _DEFAULT_CART_RULES = [
+    '기본 2인 1카트(쉐어) 이용 기준',
+    '홀수 인원 예약 시 조인 분과 카트 쉐어 필요',
+    '조인 없으면 1인 싱글 카트 (추가 요금 없음)',
+    '개별 싱글 카트 원할 경우 당일 현장 결제'
+  ];
+
+  // 주니어 / 동반자 (글로벌 공통)
+  const _DEFAULT_JUNIOR_POLICY = {
+    minAge: 8, maxAge: 15,
+    note: '주니어 요금은 시즌별로 변경. 여권 정보면 사진 제출 후 적용',
+    weekdayRate: '주중 1,550,000동~ (조인카트 포함)',
+    weekendRate: '주말 1,650,000동~ (조인카트 포함)'
+  };
+  const _DEFAULT_COMPANION_POLICY = {
+    allowed: true,
+    minAge: 8,
+    note: '갤러리(동반자) 입장 가능 — 성수기 예외 가능. 사전 채팅 신청 후 현장 결제',
+    weekdayFee: '1,900,000동',
+    weekendFee: '2,400,000동'
+  };
+
+  // 14:00 이후 라운딩 안내 (공통)
+  const _DEFAULT_LATE_NOTE = '14:00 이후 라운딩은 인원·플레이 속도에 따라 18홀 완주 어려울 수 있습니다. 환불 불가.';
+
+  // 현장 문제 / 책임 소재 (공통)
+  const _DEFAULT_ONSITE_NOTE = '예약 외 골프장 운영상 문제는 OMT가 도움드릴 수 있으나 책임 소재는 골프장에 있습니다.';
+
+  // 2026년 베트남 공휴일 (베트남 골프텔에 적용)
+  const _VN_HOLIDAYS_2026 = [
+    '01월 01일',
+    '02월 15일~21일 (구정)',
+    '04월 26일~27일 (훙왕)',
+    '04월 30일~05월 01일 (해방일/노동절)',
+    '09월 01일~02일 (독립기념일)'
+  ];
+  // 2026년 일본 공휴일 (주요)
+  const _JP_HOLIDAYS_2026 = [
+    '01월 01~03일 (설날 연휴)',
+    '04월 29일 (쇼와의 날)',
+    '05월 03~05일 (헌법기념일~어린이날)',
+    '07월 20일 (바다의 날)',
+    '08월 11일 (산의 날)'
+  ];
+
+  // 운영사 답변 템플릿 함수 (리뷰 답변)
+  const _omtReplyTo = (highlight, suggestion) =>
+    `안녕하세요, 고객님! 오마이트립입니다. 😊\n소중한 후기 감사드립니다.\n\n${highlight ? highlight + '\n\n' : ''}${suggestion ? suggestion + '\n\n' : ''}다음 이용 시에도 더 좋은 서비스로 준비하겠습니다. 오늘도 좋은 하루 보내세요 🥰`;
+
+  // 공통 FAQ 6종
+  const _DEFAULT_FAQS = [
+    { q:'예약 후 결제는 언제 되나요?',
+      a:'골프텔 예약 확정 후 즉시 결제됩니다. 골프장 현장에서는 캐디팁·렌탈비·추가 옵션만 결제하시면 됩니다.' },
+    { q:'1인이나 3인도 예약 가능한가요?',
+      a:'네, 1~3인 예약 모두 가능합니다. 골프장 측에서 4인 1조 조인으로 진행됩니다. 5인 1팀은 불가합니다.' },
+    { q:'우천 시 환불은 되나요?',
+      a:'골프장이 사전에 폐장 결정한 경우만 환불 가능합니다. 그 외에는 1일~3개월 사용 가능한 레인체크(바우처)를 발급해 드립니다.' },
+    { q:'골프 클럽을 가져가지 않아도 되나요?',
+      a:'네, 현지 골프장에서 클럽 렌탈 가능합니다 (1세트 약 99만동~). 예약 후 카카오채널로 [예약번호+남/여+왼손/오른손+세트수] 남겨주세요.' },
+    { q:'캐디팁은 얼마를 드려야 하나요?',
+      a:'국가·골프장별로 다릅니다. 베트남은 18홀당 약 400,000VND, 태국은 약 500바트, 필리핀은 약 500페소가 적정 수준입니다. 서비스 만족도에 따라 더 주셔도 좋습니다.' },
+    { q:'한국인 캐디 신청 가능한가요?',
+      a:'OMT 직영 골프텔(일본·베트남)은 100% 한국인 캐디 보장. 파트너 골프텔은 사전 신청 시 가능 여부 확인 후 안내드립니다.' },
+    { q:'어린이 라운드는 몇 살부터 가능한가요?',
+      a:'대부분 만 8세부터 가능합니다. 만 8~15세는 주니어 요금이 적용되며, 여권 사진을 채팅으로 보내주시면 자동 적용됩니다.' },
+    { q:'예약 변경·취소 규정은 어떻게 되나요?',
+      a:'출발 21일 전: 위약금 없음 / 14일 전: 30% / 7일 전: 50% / 3일 이내: 100%. 자세한 사항은 예약 안내 탭을 확인해 주세요.' }
+  ];
+
   const GOLFTELS = [
     // ===== JAPAN (직영) =====
     { id:'gt-jp-okinawa-kanucha-3n', type:PRODUCT_TYPES.GOLFTEL,
@@ -873,6 +979,151 @@
       excludes:['항공권','중식','팁','주류'],
       rating:9.5, reviews:421 }
   ];
+
+  // ============================================================
+  // 6-F) 골프텔별 상세 콘텐츠 (시설/팁/리뷰/FAQ/위치) 머지
+  // - GOLFTELS 항목에 _DEFAULT 적용 + 골프텔별 차별화 데이터 주입
+  // - ELLIS 백엔드 이관 시 별도 컬렉션(Golftel.details)으로 분리 가능
+  // ============================================================
+  const _GOLFTEL_DETAILS = {
+    // ----- JAPAN -----
+    'gt-jp-okinawa-kanucha-3n': {
+      caddyTip:    { included:false, amount:'1라운드당 약 4,000~6,000엔', note:'셀프 라운딩 시 캐디 미제공' },
+      equipmentRental:{ available:true, price:'1세트 6,000엔', brands:['Honma','Mizuno','PRGR'] },
+      pickupZones: [{ zone:'나하 시내', fee:'10,000엔' },{ zone:'얀바루(원거리)', fee:'25,000엔' }],
+      address:'905-2433 沖縄県名護市安部156-2 カヌチャベイホテル&ヴィラズ',
+      phone:'+81-980-55-8880',
+      coords:{ lat:26.6131, lng:128.1322 },
+      holidays:_JP_HOLIDAYS_2026,
+      reviewStats: { rating:4.7, count:184,
+        positives:[{tag:'코스 관리상태', n:142},{tag:'리조트 부지내 골프', n:118},{tag:'오션뷰', n:96},{tag:'접근성', n:54}],
+        negatives:[{tag:'캐디 부재', n:38},{tag:'가격대비', n:21},{tag:'식당 가격', n:14}] },
+      reviews: [
+        { id:'r1', author:'jp_yoon82', initial:'윤', rating:5, date:'2026-05-12', text:'리조트 안에 코스가 있어서 새벽 라운딩 후 바로 객실로 돌아갈 수 있는 게 최고. 오션뷰 객실은 일출이 환상적입니다.', positives:['오션뷰','접근성'], reply:_omtReplyTo('리조트 부지내 코스의 장점을 가장 잘 활용해 주신 후기네요!','다음 방문 때는 야간 라운딩도 추천드립니다.') },
+        { id:'r2', author:'kim_golf', initial:'김', rating:4, date:'2026-04-28', text:'셀프 라운딩이라 가격은 합리적인데, 한국 캐디 익숙한 분들은 처음에 좀 어색할 수 있어요. 코스 자체는 페어웨이 넓고 좋습니다.', positives:['페어웨이/그린'], negatives:['캐디 부재'], reply:_omtReplyTo('','다음 방문 시 추가 비용으로 한국어 캐디 옵션도 가능합니다. 채팅으로 문의 부탁드려요.') },
+        { id:'r3', author:'park_kim', initial:'박', rating:5, date:'2026-04-15', text:'카누차 리조트 자체가 휴양지 느낌이라 가족과 같이 가도 만족합니다. 풀빌라 + 골프 조합이 좋아요.', positives:['리조트 부지내 골프','오션뷰','접근성'], reply:'' }
+      ]
+    },
+    'gt-jp-fukuoka-kitakyushu-2n': {
+      caddyTip:    { included:true, amount:'한국인 캐디 사전 신청 가능 (+3,000엔/라운드)', note:'기본 셀프 가능' },
+      equipmentRental:{ available:true, price:'1세트 5,500엔', brands:['Mizuno','Bridgestone'] },
+      pickupZones: [{ zone:'후쿠오카 시내(텐진/하카타)', fee:'무료' },{ zone:'기타큐슈', fee:'5,000엔' }],
+      address:'810-0004 福岡県福岡市中央区渡辺通2-1-82 ソラリア西鉄ホテル',
+      phone:'+81-92-752-5555',
+      coords:{ lat:33.5849, lng:130.3973 },
+      holidays:_JP_HOLIDAYS_2026,
+      reviewStats: { rating:4.6, count:127,
+        positives:[{tag:'시내 호텔','n':89},{tag:'한국인 캐디','n':72},{tag:'가성비','n':54}],
+        negatives:[{tag:'골프장 이동시간','n':28},{tag:'코스 난이도','n':12}] }
+    },
+
+    // ----- VIETNAM -----
+    'gt-vn-danang-ba-na-4n': {
+      caddyTip:    { included:false, amount:'18홀당 400,000 VND', note:'서비스 만족도에 따라 추가 가능. 한국인 캐디는 +200,000동' },
+      equipmentRental:{ available:true, price:'990,000동', brands:['Ping','Mizuno'], note:'예약 후 카카오채널로 [예약번호+남/여+왼손/오른손+세트수] 신청' },
+      pickupZones: [
+        { zone:'다낭 시내(미케/한강)', fee:'무료' },
+        { zone:'호이안', fee:'150,000동' },
+        { zone:'인터컨티넨탈/선월드', fee:'100,000동' },
+        { zone:'랑코', fee:'700,000동' }
+      ],
+      address:'Hoa Hai Ward, Ngu Hanh Son, Da Nang City, Vietnam',
+      phone:'+84-236-3958-111',
+      coords:{ lat:15.9759, lng:108.2627 },
+      holidays:_VN_HOLIDAYS_2026,
+      reviewStats: { rating:4.8, count:312,
+        positives:[{tag:'코스 관리상태', n:248},{tag:'한국인 캐디', n:201},{tag:'풀빌라', n:178},{tag:'코스 난이도/재미', n:156},{tag:'페어웨이/그린', n:142}],
+        negatives:[{tag:'캐디팁', n:42},{tag:'가격대비', n:38},{tag:'페어웨이/그린(우기)', n:21}] },
+      reviews: [
+        { id:'r1', author:'ka_3858954533', initial:'서', rating:5, date:'2026-05-14', text:'바나힐스 코스 페어웨이 정말 잘 관리되어 있고, 풀빌라+석식 포함이라 4박 5일 내내 호텔에서 안 나갔는데도 만족스러웠어요. 한국 캐디 100%라 첫 베트남이어도 편했습니다.', positives:['코스 관리상태','풀빌라','한국인 캐디'], reply:_omtReplyTo('바나힐스 코스 관리상태에 만족해 주셔서 감사합니다. 한국인 캐디 보장은 OMT 직영 골프텔의 핵심 강점입니다!','다음 방문 때는 몽고메리 링크스 코스도 함께 추천드려요.') },
+        { id:'r2', author:'park_golf99', initial:'박', rating:5, date:'2026-05-08', text:'몽고메리 링크스 코스가 진짜 챔피언십급. 야간 라운딩까지 가능해서 더위 피해서 라운딩하기 좋아요. 풀빌라 조식이 진심 최고.', positives:['코스 난이도/재미','풀빌라'], reply:_omtReplyTo('','다낭은 16시 이후 야간 라운딩이 인기인 시즌이라 좋은 선택이셨네요!') },
+        { id:'r3', author:'jang_lee', initial:'장', rating:4, date:'2026-04-25', text:'코스는 정말 좋은데 캐디팁이 별도라 예상치 못한 비용이 발생했어요. 4인 팀이라 인당 10만원 정도 추가로 나갔습니다. 사전에 더 명확히 안내해주시면 좋을 것 같아요.', positives:['코스 난이도/재미'], negatives:['캐디팁'], reply:_omtReplyTo('캐디팁 안내 부족으로 불편드려 죄송합니다.','상품 안내에 캐디팁 약 40만동(18홀) 명시하도록 즉시 수정 반영하겠습니다.') },
+        { id:'r4', author:'sung_kim', initial:'성', rating:5, date:'2026-04-19', text:'7박 8일 다녀왔는데 매일 다른 시간대 라운딩 하면서도 풀빌라 + 조석식 덕분에 정말 편안했어요. 인터컨티넨탈 픽업도 10만동만 추가하면 되어서 합리적.', positives:['풀빌라','한국인 캐디','코스 관리상태'], reply:'' },
+        { id:'r5', author:'oh_yes', initial:'오', rating:4, date:'2026-04-02', text:'우기 시작 직전이라 후반엔 페어웨이가 약간 질긴 부분 있었는데 그래도 충분히 즐겼습니다. 다음엔 건기에 다시 가고 싶어요.', positives:['페어웨이/그린'], negatives:['페어웨이/그린(우기)'], reply:'' }
+      ]
+    },
+    'gt-vn-phuquoc-vinpearl-5n': {
+      caddyTip:    { included:false, amount:'18홀당 400,000 VND', note:'1인 1카트 가능' },
+      equipmentRental:{ available:true, price:'900,000동', brands:['Vinpearl Premium'] },
+      pickupZones: [{ zone:'즈엉동/푸꾸옥 시내', fee:'무료' },{ zone:'섬 남부', fee:'200,000동' }],
+      address:'Vinpearl Golf Phu Quoc, Long Beach, Phu Quoc',
+      phone:'+84-297-3550-555',
+      coords:{ lat:10.0500, lng:103.9700 },
+      holidays:_VN_HOLIDAYS_2026
+    },
+
+    // ----- THAILAND -----
+    'gt-th-bangkok-thanacity-3n': {
+      caddyTip:    { included:false, amount:'18홀당 약 500~600바트', note:'캐디팁 별도 / 한화 약 18,000원' },
+      equipmentRental:{ available:true, price:'2,500바트', brands:['Honma','Callaway'] },
+      pickupZones: [{ zone:'아속/스쿰빗 (BTS 직결)', fee:'무료' },{ zone:'수완나품 공항', fee:'1,200바트' }],
+      address:'Bangna-Trad Rd, Bang Phli, Samut Prakan, Thailand',
+      phone:'+66-2-336-1968',
+      coords:{ lat:13.6500, lng:100.7800 },
+      reviewStats: { rating:4.5, count:96,
+        positives:[{tag:'그렉 노먼 설계 코스', n:68},{tag:'BTS 직결', n:54},{tag:'시내 + 골프', n:42}],
+        negatives:[{tag:'캐디팁', n:24},{tag:'식당 가격', n:12}] }
+    },
+    'gt-th-pattaya-siamcc-4n': {
+      caddyTip:    { included:false, amount:'18홀당 약 500바트', note:'사이암CC 한국인 캐디 가능' },
+      equipmentRental:{ available:true, price:'3,000바트', brands:['Honma','Mizuno'] },
+      pickupZones: [{ zone:'파타야 비치/조이', fee:'무료' },{ zone:'방콕 ↔ 파타야', fee:'무료 (왕복 1회)' }],
+      address:'50 Moo 9, Pattaya, Chonburi, Thailand',
+      phone:'+66-38-909-300',
+      coords:{ lat:12.9236, lng:100.8825 }
+    },
+
+    // ----- PHILIPPINES -----
+    'gt-ph-cebu-alta-vista-4n': {
+      caddyTip:    { included:false, amount:'18홀당 약 500~700페소', note:'캐디 보너스 별도 (한화 약 1만원)' },
+      equipmentRental:{ available:true, price:'1,500페소', brands:['TaylorMade','Ping'] },
+      pickupZones: [{ zone:'막탄 섬', fee:'무료' },{ zone:'세부 시내', fee:'500페소' }],
+      address:'Alta Vista Drive, Pardo, Cebu City, Philippines',
+      phone:'+63-32-417-0888',
+      coords:{ lat:10.2856, lng:123.8347 },
+      reviewStats: { rating:4.7, count:178,
+        positives:[{tag:'한국인 캐디', n:142},{tag:'시내 전망', n:96},{tag:'샹그릴라 비치', n:88}],
+        negatives:[{tag:'캐디 보너스', n:32}] }
+    },
+    'gt-ph-clark-mimosa-5n': {
+      caddyTip:    { included:true, amount:'한국인 캐디 — 라운드 보너스 1,000페소 정도', note:'한국인 운영' },
+      equipmentRental:{ available:true, price:'2,000페소', brands:['Mizuno','Callaway','TaylorMade'] },
+      pickupZones: [{ zone:'클락 공항', fee:'무료' },{ zone:'마닐라 공항', fee:'2,500페소 (인당)' }],
+      address:'Mimosa Drive, Clark Freeport Zone, Pampanga, Philippines',
+      phone:'+63-45-499-7000',
+      coords:{ lat:15.1700, lng:120.5500 },
+      reviewStats: { rating:4.8, count:421,
+        positives:[{tag:'36홀 무제한', n:312},{tag:'한국인 캐디 100%', n:284},{tag:'조식·석식 전일', n:198},{tag:'가성비', n:172}],
+        negatives:[{tag:'마닐라 공항 픽업비', n:48}] }
+    }
+  };
+
+  // 모든 GOLFTELS에 default + 디테일 머지
+  GOLFTELS.forEach(g => {
+    const detail = _GOLFTEL_DETAILS[g.id] || {};
+    g.facilityHours       = g.facilityHours    || _DEFAULT_FACILITY_HOURS;
+    g.dresscode           = g.dresscode        || _DEFAULT_DRESSCODE;
+    g.weatherPolicy       = g.weatherPolicy    || _DEFAULT_WEATHER_POLICY;
+    g.partyRules          = g.partyRules       || _DEFAULT_PARTY_RULES;
+    g.cartRules           = g.cartRules        || _DEFAULT_CART_RULES;
+    g.juniorPolicy        = g.juniorPolicy     || _DEFAULT_JUNIOR_POLICY;
+    g.companionPolicy     = g.companionPolicy  || _DEFAULT_COMPANION_POLICY;
+    g.lateNote            = g.lateNote         || _DEFAULT_LATE_NOTE;
+    g.onsiteNote          = g.onsiteNote       || _DEFAULT_ONSITE_NOTE;
+    g.faqs                = g.faqs             || _DEFAULT_FAQS;
+    // 디테일 머지
+    Object.assign(g, detail);
+    // 기본값 폴백
+    g.caddyTip            = g.caddyTip         || { included:false, amount:'국가별 적정 팁 안내', note:'골프장별 상이' };
+    g.equipmentRental     = g.equipmentRental  || { available:true, price:'현장 문의', brands:['현지 브랜드'] };
+    g.pickupZones         = g.pickupZones      || [];
+    g.address             = g.address          || g.city + ' (주소 준비 중)';
+    g.phone               = g.phone            || '+82-2-OMT-OMT';
+    g.coords              = g.coords           || { lat:0, lng:0 };
+    g.holidays            = g.holidays         || [];
+    g.reviewStats         = g.reviewStats      || { rating:(g.rating/2), count:g.reviews||0, positives:[], negatives:[] };
+    g.reviews             = g.reviews          || [];
+  });
 
   /* =====================================================================
      7) Creators & Feed Posts
