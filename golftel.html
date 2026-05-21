@@ -277,6 +277,54 @@
 
     .tee-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 
+    /* ★ 티타임 슬롯 그리드 (몽키 패턴) */
+    .tee-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .tw{
+      padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+      font-size:12px;font-weight:800;color:var(--ink-2);transition:all .15s;cursor:pointer;
+    }
+    .tw:hover{border-color:var(--golf);color:var(--golf);}
+    .tw.on{background:var(--golf);border-color:var(--golf);color:#fff;}
+
+    .tee-group{margin-bottom:14px;}
+    .tee-group:last-child{margin-bottom:0;}
+    .tg-head{
+      display:flex;align-items:center;justify-content:space-between;
+      font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px;padding:6px 10px;
+      background:#fff;border-radius:8px;border-left:3px solid var(--golf);
+    }
+    .tg-head .range{font-weight:600;color:var(--ink-3);font-size:11px;margin-left:6px;}
+    .tg-tag{
+      font-size:10px;font-weight:900;padding:2px 7px;border-radius:5px;
+      background:var(--golf-soft);color:var(--golf-dark);letter-spacing:.02em;
+    }
+    .tg-tag.discount{background:#FEE2E2;color:#B91C1C;}
+    .tg-tag.deep{background:#DBEAFE;color:#1E40AF;}
+
+    .tg-slots{
+      display:grid;grid-template-columns:repeat(5, 1fr);gap:4px;
+    }
+    .ts{
+      padding:8px 4px;border-radius:7px;border:1.5px solid var(--line);background:#fff;
+      font-weight:800;font-size:12px;color:var(--ink);cursor:pointer;transition:all .12s;
+      letter-spacing:-0.01em;
+    }
+    .ts:hover:not(:disabled){border-color:var(--golf);color:var(--golf-dark);background:var(--golf-soft);}
+    .ts.on{background:var(--golf);border-color:var(--golf);color:#fff;box-shadow:0 2px 8px rgba(11,110,79,.3);}
+    .ts:disabled{opacity:.35;cursor:not-allowed;background:var(--bg-soft);}
+    .ts.weekend::after{content:"·주";display:block;font-size:9px;font-weight:700;color:#B91C1C;margin-top:1px;}
+    .ts.on.weekend::after{color:#FECACA;}
+
+    .tee-note{
+      font-size:11px;color:var(--ink-3);margin-top:10px;padding:8px 10px;
+      background:#fff;border-radius:8px;border:1px dashed var(--line);line-height:1.5;
+    }
+    .tee-selected{
+      font-size:12px;font-weight:800;color:var(--golf-dark);background:var(--golf-soft);
+      padding:6px 10px;border-radius:8px;margin-top:8px;display:none;
+    }
+    .tee-selected.on{display:block;}
+
     /* Cart policy chip */
     .cart-chip{
       display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;
@@ -564,19 +612,20 @@
                 </div>
               </div>
 
-              <!-- 티타임 -->
+              <!-- 티타임 슬롯 그리드 (몽키 패턴) -->
               ${(g.teeTimeWindows || []).length ? `
                 <div class="opt-block">
-                  <div class="lb">🕐 티타임 선택</div>
-                  <div class="tee-list" id="teeList">
-                    ${g.teeTimeWindows.map((t, i) => {
-                      const map = { morning:['오전','06~10시'], afternoon:['오후','11~13시'], twilight:['트와일라잇','14~15시'], night:['야간','17시~'] };
-                      const [lb, sub] = map[t] || [t, ''];
-                      return `<div class="tee-item ${i===0?'on':''}" data-tee="${t}">
-                        <span class="nm">${lb}</span><span class="pr">${sub}</span>
-                      </div>`;
+                  <div class="lb">🕐 선호 티타임</div>
+                  <div class="tee-filter" id="teeFilter">
+                    <button type="button" class="tw on" data-w="all">전체</button>
+                    ${g.teeTimeWindows.map(t => {
+                      const lb = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[t] || t;
+                      return `<button type="button" class="tw" data-w="${t}">${lb}</button>`;
                     }).join('')}
                   </div>
+                  <div id="teeGrid"></div>
+                  <div class="tee-selected" id="teeSelected"></div>
+                  <div class="tee-note">📌 패키지 가격은 동일 — 선호 시간대는 OMT 예약 시 우선순위로 사용됩니다. 주말(·주)은 코스 정책상 가격 인상 가능.</div>
                 </div>
               ` : ''}
 
@@ -611,10 +660,11 @@
 
       bindTabs();
       bindRoomOption();
-      bindTeeTime();
+      bindTeeFilters();
+      renderTeeSlots('all');  // 초기: 전체 시간대
     }
 
-    // ===== 객실/티타임 바인딩 =====
+    // ===== 객실 옵션 바인딩 =====
     function bindRoomOption(){
       document.querySelectorAll('#roomList .room-item').forEach(el => {
         el.addEventListener('click', () => {
@@ -625,12 +675,100 @@
         });
       });
     }
-    function bindTeeTime(){
-      document.querySelectorAll('#teeList .tee-item').forEach(el => {
-        el.addEventListener('click', () => {
-          document.querySelectorAll('#teeList .tee-item').forEach(x => x.classList.remove('on'));
-          el.classList.add('on');
-          selectedTee = el.dataset.tee;
+
+    // ===== 티타임 슬롯 (몽키 패턴) =====
+    const TIME_META = {
+      morning:   { label:'오전',       tag:'기본',  tagClass:'',         range:'06:00~10:30 (가장 인기)' },
+      afternoon: { label:'오후',       tag:'-10%', tagClass:'discount', range:'11:00~13:30 (한가)' },
+      twilight:  { label:'트와일라잇', tag:'-30%', tagClass:'discount', range:'14:00~15:30 (가성비)' },
+      night:     { label:'야간',       tag:'-50%', tagClass:'deep',     range:'17:00~ (조명 라운딩)' }
+    };
+
+    // "06:00~10:30" → ['06:00','06:30','07:00',...,'10:30'] (30분 간격)
+    function expandSlots(range, interval=30){
+      const [start, end] = range.split('~').map(s => s.trim());
+      const [sh, sm] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+      const out = [];
+      let h = sh, m = sm;
+      while(h < eh || (h === eh && m <= em)){
+        out.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+        m += interval;
+        if(m >= 60){ h += Math.floor(m / 60); m %= 60; }
+      }
+      return out;
+    }
+
+    // 슬롯이 주말 인 척 표시 (mock — 일부 슬롯 랜덤)
+    function isWeekendSlot(window, time){
+      // 데모용: 토요일/일요일 같은 인기 시간을 짙은 색으로 마킹
+      // 오전 06:30/07:00/07:30/08:00을 주말 인기 슬롯으로 표시 (mock)
+      if(window === 'morning' && ['06:30','07:00','07:30','08:00'].includes(time)) return true;
+      return false;
+    }
+
+    function renderTeeSlots(filter){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      const teeOff = g.operatingInfo?.teeOff || {};
+      const windows = (g.teeTimeWindows || []).filter(w => filter === 'all' || w === filter);
+
+      const grid = document.getElementById('teeGrid');
+      if(!grid) return;
+
+      grid.innerHTML = windows.map(w => {
+        const meta = TIME_META[w] || { label:w, tag:'', tagClass:'', range:'' };
+        const range = teeOff[w];
+        if(!range) return '';
+        const slots = expandSlots(range, 30);
+        return `
+          <div class="tee-group">
+            <div class="tg-head">
+              <span>${meta.label} <span class="range">${range}</span></span>
+              ${meta.tag ? `<span class="tg-tag ${meta.tagClass}">${meta.tag}</span>` : ''}
+            </div>
+            <div class="tg-slots">
+              ${slots.map(t => {
+                const wk = isWeekendSlot(w, t);
+                const slotKey = `${w}:${t}`;
+                const on = selectedTee === slotKey;
+                return `<button type="button" class="ts ${wk?'weekend':''} ${on?'on':''}" data-slot="${slotKey}">${t}</button>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Bind slot clicks
+      grid.querySelectorAll('.ts').forEach(btn => {
+        btn.addEventListener('click', () => {
+          grid.querySelectorAll('.ts').forEach(x => x.classList.remove('on'));
+          btn.classList.add('on');
+          selectedTee = btn.dataset.slot;
+          updateTeeSelected();
+        });
+      });
+    }
+
+    function updateTeeSelected(){
+      const el = document.getElementById('teeSelected');
+      if(!el) return;
+      if(!selectedTee){
+        el.classList.remove('on'); el.textContent = '';
+        return;
+      }
+      const [w, t] = selectedTee.split(':');
+      const meta = TIME_META[w];
+      el.textContent = `✓ 선택: ${meta?.label || w} ${t}${meta?.tag && meta.tag !== '기본' ? ' · '+meta.tag+' 할인 시간대' : ''}`;
+      el.classList.add('on');
+    }
+
+    function bindTeeFilters(){
+      document.querySelectorAll('#teeFilter .tw').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#teeFilter .tw').forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+          renderTeeSlots(btn.dataset.w);
         });
       });
     }
