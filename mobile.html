@@ -980,40 +980,42 @@
      NOTIFICATIONS
      ======================================================================== */
   function renderNotifications(){
-    const now = Date.now();
-    const NOTIFS = [
-      { type:'booking', unread:true, ic:'✈️', iconClass:'booking',
-        title:'<strong>오사카 패키지</strong> 예약이 확정되었습니다', time:'10분 전',
-        action:'예약 확인서 보기' },
-      { type:'social', unread:true, ic:'❤️', iconClass:'social',
-        title:'<strong>일본여행연구소</strong> 님이 회원님을 팔로우하기 시작했어요', time:'1시간 전' },
-      { type:'promo', unread:true, ic:'🎁', iconClass:'promo',
-        title:'봄 시즌 특가! 일본 패키지 <strong>최대 30% 할인</strong>', time:'3시간 전',
-        action:'지금 보기' },
-      { type:'booking', unread:false, ic:'📅', iconClass:'booking',
-        title:'다낭 여행 출발까지 <strong>D-7</strong>', time:'어제',
-        action:'준비물 체크' },
-      { type:'social', unread:false, ic:'💬', iconClass:'social',
-        title:'<strong>태국고수</strong> 님의 새 쇼츠가 업로드됐어요', time:'어제' },
-      { type:'system', unread:false, ic:'⭐', iconClass:'system',
-        title:'리뷰 작성 보너스 <strong>+5,000P</strong> 적립 완료', time:'2일 전' },
-      { type:'promo', unread:false, ic:'🎟️', iconClass:'promo',
-        title:'새 쿠폰 <strong>OMTSPRING25</strong>가 도착했어요 (-25,000원)', time:'3일 전' },
-      { type:'booking', unread:false, ic:'💳', iconClass:'booking',
-        title:'<strong>방콕 패키지</strong> 결제가 완료되었습니다', time:'5일 전' },
-      { type:'social', unread:false, ic:'🎬', iconClass:'social',
-        title:'내가 올린 쇼츠가 <strong>1,000 조회수</strong>를 돌파했어요', time:'1주 전' }
-    ];
-    document.getElementById('notifList').innerHTML = NOTIFS.map(n => `
-      <div class="notif-item ${n.unread?'unread':''}">
-        <div class="notif-ico ${n.iconClass}">${n.ic}</div>
-        <div class="notif-body">
-          <div class="notif-title">${n.title}</div>
-          <div class="notif-time">${n.time}</div>
-          ${n.action ? `<a class="notif-action">${n.action} →</a>` : ''}
+    // OMT.State.getNotifications()로 사용자 + 동적 + 정적 모두 가져옴
+    const all = OMT.State.getNotifications();
+
+    // type → iconClass 매핑 (모바일 디자인 토큰)
+    const ICON_CLASS = {
+      booking:'booking', reminder:'booking',
+      promotion:'promo', coupon:'promo',
+      points:'system', review:'system', system:'system'
+    };
+    // daysAgo → 한국어 시간 표시
+    const fmtTime = (n) => {
+      if(n.daysAgo === 0) return '오늘';
+      if(n.daysAgo === 1) return '어제';
+      if(n.daysAgo < 7) return n.daysAgo + '일 전';
+      if(n.daysAgo < 14) return '1주 전';
+      if(n.daysAgo < 31) return Math.floor(n.daysAgo/7) + '주 전';
+      return Math.floor(n.daysAgo/30) + '개월 전';
+    };
+
+    document.getElementById('notifList').innerHTML = all.map(n => {
+      const iconClass = ICON_CLASS[n.type] || 'system';
+      const action = n.actionLabel || (n.link ? '자세히 보기' : '');
+      const linkAttr = n.link
+        ? `onclick="OMT.State.markNotifRead('${n.id}');location.href='${n.link}'"`
+        : `onclick="OMT.State.markNotifRead('${n.id}');this.classList.remove('unread')"`;
+      return `
+        <div class="notif-item ${n.read?'':'unread'}" ${linkAttr} style="cursor:pointer;">
+          <div class="notif-ico ${iconClass}">${n.icon}</div>
+          <div class="notif-body">
+            <div class="notif-title"><strong>${n.title}</strong> ${n.body ? '· ' + n.body.slice(0, 60) + (n.body.length > 60 ? '...' : '') : ''}</div>
+            <div class="notif-time">${fmtTime(n)}</div>
+            ${action ? `<a class="notif-action">${action} →</a>` : ''}
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('') || `<div style="padding:60px 20px;text-align:center;color:var(--ink-3);"><div style="font-size:32px;">🔔</div><p style="margin-top:8px;font-size:13px;">새 알림이 없어요</p></div>`;
   }
 
   /* ========================================================================

@@ -1205,6 +1205,7 @@
               </div>
 
               <button class="bp-cta" id="ctaBtn" onclick="bookNow()">예약 진행하기 →</button>
+              <button class="bp-cta" style="background:transparent;color:var(--ink);border:1.5px solid var(--line);box-shadow:none;margin-top:8px;" onmouseover="this.style.borderColor='var(--golf)';this.style.color='var(--golf-dark)';" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--ink)';" onclick="addToCartFromGolftel()">🛒 장바구니에 담기</button>
               <p class="bp-note">결제는 다음 단계에서 확정합니다.</p>
             </div>
           </aside>
@@ -1704,6 +1705,42 @@
       } catch(e){}
 
       location.href = `checkout.html?gt=${encodeURIComponent(g.id)}&pax=${pax}&air=${airOn ? 1 : 0}`;
+    }
+
+    // 🛒 장바구니에 담기
+    function addToCartFromGolftel(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      const room = g.roomOptions?.[selectedRoomIdx] || { type:'2인 1실', supplement:0 };
+      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
+      const total = per * pax;
+      const productType = airOn ? 'golftel-air' : 'golftel';
+      const skuLabel = airOn ? 'GOLFTEL_AIR' : 'GOLFTEL';
+
+      State.addToCart({
+        productId: g.id,
+        productType,
+        type: skuLabel,
+        orig: D.OWNERSHIP[g.country]?.model === 'direct',
+        img: g.images?.[0],
+        name: g.name + (airOn ? ' (+ 항공)' : ''),
+        sub: `${g.hotelName} · ⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박 · ${room.type}`,
+        dates: '날짜 미정 · 결제 시 선택',
+        pax: '성인 ' + pax + '명',
+        paxCount: pax,
+        price: total,
+        // 골프텔 메타 (cart.html에서 활용)
+        country: g.country,
+        rounds: g.rounds,
+        nights: g.nights,
+        roomOption: room.type,
+        selectedSlots: selectedSlots.map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price }))
+      });
+
+      // 토스트 + 장바구니 이동 옵션
+      if(confirm('🛒 장바구니에 담았습니다. 장바구니로 이동할까요?')){
+        location.href = 'cart.html';
+      }
     }
 
     function bindTabs(){

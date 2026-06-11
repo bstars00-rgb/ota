@@ -337,6 +337,7 @@
       <button class="act-primary" onclick="sendKakaoConfirm()">
         <span style="font-weight:900;">kakao</span> 예약 확인서 카카오톡으로 받기
       </button>
+      <a class="act-secondary" id="voucherLink" href="#" target="_blank">📄 e-바우처 보기 (인쇄/PDF)</a>
       <a class="act-secondary" href="mypage.html">마이페이지에서 확인하기 →</a>
       <a class="act-tertiary" href="index.html">홈으로 돌아가기</a>
     </div>
@@ -387,19 +388,55 @@
   } else {
     renderBooking();
     spawnConfetti();
-    // 예약 확정 알림 자동 생성 (중복 방지)
+    // 예약 확정 알림 + D-day 알림 자동 생성 (중복 방지)
     try {
       const isGT = booking.productType === 'golftel' || booking.productType === 'golftel-air' || (booking.productId && booking.productId.startsWith('gt-'));
       const sku = booking.productType === 'golftel-air' ? '골프투어' : (isGT ? '골프텔' : '패키지');
+      const productName = booking.productName || booking.productId || '상품';
+      const link = 'complete.html?bk=' + encodeURIComponent(booking.bookingNumber);
+
+      // (1) 예약 확정 알림 — 즉시
       OMT.State.addUserNotification({
         id: 'booking-confirmed-' + booking.bookingNumber,
         type: 'booking',
         icon: '✅',
         title: `${sku} 예약 확정`,
-        body: `${booking.productName || booking.productId || '상품'} · ${booking.dates || ''} · 예약번호 ${booking.bookingNumber}`,
-        link: 'complete.html?bk=' + encodeURIComponent(booking.bookingNumber),
+        body: `${productName} · ${booking.dates || ''} · 예약번호 ${booking.bookingNumber}`,
+        link,
         actionLabel: '확인서 보기 →'
       });
+
+      // (2) D-day 알림들 — 결제 시점에 미리 예약 (현재 D-day가 해당 범위에 있으면 즉시 노출)
+      // dates "2026.06.14 - 2026.06.18" → 시작일 추출
+      const m = String(booking.dates || '').match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+      if(m){
+        const start = new Date(+m[1], +m[2]-1, +m[3]);
+        const today = new Date(); today.setHours(0,0,0,0);
+        const dday = Math.round((start - today) / 86400000);
+
+        const DDAY_NOTIFS = [
+          { d:7,  icon: isGT ? '⛳' : '✈️', title: isGT ? '골프 라운딩 D-7' : '출발 D-7',
+            body: `${productName} · ${booking.dates.split(' - ')[0]} 출발 · 장비/여권 점검 시작` },
+          { d:3,  icon:'📋', title:'출국 D-3 체크리스트',
+            body: `${productName} · 여권 유효기간 6개월 / 캐디팁 환전 / 항공 클래스·수하물 확인` },
+          { d:1,  icon:'🛫', title:'내일 출발이에요',
+            body: `${productName} · 공항 도착 권장 2.5h 전 · 픽업 차량 확인` },
+          { d:0,  icon:'🎉', title:'오늘 출발 — 즐거운 여행 되세요!',
+            body: `${productName} · 비상 연락: 1588-0000` }
+        ];
+
+        DDAY_NOTIFS.forEach(({ d, icon, title, body }) => {
+          // 현재 시점 기준 D-day가 이미 지나지 않았으면 등록 (단, 정확히 일치할 때만 즉시 노출)
+          if(dday === d){
+            OMT.State.addUserNotification({
+              id: `dday-${booking.bookingNumber}-d${d}`,
+              type:'reminder',
+              icon, title, body, link,
+              actionLabel:'예약 확인 →'
+            });
+          }
+        });
+      }
     } catch(e){}
   }
 
@@ -423,6 +460,9 @@
 
     document.getElementById('leadName').textContent = b.leadName || '고객';
     document.getElementById('bkNum').textContent = b.bookingNumber;
+    // e-바우처 링크 동적 설정
+    const voucherLink = document.getElementById('voucherLink');
+    if(voucherLink) voucherLink.href = 'voucher.html?bk=' + encodeURIComponent(b.bookingNumber);
     document.getElementById('bkName').textContent = b.leadName;
     document.getElementById('bkPhone').textContent = b.phone;
     const datesStr = b.dates || pkg.dates || '';

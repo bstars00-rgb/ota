@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>e-바우처 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--golf:#0B6E4F;--golf-dark:#075440;--golf-soft:#E6F4EE;
+      --accent:#FFD23F;--ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg-soft:#F7F7F9;--success:#10B981;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+      font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);
+      background:var(--bg-soft);line-height:1.55;padding:20px;
+    }
+    .mono{font-family:'JetBrains Mono',monospace;}
+
+    .voucher-wrap{
+      max-width:800px;margin:0 auto;background:#fff;border-radius:12px;
+      box-shadow:0 6px 24px rgba(0,0,0,.08);overflow:hidden;
+    }
+
+    /* 인쇄용 헤더 액션 (인쇄 시 숨김) */
+    .actions-bar{
+      display:flex;gap:8px;justify-content:flex-end;padding:14px 24px;
+      background:var(--bg-soft);border-bottom:1px solid var(--line);
+    }
+    .btn{
+      padding:9px 16px;border-radius:8px;font-weight:800;font-size:13px;
+      border:none;cursor:pointer;font-family:inherit;
+    }
+    .btn.primary{background:var(--golf);color:#fff;}
+    .btn.primary:hover{background:var(--golf-dark);}
+    .btn.ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line);}
+    .btn.ghost:hover{background:var(--bg-soft);}
+
+    /* 바우처 헤더 */
+    .v-head{
+      background:linear-gradient(135deg, var(--golf-dark), var(--golf));
+      color:#fff;padding:28px 32px;position:relative;overflow:hidden;
+    }
+    .v-head::before{content:"⛳";position:absolute;top:-20px;right:-20px;font-size:200px;opacity:.08;transform:rotate(-15deg);}
+    .v-head-row{display:flex;justify-content:space-between;align-items:flex-end;position:relative;}
+    .v-brand{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:8px;}
+    .v-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0;}
+    .v-sub{font-size:13px;opacity:.9;margin-top:4px;}
+    .v-num{
+      text-align:right;font-family:'JetBrains Mono',monospace;
+    }
+    .v-num-label{font-size:10px;opacity:.7;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+    .v-num-val{font-size:18px;font-weight:900;margin-top:2px;}
+
+    /* 본문 */
+    .v-body{padding:28px 32px;}
+
+    .v-section{margin-bottom:28px;}
+    .v-section-head{
+      display:flex;align-items:center;gap:8px;margin-bottom:12px;
+      padding-bottom:8px;border-bottom:2px solid var(--ink);
+    }
+    .v-section-head h3{margin:0;font-size:16px;font-weight:900;letter-spacing:-0.01em;}
+    .v-section-head .badge{
+      font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--golf-soft);color:var(--golf-dark);letter-spacing:.02em;
+    }
+
+    .v-grid{display:grid;grid-template-columns:140px 1fr;gap:10px 18px;font-size:13px;}
+    .v-grid dt{color:var(--ink-3);font-weight:700;}
+    .v-grid dd{margin:0;color:var(--ink);font-weight:700;}
+
+    /* 라운딩 카드 */
+    .round-card{
+      background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);
+      border:1.5px solid var(--golf);border-radius:12px;padding:16px;margin-bottom:10px;
+    }
+    .round-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .round-no{
+      display:inline-flex;align-items:center;gap:4px;font-weight:900;font-size:14px;color:var(--golf-dark);
+    }
+    .round-no .num{background:var(--golf);color:#fff;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;}
+    .round-date{font-weight:800;font-size:12px;color:var(--ink);}
+    .round-date .kind{
+      font-size:10px;padding:1px 6px;border-radius:4px;margin-left:4px;font-weight:900;
+    }
+    .round-date .kind.weekday{background:#E0F2FE;color:#0369A1;}
+    .round-date .kind.weekend{background:#FEE2E2;color:#B91C1C;}
+    .round-detail{
+      display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--ink-2);
+    }
+    .round-detail strong{color:var(--ink);}
+
+    /* 포함사항 */
+    .incl-chips{display:flex;gap:6px;flex-wrap:wrap;}
+    .incl-chip{
+      font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--golf-soft);color:var(--golf-dark);
+    }
+
+    /* QR 코드 영역 */
+    .qr-block{
+      display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;
+      background:var(--bg-soft);padding:18px;border-radius:12px;margin:18px 0;
+    }
+    .qr-code{
+      width:120px;height:120px;background:#fff;border:2px solid var(--ink);border-radius:8px;
+      display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(12,1fr);gap:0;padding:6px;
+    }
+    .qr-code .cell{background:transparent;}
+    .qr-code .cell.on{background:var(--ink);}
+    .qr-info{}
+    .qr-info .l{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .qr-info .b{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:900;color:var(--ink);}
+    .qr-info .s{font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.5;}
+
+    /* 안내 */
+    .v-note{
+      background:#FEF3C7;border-left:4px solid #F59E0B;
+      padding:12px 14px;border-radius:6px;font-size:12px;color:#92400E;line-height:1.6;
+      margin-top:14px;
+    }
+    .v-note strong{display:block;font-size:12px;color:#7C2D12;margin-bottom:4px;font-weight:900;}
+
+    /* 푸터 */
+    .v-foot{
+      background:var(--ink);color:#fff;padding:18px 32px;
+      display:flex;justify-content:space-between;align-items:center;font-size:11px;
+    }
+    .v-foot .mono{opacity:.8;}
+
+    /* 인쇄 전용 */
+    @media print{
+      body{background:#fff;padding:0;}
+      .voucher-wrap{box-shadow:none;border-radius:0;max-width:100%;}
+      .actions-bar{display:none !important;}
+      .v-head{break-inside:avoid;}
+      .round-card{break-inside:avoid;}
+      .v-section{break-inside:avoid;}
+    }
+
+    @media (max-width:640px){
+      .v-grid{grid-template-columns:100px 1fr;font-size:12px;}
+      .v-head{padding:20px;}
+      .v-body{padding:20px;}
+      .v-title{font-size:20px;}
+      .round-detail{grid-template-columns:1fr;}
+      .qr-block{grid-template-columns:1fr;justify-items:center;text-align:center;}
+    }
+  </style>
+</head>
+<body>
+  <div class="voucher-wrap" id="voucherWrap">
+    <!-- 액션 바 (인쇄 시 숨김) -->
+    <div class="actions-bar">
+      <button class="btn ghost" onclick="window.close() || (location.href='complete.html?bk=' + bn)">← 닫기</button>
+      <button class="btn primary" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
+    </div>
+
+    <div id="voucherContent">
+      <div style="padding:80px;text-align:center;color:#9CA3AF;">바우처 로딩 중...</div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const bn = params.get('bk');
+    const D = window.OMT.DATA;
+    const State = window.OMT.State;
+
+    if(!bn){
+      document.getElementById('voucherContent').innerHTML = `<div style="padding:80px;text-align:center;color:#9CA3AF;">예약번호가 누락됐어요. <a href="mypage.html" style="color:#FF6B35;font-weight:800;">마이페이지에서 예약 선택 →</a></div>`;
+    } else {
+      const booking = State.getBooking(bn);
+      if(!booking){
+        document.getElementById('voucherContent').innerHTML = `<div style="padding:80px;text-align:center;color:#9CA3AF;">예약을 찾을 수 없어요.</div>`;
+      } else {
+        renderVoucher(booking);
+      }
+    }
+
+    // 간단한 mock QR 코드 (12x12 그리드 패턴)
+    function generateMockQR(seed){
+      // seed로 결정론적 패턴 생성
+      let hash = 0;
+      for(let i=0;i<seed.length;i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+      const cells = [];
+      for(let i=0;i<144;i++){
+        const v = ((hash * (i + 1)) >>> (i % 8)) & 1;
+        cells.push(`<div class="cell ${v ? 'on' : ''}"></div>`);
+      }
+      // 각 모서리에 위치 마커 (QR 스타일)
+      [0,1,10,11, 12,13,22,23, 24,25,34,35,
+       120,121,130,131, 132,133,142,143, 108,109,118,119,
+       8,9,18,19, 20,21,30,31, 32,33,42,43].forEach(idx => {
+        if(cells[idx]) cells[idx] = '<div class="cell on"></div>';
+      });
+      return cells.join('');
+    }
+
+    function renderVoucher(b){
+      const isGT = b.productType === 'golftel' || b.productType === 'golftel-air' || (b.productId && b.productId.startsWith('gt-'));
+      const golftel = isGT && b.productId ? D.GOLFTELS.find(g => g.id === b.productId) : null;
+      const hotel = golftel?.hotelId ? D.HOTELS.find(h => h.id === golftel.hotelId) : null;
+
+      const dayLabels = ['일','월','화','수','목','금','토'];
+      // 체크인 일자
+      const m = String(b.dates || '').match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+      const checkin = m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
+
+      // 라운딩 카드들 (selectedSlots)
+      const slots = b.packageSnapshot?.selectedSlots || [];
+      const roundCardsHtml = slots.length ? slots.map((s, i) => {
+        let dateStr = '날짜 미정';
+        let kindBadge = '';
+        if(checkin){
+          const d = new Date(checkin); d.setDate(d.getDate() + i);
+          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+          dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} (${dayLabels[d.getDay()]})`;
+          kindBadge = `<span class="kind ${isWeekend?'weekend':'weekday'}">${isWeekend?'주말':'주중'}</span>`;
+        }
+        const courseId = s.courseId;
+        const course = D.GOLF_COURSES.find(c => c.id === courseId);
+        const W = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[s.window] || s.window;
+        return `
+          <div class="round-card">
+            <div class="round-head">
+              <span class="round-no"><span class="num">${i+1}</span> ${i+1}라운딩</span>
+              <span class="round-date">📅 ${dateStr}${kindBadge}</span>
+            </div>
+            <div class="round-detail">
+              <div>⛳ <strong>${s.courseName}</strong>${course?.yardage ? ' · ' + course.yardage.toLocaleString() + 'yd' : ''}</div>
+              <div>🕐 <strong>${W} ${s.time}</strong> · 티오프 30분 전 체크인</div>
+              <div>🏌️ ${course?.holes || 18}홀 · Par ${course?.par || 72}</div>
+              <div>🚗 카트: ${golftel?.cartPolicy || '2인 1카트'}</div>
+            </div>
+          </div>
+        `;
+      }).join('') : (golftel ? `<div style="padding:16px;background:var(--bg-soft);border-radius:8px;font-size:13px;color:var(--ink-2);text-align:center;"><strong>${golftel.rounds}회 라운딩 OMT 자동 확정 대기 중</strong><br><span style="font-size:11px;color:var(--ink-3);">출발 7일 전까지 SMS/카카오톡으로 확정 안내</span></div>` : '');
+
+      // 포함 사항 칩
+      const inc = golftel?.inclusions || {};
+      const incChips = [];
+      if(inc.greenFee) incChips.push('그린피');
+      if(inc.cartFee) incChips.push('카트');
+      if(inc.caddyFee) incChips.push('캐디');
+      if(inc.golfShuttle) incChips.push('셔틀');
+      if(inc.airportPickup) incChips.push('공항 픽업');
+      if(inc.breakfast) incChips.push('조식');
+      if(inc.dinner) incChips.push('석식');
+
+      // 운영 정보
+      const op = golftel?.operatingInfo || {};
+
+      // 라운딩 일자 마지막 = 체크아웃 - 1
+      const checkout = checkin ? new Date(checkin) : null;
+      if(checkout) checkout.setDate(checkout.getDate() + (b.nights || golftel?.nights || 0));
+      const checkoutStr = checkout
+        ? `${checkout.getFullYear()}.${String(checkout.getMonth()+1).padStart(2,'0')}.${String(checkout.getDate()).padStart(2,'0')}`
+        : '-';
+      const checkinStr = checkin
+        ? `${checkin.getFullYear()}.${String(checkin.getMonth()+1).padStart(2,'0')}.${String(checkin.getDate()).padStart(2,'0')}`
+        : '-';
+
+      const sku = b.productType === 'golftel-air' ? '✈️ 골프투어' : (isGT ? '⛳ 골프텔' : '📦 패키지');
+
+      document.getElementById('voucherContent').innerHTML = `
+        <div class="v-head">
+          <div class="v-head-row">
+            <div>
+              <div class="v-brand">⛳ Oh My Trip · e-Voucher</div>
+              <h1 class="v-title">${b.productName || golftel?.name || '예약 바우처'}</h1>
+              <div class="v-sub">${sku} · ${b.country ? (D.COUNTRIES[b.country]?.name || b.country) : ''}${b.city ? ' · ' + b.city : ''}</div>
+            </div>
+            <div class="v-num">
+              <div class="v-num-label">예약 번호</div>
+              <div class="v-num-val">${b.bookingNumber}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="v-body">
+          <!-- 1. 예약자 정보 -->
+          <section class="v-section">
+            <div class="v-section-head">
+              <h3>👤 예약자 정보</h3>
+            </div>
+            <dl class="v-grid">
+              <dt>대표 예약자</dt><dd>${b.leadName || '-'}</dd>
+              <dt>연락처</dt><dd>${b.phone || '-'}</dd>
+              <dt>인원</dt><dd>성인 ${b.paxCount || 2}명</dd>
+              <dt>결제 금액</dt><dd style="color:var(--primary);font-size:15px;">${(b.total || 0).toLocaleString('ko-KR')}원</dd>
+            </dl>
+          </section>
+
+          ${isGT ? `
+          <!-- 2. 호텔 정보 -->
+          <section class="v-section">
+            <div class="v-section-head">
+              <h3>🏨 호텔 정보</h3>
+              <span class="badge">${b.nights || golftel?.nights}박 ${(b.nights || golftel?.nights) + 1}일</span>
+            </div>
+            <dl class="v-grid">
+              <dt>호텔명</dt><dd>${hotel?.name || golftel?.hotelName || '-'}</dd>
+              <dt>객실 타입</dt><dd>${b.packageSnapshot?.roomOption || golftel?.roomType || '2인 1실'}</dd>
+              <dt>체크인</dt><dd>${checkinStr} · ${op.checkIn || '14:00'} 이후</dd>
+              <dt>체크아웃</dt><dd>${checkoutStr} · ${op.checkOut || '12:00'} 까지</dd>
+              ${hotel?.area ? `<dt>위치</dt><dd>${hotel.area}</dd>` : ''}
+              ${golftel?.address ? `<dt>주소</dt><dd style="font-size:12px;">${golftel.address}</dd>` : ''}
+              ${golftel?.phone ? `<dt>전화</dt><dd class="mono">${golftel.phone}</dd>` : ''}
+            </dl>
+          </section>
+
+          <!-- 3. 골프 라운딩 -->
+          <section class="v-section">
+            <div class="v-section-head">
+              <h3>⛳ 골프 라운딩</h3>
+              <span class="badge">${b.rounds || golftel?.rounds}회 · ${golftel?.cartPolicy || '2인 1카트'}</span>
+            </div>
+            ${roundCardsHtml}
+          </section>
+
+          <!-- 4. 포함 사항 -->
+          ${incChips.length ? `
+          <section class="v-section">
+            <div class="v-section-head"><h3>🎁 포함 사항</h3></div>
+            <div class="incl-chips">
+              ${incChips.map(c => `<span class="incl-chip">✓ ${c}</span>`).join('')}
+            </div>
+          </section>
+          ` : ''}
+
+          <!-- 5. QR + 입장 안내 -->
+          <section class="v-section">
+            <div class="v-section-head"><h3>📲 입장 QR & 안내</h3></div>
+            <div class="qr-block">
+              <div class="qr-code">${generateMockQR(b.bookingNumber)}</div>
+              <div class="qr-info">
+                <div class="l">바우처 코드 (QR 스캔)</div>
+                <div class="b">${b.bookingNumber}</div>
+                <div class="s">호텔 체크인 시 본 바우처를 제시해주세요. 골프장에서는 예약자 본인 확인 후 라운딩이 진행됩니다. 캐디팁(${golftel?.caddyTip?.amount || '국가별 안내'})은 현장에서 직접 지불해주세요.</div>
+              </div>
+            </div>
+            <div class="v-note">
+              <strong>⚠️ 알아두실 점</strong>
+              · 티오프 30분 전 골프장 도착·체크인 필수<br>
+              · 우천 시 코스 캔슬 불가 — 레인체크(추후 사용권) 제공<br>
+              · 여권 잔여 유효기간 6개월 이상 필수<br>
+              · ${b.ownership === 'direct' ? '<strong>OMT 직영 상품</strong> · 현지 OMT 라운저 24h 대응' : '<strong>OMT 파트너 상품</strong> · 한국어 카카오 상담 가능'}
+            </div>
+          </section>
+          ` : `
+          <!-- 일반 패키지 (간략) -->
+          <section class="v-section">
+            <div class="v-section-head"><h3>🗓️ 일정 안내</h3></div>
+            <dl class="v-grid">
+              <dt>여행 기간</dt><dd>${b.dates}</dd>
+              <dt>여행 일수</dt><dd>${b.nights || 0}박 ${(b.nights || 0) + 1}일</dd>
+            </dl>
+            <div class="v-note">
+              <strong>📌 예약 안내</strong>
+              · 카카오톡으로 항공권 e-티켓 및 호텔 바우처가 별도 발송됩니다.<br>
+              · 출발 72시간 전 알림톡 발송
+            </div>
+          </section>
+
+          <section class="v-section">
+            <div class="v-section-head"><h3>📲 바우처 코드</h3></div>
+            <div class="qr-block">
+              <div class="qr-code">${generateMockQR(b.bookingNumber)}</div>
+              <div class="qr-info">
+                <div class="l">바우처 코드</div>
+                <div class="b">${b.bookingNumber}</div>
+                <div class="s">현장에서 본 바우처를 제시해주세요.</div>
+              </div>
+            </div>
+          </section>
+          `}
+        </div>
+
+        <div class="v-foot">
+          <div>📞 카카오 24h 상담 · 1588-0000</div>
+          <div class="mono">VOUCHER-V1 · ${new Date().toISOString().slice(0,10)}</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

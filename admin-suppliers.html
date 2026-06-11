@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELLIS 공급사 콘솔 | 오마이트립 운영</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --radius:10px;--radius-lg:14px;
+      --header-h:60px;--max-w:1440px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    /* Header — admin-channels와 동일 톤 */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;color:var(--ink);}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;}
+    .btn-new{
+      padding:7px 14px;border-radius:8px;background:var(--primary);color:#fff;
+      font-weight:900;font-size:12px;cursor:pointer;
+    }
+    .btn-new:hover{background:#FF8A55;}
+
+    .page-head{padding:32px 0 24px;border-bottom:1px solid var(--line);}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+    .page-title{font-size:28px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .page-sub{font-size:14px;color:var(--ink-3);margin:0;}
+
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin:24px 0;}
+    .kpi{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .kpi-lb{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+    .kpi-val{font-size:28px;font-weight:900;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .kpi-val .small{font-size:14px;color:var(--ink-3);font-weight:700;margin-left:4px;}
+    .kpi-diff{font-size:11px;margin-top:6px;font-weight:700;}
+    .kpi-diff.up{color:var(--success);}
+    .kpi-diff.warn{color:var(--warning);}
+
+    .section{margin:28px 0;}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+    .sec-title{font-size:18px;font-weight:900;letter-spacing:-0.01em;margin:0;}
+    .sec-sub{font-size:12px;color:var(--ink-3);font-weight:600;}
+
+    /* Supplier grid */
+    .supplier-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;}
+    .supplier{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:18px;transition:border-color .15s, transform .15s;
+    }
+    .supplier:hover{border-color:var(--line-2);transform:translateY(-2px);}
+    .supplier.tier-1{border-left:3px solid var(--success);}
+    .supplier.tier-2{border-left:3px solid var(--info);}
+    .supplier.tier-3{border-left:3px solid var(--ink-3);}
+    .sup-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .sup-name{font-size:15px;font-weight:900;letter-spacing:-0.01em;}
+    .sup-name .id{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;}
+    .sup-tier{
+      display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;
+      font-size:11px;font-weight:800;letter-spacing:.02em;font-family:'JetBrains Mono',monospace;
+    }
+    .sup-tier.tier-1{background:rgba(57,211,83,.12);color:var(--success);}
+    .sup-tier.tier-2{background:rgba(88,166,255,.12);color:var(--info);}
+    .sup-tier.tier-3{background:var(--bg-3);color:var(--ink-3);}
+    .sup-cat{font-size:12px;color:var(--ink-3);margin:0 0 12px;}
+
+    .sup-metrics{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+      padding-top:12px;border-top:1px solid var(--line);
+    }
+    .sup-m .m-lb{font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;}
+    .sup-m .m-val{font-size:14px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .sup-m .m-val.ok{color:var(--success);}
+    .sup-m .m-val.warn{color:var(--warning);}
+    .sup-foot{
+      margin-top:12px;padding-top:10px;border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;font-size:11px;
+    }
+    .sup-foot .country{color:var(--accent);font-weight:800;}
+    .sup-foot .commission{color:var(--success);font-weight:900;font-family:'JetBrains Mono',monospace;}
+
+    /* Activity inventory table */
+    .inv-table{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
+    }
+    .inv-table table{width:100%;border-collapse:collapse;font-size:13px;}
+    .inv-table th{
+      padding:12px 16px;background:var(--bg-3);color:var(--ink-3);
+      font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;text-align:left;
+      border-bottom:1px solid var(--line);
+    }
+    .inv-table td{padding:12px 16px;border-bottom:1px solid var(--line);color:var(--ink-2);}
+    .inv-table tr:last-child td{border-bottom:none;}
+    .inv-table tr:hover td{background:rgba(255,255,255,.02);}
+    .inv-table .name{color:var(--ink);font-weight:800;}
+    .inv-supplier{
+      display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;
+      font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;
+      background:var(--bg-3);color:var(--accent);
+    }
+    .stock-bar{
+      width:120px;height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;position:relative;
+    }
+    .stock-bar > div{height:100%;background:var(--success);transition:width .3s;}
+    .stock-bar.warn > div{background:var(--warning);}
+    .stock-bar.crit > div{background:var(--danger);}
+    .status-pill{
+      display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;
+      font-size:11px;font-weight:800;letter-spacing:.02em;font-family:'JetBrains Mono',monospace;
+    }
+    .status-pill.live{background:rgba(57,211,83,.12);color:var(--success);}
+    .status-pill.pending{background:rgba(245,158,11,.12);color:var(--warning);}
+    .status-pill.paused{background:var(--bg-3);color:var(--ink-3);}
+    .status-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+    /* Quick filters */
+    .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+    .filter-pill{
+      padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg-2);
+      font-size:12px;font-weight:800;color:var(--ink-3);cursor:pointer;transition:all .15s;
+    }
+    .filter-pill:hover{color:var(--ink);border-color:var(--line-2);}
+    .filter-pill.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+    @media (max-width:1024px){
+      .kpi-grid{grid-template-columns:1fr 1fr;}
+      .supplier-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:768px){
+      .kpi-grid, .supplier-grid{grid-template-columns:1fr;}
+      .gnb-mini{display:none;}
+      .inv-table{font-size:11px;overflow-x:auto;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">CONSOLE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-channels.html">채널 매니저</a>
+        <a href="#" class="on">공급사</a>
+        <a href="#" onclick="alert('운영 콘솔 데모')">예약 시스템</a>
+        <a href="#" onclick="alert('운영 콘솔 데모')">크리에이터</a>
+        <a href="#" onclick="alert('운영 콘솔 데모')">정산</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn-new" onclick="alert('신규 공급사 등록 폼 (프로토타입)')">+ 신규 공급사</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">🎫 Activity / Rental Supplier Extranet · v1.0</div>
+      <h1 class="page-title">공급사 운영 콘솔</h1>
+      <p class="page-sub">액티비티·렌트 공급사 통합 관리 — 호텔/골프장 채널 매니저(admin-channels.html)와 자매 모듈</p>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Suppliers -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">🏢 공급사 (9개)</h2>
+        <span class="sec-sub">Tier 1 = 핵심 파트너 (커미션 협의) · Tier 2 = 일반 · Tier 3 = 단발성</span>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-pill on" data-f="all">전체</button>
+        <button class="filter-pill" data-f="japan">🗻 일본</button>
+        <button class="filter-pill" data-f="vietnam">🌊 베트남</button>
+        <button class="filter-pill" data-f="thailand">🛕 태국</button>
+        <button class="filter-pill" data-f="philippines">🏖️ 필리핀</button>
+        <button class="filter-pill" data-f="korea">🇰🇷 한국</button>
+      </div>
+      <div class="supplier-grid" id="supplierGrid"></div>
+    </section>
+
+    <!-- Inventory -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">🎫 액티비티 인벤토리</h2>
+        <span class="sec-sub">12개 액티비티 · 실시간 재고/판매가/공급사 매핑</span>
+      </div>
+      <div class="inv-table">
+        <table>
+          <thead>
+            <tr>
+              <th>액티비티</th>
+              <th>국가 · 도시</th>
+              <th>공급사</th>
+              <th>판매가</th>
+              <th>OMT 마진</th>
+              <th>재고</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="invTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div style="text-align:center;padding:40px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS Console · 공급사 모듈 · 운영자 전용
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    const D = window.OMT.DATA;
+
+    // ===== 공급사 mock (9개) =====
+    const SUPPLIERS = [
+      // Tier 1 — 핵심 파트너
+      { id:'sup-jp-usj',     name:'USJ Korea',         tier:'tier-1', category:'테마파크 입장권',     country:'japan',      countryLabel:'🗻 일본',     activities:14, monthlySales:42, status:'live',    commission:18, contact:'usj-partner@omt.kr' },
+      { id:'sup-vn-bnh',     name:'바나힐스 인터내셔널', tier:'tier-1', category:'테마파크·골프 입장',  country:'vietnam',    countryLabel:'🌊 베트남',   activities:9,  monthlySales:38, status:'live',    commission:20, contact:'bnh@omt.kr' },
+      { id:'sup-th-7-eleven',name:'태국 어트랙션 그룹',  tier:'1',     category:'야시장·쇼핑·티켓',     country:'thailand',   countryLabel:'🛕 태국',     activities:21, monthlySales:34, status:'live',    commission:15, contact:'th-attr@omt.kr' },
+      // Tier 2 — 일반 파트너
+      { id:'sup-vn-hoian',   name:'호이안 투어 코리아', tier:'tier-2', category:'시티 투어·쿠킹클래스',  country:'vietnam',    countryLabel:'🌊 베트남',   activities:7,  monthlySales:18, status:'live',    commission:22, contact:'hoian@omt.kr' },
+      { id:'sup-ph-hoptour', name:'세부 호핑 투어',     tier:'tier-2', category:'호핑·다이빙·스노클링', country:'philippines',countryLabel:'🏖️ 필리핀',   activities:5,  monthlySales:12, status:'live',    commission:25, contact:'cebu-hop@omt.kr' },
+      { id:'sup-jp-onsen',   name:'유후인 료칸 협회',   tier:'tier-2', category:'온천·료칸 체험',     country:'japan',      countryLabel:'🗻 일본',     activities:4,  monthlySales:8,  status:'pending', commission:18, contact:'onsen@omt.kr' },
+      // Tier 3 — 단발성
+      { id:'sup-th-spa',     name:'방콕 럭셔리 스파',   tier:'tier-3', category:'스파·웰니스',         country:'thailand',   countryLabel:'🛕 태국',     activities:3,  monthlySales:5,  status:'live',    commission:30, contact:'spa@omt.kr' },
+      { id:'sup-ph-rental',  name:'세부 렌트카 컴퍼니', tier:'tier-3', category:'렌트카 서비스',       country:'philippines',countryLabel:'🏖️ 필리핀',   activities:2,  monthlySales:3,  status:'paused',  commission:12, contact:'rental@omt.kr' },
+      { id:'sup-kr-yonsei',  name:'연세 의료센터 (방콕 시뮬)', tier:'tier-3', category:'한국인 의료 통역', country:'korea',     countryLabel:'🇰🇷 한국',     activities:1,  monthlySales:2,  status:'live',    commission:0,  contact:'medical@omt.kr' }
+    ];
+
+    // ===== 액티비티 인벤토리 (data.js ACTIVITIES + supplier 매핑) =====
+    const SUPPLIER_MAP = {
+      'a-usj-1day':        'sup-jp-usj',
+      'a-usj-express':     'sup-jp-usj',
+      'a-osaka-sakura':    'sup-jp-usj',
+      'a-tokyo-tower':     'sup-jp-usj',
+      'a-fukuoka-onsen':   'sup-jp-onsen',
+      'a-danang-banahill': 'sup-vn-bnh',
+      'a-hoian-lantern':   'sup-vn-hoian',
+      'a-nhatrang-hop':    'sup-vn-bnh'
+    };
+
+    // Mock 재고
+    const STOCK_DATA = {
+      'a-usj-1day':        { stock:248, max:300, sold:124 },
+      'a-usj-express':     { stock:80,  max:100, sold:52 },
+      'a-osaka-sakura':    { stock:42,  max:50,  sold:18 },
+      'a-tokyo-tower':     { stock:180, max:200, sold:48 },
+      'a-fukuoka-onsen':   { stock:8,   max:30,  sold:12 },   // 재고 부족
+      'a-danang-banahill': { stock:165, max:200, sold:88 },
+      'a-hoian-lantern':   { stock:24,  max:80,  sold:42 },   // 재고 낮음
+      'a-nhatrang-hop':    { stock:55,  max:80,  sold:18 }
+    };
+
+    const COUNTRY_NAME = { japan:'일본', vietnam:'베트남', thailand:'태국', philippines:'필리핀', korea:'한국' };
+    const COUNTRY_FLAG = { japan:'🗻', vietnam:'🌊', thailand:'🛕', philippines:'🏖️', korea:'🇰🇷' };
+
+    // ===== KPI =====
+    function renderKPI(){
+      const totalSuppliers = SUPPLIERS.length;
+      const liveCount = SUPPLIERS.filter(s => s.status === 'live').length;
+      const totalSales = SUPPLIERS.reduce((sum, s) => sum + s.monthlySales, 0);
+      const lowStockCount = Object.values(STOCK_DATA).filter(st => st.stock < st.max * 0.2).length;
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi">
+          <div class="kpi-lb">전체 공급사</div>
+          <div class="kpi-val">${totalSuppliers}<span class="small">개</span></div>
+          <div class="kpi-diff up">▲ ${liveCount}개 활성 · ${totalSuppliers - liveCount}개 점검 필요</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">월간 판매 건수</div>
+          <div class="kpi-val">${totalSales}<span class="small">건</span></div>
+          <div class="kpi-diff up">▲ 전월 대비 +12%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">평균 커미션율</div>
+          <div class="kpi-val">${Math.round(SUPPLIERS.reduce((s,x) => s+x.commission, 0)/SUPPLIERS.length)}<span class="small">%</span></div>
+          <div class="kpi-diff up">▲ Tier 1 기준 18.5%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">재고 부족 알림</div>
+          <div class="kpi-val">${lowStockCount}<span class="small">건</span></div>
+          <div class="kpi-diff ${lowStockCount > 0 ? 'warn' : 'up'}">${lowStockCount > 0 ? '⚠️ 재고 보충 요청 필요' : '✓ 모든 인벤토리 정상'}</div>
+        </div>
+      `;
+    }
+
+    // ===== Suppliers =====
+    let supplierFilter = 'all';
+    function renderSuppliers(){
+      const list = supplierFilter === 'all' ? SUPPLIERS : SUPPLIERS.filter(s => s.country === supplierFilter);
+      document.getElementById('supplierGrid').innerHTML = list.map(s => {
+        const statusLabel = { live:'● LIVE', pending:'● PENDING', paused:'● PAUSED' }[s.status];
+        return `
+          <div class="supplier ${s.tier === '1' ? 'tier-1' : s.tier}">
+            <div class="sup-head">
+              <div class="sup-name">${s.name}<span class="id">${s.id}</span></div>
+              <span class="status-pill ${s.status}">${statusLabel}</span>
+            </div>
+            <div class="sup-cat">${s.category}</div>
+            <div class="sup-metrics">
+              <div class="sup-m">
+                <div class="m-lb">제공 액티비티</div>
+                <div class="m-val">${s.activities}개</div>
+              </div>
+              <div class="sup-m">
+                <div class="m-lb">월간 판매</div>
+                <div class="m-val ${s.monthlySales > 20 ? 'ok' : (s.monthlySales > 5 ? '' : 'warn')}">${s.monthlySales}건</div>
+              </div>
+            </div>
+            <div class="sup-foot">
+              <span class="country">${s.countryLabel}</span>
+              <span class="commission">${s.commission}% 커미션</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ===== Activity Inventory =====
+    function renderInventory(){
+      const activities = D.ACTIVITIES || [];
+      document.getElementById('invTable').innerHTML = activities.map(a => {
+        const supplier = SUPPLIERS.find(s => s.id === SUPPLIER_MAP[a.id]) || SUPPLIERS[0];
+        const stock = STOCK_DATA[a.id] || { stock: 100, max: 100, sold: 0 };
+        const stockPct = (stock.stock / stock.max) * 100;
+        const stockClass = stockPct < 15 ? 'crit' : (stockPct < 30 ? 'warn' : '');
+        const country = a.city ? Object.entries(D.CITIES).find(([k,v]) => v.city === a.city)?.[1]?.country : null;
+        const countryLabel = country ? `${COUNTRY_FLAG[country] || ''} ${COUNTRY_NAME[country] || country}` : '-';
+        const margin = Math.round(a.price * (supplier.commission / 100));
+
+        return `
+          <tr>
+            <td><span class="name">${a.title || a.id}</span><div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${a.meta || ''}</div></td>
+            <td>${countryLabel} · ${a.city || '-'}</td>
+            <td><span class="inv-supplier">${supplier.id}</span><div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${supplier.name}</div></td>
+            <td class="mono">${(a.price || 0).toLocaleString('ko-KR')}원</td>
+            <td class="mono" style="color:var(--success);">+${margin.toLocaleString('ko-KR')}원 (${supplier.commission}%)</td>
+            <td>
+              <div class="stock-bar ${stockClass}"><div style="width:${stockPct}%;"></div></div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-family:'JetBrains Mono',monospace;">${stock.stock} / ${stock.max} · 판매 ${stock.sold}</div>
+            </td>
+            <td><span class="status-pill ${supplier.status}">${supplier.status === 'live' ? '● 판매중' : (supplier.status === 'pending' ? '● 승인대기' : '● 일시중지')}</span></td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--ink-3);">액티비티 데이터 없음</td></tr>';
+    }
+
+    // ===== Bindings =====
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        supplierFilter = btn.dataset.f;
+        renderSuppliers();
+      });
+    });
+
+    // INIT
+    renderKPI();
+    renderSuppliers();
+    renderInventory();
+  </script>
+</body>
+</html>

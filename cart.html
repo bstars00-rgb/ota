@@ -45,6 +45,9 @@
     .ci-tags{display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap;}
     .ci-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--primary-soft);color:var(--primary);font-weight:800;}
     .ci-tag.orig{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .ci-tag.golftel{background:linear-gradient(135deg,#075440,#0B6E4F);color:#fff;}
+    .ci-tag.golftel-air{background:linear-gradient(135deg,#E85826,#FF6B35);color:#fff;}
+    .ci-tag.direct{background:#FEF3C7;color:#92400E;}
     .ci-name{font-size:14px;font-weight:800;line-height:1.35;}
     .ci-sub{font-size:12px;color:var(--ink-3);margin-top:2px;}
     .ci-date{font-size:11px;color:var(--ink-2);margin-top:4px;}
@@ -208,15 +211,21 @@
     document.getElementById('omt-main').style.display = '';
     document.getElementById('emptyMain').style.display = 'none';
 
-    document.getElementById('itemsList').innerHTML = cart.map(it => `
+    document.getElementById('itemsList').innerHTML = cart.map(it => {
+      const isGT = it.type === 'GOLFTEL' || it.type === 'GOLFTEL_AIR' || (it.productType && it.productType.startsWith('golftel'));
+      const tagClass = it.type === 'GOLFTEL_AIR' ? 'golftel-air' : (isGT ? 'golftel' : (it.orig ? 'orig' : ''));
+      const tagLabel = it.type === 'GOLFTEL_AIR' ? '✈️ 골프투어' : (it.type === 'GOLFTEL' ? '⛳ 골프텔' : it.type);
+      const directTag = isGT && it.orig ? '<span class="ci-tag direct">⭐ OMT 직영</span>' : '';
+      const productLink = isGT ? `golftel.html?id=${it.productId||''}` : `product.html?id=${it.productId||''}`;
+      return `
       <div class="cart-item" data-cartid="${it.cartId}">
         <div class="ci-check ${it.checked?'checked':''}" onclick="toggleCheck('${it.cartId}')"></div>
-        <div class="ci-thumb" style="background-image:url('${it.img}')" onclick="goToProduct('${it.productId||''}')"></div>
-        <div class="ci-info" onclick="goToProduct('${it.productId||''}')">
-          <div class="ci-tags"><span class="ci-tag ${it.orig?'orig':''}">${it.type}</span></div>
+        <div class="ci-thumb" style="background-image:url('${it.img}')" onclick="location.href='${productLink}'"></div>
+        <div class="ci-info" onclick="location.href='${productLink}'">
+          <div class="ci-tags"><span class="ci-tag ${tagClass}">${tagLabel}</span>${directTag}</div>
           <div class="ci-name">${it.name}</div>
           <div class="ci-sub">${it.sub||''}</div>
-          <div class="ci-date">📅 ${it.dates||'-'} · ${it.pax||'-'}</div>
+          <div class="ci-date">📅 ${it.dates||'-'} · ${it.pax||'-'}${isGT && it.selectedSlots?.length ? ` · 🕐 슬롯 ${it.selectedSlots.length}건` : ''}</div>
         </div>
         <div class="ci-right">
           <div class="ci-price">${krw(it.price)}</div>
@@ -225,7 +234,8 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const checked = cart.filter(i => i.checked).length;
     document.getElementById('itemSummary').textContent = `총 ${cart.length}개 상품 · 선택된 ${checked}개`;
