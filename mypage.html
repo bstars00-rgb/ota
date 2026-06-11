@@ -782,15 +782,15 @@
     document.getElementById('dashCoupons').textContent = OMT.State.getAvailableCoupons().length + '장';
     document.getElementById('dashTrips').textContent = OMT.State.getBookings().filter(b => b.status === 'completed').length + '회';
 
-    // 알림 프리뷰 (최근 3건)
+    // 알림 프리뷰 (최근 3건) — 클릭 시 딥링크
     const notifs = OMT.State.getNotifications().slice(0, 3);
     document.getElementById('notifPreview').innerHTML = notifs.map(n => `
-      <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}');goTab('notifications')">
+      <div class="notif-item ${n.read?'':'unread'}" onclick="openNotif('${n.id}')">
         <div class="notif-ic">${n.icon}</div>
         <div class="notif-body">
           <div class="notif-title">${n.title}</div>
           <div class="notif-text">${n.body}</div>
-          <div class="notif-meta">${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}</div>
+          <div class="notif-meta">${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}${n.actionLabel ? ' · <span style="color:var(--primary);font-weight:800;">'+n.actionLabel+'</span>' : ''}</div>
         </div>
         ${n.read ? '' : '<div class="notif-unread-dot"></div>'}
       </div>
@@ -844,12 +844,12 @@
     document.getElementById('notifSub').textContent = `전체 ${list.length}건 · 안 읽음 ${OMT.State.getUnreadNotifCount()}건`;
     document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
     document.getElementById('notifList').innerHTML = list.map(n => `
-      <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}')">
+      <div class="notif-item ${n.read?'':'unread'}" onclick="openNotif('${n.id}')">
         <div class="notif-ic">${n.icon}</div>
         <div class="notif-body">
           <div class="notif-title">${n.title}</div>
           <div class="notif-text">${n.body}</div>
-          <div class="notif-meta">${n.date} · ${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}</div>
+          <div class="notif-meta">${n.date} · ${n.daysAgo === 0 ? '오늘' : n.daysAgo + '일 전'}${n.actionLabel ? ' · <span style="color:var(--primary);font-weight:800;">'+n.actionLabel+'</span>' : ''}</div>
         </div>
         ${n.read ? '' : '<div class="notif-unread-dot"></div>'}
       </div>
@@ -859,6 +859,23 @@
     OMT.State.markNotifRead(id);
     renderNotifications();
     document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
+  };
+  // 알림 클릭 → 읽음 처리 + 딥링크 이동 (link 있으면)
+  window.openNotif = (id) => {
+    OMT.State.markNotifRead(id);
+    const n = OMT.State.getNotifications().find(x => x.id === id);
+    document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
+    if(n?.link){
+      // 같은 페이지 mypage 내부 해시면 탭 전환
+      if(n.link.startsWith('mypage.html#')){
+        const tab = n.link.split('#')[1];
+        if(tab) goTab(tab);
+        return;
+      }
+      location.href = n.link;
+    } else {
+      renderNotifications();
+    }
   };
   window.markAllRead = () => {
     OMT.State.markAllNotifsRead();

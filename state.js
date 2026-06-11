@@ -10,7 +10,7 @@
 
   const KEYS = {
     cart:          'omt_cart_v2',
-    bookings:      'omt_bookings_v2',
+    bookings:      'omt_bookings_v3',  // v3: 골프텔 시드 추가 (2026-06-11)
     wishlist:      'omt_wishlist_v2',
     followed:      'omt_followed_creators',
     likedPosts:    'omt_liked_posts',

@@ -659,6 +659,10 @@
     // ===== Render =====
     function render(){
       const g = D.GOLFTELS.find(x => x.id === id);
+      // 최근 본 상품 자동 트래킹 (state.js)
+      if(g && State?.addRecentlyViewed){
+        try { State.addRecentlyViewed(g.id); } catch(e){}
+      }
       if(!g){
         document.getElementById('content').innerHTML = `
           <div class="loading">

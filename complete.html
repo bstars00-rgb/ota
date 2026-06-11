@@ -354,7 +354,6 @@
   if(bkParam){
     const b = OMT.State.getBooking(bkParam);
     if(b){
-      // Adapt to legacy shape that this page uses
       const pkg = b.packageSnapshot || {};
       booking = {
         bookingNumber: b.bookingNumber,
@@ -364,7 +363,17 @@
         phone: b.phone,
         package: pkg,
         paxCount: b.paxCount,
-        createdAt: b.createdAt
+        createdAt: b.createdAt,
+        // 골프텔 컨텍스트 (ELLIS 호환)
+        productId: b.productId,
+        productType: b.productType,
+        productName: b.productName,
+        country: b.country,
+        city: b.city,
+        ownership: b.ownership,
+        nights: b.nights,
+        rounds: b.rounds,
+        dates: b.dates
       };
     }
   }
@@ -385,15 +394,26 @@
     kakao:'카카오페이', naver:'네이버페이', card:'신용카드', bank:'무통장입금'
   };
 
+  // 골프텔 여부 판정
+  function isGolftelBooking(b){
+    if(b.productType === 'golftel' || b.productType === 'golftel-air') return true;
+    if(b.productId && b.productId.startsWith('gt-')) return true;
+    return false;
+  }
+
   function renderBooking(){
     const b = booking;
-    const pkg = b.package;
+    const pkg = b.package || {};
+    const isGT = isGolftelBooking(b);
+    const golftel = isGT && b.productId ? OMT.DATA.GOLFTELS.find(g => g.id === b.productId) : null;
 
     document.getElementById('leadName').textContent = b.leadName || '고객';
     document.getElementById('bkNum').textContent = b.bookingNumber;
     document.getElementById('bkName').textContent = b.leadName;
     document.getElementById('bkPhone').textContent = b.phone;
-    document.getElementById('bkDates').textContent = pkg.dates + ' · ' + pkg.nights + '박';
+    const datesStr = b.dates || pkg.dates || '';
+    const nights = b.nights || pkg.nights || golftel?.nights || 0;
+    document.getElementById('bkDates').textContent = datesStr + (nights ? (' · ' + nights + '박') : '');
     document.getElementById('bkPax').textContent = '성인 ' + b.paxCount + '명';
     document.getElementById('bkPay').textContent = PAY_LABELS[b.paymentMethod] || b.paymentMethod;
     document.getElementById('bkTotal').textContent = krw(b.total);
@@ -402,21 +422,81 @@
     document.getElementById('bkCreated').textContent =
       `${created.getFullYear()}.${String(created.getMonth()+1).padStart(2,'0')}.${String(created.getDate()).padStart(2,'0')} ${String(created.getHours()).padStart(2,'0')}:${String(created.getMinutes()).padStart(2,'0')}`;
 
+    // ===== 상태 뱃지 SKU 라벨 =====
+    const statusEl = document.querySelector('.bk-status');
+    if(statusEl){
+      if(b.productType === 'golftel-air')     statusEl.textContent = '✈️ 골프투어 확정';
+      else if(b.productType === 'golftel')    statusEl.textContent = '⛳ 골프텔 확정';
+      else                                    statusEl.textContent = 'CONFIRMED';
+    }
+
+    // ===== 아이템 리스트 =====
     const items = [];
-    items.push({
-      ic:'✈️', t:'항공',
-      n:`${pkg.flight.airline} ${pkg.flight.out.depAp}↔${pkg.flight.out.arrAp}`,
-      s:'왕복 · 1인', p: pkg.flight.price
-    });
-    items.push({
-      ic:'🏨', t:'호텔',
-      n: pkg.hotel.name,
-      s: `${pkg.hotel.areaLabel} · ${pkg.nights}박`,
-      p: pkg.hotel.price * pkg.nights
-    });
-    (pkg.activities || []).forEach(a => {
-      items.push({ ic:'🎫', t:'액티비티', n:a.title, s:a.meta, p:a.price });
-    });
+
+    if(isGT){
+      // 골프텔: 호텔 + 라운딩 슬롯들 + (옵션 항공)
+      const hotelName = golftel?.hotelName || pkg.hotel?.name || b.productName || '호텔';
+      const hotelArea = golftel?.distance?.city || pkg.hotel?.areaLabel || (b.city || '');
+      const roomLabel = pkg.roomOption ? ` · ${pkg.roomOption}` : '';
+      items.push({
+        ic:'🏨', t:'호텔 (' + nights + '박)',
+        n: hotelName + roomLabel,
+        s: hotelArea + (golftel?.inclusions?.breakfast ? ' · 조식 포함' : ''),
+        p: '패키지 포함'
+      });
+
+      // 선택된 슬롯들
+      const slots = pkg.selectedSlots || [];
+      if(slots.length){
+        slots.forEach((s, i) => {
+          const W = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[s.window] || s.window;
+          items.push({
+            ic:'⛳', t:`${i+1}라운딩`,
+            n: s.courseName,
+            s: `${W} ${s.time} · ${s.price ? s.price.toLocaleString('ko-KR')+'원 (참고)' : '확정 시간'}`,
+            p: '패키지 포함'
+          });
+        });
+      } else if(golftel) {
+        // 미선택 — OMT 자동 확정 안내
+        items.push({
+          ic:'⛳', t:`${golftel.rounds}라운딩`,
+          n: golftel.courseIds.map(cid => OMT.DATA.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean).join(' · '),
+          s: '티타임은 OMT가 골프장과 협의 후 24h 내 확정',
+          p: '패키지 포함'
+        });
+      }
+
+      // 항공 (golftel-air인 경우)
+      if(b.productType === 'golftel-air'){
+        items.push({
+          ic:'✈️', t:'항공권',
+          n:`인천 ↔ ${b.city || '현지'} 왕복`,
+          s:'골프투어 결합 상품 — e-티켓 출발 72h 전 발송',
+          p:'패키지 포함'
+        });
+      }
+    } else {
+      // 일반 패키지 (기존 로직)
+      if(pkg.flight){
+        items.push({
+          ic:'✈️', t:'항공',
+          n:`${pkg.flight.airline} ${pkg.flight.out.depAp}↔${pkg.flight.out.arrAp}`,
+          s:'왕복 · 1인', p: krw(pkg.flight.price)
+        });
+      }
+      if(pkg.hotel){
+        items.push({
+          ic:'🏨', t:'호텔',
+          n: pkg.hotel.name,
+          s: `${pkg.hotel.areaLabel} · ${pkg.nights || nights}박`,
+          p: krw(pkg.hotel.price * (pkg.nights || nights))
+        });
+      }
+      (pkg.activities || []).forEach(a => {
+        items.push({ ic:'🎫', t:'액티비티', n:a.title, s:a.meta, p:krw(a.price) });
+      });
+    }
 
     document.getElementById('bkItems').innerHTML = items.map(i => `
       <div class="bk-item">
@@ -426,12 +506,88 @@
           <div class="n">${i.n}</div>
           <div class="s">${i.s}</div>
         </div>
-        <div class="p">${krw(i.p)}</div>
+        <div class="p" style="${typeof i.p === 'string' && i.p.includes('포함') ? 'color:var(--ink-3);font-size:12px;font-weight:600;' : ''}">${i.p}</div>
       </div>
     `).join('');
 
+    // ===== 다음 안내 섹션 골프텔용 교체 =====
+    if(isGT && golftel){
+      renderGolftelNextSteps(golftel, b);
+    }
+
     // TODO: API 연동 - POST /api/bookings/:id/confirmation
-    //   서버 응답 확인 후 카카오톡 알림톡 + 이메일 발송 트리거
+  }
+
+  // 골프텔 전용 "앞으로의 안내"
+  function renderGolftelNextSteps(g, b){
+    const nextSteps = document.querySelector('.next-steps');
+    if(!nextSteps) return;
+    const isAir = b.productType === 'golftel-air';
+    const ownLabel = b.ownership === 'direct' ? '⭐ OMT 직영' : '🤝 OMT 파트너';
+    const caddyAmt = g.caddyTip?.amount || '현지 안내';
+    const pickup = (g.pickupZones || []).find(p => /무료|0/.test(p.fee));
+
+    nextSteps.innerHTML = `
+      <h3>📌 앞으로의 안내 <span style="font-size:12px;font-weight:700;color:var(--ink-3);margin-left:6px;">${ownLabel}</span></h3>
+      <div class="ns-row">
+        <div class="ns-icon">✉️</div>
+        <div class="ns-text">
+          <div class="ns-t">예약 확인서 발송 (즉시)</div>
+          <div class="ns-s">카카오톡 + 이메일 — 골프텔 바우처 포함</div>
+        </div>
+      </div>
+      ${isAir ? `
+      <div class="ns-row">
+        <div class="ns-icon">🎫</div>
+        <div class="ns-text">
+          <div class="ns-t">항공권 e-티켓 (출발 72시간 전)</div>
+          <div class="ns-s">카카오톡 알림톡으로 자동 전송</div>
+        </div>
+      </div>` : ''}
+      <div class="ns-row">
+        <div class="ns-icon">🏨</div>
+        <div class="ns-text">
+          <div class="ns-t">호텔 바우처 (출발 48시간 전)</div>
+          <div class="ns-s">${g.hotelName || '호텔'} 체크인 ${g.operatingInfo?.checkIn || '14:00'} / 체크아웃 ${g.operatingInfo?.checkOut || '12:00'}</div>
+        </div>
+      </div>
+      <div class="ns-row">
+        <div class="ns-icon">⛳</div>
+        <div class="ns-text">
+          <div class="ns-t">${(b.package?.selectedSlots?.length ? '티오프 시간 확정' : '티오프 시간 24h 내 확정')}</div>
+          <div class="ns-s">티오프 30분 전 골프장 도착·체크인 필수${(b.package?.selectedSlots?.length ? '' : ' · OMT가 골프장과 협의 후 알림톡 발송')}</div>
+        </div>
+      </div>
+      ${pickup ? `
+      <div class="ns-row">
+        <div class="ns-icon">🚐</div>
+        <div class="ns-text">
+          <div class="ns-t">공항 픽업 (도착 시)</div>
+          <div class="ns-s">${pickup.zone} · ${pickup.fee} · 한국어 가능 기사 대기</div>
+        </div>
+      </div>` : ''}
+      <div class="ns-row">
+        <div class="ns-icon">💰</div>
+        <div class="ns-text">
+          <div class="ns-t">캐디팁 안내 (현장 결제)</div>
+          <div class="ns-s">적정 금액: ${caddyAmt} · ${g.caddyTip?.included ? '본 상품 포함' : '서비스 만족도에 따라 조정'}</div>
+        </div>
+      </div>
+      <div class="ns-row">
+        <div class="ns-icon">👔</div>
+        <div class="ns-text">
+          <div class="ns-t">복장 / 장비 안내</div>
+          <div class="ns-s">카라티(피케티) 권장 · 청바지/짧은 반바지 입장 불가 · 클럽 렌탈 ${g.equipmentRental?.price || '현장 문의'}</div>
+        </div>
+      </div>
+      <div class="ns-row">
+        <div class="ns-icon">📞</div>
+        <div class="ns-text">
+          <div class="ns-t">24시간 카카오 상담</div>
+          <div class="ns-s">${b.ownership === 'direct' ? '현지 OMT 라운저 직접 대응' : '현지 파트너 운영'} · 1588-0000</div>
+        </div>
+      </div>
+    `;
   }
 
   /* =========================================================================

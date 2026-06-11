@@ -1328,27 +1328,87 @@
   /* =====================================================================
      10) Initial Bookings / Coupons / Points (for mypage seed)
      ===================================================================== */
+  // 동적 dates 헬퍼 — 오늘 기준 ±N일 → "2026.MM.DD" 포맷
+  const _bkDateStr = (offsetDays) => {
+    const d = new Date(); d.setDate(d.getDate() + offsetDays);
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  };
+  const _bkRange = (startOffset, nights) => `${_bkDateStr(startOffset)} - ${_bkDateStr(startOffset + nights)}`;
+
   const INITIAL_BOOKINGS = [
+    // ----- ⛳ 골프텔 시드 (NEW) -----
+    {
+      id:'bk-seed-gt1', bookingNumber:'OMT-3DK21A', status:'confirmed',
+      productId:'gt-vn-danang-ba-na-4n', productType:'golftel',
+      productName:'다낭 바나힐스 골프 4박5일 (라운딩 3회)',
+      country:'vietnam', city:'danang', ownership:'direct',
+      nights:4, rounds:3,
+      dates: _bkRange(3, 4),  // D-3 출발 (홈 대시보드 강조)
+      paxCount:2, total:2760000,
+      paymentMethod:'kakao', leadName:'홍길동', phone:'010-1234-5678',
+      packageSnapshot:{
+        roomOption:'2인 1실 (풀빌라)', roomSupplement:0,
+        selectedSlots:[
+          { window:'morning',   time:'06:00', courseId:'gc-vn-ba-na-hills', courseName:'바나힐스 골프클럽', price:275000 },
+          { window:'twilight',  time:'14:00', courseId:'gc-vn-montgomerie',  courseName:'몽고메리 링크스',  price:192500 },
+          { window:'afternoon', time:'11:30', courseId:'gc-vn-ba-na-hills', courseName:'바나힐스 골프클럽', price:247500 }
+        ]
+      },
+      createdAt: new Date(Date.now() - 86400000 * 18).toISOString()
+    },
+    {
+      id:'bk-seed-gt2', bookingNumber:'OMT-CLK55B', status:'pending',
+      productId:'gt-ph-clark-mimosa-5n', productType:'golftel-air',
+      productName:'클락 미모사 36홀 5박6일 (언리미티드) + 항공',
+      country:'philippines', city:'clark', ownership:'franchise',
+      nights:5, rounds:5,
+      dates: _bkRange(28, 5),  // D-28
+      paxCount:2, total:2960000,
+      paymentMethod:'bank', leadName:'홍길동', phone:'010-1234-5678',
+      packageSnapshot:{
+        roomOption:'2인 1실', roomSupplement:0,
+        selectedSlots:[
+          { window:'morning', time:'06:30', courseId:'gc-ph-mimosa', courseName:'미모사+ 골프코스', price:205000 }
+        ]
+      },
+      createdAt: new Date(Date.now() - 3600000 * 14).toISOString()
+    },
+    {
+      id:'bk-seed-gt3', bookingNumber:'OMT-OKI09C', status:'completed',
+      productId:'gt-jp-okinawa-kanucha-3n', productType:'golftel',
+      productName:'오키나와 카누차 베이 골프&리조트 3박4일',
+      country:'japan', city:'okinawa', ownership:'direct',
+      nights:3, rounds:2,
+      dates: _bkRange(-45, 3),  // 45일 전 완료 (리뷰 미작성 → 리뷰 쓰기 버튼 노출 테스트)
+      paxCount:2, total:2360000,
+      paymentMethod:'card', leadName:'홍길동', phone:'010-1234-5678',
+      packageSnapshot:{
+        roomOption:'2인 1실 (오션뷰)', roomSupplement:0,
+        selectedSlots:[
+          { window:'morning', time:'07:00', courseId:'gc-jp-kanucha', courseName:'카누차 골프코스', price:223000 }
+        ]
+      },
+      createdAt: new Date(Date.now() - 86400000 * 60).toISOString()
+    },
+
+    // ----- 📦 패키지 (기존) -----
     {
       id:'bk-seed-1', bookingNumber:'OMT-K3X9LP2M', status:'confirmed', productId:'prod-jp-01',
+      productType:'package',
       dates:'2026.05.10 - 2026.05.13', paxCount:2, total:1796000,
       paymentMethod:'kakao', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
     },
     {
       id:'bk-seed-2', bookingNumber:'OMT-J7N2QW4K', status:'pending', productId:'prod-vn-01',
+      productType:'package',
       dates:'2026.06.07 - 2026.06.12', paxCount:2, total:1290000,
       paymentMethod:'bank', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 3600000 * 22).toISOString()
     },
     {
-      id:'bk-seed-3', bookingNumber:'OMT-M5P8RT3H', status:'confirmed', productId:'prod-th-01',
-      dates:'2026.04.29 - 2026.05.04', paxCount:2, total:1780000,
-      paymentMethod:'card', leadName:'홍길동', phone:'010-1234-5678',
-      createdAt: new Date(Date.now() - 86400000 * 12).toISOString()
-    },
-    {
       id:'bk-seed-4', bookingNumber:'OMT-B1D4FG7C', status:'completed', productId:'prod-jp-02',
+      productType:'package',
       dates:'2026.02.15 - 2026.02.18', paxCount:2, total:1178000,
       paymentMethod:'kakao', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 86400000 * 65).toISOString()
@@ -1454,16 +1514,25 @@
      12) 알림 / 문의 (마이페이지 mock)
      ===================================================================== */
   const NOTIFICATIONS = [
-    { id:'n1', type:'booking',   icon:'✅', title:'예약 확정',         body:'다낭 바나힐스 골프 4박5일 예약이 확정되었어요. 예약번호: OMT-3DK21A',  date:'2026-05-19', daysAgo:1,  read:false },
-    { id:'n2', type:'reminder',  icon:'⛳', title:'골프 라운딩 D-7',    body:'오키나와 카누차 골프&리조트 라운딩이 7일 남았어요. 필요 장비 준비 안내.',  date:'2026-05-14', daysAgo:6,  read:false },
-    { id:'n3', type:'promotion', icon:'🔥', title:'단독 특가 알림',     body:'다낭 직영 풀빌라가 한정 수량 -25% 할인 중! 5/25까지.',                date:'2026-05-13', daysAgo:7,  read:false },
-    { id:'n4', type:'coupon',    icon:'🎟️', title:'쿠폰 만료 임박',     body:'10% 할인 쿠폰이 3일 후 만료됩니다. 예약 시 자동 적용 가능.',           date:'2026-05-17', daysAgo:3,  read:true  },
-    { id:'n5', type:'points',    icon:'💰', title:'포인트 적립',         body:'결제 1% 적립 — 12,890P가 적립되었어요. 다음 예약 시 사용 가능.',      date:'2026-05-12', daysAgo:8,  read:true  },
-    { id:'n6', type:'review',    icon:'✏️', title:'리뷰 작성 요청',     body:'세부 알타비스타 골프 4박5일 잘 다녀오셨어요? 리뷰 작성 시 5,000P 적립.',date:'2026-05-11', daysAgo:9,  read:true  },
+    { id:'n1', type:'booking',   icon:'✅', title:'예약 확정',         body:'다낭 바나힐스 골프 4박5일 예약이 확정되었어요. 예약번호: OMT-3DK21A',  date:'2026-05-19', daysAgo:1,  read:false,
+      link:'complete.html?bk=OMT-3DK21A', actionLabel:'예약 확인서 →' },
+    { id:'n2', type:'reminder',  icon:'⛳', title:'골프 라운딩 D-7',    body:'오키나와 카누차 골프&리조트 라운딩이 7일 남았어요. 필요 장비 준비 안내.',  date:'2026-05-14', daysAgo:6,  read:false,
+      link:'golftel.html?id=gt-jp-okinawa-kanucha-3n#info', actionLabel:'준비 안내 보기 →' },
+    { id:'n3', type:'promotion', icon:'🔥', title:'단독 특가 알림',     body:'다낭 직영 풀빌라가 한정 수량 -25% 할인 중! 5/25까지.',                date:'2026-05-13', daysAgo:7,  read:false,
+      link:'golftel.html?id=gt-vn-danang-ba-na-4n', actionLabel:'할인 상품 →' },
+    { id:'n4', type:'coupon',    icon:'🎟️', title:'쿠폰 만료 임박',     body:'10% 할인 쿠폰이 3일 후 만료됩니다. 예약 시 자동 적용 가능.',           date:'2026-05-17', daysAgo:3,  read:true,
+      link:'mypage.html#coupons', actionLabel:'쿠폰함 보기 →' },
+    { id:'n5', type:'points',    icon:'💰', title:'포인트 적립',         body:'결제 1% 적립 — 12,890P가 적립되었어요. 다음 예약 시 사용 가능.',      date:'2026-05-12', daysAgo:8,  read:true,
+      link:'mypage.html#points', actionLabel:'포인트 내역 →' },
+    { id:'n6', type:'review',    icon:'✏️', title:'리뷰 작성 요청',     body:'세부 알타비스타 골프 4박5일 잘 다녀오셨어요? 리뷰 작성 시 5,000P 적립.',date:'2026-05-11', daysAgo:9,  read:true,
+      link:'mypage.html#bookings', actionLabel:'리뷰 작성 →' },
     { id:'n7', type:'system',    icon:'📢', title:'시스템 공지',         body:'5/22(목) 02:00~05:00 정기점검으로 예약 시스템이 일시 중단됩니다.',   date:'2026-05-10', daysAgo:10, read:true  },
-    { id:'n8', type:'booking',   icon:'⛳', title:'티타임 확정',         body:'다낭 바나힐스 골프 첫 라운딩 시간이 06:00로 확정되었습니다.',          date:'2026-05-19', daysAgo:1,  read:true  },
-    { id:'n9', type:'promotion', icon:'🎁', title:'GOLD 등급 혜택',      body:'GOLD 등급 한정 — 다낭 직영 골프텔 추가 5% 할인 코드: GOLDDA5',         date:'2026-05-05', daysAgo:15, read:true  },
-    { id:'n10',type:'reminder',  icon:'✈️', title:'출국 D-3 체크리스트', body:'여권 유효기간 6개월 이상, 골프 클럽 휴대수하물 규정 확인 필요.',        date:'2026-05-22', daysAgo:0,  read:false }
+    { id:'n8', type:'booking',   icon:'⛳', title:'티타임 확정',         body:'다낭 바나힐스 골프 첫 라운딩 시간이 06:00로 확정되었습니다.',          date:'2026-05-19', daysAgo:1,  read:true,
+      link:'complete.html?bk=OMT-3DK21A', actionLabel:'예약 상세 →' },
+    { id:'n9', type:'promotion', icon:'🎁', title:'GOLD 등급 혜택',      body:'GOLD 등급 한정 — 다낭 직영 골프텔 추가 5% 할인 코드: GOLDDA5',         date:'2026-05-05', daysAgo:15, read:true,
+      link:'golftels.html?c=vietnam', actionLabel:'직영 골프텔 →' },
+    { id:'n10',type:'reminder',  icon:'✈️', title:'출국 D-3 체크리스트', body:'여권 유효기간 6개월 이상, 골프 클럽 휴대수하물 규정 확인 필요.',        date:'2026-05-22', daysAgo:0,  read:false,
+      link:'mypage.html#home', actionLabel:'체크리스트 →' }
   ];
 
   const INQUIRIES = [
