@@ -66,13 +66,32 @@
     GMP: { code:'GMP', name:'김포', country:'KR', isOrigin:true },
     PUS: { code:'PUS', name:'부산(김해)', country:'KR', isOrigin:true },
     TAE: { code:'TAE', name:'대구', country:'KR', isOrigin:true },
+    CJU: { code:'CJU', name:'제주', country:'KR', isOrigin:true },
+    KWJ: { code:'KWJ', name:'광주', country:'KR', isOrigin:true },
+    RSU: { code:'RSU', name:'여수', country:'KR', isOrigin:true },
+    USN: { code:'USN', name:'울산', country:'KR', isOrigin:true },
+    WJU: { code:'WJU', name:'원주', country:'KR', isOrigin:true },
+    CJJ: { code:'CJJ', name:'청주', country:'KR', isOrigin:true },
+    MWX: { code:'MWX', name:'무안', country:'KR', isOrigin:true },
+    KPO: { code:'KPO', name:'포항경주', country:'KR', isOrigin:true },
     // Japan
     NRT: { code:'NRT', name:'도쿄(나리타)', country:'japan', city:'tokyo' },
     HND: { code:'HND', name:'도쿄(하네다)', country:'japan', city:'tokyo' },
     KIX: { code:'KIX', name:'오사카', country:'japan', city:'osaka' },
     FUK: { code:'FUK', name:'후쿠오카', country:'japan', city:'fukuoka' },
     CTS: { code:'CTS', name:'삿포로', country:'japan', city:'sapporo' },
+    NGO: { code:'NGO', name:'나고야', country:'japan', city:'nagoya' },
     OKA: { code:'OKA', name:'오키나와', country:'japan', city:'okinawa' },
+    // China
+    PEK: { code:'PEK', name:'베이징', country:'china', city:'beijing' },
+    PVG: { code:'PVG', name:'상해(푸동)', country:'china', city:'shanghai' },
+    SHA: { code:'SHA', name:'상해(홍차오)', country:'china', city:'shanghai' },
+    TAO: { code:'TAO', name:'청도', country:'china', city:'qingdao' },
+    SHE: { code:'SHE', name:'심양', country:'china', city:'shenyang' },
+    YNJ: { code:'YNJ', name:'연길', country:'china', city:'yanji' },
+    DLC: { code:'DLC', name:'대련', country:'china', city:'dalian' },
+    CAN: { code:'CAN', name:'광저우', country:'china', city:'guangzhou' },
+    HRB: { code:'HRB', name:'하얼빈', country:'china', city:'harbin' },
     // Vietnam
     DAD: { code:'DAD', name:'다낭', country:'vietnam', city:'danang' },
     CXR: { code:'CXR', name:'나트랑', country:'vietnam', city:'nhatrang' },
@@ -89,8 +108,71 @@
     CEB: { code:'CEB', name:'세부', country:'philippines', city:'cebu' },
     MNL: { code:'MNL', name:'마닐라', country:'philippines', city:'manila' },
     KLO: { code:'KLO', name:'보라카이(칼리보)', country:'philippines', city:'boracay' },
-    PPS: { code:'PPS', name:'팔라완', country:'philippines', city:'palawan' }
+    PPS: { code:'PPS', name:'팔라완', country:'philippines', city:'palawan' },
+    // Asia (others)
+    DMK: { code:'DMK', name:'방콕(돈무앙)', country:'thailand', city:'bangkok' },
+    HKG: { code:'HKG', name:'홍콩', country:'hongkong', city:'hongkong' },
+    TPE: { code:'TPE', name:'타이페이', country:'taiwan', city:'taipei' },
+    SIN: { code:'SIN', name:'싱가포르', country:'singapore', city:'singapore' },
+    DPS: { code:'DPS', name:'발리', country:'indonesia', city:'bali' },
+    ULN: { code:'ULN', name:'울란바토르', country:'mongolia', city:'ulaanbaatar' },
+    // North America
+    LAX: { code:'LAX', name:'로스앤젤레스', country:'usa', city:'losangeles' },
+    JFK: { code:'JFK', name:'뉴욕(JFK)', country:'usa', city:'newyork' },
+    LGA: { code:'LGA', name:'뉴욕(라구아디아)', country:'usa', city:'newyork' },
+    EWR: { code:'EWR', name:'뉴욕(뉴왁)', country:'usa', city:'newyork' },
+    SFO: { code:'SFO', name:'샌프란시스코', country:'usa', city:'sanfrancisco' },
+    HNL: { code:'HNL', name:'호놀룰루(오하우)', country:'usa', city:'honolulu' },
+    LAS: { code:'LAS', name:'라스베이거스', country:'usa', city:'lasvegas' },
+    ATL: { code:'ATL', name:'애틀란타', country:'usa', city:'atlanta' },
+    YVR: { code:'YVR', name:'벤쿠버', country:'canada', city:'vancouver' },
+    YYZ: { code:'YYZ', name:'토론토', country:'canada', city:'toronto' },
+    GRU: { code:'GRU', name:'상파울로', country:'brazil', city:'saopaulo' },
+    CUN: { code:'CUN', name:'칸쿤', country:'mexico', city:'cancun' },
+    // Europe
+    CDG: { code:'CDG', name:'파리', country:'france', city:'paris' },
+    LHR: { code:'LHR', name:'런던', country:'uk', city:'london' },
+    FCO: { code:'FCO', name:'로마', country:'italy', city:'rome' },
+    PRG: { code:'PRG', name:'프라하', country:'czech', city:'prague' },
+    FRA: { code:'FRA', name:'프랑크푸르트', country:'germany', city:'frankfurt' },
+    AMS: { code:'AMS', name:'암스테르담', country:'netherlands', city:'amsterdam' },
+    MAD: { code:'MAD', name:'마드리드', country:'spain', city:'madrid' },
+    BCN: { code:'BCN', name:'바르셀로나', country:'spain', city:'barcelona' },
+    ZRH: { code:'ZRH', name:'취리히', country:'switzerland', city:'zurich' },
+    IST: { code:'IST', name:'이스탄불', country:'turkey', city:'istanbul' },
+    HEL: { code:'HEL', name:'헬싱키', country:'finland', city:'helsinki' },
+    // Oceania
+    GUM: { code:'GUM', name:'괌', country:'guam', city:'guam' },
+    SPN: { code:'SPN', name:'사이판', country:'cnmi', city:'saipan' },
+    SYD: { code:'SYD', name:'시드니', country:'australia', city:'sydney' },
+    MEL: { code:'MEL', name:'멜번', country:'australia', city:'melbourne' },
+    AKL: { code:'AKL', name:'오클랜드', country:'newzealand', city:'auckland' }
   };
+
+  /* CITY_GRID — 인터파크 스타일 도시 선택 모달용 그룹 매핑 */
+  const CITY_GRID = {
+    '국내': ['GMP','ICN','CJU','PUS','TAE','KWJ','RSU','USN','WJU','CJJ','MWX','KPO'],
+    '일본': ['NRT','HND','KIX','FUK','CTS','NGO','OKA'],
+    '중국': ['PEK','PVG','SHA','TAO','SHE','YNJ','DLC','CAN','HRB'],
+    '아시아': ['BKK','DMK','HKG','TPE','MNL','CEB','SIN','SGN','HAN','DAD','CXR','DPS','ULN'],
+    '미주': ['LAX','JFK','LGA','EWR','SFO','HNL','LAS','ATL'],
+    '캐나다': ['YVR','YYZ'],
+    '중남미': ['GRU','CUN'],
+    '유럽': ['CDG','LHR','FCO','PRG','FRA','AMS','MAD','BCN','ZRH','IST','HEL'],
+    '대양주': ['GUM','SPN','SYD','MEL','AKL']
+  };
+
+  /* 나고야 NGO 노선 — 스크린샷 참고 8건 */
+  const NAGOYA_FLIGHTS = [
+    { id:'f-7C2105', code:'7C', number:'7C2105', from:'ICN', to:'NGO', outDep:'09:30', outArr:'11:30', outDur:'2h 00m', retDep:'13:00', retArr:'15:00', retDur:'2h 00m', stops:0, price:375400, class:'economy', depTime:'morning' },
+    { id:'f-LJ631',  code:'LJ', number:'LJ631',  from:'ICN', to:'NGO', outDep:'07:30', outArr:'09:25', outDur:'1h 55m', retDep:'11:00', retArr:'13:10', retDur:'2h 10m', stops:0, price:379000, class:'economy', depTime:'morning' },
+    { id:'f-7C2107', code:'7C', number:'7C2107', from:'ICN', to:'NGO', outDep:'15:05', outArr:'17:00', outDur:'1h 55m', retDep:'18:30', retArr:'20:40', retDur:'2h 10m', stops:0, price:390400, class:'economy', depTime:'afternoon' },
+    { id:'f-KE757',  code:'KE', number:'KE757',  from:'ICN', to:'NGO', outDep:'10:00', outArr:'12:00', outDur:'2h 00m', retDep:'13:30', retArr:'15:40', retDur:'2h 10m', stops:0, price:437200, class:'economy', depTime:'morning' },
+    { id:'f-OZ134',  code:'OZ', number:'OZ134',  from:'ICN', to:'NGO', outDep:'12:20', outArr:'14:05', outDur:'1h 45m', retDep:'15:30', retArr:'17:40', retDur:'2h 10m', stops:0, price:625200, class:'economy', depTime:'afternoon' },
+    { id:'f-NH158',  code:'NH', number:'NH158',  from:'ICN', to:'NGO', outDep:'14:50', outArr:'16:50', outDur:'2h 00m', retDep:'18:00', retArr:'20:10', retDur:'2h 10m', stops:0, price:803400, class:'economy', depTime:'afternoon' },
+    { id:'f-LJ633',  code:'LJ', number:'LJ633',  from:'ICN', to:'NGO', outDep:'16:00', outArr:'17:55', outDur:'1h 55m', retDep:'19:30', retArr:'21:40', retDur:'2h 10m', stops:0, price:419000, class:'economy', depTime:'afternoon' },
+    { id:'f-7C2109', code:'7C', number:'7C2109', from:'ICN', to:'NGO', outDep:'19:30', outArr:'21:30', outDur:'2h 00m', retDep:'22:30', retArr:'00:40', retDur:'2h 10m', stops:1, price:489400, class:'economy', depTime:'evening' }
+  ];
 
   /* =====================================================================
      2) Airlines
@@ -108,7 +190,11 @@
     TG: { code:'TG', name:'타이항공',        tier:'FSC',  color:'linear-gradient(135deg,#582D82,#7B4CA0)' },
     FD: { code:'FD', name:'에어아시아',      tier:'LCC',  color:'linear-gradient(135deg,#E31837,#FF4949)' },
     '5J':{ code:'5J',name:'세부퍼시픽',      tier:'LCC',  color:'linear-gradient(135deg,#FDD20C,#FFE54C)' },
-    PR: { code:'PR', name:'필리핀항공',      tier:'FSC',  color:'linear-gradient(135deg,#003F87,#1565C0)' }
+    PR: { code:'PR', name:'필리핀항공',      tier:'FSC',  color:'linear-gradient(135deg,#003F87,#1565C0)' },
+    NH: { code:'NH', name:'ANA항공',        tier:'FSC',  color:'linear-gradient(135deg,#003E92,#1565C0)' },
+    JL: { code:'JL', name:'일본항공(JAL)',  tier:'FSC',  color:'linear-gradient(135deg,#B70519,#E74C3C)' },
+    CA: { code:'CA', name:'중국국제항공',    tier:'FSC',  color:'linear-gradient(135deg,#C8102E,#E74C3C)' },
+    CX: { code:'CX', name:'캐세이퍼시픽',    tier:'FSC',  color:'linear-gradient(135deg,#006564,#0B8888)' }
   };
 
   /* =====================================================================
@@ -1578,8 +1664,11 @@
       ] }
   ];
 
+  // NAGOYA_FLIGHTS를 FLIGHTS에 병합
+  Array.prototype.push.apply(FLIGHTS, NAGOYA_FLIGHTS);
+
   root.DATA = {
-    COUNTRIES, CITIES, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
+    COUNTRIES, CITIES, CITY_GRID, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
     PRODUCTS, PRODUCT_TYPES, OWNERSHIP, GOLF_COURSES, GOLFTELS, CHANNEL_MANAGERS,
     CREATORS, FEED_POSTS, REVIEWS, USER,
     INITIAL_BOOKINGS, COUPONS, POINTS_HISTORY,

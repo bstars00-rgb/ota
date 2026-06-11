@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>항공권 검색 결과 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-d:#E85826;--accent:#FFD23F;
+      --ink:#1A1A1A;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+      --line:#E5E7EB;--bg:#FAFBFC;--bg-2:#fff;--bg-soft:#F9FAFB;
+      --success:#10B981;--warning:#F59E0B;--danger:#EF4444;--info:#3B82F6;
+      --max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono',monospace;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
+    .header-inner{height:60px;display:flex;align-items:center;gap:20px;}
+    .logo{font-size:22px;font-weight:900;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:8px;}
+    .logo .mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;}
+    .gnb{display:flex;gap:6px;margin-left:20px;}
+    .gnb a{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:800;color:var(--ink-3);}
+    .gnb a:hover{color:var(--ink);}
+
+    /* Page head with stepper */
+    .page-head{padding:28px 0 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+    .page-head .title-block h1{font-size:30px;font-weight:900;margin:0 0 6px;letter-spacing:-0.02em;}
+    .page-head .title-block .dates{font-size:13px;color:var(--ink-3);font-weight:700;}
+
+    /* Stepper */
+    .stepper{display:flex;align-items:center;gap:6px;}
+    .step{display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .step .num{
+      width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:14px;
+      display:grid;place-items:center;font-weight:900;
+    }
+    .step.inactive .num{background:var(--bg-soft);color:var(--ink-4);}
+    .step .label{font-size:12px;font-weight:800;color:var(--ink);}
+    .step.inactive .label{color:var(--ink-4);}
+    .step-line{width:60px;height:1px;background:var(--line);margin-top:-16px;}
+
+    /* Two-col layout */
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:24px;padding-bottom:60px;}
+
+    /* Filters (left) */
+    .filters{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:fit-content;position:sticky;top:80px;}
+    .filter-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .filter-head .h{font-size:14px;font-weight:900;}
+    .filter-head .reset{font-size:11px;font-weight:800;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px;}
+    .filter-head .reset:hover{color:var(--primary);}
+    .filter-section{border-bottom:1px solid var(--line);}
+    .filter-section:last-child{border-bottom:none;}
+    .filter-section-h{
+      padding:14px 18px;font-size:13px;font-weight:900;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+    }
+    .filter-section-h .chevron{font-size:12px;color:var(--ink-3);transition:transform .15s;}
+    .filter-section-h.collapsed .chevron{transform:rotate(-90deg);}
+    .filter-section-body{padding:0 18px 14px;}
+    .filter-section-body.collapsed{display:none;}
+    .filter-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px;}
+    .filter-row label{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;}
+    .filter-row label input{accent-color:var(--primary);width:14px;height:14px;cursor:pointer;}
+    .filter-row .price{font-size:11px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;}
+    .filter-more{color:var(--primary);font-size:12px;font-weight:800;margin-top:8px;cursor:pointer;}
+
+    /* Price range slider */
+    .price-input-row{display:flex;gap:6px;margin-bottom:10px;}
+    .price-input-row input{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;outline:none;font-family:'JetBrains Mono',monospace;}
+    .price-input-row button{padding:8px 14px;background:var(--primary);color:#fff;border-radius:6px;font-size:12px;font-weight:800;}
+    .price-range{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:6px;}
+
+    /* Results (right) */
+    .results-head{
+      background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 20px;margin-bottom:12px;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    }
+    .results-head .note{font-size:12px;color:var(--ink-2);font-weight:600;}
+    .results-head .actions{display:flex;gap:8px;align-items:center;}
+    .results-head .compare-btn{
+      padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .results-head .compare-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .results-head .sort-select{
+      padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink);
+      cursor:pointer;outline:none;min-width:140px;
+    }
+
+    /* Sort chips */
+    .sort-chips{
+      background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:14px;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    }
+    .sort-chip{
+      padding:14px;border-radius:10px;background:#fff;border:2px solid var(--line);text-align:center;
+      cursor:pointer;transition:all .15s;
+    }
+    .sort-chip:hover{border-color:var(--primary);}
+    .sort-chip.on{background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border-color:var(--primary);}
+    .sort-chip .nm{font-size:13px;font-weight:900;color:var(--ink);margin-bottom:4px;}
+    .sort-chip .pr{font-size:18px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',monospace;}
+    .sort-chip .du{font-size:11px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+
+    /* Flight card */
+    .flight-card{
+      background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:10px;
+      display:grid;grid-template-columns:120px 1fr 200px 200px;gap:20px;align-items:center;
+      transition:all .15s;
+    }
+    .flight-card:hover{border-color:var(--primary);box-shadow:0 6px 18px rgba(0,0,0,.05);}
+    .flight-card .airline{display:flex;align-items:center;gap:10px;}
+    .flight-card .airline-logo{
+      width:36px;height:36px;border-radius:8px;color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;flex-shrink:0;
+    }
+    .flight-card .airline-name{font-size:13px;font-weight:800;color:var(--ink);}
+    .flight-card .airline-num{font-size:10px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;}
+
+    .flight-route{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:center;}
+    .flight-route .col{text-align:center;}
+    .flight-route .col.middle{position:relative;}
+    .flight-route .date{font-size:11px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:2px;}
+    .flight-route .time{font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .flight-route .airport{font-size:11px;font-weight:800;color:var(--ink-2);margin-top:2px;}
+    .flight-route .col.middle .label{font-size:11px;font-weight:800;color:var(--ink-3);}
+    .flight-route .col.middle .dur{font-size:12px;font-weight:800;color:var(--ink-2);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+    .flight-route .col.middle::before, .flight-route .col.middle::after{
+      content:'';position:absolute;top:50%;height:1px;background:var(--line);width:30%;
+    }
+    .flight-route .col.middle::before{left:0;}
+    .flight-route .col.middle::after{right:0;}
+
+    .flight-extras{text-align:right;}
+    .flight-extras .baggage{font-size:11px;color:var(--ink-2);font-weight:700;}
+    .flight-extras .price{font-size:22px;font-weight:900;color:var(--ink);font-family:'JetBrains Mono',monospace;margin-top:4px;}
+    .flight-extras .price.business{color:var(--info);}
+
+    .flight-cta{text-align:right;}
+    .flight-cta .select-btn{
+      padding:11px 28px;background:#fff;border:1px solid var(--line);border-radius:8px;
+      font-size:14px;font-weight:900;color:var(--ink);display:inline-block;
+    }
+    .flight-cta .select-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .flight-cta .seats-left{font-size:11px;color:var(--success);font-weight:800;margin-top:6px;}
+    .flight-cta .seats-low{color:var(--warning);}
+
+    /* Empty state */
+    .empty{
+      background:#fff;border:1px solid var(--line);border-radius:14px;padding:80px 20px;text-align:center;
+    }
+    .empty .ic{font-size:48px;margin-bottom:8px;}
+    .empty .nm{font-size:16px;font-weight:900;color:var(--ink);margin-bottom:6px;}
+    .empty .desc{font-size:13px;color:var(--ink-3);}
+
+    @media (max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .filters{position:static;}
+      .flight-card{grid-template-columns:1fr;gap:14px;text-align:left;}
+      .flight-extras,.flight-cta{text-align:left;}
+      .sort-chips{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="mark">O</span>오마이트립
+      </a>
+      <nav class="gnb">
+        <a href="index.html">🏠 홈</a>
+        <a href="golftels.html">⛳ 골프텔</a>
+        <a href="flights.html">✈️ 항공권</a>
+        <a href="hotels.html">🏨 호텔</a>
+        <a href="search.html">🔍 통합 검색</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="title-block">
+        <h1 id="routeTitle">로딩 중...</h1>
+        <div class="dates" id="dateRange"></div>
+      </div>
+      <div class="stepper">
+        <div class="step">
+          <div class="num">01</div>
+          <div class="label">가는편 선택</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step inactive">
+          <div class="num">02</div>
+          <div class="label">오는편 선택</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step inactive">
+          <div class="num">03</div>
+          <div class="label">결제하기</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <!-- Filters -->
+      <aside class="filters">
+        <div class="filter-head">
+          <div class="h">결과 내 검색</div>
+          <button class="reset" onclick="resetFilters()">↺ 초기화</button>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-h" onclick="toggleSection(this)">
+            경유 횟수 <span class="chevron">▾</span>
+          </div>
+          <div class="filter-section-body">
+            <div class="filter-row">
+              <label><input type="checkbox" data-filter="stops" data-val="0" onchange="applyFilters()" /> 직항 <span id="cnt-direct">(0)</span></label>
+              <span class="price" id="price-direct">₩ 0 ~</span>
+            </div>
+            <div class="filter-row">
+              <label><input type="checkbox" data-filter="stops" data-val="1" onchange="applyFilters()" /> 1회 경유 <span id="cnt-stop1">(0)</span></label>
+              <span class="price" id="price-stop1">₩ 0 ~</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-h" onclick="toggleSection(this)">
+            항공사 <span class="chevron">▾</span>
+          </div>
+          <div class="filter-section-body" id="airlineFilters">
+            <!-- 동적 렌더 -->
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-h" onclick="toggleSection(this)">
+            가격대 <span class="chevron">▾</span>
+          </div>
+          <div class="filter-section-body">
+            <div class="price-input-row">
+              <input type="text" id="priceMinInput" placeholder="최소" />
+              <span style="align-self:center;">~</span>
+              <input type="text" id="priceMaxInput" placeholder="최대" />
+              <button onclick="applyPriceRange()">적용</button>
+            </div>
+            <input type="range" id="priceMaxRange" min="100000" max="2000000" step="50000" style="width:100%;accent-color:var(--primary);" oninput="updatePriceRangeLabel()" />
+            <div class="price-range">
+              <span id="priceMinLabel">100,000원</span>
+              <span id="priceMaxLabel">2,000,000원</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-h" onclick="toggleSection(this)">
+            항공편 시간 <span class="chevron">▾</span>
+          </div>
+          <div class="filter-section-body">
+            <div class="filter-row">
+              <label><input type="checkbox" data-filter="time" data-val="morning" onchange="applyFilters()" /> 오전 (06~12시)</label>
+            </div>
+            <div class="filter-row">
+              <label><input type="checkbox" data-filter="time" data-val="afternoon" onchange="applyFilters()" /> 오후 (12~18시)</label>
+            </div>
+            <div class="filter-row">
+              <label><input type="checkbox" data-filter="time" data-val="evening" onchange="applyFilters()" /> 저녁·심야 (18~06시)</label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Results -->
+      <section>
+        <div class="results-head">
+          <div class="note">표시된 금액은 항공권 + 유류할증료 + 제세공과금 + 발권 수수료가 포함된 금액입니다.</div>
+          <div class="actions">
+            <button class="compare-btn">⚖️ 비교하기</button>
+            <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+              <option value="recommend">추천순</option>
+              <option value="cheapest">최저가순</option>
+              <option value="fastest">최단 시간순</option>
+              <option value="earliest">빠른 출발순</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 정렬 chips (4종 가격/시간 미리보기) -->
+        <div class="sort-chips" id="sortChips">
+          <div class="sort-chip on" data-sort="recommend" onclick="setSortChip('recommend', this)">
+            <div class="nm">추천순</div>
+            <div class="pr" id="chip-recommend-pr">-</div>
+            <div class="du" id="chip-recommend-du">-</div>
+          </div>
+          <div class="sort-chip" data-sort="fastest" onclick="setSortChip('fastest', this)">
+            <div class="nm">최단 여행 시간 순</div>
+            <div class="pr" id="chip-fastest-pr">-</div>
+            <div class="du" id="chip-fastest-du">-</div>
+          </div>
+          <div class="sort-chip" data-sort="cheapest" onclick="setSortChip('cheapest', this)">
+            <div class="nm">최저가순</div>
+            <div class="pr" id="chip-cheapest-pr">-</div>
+            <div class="du" id="chip-cheapest-du">-</div>
+          </div>
+          <div class="sort-chip" data-sort="earliest" onclick="setSortChip('earliest', this)">
+            <div class="nm">빠른 출발 순</div>
+            <div class="pr" id="chip-earliest-pr">-</div>
+            <div class="du" id="chip-earliest-du">-</div>
+          </div>
+        </div>
+
+        <div id="flightList"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const SQ = {
+      from: params.get('from') || 'ICN',
+      to: params.get('to') || 'NGO',
+      dep: params.get('dep') || '',
+      ret: params.get('ret') || '',
+      type: params.get('type') || 'roundtrip',
+      nonstop: params.get('nonstop') === '1',
+      cls: params.get('cls') || 'economy',
+      adult: parseInt(params.get('adult') || '1'),
+      child: parseInt(params.get('child') || '0'),
+      infant: parseInt(params.get('infant') || '0')
+    };
+
+    let currentSort = 'recommend';
+    let activeFilters = {
+      stops: [],
+      airlines: [],
+      time: [],
+      priceMin: null,
+      priceMax: null
+    };
+
+    function init(){
+      const data = window.OMT?.DATA || {};
+      const cities = data.CITIES || {};
+      const fromCity = cities[SQ.from] || { name: SQ.from };
+      const toCity = cities[SQ.to] || { name: SQ.to };
+
+      document.getElementById('routeTitle').innerHTML = `<span style="font-size:30px;">${toCity.name}<span style="font-size:18px;color:var(--ink-3);font-weight:700;">(으)로 가는 항공편을 선택해 주세요.</span></span>`;
+      const fmtDate = key => {
+        if(!key) return '';
+        const [y, m, d] = key.split('-');
+        const date = new Date(+y, +m-1, +d);
+        const dow = ['일','월','화','수','목','금','토'][date.getDay()];
+        return `${y}.${m}.${d}(${dow})`;
+      };
+      const dateText = SQ.ret
+        ? `${fmtDate(SQ.dep)} ~ ${fmtDate(SQ.ret)}`
+        : fmtDate(SQ.dep);
+      document.getElementById('dateRange').textContent = dateText;
+
+      // 항공편 필터 + 매칭 (해당 노선)
+      const allFlights = (data.FLIGHTS || []).filter(f => f.from === SQ.from && f.to === SQ.to);
+      // 매칭이 없으면 to만 같은 거 + ICN 기본 fallback
+      let flights = allFlights;
+      if(flights.length === 0){
+        flights = (data.FLIGHTS || []).filter(f => f.to === SQ.to).slice(0, 8);
+      }
+      if(flights.length === 0){
+        // 다른 노선이라도 항공사 다양성을 보여주기 위해 처음 12개
+        flights = (data.FLIGHTS || []).slice(0, 12);
+      }
+      // nonstop 필터 (검색 시점)
+      if(SQ.nonstop){
+        flights = flights.filter(f => f.stops === 0);
+      }
+
+      // 추가 noise: 가격을 약간 흔들어 27건 정도 보여주기 (mock)
+      window._allFlights = flights;
+      renderAirlineFilters();
+      renderSortChips();
+      applyFilters();
+    }
+
+    function renderAirlineFilters(){
+      const airlines = window.OMT?.DATA?.AIRLINES || {};
+      const flights = window._allFlights || [];
+      const counts = {};
+      flights.forEach(f => {
+        counts[f.code] = counts[f.code] || { count: 0, minPrice: Infinity };
+        counts[f.code].count++;
+        counts[f.code].minPrice = Math.min(counts[f.code].minPrice, f.price);
+      });
+      const html = Object.entries(counts).map(([code, info]) => {
+        const a = airlines[code] || { name: code };
+        return `
+          <div class="filter-row">
+            <label><input type="checkbox" data-filter="airlines" data-val="${code}" onchange="applyFilters()" /> ${a.name} (${info.count})</label>
+            <span class="price">₩ ${info.minPrice.toLocaleString('ko-KR')} ~</span>
+          </div>
+        `;
+      }).slice(0, 5).join('');
+      document.getElementById('airlineFilters').innerHTML = html + (Object.keys(counts).length > 5 ? '<div class="filter-more">+ 더보기</div>' : '');
+
+      // 경유 횟수 카운트 + 가격
+      const direct = flights.filter(f => f.stops === 0);
+      const stop1 = flights.filter(f => f.stops === 1);
+      document.getElementById('cnt-direct').textContent = `(${direct.length})`;
+      document.getElementById('cnt-stop1').textContent = `(${stop1.length})`;
+      if(direct.length > 0){
+        document.getElementById('price-direct').textContent = `₩ ${Math.min(...direct.map(f => f.price)).toLocaleString('ko-KR')} ~`;
+      }
+      if(stop1.length > 0){
+        document.getElementById('price-stop1').textContent = `₩ ${Math.min(...stop1.map(f => f.price)).toLocaleString('ko-KR')} ~`;
+      }
+
+      // 가격 슬라이더 범위
+      const allPrices = flights.map(f => f.price);
+      const minP = Math.min(...allPrices, 100000);
+      const maxP = Math.max(...allPrices, 1000000);
+      document.getElementById('priceMinLabel').textContent = minP.toLocaleString('ko-KR') + '원';
+      document.getElementById('priceMaxLabel').textContent = maxP.toLocaleString('ko-KR') + '원';
+      document.getElementById('priceMinInput').placeholder = minP.toLocaleString('ko-KR');
+      document.getElementById('priceMaxInput').placeholder = maxP.toLocaleString('ko-KR');
+      const slider = document.getElementById('priceMaxRange');
+      slider.min = minP;
+      slider.max = maxP;
+      slider.value = maxP;
+    }
+
+    function renderSortChips(){
+      const flights = window._allFlights || [];
+      if(flights.length === 0) return;
+      const recommended = [...flights].sort((a,b) => a.price - b.price)[0];
+      const fastest = [...flights].sort((a,b) => parseDuration(a.outDur) - parseDuration(b.outDur))[0];
+      const cheapest = [...flights].sort((a,b) => a.price - b.price)[0];
+      const earliest = [...flights].sort((a,b) => a.outDep.localeCompare(b.outDep))[0];
+      const setChip = (key, flight) => {
+        document.getElementById(`chip-${key}-pr`).textContent = flight.price.toLocaleString('ko-KR') + '원';
+        document.getElementById(`chip-${key}-du`).textContent = flight.outDur;
+      };
+      setChip('recommend', recommended);
+      setChip('fastest', fastest);
+      setChip('cheapest', cheapest);
+      setChip('earliest', earliest);
+    }
+
+    function parseDuration(s){
+      // "2h 00m" → 120
+      const m = s.match(/(\d+)h\s*(\d+)?m?/);
+      if(!m) return 0;
+      return parseInt(m[1]) * 60 + parseInt(m[2] || '0');
+    }
+
+    window.applyFilters = () => {
+      activeFilters = { stops: [], airlines: [], time: [], priceMin: null, priceMax: null };
+      document.querySelectorAll('.filter-section input[type="checkbox"]:checked').forEach(cb => {
+        const key = cb.dataset.filter;
+        const val = cb.dataset.val;
+        if(key === 'stops') activeFilters.stops.push(parseInt(val));
+        if(key === 'airlines') activeFilters.airlines.push(val);
+        if(key === 'time') activeFilters.time.push(val);
+      });
+      const minP = parseInt((document.getElementById('priceMinInput').value || '').replace(/,/g, ''));
+      const maxP = parseInt((document.getElementById('priceMaxInput').value || '').replace(/,/g, ''));
+      if(!isNaN(minP)) activeFilters.priceMin = minP;
+      if(!isNaN(maxP)) activeFilters.priceMax = maxP;
+      renderFlightList();
+    };
+
+    window.applyPriceRange = () => applyFilters();
+
+    window.updatePriceRangeLabel = () => {
+      const v = parseInt(document.getElementById('priceMaxRange').value);
+      document.getElementById('priceMaxLabel').textContent = v.toLocaleString('ko-KR') + '원';
+      document.getElementById('priceMaxInput').value = v.toLocaleString('ko-KR');
+    };
+
+    window.resetFilters = () => {
+      document.querySelectorAll('.filter-section input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('priceMinInput').value = '';
+      document.getElementById('priceMaxInput').value = '';
+      applyFilters();
+    };
+
+    window.toggleSection = (el) => {
+      el.classList.toggle('collapsed');
+      el.nextElementSibling.classList.toggle('collapsed');
+    };
+
+    window.setSort = (s) => {
+      currentSort = s;
+      document.querySelectorAll('.sort-chip').forEach(c => c.classList.toggle('on', c.dataset.sort === s));
+      renderFlightList();
+    };
+    window.setSortChip = (s, el) => {
+      currentSort = s;
+      document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('on'));
+      el.classList.add('on');
+      document.getElementById('sortSelect').value = s;
+      renderFlightList();
+    };
+
+    function renderFlightList(){
+      const airlines = window.OMT?.DATA?.AIRLINES || {};
+      let flights = [...(window._allFlights || [])];
+
+      // Apply filters
+      if(activeFilters.stops.length > 0) flights = flights.filter(f => activeFilters.stops.includes(f.stops));
+      if(activeFilters.airlines.length > 0) flights = flights.filter(f => activeFilters.airlines.includes(f.code));
+      if(activeFilters.time.length > 0) flights = flights.filter(f => activeFilters.time.includes(f.depTime));
+      if(activeFilters.priceMin !== null) flights = flights.filter(f => f.price >= activeFilters.priceMin);
+      if(activeFilters.priceMax !== null) flights = flights.filter(f => f.price <= activeFilters.priceMax);
+
+      // Apply sort
+      if(currentSort === 'cheapest' || currentSort === 'recommend'){
+        flights.sort((a,b) => a.price - b.price);
+      } else if(currentSort === 'fastest'){
+        flights.sort((a,b) => parseDuration(a.outDur) - parseDuration(b.outDur));
+      } else if(currentSort === 'earliest'){
+        flights.sort((a,b) => a.outDep.localeCompare(b.outDep));
+      }
+
+      const list = document.getElementById('flightList');
+      if(flights.length === 0){
+        list.innerHTML = `
+          <div class="empty">
+            <div class="ic">✈️</div>
+            <div class="nm">조건에 맞는 항공편이 없어요</div>
+            <div class="desc">필터를 초기화하거나 다른 날짜·노선으로 검색해보세요</div>
+          </div>
+        `;
+        return;
+      }
+
+      const fmtDate = key => {
+        if(!key) return '';
+        const [, m, d] = key.split('-');
+        return `${m}.${d}`;
+      };
+      const remainingSeats = (f) => {
+        // mock: f.id 끝자리로 random
+        const code = f.id.charCodeAt(f.id.length - 1) % 12;
+        return code === 0 ? 1 : (code < 4 ? code + 2 : code);
+      };
+
+      list.innerHTML = flights.map(f => {
+        const a = airlines[f.code] || { name: f.code, color: 'linear-gradient(135deg,#6B7280,#9CA3AF)' };
+        const seats = remainingSeats(f);
+        const isBusiness = f.class === 'business' || f.class === 'first';
+        return `
+          <div class="flight-card">
+            <div class="airline">
+              <div class="airline-logo" style="background:${a.color || 'linear-gradient(135deg,#6B7280,#9CA3AF)'};">${f.code.replace(/\W/g,'').slice(0,2)}</div>
+              <div>
+                <div class="airline-name">${a.name}</div>
+                <div class="airline-num">${f.number}</div>
+              </div>
+            </div>
+            <div class="flight-route">
+              <div class="col">
+                <div class="date">${fmtDate(SQ.dep)}</div>
+                <div class="time">${f.outDep}</div>
+                <div class="airport">${f.from}</div>
+              </div>
+              <div class="col middle">
+                <div class="label">${f.stops === 0 ? '직항' : f.stops + '회 경유'}</div>
+                <div class="dur">${f.outDur}</div>
+              </div>
+              <div class="col">
+                <div class="date">${fmtDate(SQ.dep)}</div>
+                <div class="time">${f.outArr}</div>
+                <div class="airport">${f.to}</div>
+              </div>
+            </div>
+            <div class="flight-extras">
+              <div class="baggage">무료 수하물 15KG</div>
+              <div class="price ${isBusiness ? 'business' : ''}">${f.price.toLocaleString('ko-KR')}원</div>
+            </div>
+            <div class="flight-cta">
+              <a href="checkout.html?type=flight&id=${f.id}" class="select-btn">선택</a>
+              <div class="seats-left ${seats <= 3 ? 'seats-low' : ''}">잔여 ${seats}석</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Sort chip 갱신
+      renderSortChips();
+    }
+
+    init();
+  </script>
+</body>
+</html>
