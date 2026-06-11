@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원 관리 | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --vip:#DA70D6;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header (공통) */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:24px 0 12px;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+
+    /* KPI - 등급별 분포 */
+    .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .kpi-mini.bronze{border-left:3px solid #CD7F32;}
+    .kpi-mini.silver{border-left:3px solid #B0B7C3;}
+    .kpi-mini.gold{border-left:3px solid var(--accent);}
+    .kpi-mini.platinum{border-left:3px solid var(--info);}
+    .kpi-mini.vip{border-left:3px solid var(--vip);}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;}
+    .tab{padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;}
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+    .tab .badge.vip{background:rgba(218,112,214,.2);color:var(--vip);}
+
+    /* Search bar */
+    .search-bar{
+      margin:0 0 12px;display:flex;gap:8px;align-items:center;
+      background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;
+    }
+    .search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-size:14px;}
+    .search-bar input::placeholder{color:var(--ink-4);}
+    .search-bar .btn{padding:6px 14px;background:var(--primary);color:#fff;border-radius:6px;font-weight:800;font-size:12px;}
+
+    /* Filter chips */
+    .filter-chips{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+    .chip{
+      padding:6px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:18px;
+      font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;
+    }
+    .chip:hover{background:var(--bg-3);}
+    .chip.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .chip .num{margin-left:4px;font-family:'JetBrains Mono',monospace;opacity:.8;}
+
+    /* Table */
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .toolbar-left{font-size:12px;color:var(--ink-3);}
+    .toolbar-left strong{color:var(--ink);font-family:'JetBrains Mono',monospace;}
+    .toolbar-right{display:flex;gap:6px;}
+    .toolbar-right .tchip{
+      padding:5px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+      font-size:11px;font-weight:700;color:var(--ink-2);cursor:pointer;
+    }
+    .toolbar-right .tchip:hover{background:var(--bg-3);}
+
+    .table-wrap{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:var(--bg-3);}
+    th{text-align:left;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;padding:11px 14px;border-bottom:1px solid var(--line);}
+    td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);}
+    tbody tr{cursor:pointer;transition:background .12s;}
+    tbody tr:hover{background:rgba(255,255,255,.025);}
+    tbody tr:last-child td{border-bottom:none;}
+
+    .grade-pill{
+      display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:800;letter-spacing:.04em;
+    }
+    .grade-bronze{background:rgba(205,127,50,.15);color:#CD7F32;}
+    .grade-silver{background:rgba(176,183,195,.15);color:#B0B7C3;}
+    .grade-gold{background:rgba(255,210,63,.15);color:var(--accent);}
+    .grade-platinum{background:rgba(88,166,255,.15);color:var(--info);}
+    .grade-vip{background:rgba(218,112,214,.2);color:var(--vip);}
+
+    .user-name-cell{display:flex;align-items:center;gap:10px;}
+    .user-avatar{
+      width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--bg-3),var(--line));
+      display:grid;place-items:center;font-weight:900;font-size:13px;color:var(--accent);flex-shrink:0;
+    }
+    .user-info .name{font-weight:800;color:var(--ink);font-size:13px;}
+    .user-info .id{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+
+    .amount{font-family:'JetBrains Mono',monospace;font-weight:800;text-align:right;}
+    .amount.big{color:var(--accent);}
+    .points{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--success);text-align:right;}
+    .when-cell{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-3);}
+
+    .action-row{display:flex;gap:4px;}
+    .action-btn{padding:4px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;font-size:11px;font-weight:700;color:var(--ink-2);}
+    .action-btn:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:18px 0;}
+    .pagination button{padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);}
+    .pagination button.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .pagination .ellipsis{color:var(--ink-4);padding:0 4px;}
+
+    /* Slideout */
+    .slideout-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .slideout-overlay.on{opacity:1;pointer-events:auto;}
+    .slideout{
+      position:fixed;top:0;right:0;bottom:0;width:580px;max-width:92vw;background:var(--bg-2);
+      border-left:1px solid var(--line);z-index:90;transform:translateX(100%);transition:transform .25s;
+      display:flex;flex-direction:column;
+    }
+    .slideout.on{transform:translateX(0);}
+    .slideout-head{
+      padding:16px 20px;border-bottom:1px solid var(--line);
+      background:var(--bg-3);display:flex;justify-content:space-between;align-items:center;
+    }
+    .slideout-head .close{font-size:18px;color:var(--ink-3);cursor:pointer;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;}
+    .slideout-head .close:hover{background:var(--bg);color:var(--ink);}
+    .slideout-body{flex:1;overflow-y:auto;padding:20px;}
+
+    .so-profile{display:flex;gap:14px;align-items:center;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+    .so-profile .av{
+      width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:grid;place-items:center;font-weight:900;font-size:24px;color:#fff;
+    }
+    .so-profile .info .nm{font-size:18px;font-weight:900;color:var(--ink);}
+    .so-profile .info .em{font-size:12px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .so-profile .info .gr{margin-top:4px;}
+
+    .so-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+    .so-stat{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center;}
+    .so-stat .lb{font-size:10px;color:var(--ink-3);font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
+    .so-stat .vl{font-size:16px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent);margin-top:4px;}
+
+    .so-section{margin-bottom:20px;}
+    .so-section .h{
+      font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+      margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;
+    }
+    .so-section .h .count{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+    .timeline-item{
+      display:grid;grid-template-columns:60px 1fr auto;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);
+      font-size:12px;align-items:center;
+    }
+    .timeline-item:last-child{border-bottom:none;}
+    .timeline-item .when{font-family:'JetBrains Mono',monospace;color:var(--ink-3);font-size:11px;}
+    .timeline-item .what{color:var(--ink-2);}
+    .timeline-item .what strong{color:var(--ink);}
+    .timeline-item .ref{font-family:'JetBrains Mono',monospace;color:var(--info);font-size:11px;}
+
+    .kv-grid{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:13px;}
+    .kv-grid dt{color:var(--ink-3);font-weight:700;}
+    .kv-grid dd{margin:0;color:var(--ink);font-weight:600;}
+
+    .slideout-foot{
+      padding:14px 20px;border-top:1px solid var(--line);background:var(--bg-3);
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .slideout-foot .btn{padding:8px 14px;border-radius:6px;font-size:12px;font-weight:800;}
+    .slideout-foot .btn-primary{background:var(--primary);color:#fff;}
+    .slideout-foot .btn-success{background:var(--success);color:#fff;}
+    .slideout-foot .btn-warning{background:var(--warning);color:#fff;}
+    .slideout-foot .btn-danger{background:var(--danger);color:#fff;}
+    .slideout-foot .btn-ghost{background:var(--bg-2);color:var(--ink-2);border:1px solid var(--line);}
+
+    @media (max-width:1024px){
+      .kpi-row{grid-template-columns:1fr 1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠 대시보드</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="#" class="on">👥 회원</a>
+        <a href="admin-cs.html">💬 CS</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">K</div>
+        <div>
+          <div class="name">김운영</div>
+          <div class="role">MANAGER</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">👥 CUSTOMER MANAGEMENT</div>
+      <h1 class="page-title">회원 관리</h1>
+      <p class="page-sub">전체 12,418명 · 등급별 분포 + 누적 통계 + VIP 관리</p>
+    </section>
+
+    <!-- KPI: 등급별 분포 -->
+    <div class="kpi-row">
+      <div class="kpi-mini bronze">
+        <div class="lb">🥉 브론즈 (0~50만)</div>
+        <div class="val">8,742<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini silver">
+        <div class="lb">🥈 실버 (50~200만)</div>
+        <div class="val">2,418<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini gold">
+        <div class="lb">🥇 골드 (200~500만)</div>
+        <div class="val">894<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini platinum">
+        <div class="lb">💎 플래티넘 (500만+)</div>
+        <div class="val">340<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini vip">
+        <div class="lb">⭐ VIP (1억+)</div>
+        <div class="val">24<span class="small">명</span></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab on" data-tab="all">전체 회원 <span class="badge">12,418</span></div>
+      <div class="tab" data-tab="vip">⭐ VIP 관리 <span class="badge vip">24</span></div>
+      <div class="tab" data-tab="recent">🆕 최근 가입 <span class="badge">142</span></div>
+      <div class="tab" data-tab="dormant">💤 휴면 회원 <span class="badge">2,418</span></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span style="font-size:14px;color:var(--ink-3);">🔍</span>
+      <input type="text" placeholder="이름 · 이메일 · 전화번호 · 회원번호 검색" />
+      <button class="btn">검색</button>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-chips">
+      <div class="chip on">전체 등급</div>
+      <div class="chip">🥉 브론즈 <span class="num">8,742</span></div>
+      <div class="chip">🥈 실버 <span class="num">2,418</span></div>
+      <div class="chip">🥇 골드 <span class="num">894</span></div>
+      <div class="chip">💎 플래티넘 <span class="num">340</span></div>
+      <div class="chip">⭐ VIP <span class="num">24</span></div>
+      <div style="width:1px;background:var(--line);margin:auto 4px;"></div>
+      <div class="chip">📅 가입 30d</div>
+      <div class="chip">📅 가입 1y</div>
+      <div class="chip">✈️ 직영국 활동</div>
+      <div class="chip">📷 리뷰 작성자</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">전체 <strong>12,418</strong>명 중 <strong>1-12</strong> 표시 · 정렬: 최근 예약순</div>
+      <div class="toolbar-right">
+        <select style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:5px 10px;color:var(--ink-2);font-size:11px;font-weight:700;outline:none;">
+          <option>최근 예약순</option>
+          <option>총 결제액순</option>
+          <option>예약 횟수순</option>
+          <option>가입일순</option>
+          <option>마지막 접속순</option>
+        </select>
+        <button class="tchip">📥 CSV 다운로드</button>
+        <button class="tchip">📩 일괄 알림 발송</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px;"><input type="checkbox" /></th>
+            <th>회원</th>
+            <th style="width:90px;">등급</th>
+            <th style="width:130px;">총 결제액</th>
+            <th style="width:80px;">예약</th>
+            <th style="width:100px;">포인트</th>
+            <th style="width:120px;">가입일</th>
+            <th style="width:120px;">마지막 접속</th>
+            <th style="width:170px;">액션</th>
+          </tr>
+        </thead>
+        <tbody id="userTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button>‹</button>
+      <button class="on">1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>4</button>
+      <button>5</button>
+      <span class="ellipsis">…</span>
+      <button>1,035</button>
+      <button>›</button>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · 회원 관리 · ELLIS_SPEC.md §3.4 Users 도메인 기반
+    </div>
+  </main>
+
+  <!-- Slideout -->
+  <div class="slideout-overlay" id="slideoutOverlay" onclick="closeSlideout()"></div>
+  <aside class="slideout" id="slideout">
+    <div class="slideout-head">
+      <div style="font-size:14px;font-weight:900;">회원 상세</div>
+      <button class="close" onclick="closeSlideout()">×</button>
+    </div>
+    <div class="slideout-body" id="slideoutBody"></div>
+    <div class="slideout-foot">
+      <button class="btn btn-primary" onclick="alert('등급 수동 변경 모달 → audit_logs 기록')">⬆️ 등급 변경</button>
+      <button class="btn btn-success" onclick="alert('포인트 적립 (사유 필수)')">+ 포인트 적립</button>
+      <button class="btn btn-warning" onclick="alert('포인트 차감 (사유 필수)')">− 포인트 차감</button>
+      <button class="btn btn-ghost" onclick="alert('쿠폰 발급 모달')">🎟️ 쿠폰</button>
+      <button class="btn btn-ghost" onclick="alert('메모 추가')">📝 메모</button>
+      <button class="btn btn-danger" onclick="alert('SUPER_ADMIN 권한 필요')">⛔ 계정 정지</button>
+    </div>
+  </aside>
+
+  <script>
+    const USERS = [
+      {id:'user-12418', name:'한○○', email:'h***@gmail.com', phone:'010-XXXX-4444', grade:'vip', amount:'132,840,000원', bookings:'48', points:'1,284,000P', joined:'2023-08-22', last:'1h 전', initial:'한'},
+      {id:'user-12017', name:'서○○', email:'s***@naver.com', phone:'010-XXXX-2345', grade:'platinum', amount:'14,820,000원', bookings:'12', points:'148,200P', joined:'2024-05-18', last:'3h 전', initial:'서'},
+      {id:'user-11842', name:'박○○', email:'p***@kakao.com', phone:'010-XXXX-1234', grade:'gold', amount:'4,840,000원', bookings:'7', points:'48,400P', joined:'2024-09-12', last:'오늘 12:48', initial:'박'},
+      {id:'user-11618', name:'김○○', email:'k***@gmail.com', phone:'010-XXXX-5678', grade:'gold', amount:'3,920,000원', bookings:'5', points:'39,200P', joined:'2024-11-04', last:'오늘 10:22', initial:'김'},
+      {id:'user-11420', name:'정○○', email:'j***@naver.com', phone:'010-XXXX-7890', grade:'silver', amount:'1,890,000원', bookings:'3', points:'18,900P', joined:'2025-02-08', last:'어제', initial:'정'},
+      {id:'user-11218', name:'최○○', email:'c***@gmail.com', phone:'010-XXXX-3456', grade:'silver', amount:'1,540,000원', bookings:'2', points:'15,400P', joined:'2025-04-14', last:'어제', initial:'최'},
+      {id:'user-11018', name:'윤○○', email:'y***@kakao.com', phone:'010-XXXX-9012', grade:'platinum', amount:'8,420,000원', bookings:'9', points:'84,200P', joined:'2024-03-18', last:'2일 전', initial:'윤'},
+      {id:'user-10918', name:'강○○', email:'g***@naver.com', phone:'010-XXXX-1111', grade:'gold', amount:'2,920,000원', bookings:'4', points:'29,200P', joined:'2025-01-22', last:'2일 전', initial:'강'},
+      {id:'user-10818', name:'오○○', email:'o***@gmail.com', phone:'010-XXXX-2222', grade:'gold', amount:'2,840,000원', bookings:'4', points:'28,400P', joined:'2025-03-08', last:'3일 전', initial:'오'},
+      {id:'user-10718', name:'송○○', email:'s***@kakao.com', phone:'010-XXXX-3333', grade:'silver', amount:'1,780,000원', bookings:'3', points:'17,800P', joined:'2025-05-12', last:'4일 전', initial:'송'},
+      {id:'user-10618', name:'이○○', email:'l***@naver.com', phone:'010-XXXX-6789', grade:'bronze', amount:'480,000원', bookings:'1', points:'4,800P', joined:'2026-01-08', last:'오늘 09:14', initial:'이'},
+      {id:'user-10518', name:'유○○', email:'u***@gmail.com', phone:'010-XXXX-5555', grade:'silver', amount:'1,420,000원', bookings:'2', points:'14,200P', joined:'2025-08-22', last:'5일 전', initial:'유'},
+    ];
+    const GRADE_LABEL = {bronze:'🥉 브론즈', silver:'🥈 실버', gold:'🥇 골드', platinum:'💎 플래티넘', vip:'⭐ VIP'};
+
+    function renderTable(){
+      const tb = document.getElementById('userTbody');
+      tb.innerHTML = USERS.map(u => `
+        <tr onclick="openUser('${u.id}')">
+          <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+          <td>
+            <div class="user-name-cell">
+              <div class="user-avatar">${u.initial}</div>
+              <div class="user-info">
+                <div class="name">${u.name}</div>
+                <div class="id">${u.id} · ${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="grade-pill grade-${u.grade}">${GRADE_LABEL[u.grade]}</span></td>
+          <td class="amount ${u.grade==='vip'||u.grade==='platinum'?'big':''}">${u.amount}</td>
+          <td class="amount" style="color:var(--info);">${u.bookings}회</td>
+          <td class="points">${u.points}</td>
+          <td class="when-cell">${u.joined}</td>
+          <td class="when-cell">${u.last}</td>
+          <td>
+            <div class="action-row">
+              <button class="action-btn" onclick="event.stopPropagation();openUser('${u.id}')">상세</button>
+              <button class="action-btn" onclick="event.stopPropagation();alert('등급 변경 모달')">등급</button>
+              <button class="action-btn" onclick="event.stopPropagation();alert('포인트 조정 모달')">포인트</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+    renderTable();
+
+    function openUser(id){
+      const u = USERS.find(x => x.id === id);
+      if(!u) return;
+      document.getElementById('slideoutBody').innerHTML = `
+        <div class="so-profile">
+          <div class="av">${u.initial}</div>
+          <div class="info">
+            <div class="nm">${u.name}</div>
+            <div class="em">${u.id} · ${u.email}</div>
+            <div class="em">${u.phone}</div>
+            <div class="gr"><span class="grade-pill grade-${u.grade}">${GRADE_LABEL[u.grade]}</span></div>
+          </div>
+        </div>
+
+        <div class="so-stats">
+          <div class="so-stat">
+            <div class="lb">총 결제액</div>
+            <div class="vl">${u.amount.replace('원','').replace(',000,000','M').replace(',000','K')}</div>
+          </div>
+          <div class="so-stat">
+            <div class="lb">예약</div>
+            <div class="vl">${u.bookings}회</div>
+          </div>
+          <div class="so-stat">
+            <div class="lb">포인트</div>
+            <div class="vl">${u.points.replace(',000','K').replace('P','')}</div>
+          </div>
+          <div class="so-stat">
+            <div class="lb">리뷰</div>
+            <div class="vl">${Math.floor(u.bookings*0.6)}건</div>
+          </div>
+        </div>
+
+        <div class="so-section">
+          <div class="h">📋 기본 정보</div>
+          <dl class="kv-grid">
+            <dt>이름·전화</dt><dd>${u.name} · ${u.phone}</dd>
+            <dt>이메일</dt><dd>${u.email}</dd>
+            <dt>회원ID</dt><dd style="font-family:'JetBrains Mono',monospace;font-size:12px;">${u.id}</dd>
+            <dt>등급</dt><dd>${GRADE_LABEL[u.grade]}</dd>
+            <dt>가입일</dt><dd style="font-family:'JetBrains Mono',monospace;">${u.joined}</dd>
+            <dt>마지막 접속</dt><dd>${u.last}</dd>
+            <dt>마케팅 동의</dt><dd>✓ 카톡 / ✓ SMS / ✗ 이메일</dd>
+            <dt>관심 국가</dt><dd>베트남·일본</dd>
+            ${u.grade==='vip' ? `<dt>VIP 매니저</dt><dd style="color:var(--vip);font-weight:800;">⭐ 김담당 (전담)</dd>` : ''}
+          </dl>
+        </div>
+
+        <div class="so-section">
+          <div class="h">🎫 예약 이력 <span class="count">${u.bookings}건</span></div>
+          <div class="timeline-item">
+            <span class="when">2026-06-13</span>
+            <span class="what"><strong>다낭 풀빌라 6박</strong> · 골프텔</span>
+            <span class="ref">OMT-VN8K3M</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-04-22</span>
+            <span class="what"><strong>카누차 오키나와 3박 2R</strong> · 골프텔</span>
+            <span class="ref">OMT-JP3K7L</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-02-18</span>
+            <span class="what"><strong>나트랑 빈펄 5박 4R</strong> · 골프텔+항공</span>
+            <span class="ref">OMT-VN5L2P</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2025-11-08</span>
+            <span class="what"><strong>방콕 알파인 4박 3R</strong> · 골프텔</span>
+            <span class="ref">OMT-TH4K9M</span>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--info);font-weight:700;padding:8px 0;cursor:pointer;">전체 이력 보기 →</div>
+        </div>
+
+        <div class="so-section">
+          <div class="h">💰 포인트·쿠폰 활동 <span class="count">최근 6건</span></div>
+          <div class="timeline-item">
+            <span class="when">2h 전</span>
+            <span class="what">예약 적립 <strong style="color:var(--success);">+24,000P</strong></span>
+            <span class="ref">OMT-VN8K3M</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-05-12</span>
+            <span class="what">생일 쿠폰 발급 <strong style="color:var(--accent);">10% 할인</strong></span>
+            <span class="ref">CPN-BD-892</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-04-22</span>
+            <span class="what">예약 사용 <strong style="color:var(--danger);">-12,000P</strong></span>
+            <span class="ref">OMT-JP3K7L</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-03-08</span>
+            <span class="what">리뷰 보너스 <strong style="color:var(--success);">+1,000P</strong></span>
+            <span class="ref">REV-2418</span>
+          </div>
+        </div>
+
+        <div class="so-section">
+          <div class="h">📜 운영자 활동 로그 (audit_logs) <span class="count">3건</span></div>
+          <div class="timeline-item">
+            <span class="when">2026-04-22</span>
+            <span class="what"><strong>윤CS</strong> 등급 SILVER → ${u.grade.toUpperCase()}</span>
+            <span class="ref">audit-#28419</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-02-18</span>
+            <span class="what"><strong>박CS</strong> 포인트 보너스 적립 <strong style="color:var(--success);">+5,000P</strong></span>
+            <span class="ref">audit-#27284</span>
+          </div>
+          <div class="timeline-item">
+            <span class="when">2026-01-08</span>
+            <span class="what"><strong>최CS</strong> 메모 추가 "VIP 후보군"</span>
+            <span class="ref">audit-#26142</span>
+          </div>
+        </div>
+      `;
+      document.getElementById('slideout').classList.add('on');
+      document.getElementById('slideoutOverlay').classList.add('on');
+    }
+    function closeSlideout(){
+      document.getElementById('slideout').classList.remove('on');
+      document.getElementById('slideoutOverlay').classList.remove('on');
+    }
+
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+      });
+    });
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+        c.classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>

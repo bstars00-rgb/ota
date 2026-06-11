@@ -457,21 +457,42 @@ CREATE TABLE supplier_settlements (
 
 ## 10. 마이그레이션 체크리스트
 
-- [ ] BACKOFFICE_SPEC.md 검토 (운영팀 + 개발팀)
-- [ ] admin-dashboard.html (이번 사이클 신규)
-- [ ] admin-bookings.html (이번 사이클 신규)
-- [ ] admin-products.html (이번 사이클 신규)
-- [ ] admin-customers.html (다음 사이클)
-- [ ] admin-cs.html (다음 사이클)
-- [ ] admin-settlement.html (Phase 2)
-- [ ] admin-cms.html (Phase 3)
-- [ ] admin-users.html (Phase 1 — 보안 필수)
-- [ ] ELLIS DB 스키마 ALTER (admins / audit_logs / cms_* / supplier_settlements)
-- [ ] ELLIS API 백엔드 구현 (위 9.6 엔드포인트)
-- [ ] 2FA TOTP 라이브러리 도입
+### ✅ 프론트엔드 프로토타입 (6/8 모듈 완료)
+- [x] BACKOFFICE_SPEC.md 작성 (v1.0)
+- [x] admin-dashboard.html — 사이클 10
+- [x] admin-bookings.html — 사이클 10
+- [x] admin-products.html — 사이클 10
+- [x] **admin-cs.html — 사이클 11** ⭐ NEW (3 탭: 문의 응대 + 리뷰 관리 + 알림톡 이력)
+- [x] **admin-customers.html — 사이클 11** ⭐ NEW (Phase 2 조기 진행 · 5등급 분포)
+- [x] **admin-users.html — 사이클 11** ⭐ NEW (24명 운영자 + 권한 매트릭스 + 감사 로그)
+- [ ] admin-settlement.html — Phase 2 잔여
+- [ ] admin-cms.html — Phase 3
+
+### ⏳ 백엔드 구현 (추후 개발팀)
+- [ ] ELLIS DB 스키마 ALTER (admins / audit_logs / cms_* / pricing_rules / supplier_settlements)
+- [ ] ELLIS API 백엔드 구현 (위 §6 엔드포인트 22종)
+- [ ] 2FA TOTP 라이브러리 도입 (Google Authenticator)
 - [ ] CSV/Excel export 라이브러리
 - [ ] 운영자 초기 계정 등록 + ROLE 부여
 - [ ] 감사 로그 모니터링 대시보드 (Grafana 등)
+- [ ] 4-eye 승인 시스템 (SUPER_ADMIN 부여 시 2명 승인)
+- [ ] IP 화이트리스트 정책 (회사 VPN/오피스)
+
+### ⏳ 운영 도입
+- [ ] 운영자 24명 초기 등록 + 권한 부여
+- [ ] 운영자 사용 가이드 작성
+- [ ] CS·MD 팀별 워크플로우 트레이닝
+- [ ] 감사 로그 검토 정기 일정 (월 1회)
+- [ ] CS SLA 정의 (24h 내 1차 답변 · 72h 내 처리 완료)
+
+---
+
+## 변경 이력
+
+| 버전 | 일자 | 변경 |
+|---|---|---|
+| **v1.1** | 2026-06-11 | 사이클 11 — admin-cs / admin-customers / admin-users 3 페이지 추가 · Phase 1 완료 + Phase 2 조기 진입 |
+| v1.0 | 2026-06-11 | 초기 구상 — 8 모듈 · 4 ROLE · admin-dashboard/bookings/products 3 페이지 |
 
 ---
 

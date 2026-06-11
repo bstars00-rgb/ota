@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS 운영 | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --kakao:#FEE500;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select,textarea{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header (공통) */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:24px 0 12px;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+
+    /* KPI */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;}
+    .tab{padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;}
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+    .tab .badge.danger{background:rgba(248,81,73,.2);color:var(--danger);}
+    .tab .badge.warn{background:rgba(245,158,11,.2);color:var(--warning);}
+
+    .tab-pane{display:none;}
+    .tab-pane.on{display:block;}
+
+    /* 문의 응대: 2-col 레이아웃 */
+    .cs-grid{display:grid;grid-template-columns:380px 1fr;gap:14px;height:calc(100vh - 280px);min-height:560px;}
+    .inquiry-list{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+      display:flex;flex-direction:column;
+    }
+    .inquiry-list-head{
+      padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg-3);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .inquiry-list-head .h{font-size:13px;font-weight:900;}
+    .inquiry-list-head select{
+      background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:4px 8px;
+      color:var(--ink-2);font-size:11px;font-weight:700;outline:none;
+    }
+    .inquiry-search{padding:10px 14px;border-bottom:1px solid var(--line);}
+    .inquiry-search input{
+      width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;
+      padding:7px 10px;color:var(--ink);font-size:12px;outline:none;
+    }
+    .inquiry-items{flex:1;overflow-y:auto;}
+    .inq-item{
+      padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;
+      transition:background .12s;display:grid;grid-template-columns:1fr auto;gap:6px;
+    }
+    .inq-item:hover{background:rgba(255,255,255,.02);}
+    .inq-item.on{background:rgba(255,107,53,.06);border-left:3px solid var(--primary);}
+    .inq-item .top{display:flex;justify-content:space-between;align-items:center;grid-column:1/-1;}
+    .inq-item .cat{
+      font-size:10px;font-weight:900;padding:1px 7px;border-radius:4px;
+      background:rgba(88,166,255,.15);color:var(--info);letter-spacing:.04em;
+    }
+    .inq-item .when{font-size:10px;color:var(--ink-4);font-family:'JetBrains Mono',monospace;}
+    .inq-item .title{
+      font-size:13px;font-weight:800;color:var(--ink);grid-column:1/-1;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .inq-item .preview{
+      font-size:11px;color:var(--ink-3);grid-column:1/-1;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .inq-item .author{font-size:10px;color:var(--ink-3);grid-column:1/-1;}
+    .inq-item .author strong{color:var(--ink-2);}
+    .inq-item.urgent .cat{background:rgba(248,81,73,.18);color:var(--danger);}
+
+    /* 문의 상세 */
+    .inquiry-detail{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+      display:flex;flex-direction:column;
+    }
+    .inq-detail-head{
+      padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bg-3);
+      display:flex;justify-content:space-between;align-items:flex-start;
+    }
+    .inq-detail-head .left .h{font-size:16px;font-weight:900;margin-bottom:4px;}
+    .inq-detail-head .left .meta{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .inq-detail-head .right{display:flex;gap:6px;}
+    .inq-detail-head .right button{
+      padding:5px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);
+    }
+    .inq-detail-head .right button:hover{background:var(--bg);color:var(--ink);}
+
+    .inq-thread{flex:1;overflow-y:auto;padding:20px;}
+    .msg{
+      margin-bottom:14px;padding:12px 14px;border-radius:10px;max-width:88%;
+      font-size:13px;line-height:1.6;
+    }
+    .msg.from-user{background:var(--bg-3);border-bottom-left-radius:3px;}
+    .msg.from-cs{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-bottom-right-radius:3px;margin-left:auto;}
+    .msg .who{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;color:var(--ink-3);}
+    .msg.from-cs .who{color:var(--primary);}
+    .msg .when{font-size:10px;color:var(--ink-4);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+
+    .reply-area{padding:14px 20px;border-top:1px solid var(--line);background:var(--bg-3);}
+    .templates{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .templates .tpl{
+      padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);cursor:pointer;
+    }
+    .templates .tpl:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+    .reply-input{
+      width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+      padding:10px 12px;color:var(--ink);font-size:13px;outline:none;resize:vertical;min-height:80px;
+    }
+    .reply-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+    .reply-foot .alimtalk-hint{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px;}
+    .reply-foot .alimtalk-hint strong{color:var(--kakao);font-weight:900;}
+    .reply-foot .btn-send{
+      padding:8px 16px;background:var(--primary);color:#fff;border-radius:6px;font-weight:800;font-size:12px;
+    }
+    .reply-foot .btn-send:hover{background:#FF8B5C;}
+
+    /* 리뷰 관리 */
+    .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .review-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .review-card .top{display:flex;justify-content:space-between;align-items:center;}
+    .review-card .stars{color:var(--accent);font-size:13px;font-weight:900;}
+    .review-card .when{font-size:10px;color:var(--ink-4);font-family:'JetBrains Mono',monospace;}
+    .review-card .product{font-size:11px;color:var(--info);font-weight:800;}
+    .review-card .body{font-size:12px;color:var(--ink-2);line-height:1.5;}
+    .review-card .photos{display:flex;gap:4px;}
+    .review-card .photos .ph{width:38px;height:38px;background:linear-gradient(135deg,var(--bg-3),var(--line));border-radius:5px;display:grid;place-items:center;font-size:14px;}
+    .review-card .foot{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--line);}
+    .review-card .foot .author{font-size:11px;color:var(--ink-3);}
+    .review-card .foot .actions{display:flex;gap:4px;}
+    .review-card .foot .actions button{
+      padding:4px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:10px;font-weight:700;color:var(--ink-2);
+    }
+    .review-card .foot .actions button:hover{background:var(--bg);color:var(--ink);}
+    .review-card .reported-tag{
+      padding:1px 7px;border-radius:4px;font-size:10px;font-weight:900;
+      background:rgba(248,81,73,.18);color:var(--danger);
+    }
+
+    /* 알림톡 이력 */
+    .alimtalk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+    .tpl-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px;
+      cursor:pointer;transition:all .15s;
+    }
+    .tpl-card:hover{transform:translateY(-2px);border-color:var(--line-2);}
+    .tpl-card .code{font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-weight:800;}
+    .tpl-card .name{font-size:13px;font-weight:900;color:var(--ink);margin:4px 0;}
+    .tpl-card .num{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent);margin:4px 0;}
+    .tpl-card .num .small{font-size:11px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .tpl-card .rate{font-size:10px;font-weight:800;}
+    .tpl-card .rate.ok{color:var(--success);}
+    .tpl-card .rate.warn{color:var(--warning);}
+
+    .send-log-table{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+    .send-log-table table{width:100%;border-collapse:collapse;}
+    .send-log-table th{
+      text-align:left;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;
+      text-transform:uppercase;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--bg-3);
+    }
+    .send-log-table td{padding:11px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);}
+    .send-log-table tr:last-child td{border-bottom:none;}
+    .send-log-table .tpl-code{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700;}
+    .send-log-table .recipient{font-family:'JetBrains Mono',monospace;color:var(--ink-3);}
+    .send-log-table .status-ok{color:var(--success);font-weight:800;}
+    .send-log-table .status-fail{color:var(--danger);font-weight:800;}
+    .send-log-table .status-sms{color:var(--info);font-weight:800;}
+    .send-log-table .retry{
+      padding:4px 10px;background:var(--primary);color:#fff;border-radius:5px;font-size:11px;font-weight:800;
+    }
+
+    @media (max-width:1024px){
+      .cs-grid{grid-template-columns:1fr;height:auto;}
+      .inquiry-list{height:300px;}
+      .review-grid{grid-template-columns:1fr 1fr;}
+      .alimtalk-grid{grid-template-columns:1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠 대시보드</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="admin-customers.html">👥 회원</a>
+        <a href="#" class="on">💬 CS</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">P</div>
+        <div>
+          <div class="name">박CS</div>
+          <div class="role">OPERATOR</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">💬 CUSTOMER SERVICE OPERATIONS</div>
+      <h1 class="page-title">CS 운영</h1>
+      <p class="page-sub">문의 응대 · 리뷰 관리 · 카톡 알림톡 발송 이력</p>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <div class="lb">답변 대기</div>
+        <div class="val" style="color:var(--warning);">23<span class="small">건</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">24h+ 미답변</div>
+        <div class="val" style="color:var(--danger);">4<span class="small">건</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">오늘 처리</div>
+        <div class="val" style="color:var(--success);">89<span class="small">건</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">평균 응답</div>
+        <div class="val">3.2<span class="small">h</span></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab on" data-tab="inquiry">💬 문의 응대 <span class="badge danger">23</span></div>
+      <div class="tab" data-tab="review">⭐ 리뷰 관리 <span class="badge">847</span></div>
+      <div class="tab" data-tab="alimtalk">📩 알림톡 이력 <span class="badge">12,840</span></div>
+    </div>
+
+    <!-- 문의 응대 -->
+    <div class="tab-pane on" id="pane-inquiry">
+      <div class="cs-grid">
+        <div class="inquiry-list">
+          <div class="inquiry-list-head">
+            <div class="h">📥 답변 대기 큐</div>
+            <select>
+              <option>오래된 순</option>
+              <option>최신순</option>
+              <option>긴급순</option>
+            </select>
+          </div>
+          <div class="inquiry-search">
+            <input type="text" placeholder="🔍 회원·상품·카테고리 검색" />
+          </div>
+          <div class="inquiry-items" id="inqList"></div>
+        </div>
+        <div class="inquiry-detail" id="inqDetail">
+          <!-- JS로 채움 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 리뷰 관리 -->
+    <div class="tab-pane" id="pane-review">
+      <div class="tabs" style="margin:0 0 14px;">
+        <div class="tab on">전체 리뷰 <span class="badge">847</span></div>
+        <div class="tab">🚨 신고 대기 <span class="badge danger">3</span></div>
+        <div class="tab">📷 사진 첨부 <span class="badge">218</span></div>
+        <div class="tab">↩️ 운영사 답변 가능 <span class="badge warn">54</span></div>
+      </div>
+      <div class="review-grid" id="reviewGrid"></div>
+    </div>
+
+    <!-- 알림톡 이력 -->
+    <div class="tab-pane" id="pane-alimtalk">
+      <h3 style="font-size:14px;font-weight:900;margin:0 0 12px;">📊 이번달 발송 통계 (10 템플릿)</h3>
+      <div class="alimtalk-grid">
+        <div class="tpl-card">
+          <div class="code">TPL-001</div>
+          <div class="name">예약 확정</div>
+          <div class="num">2,486<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.2%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-002</div>
+          <div class="name">D-7 알림</div>
+          <div class="num">1,842<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 98.8%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-003</div>
+          <div class="name">D-3 알림</div>
+          <div class="num">1,920<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.1%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-004</div>
+          <div class="name">티오프 확정</div>
+          <div class="num">1,648<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.5%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-005</div>
+          <div class="name">결제 완료</div>
+          <div class="num">2,420<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.4%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-006</div>
+          <div class="name">결제 실패</div>
+          <div class="num">242<span class="small">건</span></div>
+          <div class="rate warn">⚠ 성공률 96.8%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-007</div>
+          <div class="name">문의 답변</div>
+          <div class="num">748<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.7%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-008</div>
+          <div class="name">리뷰 요청</div>
+          <div class="num">1,284<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 98.4%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-009</div>
+          <div class="name">취소 확정</div>
+          <div class="num">94<span class="small">건</span></div>
+          <div class="rate ok">✓ 성공률 99.0%</div>
+        </div>
+        <div class="tpl-card">
+          <div class="code">TPL-010</div>
+          <div class="name">특가 (마케팅)</div>
+          <div class="num">1,156<span class="small">건</span></div>
+          <div class="rate warn">⚠ 성공률 94.2%</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:14px;font-weight:900;margin:24px 0 12px;display:flex;align-items:center;gap:8px;">
+        ⚠️ 실패 발송 큐 <span style="font-size:11px;color:var(--ink-3);font-weight:700;">최근 24h · 18건</span>
+      </h3>
+      <div class="send-log-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">템플릿</th>
+              <th style="width:140px;">수신자</th>
+              <th>내용 요약</th>
+              <th style="width:130px;">발송 시각</th>
+              <th style="width:90px;">상태</th>
+              <th style="width:140px;">실패 사유</th>
+              <th style="width:100px;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tpl-code">TPL-001</span></td>
+              <td class="recipient">010-XXXX-1234</td>
+              <td>박○○님 예약 OMT-CL9X2A 확정 안내</td>
+              <td class="recipient">14:08:22</td>
+              <td><span class="status-fail">✗ 실패</span></td>
+              <td>알림톡 미수신자</td>
+              <td><button class="retry">SMS 대체</button></td>
+            </tr>
+            <tr>
+              <td><span class="tpl-code">TPL-010</span></td>
+              <td class="recipient">010-XXXX-5678</td>
+              <td>이번주 특가 안내 (광고)</td>
+              <td class="recipient">13:54:08</td>
+              <td><span class="status-fail">✗ 차단</span></td>
+              <td>마케팅 수신 거부</td>
+              <td><button class="retry" style="background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line);">재시도 불가</button></td>
+            </tr>
+            <tr>
+              <td><span class="tpl-code">TPL-002</span></td>
+              <td class="recipient">010-XXXX-9012</td>
+              <td>D-7 출발 안내 - 다낭 5박</td>
+              <td class="recipient">13:22:14</td>
+              <td><span class="status-fail">✗ 실패</span></td>
+              <td>토큰 없음</td>
+              <td><button class="retry">SMS 대체</button></td>
+            </tr>
+            <tr>
+              <td><span class="tpl-code">TPL-006</span></td>
+              <td class="recipient">010-XXXX-3456</td>
+              <td>결제 실패 - 카카오페이</td>
+              <td class="recipient">12:48:30</td>
+              <td><span class="status-sms">✓ SMS 전환</span></td>
+              <td>알림톡 미수신자</td>
+              <td><button class="retry" style="background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line);">완료</button></td>
+            </tr>
+            <tr>
+              <td><span class="tpl-code">TPL-008</span></td>
+              <td class="recipient">010-XXXX-7890</td>
+              <td>리뷰 요청 - 푸꾸옥 빈펄</td>
+              <td class="recipient">11:18:22</td>
+              <td><span class="status-fail">✗ 차단</span></td>
+              <td>마케팅 수신 거부</td>
+              <td><button class="retry" style="background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line);">재시도 불가</button></td>
+            </tr>
+            <tr>
+              <td><span class="tpl-code">TPL-001</span></td>
+              <td class="recipient">010-XXXX-2345</td>
+              <td>박○○님 예약 OMT-VN8K3M 확정</td>
+              <td class="recipient">10:42:08</td>
+              <td><span class="status-sms">✓ SMS 전환</span></td>
+              <td>알림톡 미수신자</td>
+              <td><button class="retry" style="background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line);">완료</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · CS 운영 · ALIMTALK_TEMPLATES.md · ELLIS_SPEC.md §3.7 Inquiries / §3.8 Reviews
+    </div>
+  </main>
+
+  <script>
+    // 문의 데이터
+    const INQUIRIES = [
+      {id:'uq-2618', cat:'결제·환불', urgent:true, title:'환불 진행 상황 문의', preview:'어제 취소 신청한 OMT-3DK21A 환불이 아직...', author:'최○○', when:'어제 14:22', diff:'26h'},
+      {id:'uq-2619', cat:'골프', urgent:false, title:'바나힐 골프장 캐디 한국어 가능 여부', preview:'골프장에 한국어 캐디 분이 있는지 궁금합니다', author:'김○○', when:'오늘 09:14', diff:'5h'},
+      {id:'uq-2620', cat:'예약', urgent:false, title:'2명 → 4명 인원 변경', preview:'7월 4일 호치민 예약(OMT-PT9X4K)을 4명으로...', author:'정○○', when:'오늘 10:08', diff:'4h'},
+      {id:'uq-2621', cat:'호텔', urgent:false, title:'카누차 가족실 4인 가능?', preview:'성인 2 아동 2 가족이서 1실 가능한가요?', author:'서○○', when:'오늘 11:42', diff:'3h'},
+      {id:'uq-2622', cat:'결제·환불', urgent:false, title:'카카오페이 결제 오류', preview:'결제 진행 중 화면이 멈춰서 카드사 청구는 됐는데...', author:'이○○', when:'오늘 12:18', diff:'2h'},
+      {id:'uq-2623', cat:'골프', urgent:false, title:'미모사 GC 카트 옵션', preview:'카트 의무가 아닌가요? 캐디만 가능한지...', author:'윤○○', when:'오늘 13:08', diff:'1h'},
+      {id:'uq-2624', cat:'렌탈', urgent:false, title:'골프채 대여 - 좌타용 가능?', preview:'왼손 라이트 핸드 골프채 대여 가능한지요', author:'강○○', when:'오늘 13:42', diff:'50m'},
+      {id:'uq-2625', cat:'기타', urgent:false, title:'법인 결제 - 세금계산서 발행', preview:'회사 법인카드로 결제 후 세금계산서 가능?', author:'오○○', when:'오늘 14:12', diff:'20m'}
+    ];
+
+    function renderInquiryList(){
+      const c = document.getElementById('inqList');
+      c.innerHTML = INQUIRIES.map((q,i) => `
+        <div class="inq-item ${i===0?'on':''} ${q.urgent?'urgent':''}" onclick="selectInquiry('${q.id}')">
+          <div class="top">
+            <span class="cat">${q.cat}${q.urgent?' · 🔥':''}</span>
+            <span class="when">${q.diff}</span>
+          </div>
+          <div class="title">${q.title}</div>
+          <div class="preview">${q.preview}</div>
+          <div class="author"><strong>${q.author}</strong> · ${q.when}</div>
+        </div>
+      `).join('');
+      selectInquiry(INQUIRIES[0].id);
+    }
+
+    function selectInquiry(id){
+      document.querySelectorAll('.inq-item').forEach(el => el.classList.remove('on'));
+      const items = document.querySelectorAll('.inq-item');
+      const idx = INQUIRIES.findIndex(x => x.id === id);
+      if(items[idx]) items[idx].classList.add('on');
+
+      const q = INQUIRIES.find(x => x.id === id);
+      if(!q) return;
+      document.getElementById('inqDetail').innerHTML = `
+        <div class="inq-detail-head">
+          <div class="left">
+            <div class="h">${q.title}</div>
+            <div class="meta">${q.id} · ${q.cat} · ${q.author} · ${q.when} ${q.urgent?'<span style="color:var(--danger);font-weight:900;margin-left:6px;">🔥 24h+ 미답변</span>':''}</div>
+          </div>
+          <div class="right">
+            <button onclick="alert('회원 정보 → admin-customers.html')">👤 회원 조회</button>
+            <button onclick="alert('관련 예약 → admin-bookings.html')">🎫 예약 보기</button>
+            <button onclick="alert('카테고리 재분류 모달')">🗂️ 재분류</button>
+          </div>
+        </div>
+        <div class="inq-thread">
+          <div class="msg from-user">
+            <div class="who">${q.author} (회원)</div>
+            ${q.preview}<br>구체적으로 ${q.cat} 관련해서 자세히 알려주시면 감사하겠습니다.
+            <div class="when">${q.when}</div>
+          </div>
+          ${q.urgent ? `
+            <div style="text-align:center;padding:10px;margin:14px 0;background:rgba(248,81,73,.08);border:1px dashed var(--danger);border-radius:8px;font-size:12px;color:var(--danger);font-weight:800;">
+              ⚠️ 답변 SLA 초과 (24h+) — 즉시 응대 권장
+            </div>
+          ` : ''}
+        </div>
+        <div class="reply-area">
+          <div class="templates">
+            <span style="font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;align-self:center;margin-right:4px;">자동 답변 템플릿:</span>
+            <button class="tpl" onclick="insertTpl('환불 진행')">환불 진행</button>
+            <button class="tpl" onclick="insertTpl('예약 변경')">예약 변경</button>
+            <button class="tpl" onclick="insertTpl('골프장 안내')">골프장 안내</button>
+            <button class="tpl" onclick="insertTpl('호텔 안내')">호텔 안내</button>
+            <button class="tpl" onclick="insertTpl('결제 안내')">결제 안내</button>
+            <button class="tpl" onclick="insertTpl('일반 답변')">일반 답변</button>
+          </div>
+          <textarea class="reply-input" id="replyInput" placeholder="답변을 입력하세요. 발송 시 TPL-007 (문의 답변) 알림톡이 자동으로 전송됩니다."></textarea>
+          <div class="reply-foot">
+            <div class="alimtalk-hint">
+              📩 답변 발송 시 <strong>TPL-007</strong> 카톡 알림톡 자동 트리거 · ALIMTALK_TEMPLATES.md 참고
+            </div>
+            <button class="btn-send" onclick="sendReply()">📤 답변 발송 (TPL-007)</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function insertTpl(name){
+      const templates = {
+        '환불 진행':'안녕하세요 박○○님,\n\n환불 진행 상황을 확인해드리겠습니다.\n현재 [예약번호]는 [날짜] 취소 신청 접수되어 결제 환불 절차 진행 중이며, 영업일 기준 3-5일 내 [카드사/계좌]로 환불 완료될 예정입니다.\n\n불편을 드려 죄송합니다.',
+        '예약 변경':'안녕하세요 [회원명]님,\n\n예약 변경 요청 잘 받았습니다. 변경 가능 여부 확인 후 24시간 내 안내드리겠습니다. 변경 수수료가 발생할 수 있는 점 양해 부탁드립니다.',
+        '골프장 안내':'안녕하세요 [회원명]님,\n\n문의주신 골프장 정보입니다:\n- 한국어 캐디: [가능/불가능]\n- 카트 옵션: [정보]\n- 라운드 규정: [정보]\n\n추가 문의 있으시면 언제든 답변 주세요.',
+        '호텔 안내':'안녕하세요 [회원명]님,\n\n호텔 객실 안내드립니다. 가족실(4인) 이용 가능 객실 타입과 추가 요금 안내드리겠습니다.',
+        '결제 안내':'안녕하세요 [회원명]님,\n\n결제 관련 확인해드렸습니다. 현재 결제 상태와 처리 절차 안내드립니다. 카드사 확인이 필요한 경우 별도 안내드리겠습니다.',
+        '일반 답변':'안녕하세요 [회원명]님,\n\n문의주신 내용 잘 받았습니다. 확인 후 자세히 답변드리겠습니다. 감사합니다.'
+      };
+      document.getElementById('replyInput').value = templates[name] || '';
+    }
+
+    function sendReply(){
+      const text = document.getElementById('replyInput').value.trim();
+      if(!text){ alert('답변을 입력해주세요'); return; }
+      alert('✅ 답변 발송 완료\n· user_inquiries.status = "replied"\n· ALIMTALK TPL-007 트리거\n· audit_logs INSERT\n· notifications INSERT (회원 측 알림)');
+      document.getElementById('replyInput').value = '';
+    }
+
+    renderInquiryList();
+
+    // 리뷰 mock
+    const REVIEWS = [
+      {stars:'★★★★★',score:5,product:'다낭 바나힐스 4박 3R',body:'캐디 분이 친절하고 코스 컨디션 너무 좋았어요. 라운딩 후 호텔 픽업도 빠르게...',author:'박○○ · 골드',when:'2h 전',photos:3},
+      {stars:'★★★★☆',score:4,product:'클락 미모사 5박 4R',body:'전반적으로 만족했습니다. 다만 첫날 티오프 시간이 갑자기 변경되어 당황...',author:'김○○ · 실버',when:'5h 전',photos:0},
+      {stars:'★★★★★',score:5,product:'카누차 오키나와 3박 2R',body:'고급스러운 분위기와 최고의 코스. 한국어 가능한 직원도 많아서 편했어요.',author:'윤○○ · 플래티넘',when:'8h 전',photos:5,reported:false},
+      {stars:'★★☆☆☆',score:2,product:'파타야 칸차나 3박 2R',body:'사진과 달라요. 정말 화가 납니다. 호텔도 별로고 골프장 직원도 무례...',author:'정○○ · 브론즈',when:'14h 전',photos:2,reported:true},
+      {stars:'★★★★★',score:5,product:'푸꾸옥 빈펄 6박 5R',body:'가족 6명 다 만족! 아이들도 즐거워했고 부모님도 편하게 라운딩.',author:'서○○ · 골드',when:'1일 전',photos:7},
+      {stars:'★★★★☆',score:4,product:'호치민 시티 5박 + 빈펄 GC',body:'시내 접근성 좋고 골프장도 가까웠습니다. 항공편 시간이 좀 애매했네요.',author:'최○○ · 실버',when:'1일 전',photos:1},
+      {stars:'★★★★★',score:5,product:'나트랑 빈펄 7박 럭셔리',body:'정말 럭셔리! VIP 매니저 분이 1:1 케어해주셔서 편하게 보냈습니다.',author:'한○○ · VIP',when:'2일 전',photos:8},
+      {stars:'★★★☆☆',score:3,product:'방콕 알파인 4박 3R',body:'그저 그랬어요. 가격 대비 호텔이 좀 아쉬웠고 골프장은 무난.',author:'오○○ · 골드',when:'2일 전',photos:0},
+      {stars:'★★★★★',score:5,product:'세부 막탄 5박 5R',body:'친구 8명 단체. 매일 라운딩 다른 코스 돌고 너무 좋았습니다!',author:'송○○ · 실버',when:'3일 전',photos:6}
+    ];
+    function renderReviews(){
+      const g = document.getElementById('reviewGrid');
+      g.innerHTML = REVIEWS.map(r => `
+        <div class="review-card">
+          <div class="top">
+            <span class="stars">${r.stars} ${r.score}.0</span>
+            <span class="when">${r.when}</span>
+          </div>
+          <div class="product">${r.product}</div>
+          <div class="body">${r.body}</div>
+          ${r.photos > 0 ? `<div class="photos">${Array.from({length:Math.min(r.photos,5)}, () => `<div class="ph">📷</div>`).join('')}${r.photos > 5 ? `<div class="ph" style="background:var(--bg-3);font-size:10px;color:var(--ink-3);">+${r.photos-5}</div>` : ''}</div>` : ''}
+          <div class="foot">
+            <span class="author">${r.author}</span>
+            <div class="actions">
+              ${r.reported ? '<span class="reported-tag">🚨 신고</span>' : ''}
+              <button onclick="alert('운영사 답변 작성 모달 → reviews.reply')">↩️ 답변</button>
+              <button onclick="alert('리뷰 삭제 (사유 필수) → audit_logs')">🗑️ 삭제</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderReviews();
+
+    // Tab switching
+    document.querySelectorAll('.tabs > .tab').forEach(t => {
+      t.addEventListener('click', () => {
+        const tab = t.dataset.tab;
+        if(!tab) return;
+        document.querySelectorAll('.tabs > .tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+        document.getElementById('pane-'+tab).classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>

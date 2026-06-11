@@ -170,8 +170,9 @@
         <a href="#" class="on">🏠 대시보드</a>
         <a href="admin-bookings.html">🎫 예약</a>
         <a href="admin-products.html">⛳ 상품</a>
-        <a href="#" onclick="alert('Phase 2 — admin-customers.html 준비 중')">👥 회원</a>
-        <a href="#" onclick="alert('Phase 1 — admin-cs.html 준비 중')">💬 CS</a>
+        <a href="admin-customers.html">👥 회원</a>
+        <a href="admin-cs.html">💬 CS</a>
+        <a href="admin-users.html">🔐 권한</a>
         <span class="divider"></span>
         <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
       </nav>
@@ -225,7 +226,7 @@
     <section class="section">
       <div class="sec-head">
         <h2 class="sec-title">🧩 운영 모듈</h2>
-        <div class="sec-sub">권한 ROLE: <strong style="color:var(--accent);">MANAGER</strong> · 전체 8 모듈 중 7 모듈 사용 가능</div>
+        <div class="sec-sub">권한 ROLE: <strong style="color:var(--accent);">MANAGER</strong> · 전체 8 모듈 중 7 모듈 사용 가능 · Phase 1 완료 + Phase 2 일부</div>
       </div>
       <div class="module-grid">
         <div class="module-card" onclick="location.href='admin-bookings.html'">
@@ -240,13 +241,13 @@
           <div class="desc">골프텔/패키지/액티비티 CRUD · 가격 관리 · 인벤토리 동기화</div>
           <div class="count"><span>전체 45 상품</span><strong>판매중 42</strong></div>
         </div>
-        <div class="module-card cs" onclick="alert('Phase 1 — admin-customers.html 준비 중')">
+        <div class="module-card cs" onclick="location.href='admin-customers.html'">
           <div class="ic">👥</div>
           <div class="name">회원 관리</div>
           <div class="desc">회원 검색 · 등급 변경 · 포인트 조정 · VIP 관리</div>
           <div class="count"><span>전체 12,418명</span><strong>VIP 24명</strong></div>
         </div>
-        <div class="module-card cs" onclick="alert('Phase 1 — admin-cs.html 준비 중')">
+        <div class="module-card cs" onclick="location.href='admin-cs.html'">
           <div class="ic">💬</div>
           <div class="name">CS 운영</div>
           <div class="desc">문의 응대 · 리뷰 관리 · 알림톡 발송 이력</div>
@@ -264,11 +265,11 @@
           <div class="desc">메인 배너 · 카테고리 · 인기 검색어 · 공지·FAQ</div>
           <div class="count"><span>활성 배너 3</span><strong>이번주 +2</strong></div>
         </div>
-        <div class="module-card security disabled" onclick="alert('SUPER_ADMIN 권한 필요')">
+        <div class="module-card security" onclick="location.href='admin-users.html'">
           <div class="ic">🔐</div>
           <div class="name">권한·계정 <span class="badge role">SUPER_ADMIN</span></div>
           <div class="desc">운영자 추가 · ROLE 변경 · 활동 로그 · 2FA</div>
-          <div class="count"><span>운영자 24명</span><strong>최근 7일 0건</strong></div>
+          <div class="count"><span>운영자 24명</span><strong>감사 로그 18,420</strong></div>
         </div>
         <div class="module-card finance" onclick="location.href='admin-analytics.html'">
           <div class="ic">📊</div>

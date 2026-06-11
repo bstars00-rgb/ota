@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>운영자 권한·감사 로그 | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --super:#FF3366;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header (공통) */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--super),var(--danger));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--super);font-weight:900;letter-spacing:.04em;}
+
+    /* SUPER_ADMIN 경고 배너 */
+    .warn-banner{
+      background:rgba(255,51,102,.08);border:1px solid rgba(255,51,102,.3);border-radius:10px;
+      padding:12px 18px;margin:14px 0 18px;display:flex;align-items:center;gap:12px;
+    }
+    .warn-banner .ic{font-size:22px;}
+    .warn-banner .txt{flex:1;font-size:12px;color:var(--ink-2);line-height:1.5;}
+    .warn-banner .txt strong{color:var(--super);font-weight:900;}
+
+    /* Page head */
+    .page-head{padding:24px 0 4px;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+    .super-tag{
+      padding:3px 9px;background:rgba(255,51,102,.15);color:var(--super);border-radius:5px;
+      font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;
+    }
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+
+    /* KPI */
+    .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .kpi-mini.super{border-left:3px solid var(--super);}
+    .kpi-mini.manager{border-left:3px solid var(--primary);}
+    .kpi-mini.operator{border-left:3px solid var(--info);}
+    .kpi-mini.viewer{border-left:3px solid var(--ink-3);}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;justify-content:space-between;align-items:end;}
+    .tab-group{display:flex;gap:2px;}
+    .tab{padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;}
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+    .invite-btn{
+      padding:8px 14px;background:var(--super);color:#fff;border-radius:6px;font-size:12px;font-weight:800;
+      display:flex;align-items:center;gap:5px;
+    }
+    .invite-btn:hover{background:#FF1A52;}
+
+    .tab-pane{display:none;}
+    .tab-pane.on{display:block;}
+
+    /* Admin user grid */
+    .admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .admin-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .admin-card.super{border-color:rgba(255,51,102,.3);}
+    .admin-card .top{display:flex;gap:12px;align-items:center;}
+    .admin-card .av{
+      width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--bg-3),var(--line));
+      display:grid;place-items:center;font-weight:900;font-size:16px;color:var(--accent);
+    }
+    .admin-card.super .av{background:linear-gradient(135deg,var(--super),var(--danger));color:#fff;}
+    .admin-card.manager .av{background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;}
+    .admin-card.operator .av{background:linear-gradient(135deg,var(--info),#7CCAFF);color:#fff;}
+    .admin-card .info{flex:1;}
+    .admin-card .nm{font-size:14px;font-weight:900;color:var(--ink);}
+    .admin-card .em{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .admin-card .meta{font-size:11px;color:var(--ink-3);padding-top:8px;border-top:1px solid var(--line);}
+    .admin-card .meta .row{display:flex;justify-content:space-between;margin-bottom:3px;}
+    .admin-card .meta .row .v{color:var(--ink-2);font-weight:700;font-family:'JetBrains Mono',monospace;}
+    .admin-card .meta .v.ok{color:var(--success);}
+    .admin-card .meta .v.warn{color:var(--warning);}
+    .admin-card .meta .v.err{color:var(--danger);}
+    .role-pill{
+      display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.04em;font-family:'JetBrains Mono',monospace;
+    }
+    .role-SUPER_ADMIN{background:rgba(255,51,102,.18);color:var(--super);}
+    .role-MANAGER{background:rgba(255,107,53,.18);color:var(--primary);}
+    .role-OPERATOR{background:rgba(88,166,255,.18);color:var(--info);}
+    .role-VIEWER{background:rgba(110,118,129,.18);color:var(--ink-3);}
+    .admin-card .actions{display:flex;gap:4px;margin-top:8px;}
+    .admin-card .actions button{
+      flex:1;padding:5px 0;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);
+    }
+    .admin-card .actions button:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+    .admin-card .actions button.danger:hover{border-color:var(--danger);color:var(--danger);}
+
+    /* Audit log filter */
+    .audit-filter{
+      display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;
+      background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;
+    }
+    .audit-filter .field label{font-size:10px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:4px;}
+    .audit-filter .field input, .audit-filter .field select{
+      width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;
+      color:var(--ink);font-size:12px;outline:none;
+    }
+    .audit-filter .field select:focus, .audit-filter .field input:focus{border-color:var(--primary);}
+    .audit-filter button{
+      padding:8px 14px;background:var(--primary);color:#fff;border-radius:6px;font-weight:800;font-size:12px;height:34px;
+    }
+
+    /* Audit log table */
+    .audit-table{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .audit-table table{width:100%;border-collapse:collapse;}
+    .audit-table th{
+      text-align:left;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;
+      text-transform:uppercase;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--bg-3);
+    }
+    .audit-table td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);vertical-align:top;}
+    .audit-table tr:last-child td{border-bottom:none;}
+    .audit-table .when{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);white-space:nowrap;}
+    .audit-table .who{font-weight:800;color:var(--accent);}
+    .audit-table .action-tag{
+      display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:800;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .audit-table .action-create{background:rgba(57,211,83,.15);color:var(--success);}
+    .audit-table .action-update{background:rgba(245,158,11,.15);color:var(--warning);}
+    .audit-table .action-delete{background:rgba(248,81,73,.15);color:var(--danger);}
+    .audit-table .action-cancel{background:rgba(245,158,11,.15);color:var(--warning);}
+    .audit-table .action-refund{background:rgba(248,81,73,.15);color:var(--danger);}
+    .audit-table .action-login{background:rgba(88,166,255,.15);color:var(--info);}
+    .audit-table .ref{font-family:'JetBrains Mono',monospace;color:var(--info);font-size:11px;}
+    .audit-table .diff{font-family:'JetBrains Mono',monospace;font-size:11px;}
+    .audit-table .diff .before{color:var(--danger);}
+    .audit-table .diff .arrow{color:var(--ink-4);margin:0 4px;}
+    .audit-table .diff .after{color:var(--success);}
+    .audit-table .ip{font-family:'JetBrains Mono',monospace;color:var(--ink-3);font-size:11px;}
+
+    /* Modal (Invite admin) */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;display:grid;place-items:center;}
+    .modal-overlay.on{opacity:1;pointer-events:auto;}
+    .modal{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:14px;
+      width:min(480px,92vw);max-height:88vh;overflow-y:auto;
+    }
+    .modal-head{padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bg-3);display:flex;justify-content:space-between;align-items:center;}
+    .modal-head .h{font-size:15px;font-weight:900;}
+    .modal-head .close{font-size:18px;color:var(--ink-3);cursor:pointer;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;}
+    .modal-head .close:hover{background:var(--bg);color:var(--ink);}
+    .modal-body{padding:20px;}
+    .modal-body .form-field{margin-bottom:14px;}
+    .modal-body .form-field label{font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:5px;}
+    .modal-body .form-field input, .modal-body .form-field select{
+      width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 12px;
+      color:var(--ink);font-size:13px;outline:none;
+    }
+    .modal-body .hint{font-size:11px;color:var(--ink-3);margin-top:6px;line-height:1.5;}
+    .modal-foot{padding:14px 20px;border-top:1px solid var(--line);background:var(--bg-3);display:flex;gap:8px;justify-content:flex-end;}
+    .modal-foot .btn{padding:8px 16px;border-radius:6px;font-size:12px;font-weight:800;}
+    .modal-foot .btn-primary{background:var(--super);color:#fff;}
+    .modal-foot .btn-ghost{background:var(--bg-2);color:var(--ink-2);border:1px solid var(--line);}
+
+    @media (max-width:1024px){
+      .admin-grid{grid-template-columns:1fr 1fr;}
+      .audit-filter{grid-template-columns:1fr 1fr;}
+      .kpi-row{grid-template-columns:1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠 대시보드</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="admin-customers.html">👥 회원</a>
+        <a href="admin-cs.html">💬 CS</a>
+        <a href="#" class="on">🔐 권한</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">최</div>
+        <div>
+          <div class="name">최최고</div>
+          <div class="role">SUPER_ADMIN</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">🔐 ADMIN USERS & AUDIT LOG</div>
+      <h1 class="page-title">권한 · 계정 <span class="super-tag">SUPER_ADMIN ONLY</span></h1>
+      <p class="page-sub">운영자 계정 24명 · 4 ROLE 권한 관리 + 2FA 상태 + 감사 로그 18,420건</p>
+    </section>
+
+    <!-- 경고 배너 -->
+    <div class="warn-banner">
+      <div class="ic">⚠️</div>
+      <div class="txt">
+        <strong>SUPER_ADMIN 전용 페이지</strong> · 모든 작업은 <span style="font-family:'JetBrains Mono',monospace;color:var(--accent);">audit_logs</span>에 기록되며 사후 검토됩니다.
+        ROLE 변경·계정 정지·운영자 추가 시 사유 입력이 의무이고, 변경 즉시 해당 운영자에게 카톡·이메일 알림이 발송됩니다.
+      </div>
+    </div>
+
+    <!-- ROLE 분포 KPI -->
+    <div class="kpi-row">
+      <div class="kpi-mini super">
+        <div class="lb">🔥 SUPER_ADMIN</div>
+        <div class="val">2<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini manager">
+        <div class="lb">👔 MANAGER</div>
+        <div class="val">5<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini operator">
+        <div class="lb">⚙️ OPERATOR</div>
+        <div class="val">14<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini viewer">
+        <div class="lb">👁️ VIEWER</div>
+        <div class="val">3<span class="small">명</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">🔒 2FA 활성</div>
+        <div class="val" style="color:var(--success);">22<span class="small">/24</span></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab-group">
+        <div class="tab on" data-tab="admins">👥 운영자 계정 <span class="badge">24</span></div>
+        <div class="tab" data-tab="audit">📜 감사 로그 <span class="badge">18,420</span></div>
+        <div class="tab" data-tab="permissions">🛡️ 권한 매트릭스</div>
+      </div>
+      <button class="invite-btn" onclick="openInviteModal()">+ 운영자 초대</button>
+    </div>
+
+    <!-- 운영자 계정 -->
+    <div class="tab-pane on" id="pane-admins">
+      <div class="admin-grid" id="adminGrid"></div>
+    </div>
+
+    <!-- 감사 로그 -->
+    <div class="tab-pane" id="pane-audit">
+      <div class="audit-filter">
+        <div class="field">
+          <label>운영자</label>
+          <select>
+            <option>전체 운영자</option>
+            <option>최최고 (SUPER_ADMIN)</option>
+            <option>김운영 (MANAGER)</option>
+            <option>박CS (OPERATOR)</option>
+            <option>이MD (OPERATOR)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>작업 유형</label>
+          <select>
+            <option>전체 작업</option>
+            <option>booking.cancel</option>
+            <option>booking.refund</option>
+            <option>product.update</option>
+            <option>user.grade-change</option>
+            <option>admin.invite</option>
+            <option>auth.login</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>기간 시작</label>
+          <input type="date" value="2026-06-01" />
+        </div>
+        <div class="field">
+          <label>기간 종료</label>
+          <input type="date" value="2026-06-11" />
+        </div>
+        <button>필터 적용</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--ink-3);">전체 <strong style="color:var(--ink);font-family:'JetBrains Mono',monospace;">18,420</strong>건 중 <strong style="color:var(--ink);font-family:'JetBrains Mono',monospace;">1-15</strong> 표시 · 최신순</div>
+        <button style="padding:5px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:700;color:var(--ink-2);">📥 CSV 다운로드</button>
+      </div>
+
+      <div class="audit-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">시각</th>
+              <th style="width:100px;">운영자</th>
+              <th style="width:140px;">작업</th>
+              <th style="width:130px;">대상</th>
+              <th>변경 내용</th>
+              <th style="width:120px;">IP</th>
+            </tr>
+          </thead>
+          <tbody id="auditTbody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin:18px 0;">
+        <button style="padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);">‹</button>
+        <button style="padding:6px 11px;background:var(--primary);color:#fff;border-color:var(--primary);border-radius:6px;font-size:12px;font-weight:700;border:1px solid var(--primary);">1</button>
+        <button style="padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);">2</button>
+        <button style="padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);">3</button>
+        <span style="color:var(--ink-4);padding:0 4px;">…</span>
+        <button style="padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);">1,228</button>
+        <button style="padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);">›</button>
+      </div>
+    </div>
+
+    <!-- 권한 매트릭스 -->
+    <div class="tab-pane" id="pane-permissions">
+      <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead style="background:var(--bg-3);">
+            <tr>
+              <th style="text-align:left;padding:12px 14px;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line);">권한</th>
+              <th style="padding:12px 14px;font-size:11px;font-weight:800;color:var(--super);letter-spacing:.04em;border-bottom:1px solid var(--line);text-align:center;">SUPER_ADMIN</th>
+              <th style="padding:12px 14px;font-size:11px;font-weight:800;color:var(--primary);letter-spacing:.04em;border-bottom:1px solid var(--line);text-align:center;">MANAGER</th>
+              <th style="padding:12px 14px;font-size:11px;font-weight:800;color:var(--info);letter-spacing:.04em;border-bottom:1px solid var(--line);text-align:center;">OPERATOR</th>
+              <th style="padding:12px 14px;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;border-bottom:1px solid var(--line);text-align:center;">VIEWER</th>
+            </tr>
+          </thead>
+          <tbody id="permTbody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:14px;text-align:center;">
+        본 매트릭스는 <a href="BACKOFFICE_SPEC.md" style="color:var(--primary);">BACKOFFICE_SPEC.md §2</a> 기준 · ELLIS 백엔드 RBAC 미들웨어에서 강제됨
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · 권한·계정 · ELLIS_SPEC.md §11.1 admins / audit_logs 도메인 기반
+    </div>
+  </main>
+
+  <!-- Invite modal -->
+  <div class="modal-overlay" id="inviteOverlay" onclick="if(event.target===this)closeInviteModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="h">🔐 운영자 초대</div>
+        <button class="close" onclick="closeInviteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>이름</label>
+          <input type="text" placeholder="예: 이서연" />
+        </div>
+        <div class="form-field">
+          <label>이메일 (회사 이메일 권장)</label>
+          <input type="email" placeholder="user@omt.com" />
+        </div>
+        <div class="form-field">
+          <label>ROLE</label>
+          <select>
+            <option value="OPERATOR" selected>OPERATOR (일반 운영자)</option>
+            <option value="VIEWER">VIEWER (조회만)</option>
+            <option value="MANAGER">MANAGER (팀장급)</option>
+            <option value="SUPER_ADMIN">⚠️ SUPER_ADMIN (전권)</option>
+          </select>
+          <div class="hint">SUPER_ADMIN 부여 시 2명 이상의 기존 SUPER_ADMIN 승인 필요 (4-eye)</div>
+        </div>
+        <div class="form-field">
+          <label>팀</label>
+          <select>
+            <option>CS</option>
+            <option>MD</option>
+            <option>FINANCE</option>
+            <option>MARKETING</option>
+            <option>SYSTEM</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>초대 사유 (audit_logs 기록)</label>
+          <input type="text" placeholder="예: 7월 신규 CS 인력 충원" />
+        </div>
+        <div style="background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--ink-3);line-height:1.6;">
+          📩 초대 시 자동 진행:
+          <ul style="margin:6px 0 0;padding-left:20px;">
+            <li>임시 비밀번호 + 비밀번호 설정 링크 이메일 발송</li>
+            <li>2FA TOTP 설정 의무 (Google Authenticator)</li>
+            <li>첫 로그인 시 비밀번호 변경 강제</li>
+            <li>audit_logs INSERT (admin.invite)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeInviteModal()">취소</button>
+        <button class="btn btn-primary" onclick="alert('✅ 초대 완료\n· admins INSERT\n· 비밀번호 설정 메일 발송\n· audit_logs INSERT');closeInviteModal();">초대 발송</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 운영자 24명 mock
+    const ADMINS = [
+      {id:'admin-01', name:'최최고', email:'choi@omt.com', role:'SUPER_ADMIN', team:'SYSTEM', last:'1m 전', joined:'2023-04-12', twofa:true, initial:'최'},
+      {id:'admin-02', name:'정대표', email:'jung@omt.com', role:'SUPER_ADMIN', team:'SYSTEM', last:'3h 전', joined:'2023-04-12', twofa:true, initial:'정'},
+      {id:'admin-03', name:'김운영', email:'kim@omt.com', role:'MANAGER', team:'CS', last:'14m 전', joined:'2023-08-22', twofa:true, initial:'김'},
+      {id:'admin-04', name:'이매니저', email:'lee@omt.com', role:'MANAGER', team:'MD', last:'2h 전', joined:'2024-01-08', twofa:true, initial:'이'},
+      {id:'admin-05', name:'정재무', email:'jung2@omt.com', role:'MANAGER', team:'FINANCE', last:'38m 전', joined:'2024-03-18', twofa:true, initial:'정'},
+      {id:'admin-06', name:'강마케팅', email:'kang@omt.com', role:'MANAGER', team:'MARKETING', last:'1h 전', joined:'2024-05-22', twofa:true, initial:'강'},
+      {id:'admin-07', name:'송팀장', email:'song@omt.com', role:'MANAGER', team:'CS', last:'어제', joined:'2024-08-14', twofa:true, initial:'송'},
+      {id:'admin-08', name:'박CS', email:'park@omt.com', role:'OPERATOR', team:'CS', last:'2m 전', joined:'2024-11-08', twofa:true, initial:'박'},
+      {id:'admin-09', name:'최CS', email:'choi2@omt.com', role:'OPERATOR', team:'CS', last:'22m 전', joined:'2025-01-22', twofa:true, initial:'최'},
+      {id:'admin-10', name:'윤CS', email:'yoon@omt.com', role:'OPERATOR', team:'CS', last:'1h 12m 전', joined:'2025-03-18', twofa:false, initial:'윤'},
+      {id:'admin-11', name:'이MD', email:'lee2@omt.com', role:'OPERATOR', team:'MD', last:'14m 전', joined:'2025-04-08', twofa:true, initial:'이'},
+      {id:'admin-12', name:'한MD', email:'han@omt.com', role:'OPERATOR', team:'MD', last:'어제', joined:'2025-05-22', twofa:true, initial:'한'},
+      {id:'admin-13', name:'서애널', email:'seo@omt.com', role:'VIEWER', team:'MARKETING', last:'2일 전', joined:'2025-08-12', twofa:true, initial:'서'},
+      {id:'admin-14', name:'오인턴', email:'oh@omt.com', role:'VIEWER', team:'MD', last:'5일 전', joined:'2026-04-08', twofa:false, initial:'오'},
+    ];
+
+    function renderAdmins(){
+      const g = document.getElementById('adminGrid');
+      g.innerHTML = ADMINS.map(a => `
+        <div class="admin-card ${a.role==='SUPER_ADMIN'?'super':a.role==='MANAGER'?'manager':a.role==='OPERATOR'?'operator':''}">
+          <div class="top">
+            <div class="av">${a.initial}</div>
+            <div class="info">
+              <div class="nm">${a.name}</div>
+              <div class="em">${a.email}</div>
+            </div>
+            <span class="role-pill role-${a.role}">${a.role}</span>
+          </div>
+          <div class="meta">
+            <div class="row"><span>팀</span><span class="v">${a.team}</span></div>
+            <div class="row"><span>가입</span><span class="v">${a.joined}</span></div>
+            <div class="row"><span>마지막 접속</span><span class="v">${a.last}</span></div>
+            <div class="row"><span>2FA</span><span class="v ${a.twofa?'ok':'err'}">${a.twofa?'✓ 활성':'✗ 비활성'}</span></div>
+          </div>
+          <div class="actions">
+            <button onclick="alert('ROLE 변경 → admin ${a.id} → audit_logs')">ROLE 변경</button>
+            <button onclick="alert('비밀번호 초기화 → 임시 PW 이메일')">PW 초기화</button>
+            <button class="danger" onclick="alert('SUPER_ADMIN 4-eye 승인 후 정지 처리')">정지</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderAdmins();
+
+    // 감사 로그 mock
+    const AUDIT = [
+      {when:'2026-06-11 14:32:08', who:'박CS', action:'booking.cancel', actionType:'cancel', target:'OMT-3DK21A', diff:'<span class="before">confirmed</span><span class="arrow">→</span><span class="after">cancelled</span>', ip:'192.168.1.42'},
+      {when:'2026-06-11 14:18:22', who:'이MD', action:'product.update', actionType:'update', target:'gt-vn-danang-ba-na-4n', diff:'price <span class="before">2,100,000</span><span class="arrow">→</span><span class="after">1,890,000</span>', ip:'192.168.1.31'},
+      {when:'2026-06-11 14:10:48', who:'최CS', action:'inquiry.reply', actionType:'create', target:'uq-2618', diff:'답변 작성 + TPL-007 발송', ip:'192.168.1.44'},
+      {when:'2026-06-11 13:54:30', who:'정재무', action:'settlement.run', actionType:'create', target:'creator-2026-05', diff:'48 크리에이터 정산 실행 (총 6,820만)', ip:'192.168.1.18'},
+      {when:'2026-06-11 13:32:14', who:'강마케팅', action:'banner.activate', actionType:'update', target:'banner-9', diff:'<span class="before">inactive</span><span class="arrow">→</span><span class="after">active</span>', ip:'192.168.1.22'},
+      {when:'2026-06-11 12:20:22', who:'윤CS', action:'user.grade-change', actionType:'update', target:'user-128', diff:'<span class="before">GOLD</span><span class="arrow">→</span><span class="after">PLATINUM</span>', ip:'192.168.1.51'},
+      {when:'2026-06-11 12:08:18', who:'박CS', action:'booking.confirm', actionType:'update', target:'OMT-PT9X4K', diff:'<span class="before">pending</span><span class="arrow">→</span><span class="after">confirmed</span>', ip:'192.168.1.42'},
+      {when:'2026-06-11 11:42:08', who:'이MD', action:'product.create', actionType:'create', target:'gt-ph-cebu-new-3n', diff:'신규 상품 등록 · 가격 1,247,000', ip:'192.168.1.31'},
+      {when:'2026-06-11 11:18:22', who:'최최고', action:'admin.invite', actionType:'create', target:'admin-09', diff:'OPERATOR 신규 초대 · CS 팀', ip:'10.0.0.5'},
+      {when:'2026-06-11 11:00:00', who:'박CS', action:'booking.refund', actionType:'refund', target:'OMT-VN8M2K', diff:'환불 승인 1,290,000원 · 사유: 호텔 시설 하자', ip:'192.168.1.42'},
+      {when:'2026-06-11 10:48:14', who:'최최고', action:'admin.role-change', actionType:'update', target:'admin-07', diff:'<span class="before">OPERATOR</span><span class="arrow">→</span><span class="after">MANAGER</span>', ip:'10.0.0.5'},
+      {when:'2026-06-11 10:22:08', who:'김운영', action:'auth.login', actionType:'login', target:'-', diff:'2FA 인증 성공', ip:'192.168.1.5'},
+      {when:'2026-06-11 09:14:22', who:'정재무', action:'pricing-rule.create', actionType:'create', target:'rule-summer-2026', diff:'성수기 가산 +18% · 7/15~8/25 · VN·PH', ip:'192.168.1.18'},
+      {when:'2026-06-11 09:00:00', who:'(system)', action:'cron.alimtalk-d3', actionType:'create', target:'-', diff:'D-3 알림톡 일괄 발송 (TPL-003) · 142건', ip:'10.0.0.1'},
+      {when:'2026-06-11 08:42:18', who:'최최고', action:'auth.login', actionType:'login', target:'-', diff:'2FA 인증 성공', ip:'10.0.0.5'},
+    ];
+    function renderAudit(){
+      const tb = document.getElementById('auditTbody');
+      tb.innerHTML = AUDIT.map(a => `
+        <tr>
+          <td class="when">${a.when}</td>
+          <td><span class="who">${a.who}</span></td>
+          <td><span class="action-tag action-${a.actionType}">${a.action}</span></td>
+          <td class="ref">${a.target}</td>
+          <td class="diff">${a.diff}</td>
+          <td class="ip">${a.ip}</td>
+        </tr>
+      `).join('');
+    }
+    renderAudit();
+
+    // 권한 매트릭스
+    const PERMISSIONS = [
+      ['대시보드 조회', 1,1,1,1],
+      ['예약 조회', 1,1,1,1],
+      ['예약 수동 확정/취소', 1,1,1,0],
+      ['환불 처리', 1,1,0,0],
+      ['상품 CRUD', 1,1,0,0],
+      ['가격 변경', 1,1,0,0],
+      ['회원 정보 조회', 1,1,1,1],
+      ['회원 등급/포인트 수동 조정', 1,1,0,0],
+      ['회원 탈퇴 처리', 1,0,0,0],
+      ['정산 조회', 1,1,0,1],
+      ['정산 실행', 1,0,0,0],
+      ['CS 응대', 1,1,1,0],
+      ['CMS (배너/공지)', 1,1,0,0],
+      ['운영자 계정 관리', 1,0,0,0],
+      ['활동 로그 조회', 1,1,0,0],
+    ];
+    function renderPermissions(){
+      const tb = document.getElementById('permTbody');
+      tb.innerHTML = PERMISSIONS.map(([name, su, mg, op, vw]) => `
+        <tr>
+          <td style="padding:11px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);font-weight:700;">${name}</td>
+          <td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:center;font-size:14px;color:${su?'var(--success)':'var(--ink-4)'};">${su?'✓':'✗'}</td>
+          <td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:center;font-size:14px;color:${mg?'var(--success)':'var(--ink-4)'};">${mg?'✓':'✗'}</td>
+          <td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:center;font-size:14px;color:${op?'var(--success)':'var(--ink-4)'};">${op?'✓':'✗'}</td>
+          <td style="padding:11px 14px;border-bottom:1px solid var(--line);text-align:center;font-size:14px;color:${vw?'var(--success)':'var(--ink-4)'};">${vw?'✓':'✗'}</td>
+        </tr>
+      `).join('');
+    }
+    renderPermissions();
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        const tab = t.dataset.tab;
+        if(!tab) return;
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+        document.getElementById('pane-'+tab).classList.add('on');
+      });
+    });
+
+    // Invite modal
+    function openInviteModal(){document.getElementById('inviteOverlay').classList.add('on');}
+    function closeInviteModal(){document.getElementById('inviteOverlay').classList.remove('on');}
+  </script>
+</body>
+</html>
