@@ -282,6 +282,10 @@
         🔔
         <span class="label">알림</span>
       </div>
+      <div class="side-btn" onclick="showClipModal()" style="position:relative;">
+        🎬
+        <span class="label">클립</span>
+      </div>
     </div>
 
     <!-- 채팅 -->
@@ -418,6 +422,116 @@
         navigator.clipboard?.writeText(location.href);
         alert('🔗 링크를 복사했어요!');
       }
+    }
+
+    // 🎬 클립 캡쳐 모달
+    function showClipModal(){
+      const overlay = document.createElement('div');
+      overlay.id = 'clipOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease;';
+      const now = new Date();
+      const timeStamp = `${now.getMonth()+1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      overlay.innerHTML = `
+        <div style="max-width:340px;width:100%;animation:clipPop .35s ease;">
+          <!-- 클립 카드 (캡쳐된 미리보기) -->
+          <div id="clipCard" style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);">
+            <!-- 상단 비디오 영역 -->
+            <div style="aspect-ratio:9/12;background:url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80') center/cover;position:relative;">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 30%, transparent 60%, rgba(0,0,0,.9) 100%);"></div>
+
+              <!-- 상단 LIVE 뱃지 -->
+              <div style="position:absolute;top:14px;left:14px;display:flex;gap:6px;">
+                <span style="padding:4px 10px;border-radius:5px;background:#FF0033;color:#fff;font-size:10px;font-weight:900;letter-spacing:.06em;">🔴 LIVE</span>
+                <span style="padding:4px 10px;border-radius:5px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;font-weight:800;backdrop-filter:blur(8px);">👁️ <span id="clipViewers">1,247</span></span>
+              </div>
+
+              <!-- 우상단 OMT 워터마크 -->
+              <div style="position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);padding:4px 9px;border-radius:5px;backdrop-filter:blur(8px);">
+                <span style="width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#FF6B35,#FF9A6C);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;">O</span>
+                <span style="font-size:10px;color:#fff;font-weight:800;">OhMyTrip</span>
+              </div>
+
+              <!-- 하단 크리에이터 -->
+              <div style="position:absolute;bottom:90px;left:14px;right:14px;color:#fff;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#FFD23F);display:grid;place-items:center;font-weight:900;font-size:12px;">베</div>
+                  <div style="font-size:12px;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.8);">베트남살이 ✓</div>
+                </div>
+                <div style="font-size:14px;font-weight:900;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.8);">⛳ 다낭 바나힐스 골프텔<br>4박5일 라운딩 3회</div>
+              </div>
+
+              <!-- 하단 가격 박스 -->
+              <div style="position:absolute;bottom:14px;left:14px;right:14px;background:rgba(255,255,255,.96);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px);">
+                <div style="flex:1;">
+                  <div style="font-size:9px;color:#FF0033;font-weight:900;letter-spacing:.04em;">🔥 LIVE 특가</div>
+                  <div style="display:flex;align-items:baseline;gap:5px;margin-top:2px;">
+                    <div style="font-size:18px;font-weight:900;color:#FF6B35;letter-spacing:-0.02em;">1,260,000원</div>
+                    <div style="font-size:11px;color:#9CA3AF;text-decoration:line-through;">1,680,000원</div>
+                  </div>
+                </div>
+                <div style="padding:7px 12px;background:#FF0033;color:#fff;border-radius:8px;font-weight:900;font-size:11px;">25% OFF</div>
+              </div>
+            </div>
+
+            <!-- 푸터 (타임스탬프) -->
+            <div style="padding:12px 16px;background:#1A1A1A;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:10px;color:rgba(255,255,255,.6);">📅 캡쳐 ${timeStamp}</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.6);font-family:'JetBrains Mono',monospace;">CLIP-${Math.floor(Math.random()*999999).toString().padStart(6,'0')}</div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+            <button onclick="downloadClip()" style="padding:13px;background:#fff;color:#1A1A1A;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;">⬇ 이미지 저장</button>
+            <button onclick="shareClip()" style="padding:13px;background:#FFD23F;color:#1A1A1A;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;">📤 공유</button>
+          </div>
+
+          <button onclick="closeClipModal()" style="width:100%;margin-top:8px;padding:11px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">닫기</button>
+
+          <div style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.6);line-height:1.5;">
+            🎬 라이브 상품 카드를 캡쳐했어요<br>
+            친구에게 공유하면 다음 라이브 입장 시 +500P 적립
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e) => { if(e.target === overlay) closeClipModal(); });
+    }
+
+    function closeClipModal(){
+      document.getElementById('clipOverlay')?.remove();
+    }
+    function downloadClip(){
+      // mock — 실제로는 html2canvas 등으로 캡쳐
+      alert('🎬 클립 이미지가 저장되었어요! (mock — 실제 다운로드는 html2canvas 도입 필요)');
+    }
+    function shareClip(){
+      const text = '🔴 [LIVE] 다낭 바나힐스 골프텔 25% 특가! 1,260,000원 (베트남살이 라이브)';
+      if(navigator.share){
+        navigator.share({ title:'⛳ 다낭 골프텔 LIVE 특가', text, url:location.href });
+      } else {
+        navigator.clipboard?.writeText(text + ' · ' + location.href);
+        alert('📋 공유 텍스트를 복사했어요!');
+      }
+    }
+
+    // 클립 카드 시청자 카운트 동기화
+    setInterval(() => {
+      const el = document.getElementById('clipViewers');
+      if(!el) return;
+      el.textContent = document.getElementById('viewerCount')?.textContent || '1,247';
+    }, 2000);
+
+    // 클립 모달용 keyframes (없으면 추가)
+    if(!document.getElementById('clipAnimCSS')){
+      const style = document.createElement('style');
+      style.id = 'clipAnimCSS';
+      style.textContent = `
+        @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+        @keyframes clipPop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+      `;
+      document.head.appendChild(style);
     }
 
     // 초기 채팅 시드

@@ -1560,10 +1560,52 @@
     searchSuggest.style.display = 'block';
   }
 
+  // 🔥 인기 검색어 (시뮬)
+  const TRENDING_KEYWORDS = [
+    { q:'다낭 골프텔', score:'+128%', icon:'🔥' },
+    { q:'오키나와 카누차', score:'+82%', icon:'🆕' },
+    { q:'골프텔', score:'1위', icon:'🏆' },
+    { q:'클락 미모사', score:'+54%', icon:'🔥' },
+    { q:'직영 골프텔', score:'추천', icon:'⭐' },
+    { q:'풀빌라 골프', score:'+38%', icon:'🆕' }
+  ];
+
+  function renderTrending(){
+    const history = (OMT.State.getSearchHistory() || []).slice(0, 3);
+    const historyHtml = history.length > 0 ? `
+      <div style="font-size:11px;font-weight:800;color:#9CA3AF;padding:8px 10px 4px;letter-spacing:.04em;text-transform:uppercase;">🕐 최근 검색</div>
+      ${history.map(h => `
+        <div onclick="aiQuery.value='${h.replace(/'/g, "\\'")}';renderSuggestions('${h.replace(/'/g, "\\'")}')" style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;align-items:center;color:#6B7280;font-size:12px;" onmouseover="this.style.background='#F7F7F9'" onmouseout="this.style.background=''">
+          <span>🕐</span><span>${h}</span>
+        </div>
+      `).join('')}
+    ` : '';
+
+    searchSuggest.innerHTML = historyHtml + `
+      <div style="font-size:11px;font-weight:800;color:#9CA3AF;padding:8px 10px 4px;letter-spacing:.04em;text-transform:uppercase;">🔥 실시간 인기 검색어</div>
+      ${TRENDING_KEYWORDS.map((t, i) => `
+        <div onclick="aiQuery.value='${t.q}';renderSuggestions('${t.q}')" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;align-items:center;" onmouseover="this.style.background='#F7F7F9'" onmouseout="this.style.background=''">
+          <span style="width:24px;height:24px;border-radius:50%;background:${i<3?'#FF6B35':'#F7F7F9'};color:${i<3?'#fff':'#9CA3AF'};display:grid;place-items:center;font-size:11px;font-weight:900;">${i+1}</span>
+          <span style="flex:1;font-size:13px;font-weight:800;color:#1A1A1A;">${t.q}</span>
+          <span style="font-size:11px;font-weight:900;color:#FF6B35;">${t.icon} ${t.score}</span>
+        </div>
+      `).join('')}
+    `;
+    searchSuggest.style.display = 'block';
+  }
+
   // 입력 바인딩
   if(aiQuery){
-    aiQuery.addEventListener('input', (e) => renderSuggestions(e.target.value));
-    aiQuery.addEventListener('focus', (e) => { if(e.target.value) renderSuggestions(e.target.value); else { searchSuggest.style.display = 'none'; } });
+    aiQuery.addEventListener('input', (e) => {
+      const v = e.target.value.trim();
+      if(v.length === 0) renderTrending();
+      else renderSuggestions(v);
+    });
+    aiQuery.addEventListener('focus', (e) => {
+      const v = e.target.value.trim();
+      if(v) renderSuggestions(v);
+      else renderTrending();
+    });
     aiQuery.addEventListener('blur', () => { setTimeout(() => { searchSuggest.style.display = 'none'; }, 200); });
   }
   const QUICK_TAB_DESTINATIONS = {

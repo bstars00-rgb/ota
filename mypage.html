@@ -959,15 +959,40 @@
     const liveEl = document.getElementById('livePreview');
     if(liveHistory.length > 0 && liveBlock && liveEl){
       liveBlock.style.display = '';
-      liveEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(${Math.min(liveHistory.length, 3)},1fr);gap:10px;">
+      // 진행 중 라이브 1건 (다낭 바나힐스 mock 라이브) — viewedAt 30분 이내면 LIVE 진행 중으로 간주
+      const stillLive = (h) => {
+        const minsAgo = (Date.now() - new Date(h.viewedAt).getTime()) / 60000;
+        return minsAgo < 30;   // 30분 이내 시청 = 라이브가 아직 진행 중
+      };
+      const liveCount = liveHistory.filter(stillLive).length;
+      const replayCount = liveHistory.length - liveCount;
+
+      const summaryHtml = `
+        <div style="font-size:11px;color:var(--ink-2);margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          ${liveCount > 0 ? `<span style="padding:2px 8px;background:#FF0033;color:#fff;border-radius:5px;font-weight:900;display:inline-flex;align-items:center;gap:4px;"><span style="width:5px;height:5px;border-radius:50%;background:#fff;animation:livePulseM 1s infinite;"></span>진행 중 ${liveCount}</span>` : ''}
+          ${replayCount > 0 ? `<span style="padding:2px 8px;background:var(--bg-soft);color:var(--ink-2);border-radius:5px;font-weight:700;">📺 다시보기 ${replayCount}</span>` : ''}
+        </div>
+      `;
+
+      const styleTag = `<style>@keyframes livePulseM{0%,100%{opacity:1;}50%{opacity:.3;}}</style>`;
+
+      liveEl.innerHTML = styleTag + summaryHtml + `<div style="display:grid;grid-template-columns:repeat(${Math.min(liveHistory.length, 3)},1fr);gap:10px;">
         ${liveHistory.slice(0, 3).map(h => {
           const ago = Math.floor((Date.now() - new Date(h.viewedAt).getTime()) / 60000);
           const agoLabel = ago < 1 ? '방금' : (ago < 60 ? ago + '분 전' : (ago < 1440 ? Math.floor(ago/60) + '시간 전' : Math.floor(ago/1440) + '일 전'));
-          return `<a href="live.html" style="display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;background:#fff;">
+          const isLive = stillLive(h);
+          const badgeHtml = isLive
+            ? `<span style="position:absolute;top:6px;left:6px;padding:2px 7px;border-radius:4px;background:#FF0033;color:#fff;font-size:9px;font-weight:900;display:inline-flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#fff;animation:livePulseM 1s infinite;"></span>LIVE</span>`
+            : `<span style="position:absolute;top:6px;left:6px;padding:2px 7px;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:800;backdrop-filter:blur(4px);">📺 다시보기</span>`;
+          const playOverlay = !isLive
+            ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity .15s;" class="play-overlay">
+                 <div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;color:#1A1A1A;font-size:18px;font-weight:900;">▶</div>
+               </div>`
+            : '';
+          return `<a href="live.html" style="display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;background:#fff;" onmouseover="this.querySelector('.play-overlay') && (this.querySelector('.play-overlay').style.opacity = 1)" onmouseout="this.querySelector('.play-overlay') && (this.querySelector('.play-overlay').style.opacity = 0)">
             <div style="aspect-ratio:4/3;background:url('${h.productImage}') center/cover;background-color:#eee;position:relative;">
-              <span style="position:absolute;top:6px;left:6px;padding:2px 7px;border-radius:4px;background:#FF0033;color:#fff;font-size:9px;font-weight:900;display:inline-flex;align-items:center;gap:3px;">
-                <span style="width:5px;height:5px;border-radius:50%;background:#fff;"></span>LIVE
-              </span>
+              ${badgeHtml}
+              ${playOverlay}
               <span style="position:absolute;bottom:6px;left:6px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:800;backdrop-filter:blur(4px);">${agoLabel}</span>
             </div>
             <div style="padding:8px;">

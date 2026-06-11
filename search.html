@@ -352,12 +352,32 @@
       const grid = document.getElementById('resultGrid');
 
       if(list.length === 0){
+        const trendingHtml = !currentQuery ? `
+          <div style="margin-top:32px;padding:24px;background:#fff;border-radius:14px;border:1px solid var(--line);text-align:left;">
+            <div style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;">🔥 실시간 인기 검색어</div>
+            ${[
+              { q:'다낭 골프텔', score:'+128%', icon:'🔥' },
+              { q:'오키나와 카누차', score:'+82%', icon:'🆕' },
+              { q:'골프텔', score:'1위', icon:'🏆' },
+              { q:'클락 미모사', score:'+54%', icon:'🔥' },
+              { q:'직영 골프텔', score:'추천', icon:'⭐' },
+              { q:'풀빌라 골프', score:'+38%', icon:'🆕' }
+            ].map((t, i) => `
+              <div onclick="document.getElementById('searchInput').value='${t.q}';doSearch({preventDefault:()=>{}})" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;align-items:center;border-bottom:1px solid var(--bg-soft);" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+                <span style="width:26px;height:26px;border-radius:50%;background:${i<3?'#FF6B35':'#F7F7F9'};color:${i<3?'#fff':'#9CA3AF'};display:grid;place-items:center;font-size:12px;font-weight:900;">${i+1}</span>
+                <span style="flex:1;font-size:14px;font-weight:800;color:var(--ink);">${t.q}</span>
+                <span style="font-size:12px;font-weight:900;color:#FF6B35;">${t.icon} ${t.score}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : '';
         grid.innerHTML = `
           <div class="empty">
             <div class="ic">🔍</div>
-            <h3>${currentQuery ? `"${currentQuery}" 검색 결과가 없어요` : '검색어를 입력해주세요'}</h3>
-            <p>${currentQuery ? '다른 키워드로 시도하거나, AI 플래너에게 자연어로 물어보세요' : '예: 다낭, 골프텔, 직영'}</p>
+            <h3>${currentQuery ? `"${currentQuery}" 검색 결과가 없어요` : '무엇을 찾으시나요?'}</h3>
+            <p>${currentQuery ? '다른 키워드로 시도하거나, AI 플래너에게 자연어로 물어보세요' : '아래 인기 검색어를 누르거나 직접 입력해보세요'}</p>
             ${currentQuery ? `<a class="ai-cta" href="ai-planner.html?q=${encodeURIComponent(currentQuery)}">✦ AI 플래너에게 물어보기 →</a>` : ''}
+            ${trendingHtml}
           </div>`;
         return;
       }

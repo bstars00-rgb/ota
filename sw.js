@@ -3,7 +3,7 @@
 // 전략: data.js / state.js / 페이지는 stale-while-revalidate
 // 외부 (Unsplash 등) 은 network-first
 // ========================================
-const CACHE_NAME = 'omt-v1-2026-06-11';
+const CACHE_NAME = 'omt-v2-2026-06-11';   // 버전 업 (offline 폴백 추가)
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,7 +13,8 @@ const CORE_ASSETS = [
   './golftel.html',
   './country.html',
   './mypage.html',
-  './manifest.json'
+  './manifest.json',
+  './offline.html'                          // 오프라인 폴백 페이지
 ];
 
 // 설치 — 핵심 자산 사전 캐싱
@@ -66,7 +67,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 같은 도메인 — stale-while-revalidate
+  // 같은 도메인 — stale-while-revalidate + 오프라인 폴백
   event.respondWith(
     caches.match(req).then(cached => {
       const fetchPromise = fetch(req).then(res => {
@@ -75,7 +76,16 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then(c => c.put(req, clone).catch(() => {}));
         }
         return res;
-      }).catch(() => cached);  // 네트워크 실패 → 캐시
+      }).catch(() => {
+        // 네트워크 실패 → 캐시 우선, 둘 다 없으면 HTML 요청만 offline.html 폴백
+        if(cached) return cached;
+        const accept = req.headers.get('accept') || '';
+        if(req.mode === 'navigate' || accept.includes('text/html')){
+          return caches.match('./offline.html');
+        }
+        // JS/CSS/이미지는 네트워크 에러 그대로 전파 (사용자가 오프라인 자동 인지)
+        return new Response('', { status:503, statusText:'Offline · 캐시 없음' });
+      });
       return cached || fetchPromise;
     })
   );

@@ -1147,6 +1147,51 @@
                 <li>${own.model === 'direct' ? '<strong>OMT 직영 상품</strong> · 한국어 카카오 24h 상담 / 현지 OMT 라운저 대응' : '<strong>OMT 파트너 상품</strong> · 한국어 상담 / 현지 파트너 운영'}</li>
               </ul>
             </section>
+
+            <!-- 🤝 함께 본 골프텔 -->
+            ${(() => {
+              // 같은 국가 또는 비슷한 가격대 골프텔 3건
+              const others = D.GOLFTELS
+                .filter(x => x.id !== g.id)
+                .map(x => ({
+                  g: x,
+                  // 점수: 같은 국가 +50, 가격 차이 비례 차감, 평점 +5×rating
+                  score: (x.country === g.country ? 50 : 0)
+                       - Math.abs(x.pricePerPerson - g.pricePerPerson) / 100000
+                       + (x.reviewStats?.rating || 0) * 5
+                }))
+                .sort((a,b) => b.score - a.score)
+                .slice(0, 3)
+                .map(o => o.g);
+
+              if(others.length === 0) return '';
+              return `
+                <section class="panel" style="margin-top:18px;">
+                  <h3 style="display:flex;align-items:center;gap:6px;">🤝 이 상품을 본 사용자가 함께 본 골프텔</h3>
+                  <div style="font-size:12px;color:var(--ink-3);margin:0 0 14px;">${(D.COUNTRIES[g.country]?.name || g.country)} · 비슷한 가격대 · 평점순</div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                    ${others.map(o => {
+                      const oOwn = D.OWNERSHIP[o.country] || {};
+                      return `
+                        <a href="golftel.html?id=${o.id}" style="display:block;border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;background:#fff;transition:transform .15s, box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+                          <div style="aspect-ratio:4/3;background:url('${o.images?.[0]}') center/cover;background-color:#eee;position:relative;">
+                            <span style="position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:900;background:${oOwn.model==='direct'?'linear-gradient(135deg,#075440,#0B6E4F);color:#fff':'#fff;color:#1A1A1A'};">${oOwn.label || '파트너'}</span>
+                          </div>
+                          <div style="padding:10px;">
+                            <div style="font-size:12px;font-weight:900;line-height:1.3;color:var(--ink);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:32px;">${o.name}</div>
+                            <div style="font-size:11px;color:var(--ink-2);margin-top:4px;">⛳ ${o.rounds}라운딩 · 🏨 ${o.nights}박</div>
+                            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);">
+                              <span style="font-size:11px;font-weight:800;color:var(--primary);">★ ${(o.reviewStats?.rating || o.rating/2).toFixed(1)}</span>
+                              <span style="font-size:13px;font-weight:900;color:var(--ink);">${(o.pricePerPerson/10000).toFixed(0)}만원~</span>
+                            </div>
+                          </div>
+                        </a>
+                      `;
+                    }).join('')}
+                  </div>
+                </section>
+              `;
+            })()}
           </div>
 
           <aside>
