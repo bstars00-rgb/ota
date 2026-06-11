@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELLIS 사용자 분석 | 오마이트립 운영</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --golf:#0B6E4F;
+      --radius:10px;--radius-lg:14px;
+      --header-h:60px;--max-w:1440px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;color:var(--ink);}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+
+    .header-actions{margin-left:auto;display:flex;gap:8px;}
+    .period-pill{padding:6px 12px;background:var(--bg-3);border:1px solid var(--line);border-radius:7px;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer;}
+    .period-pill.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+    .page-head{padding:24px 0;border-bottom:1px solid var(--line);}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .page-sub{font-size:13px;color:var(--ink-3);margin:0;}
+
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin:24px 0;}
+    .kpi{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .kpi-lb{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+    .kpi-val{font-size:28px;font-weight:900;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .kpi-val .small{font-size:14px;color:var(--ink-3);font-weight:700;margin-left:4px;}
+    .kpi-diff{font-size:11px;margin-top:6px;font-weight:700;}
+    .kpi-diff.up{color:var(--success);}
+    .kpi-diff.down{color:var(--danger);}
+
+    .section{margin:24px 0;}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+    .sec-title{font-size:18px;font-weight:900;letter-spacing:-0.01em;margin:0;display:flex;align-items:center;gap:8px;}
+    .sec-sub{font-size:12px;color:var(--ink-3);font-weight:600;}
+
+    /* Funnel */
+    .funnel-panel{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .funnel-row{
+      display:grid;grid-template-columns:200px 1fr 120px 90px;gap:14px;align-items:center;
+      padding:12px 0;border-bottom:1px solid var(--line);
+    }
+    .funnel-row:last-child{border-bottom:none;}
+    .funnel-stage{font-size:13px;color:var(--ink);font-weight:800;}
+    .funnel-stage .ic{font-size:18px;margin-right:8px;}
+    .funnel-bar{height:34px;border-radius:8px;background:var(--bg-3);position:relative;overflow:hidden;}
+    .funnel-bar > div{
+      height:100%;background:linear-gradient(90deg,var(--primary),#FF9A6C);
+      display:flex;align-items:center;padding:0 14px;font-family:'JetBrains Mono',monospace;font-weight:900;color:#fff;font-size:13px;
+      transition:width .8s ease;
+    }
+    .funnel-conv{font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--ink-2);text-align:right;}
+    .funnel-conv .change{display:block;font-size:11px;color:var(--success);margin-top:2px;}
+    .funnel-conv .change.down{color:var(--danger);}
+    .funnel-drop{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;text-align:right;}
+
+    /* 2-column grid */
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+    /* SKU 비교 */
+    .sku-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .sku-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .sku-name{font-size:14px;font-weight:900;}
+    .sku-name .ic{margin-right:6px;}
+    .sku-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+    .sku-row:last-child{border-bottom:none;}
+    .sku-row .k{color:var(--ink-3);}
+    .sku-row .v{font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .sku-row .v.ok{color:var(--success);}
+    .sku-row .v.warn{color:var(--warning);}
+
+    /* Country/device table */
+    .stat-table{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+    .stat-table table{width:100%;border-collapse:collapse;font-size:13px;}
+    .stat-table th{
+      padding:10px 14px;background:var(--bg-3);color:var(--ink-3);
+      font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;text-align:left;
+      border-bottom:1px solid var(--line);
+    }
+    .stat-table td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);}
+    .stat-table tr:last-child td{border-bottom:none;}
+    .stat-table .name{color:var(--ink);font-weight:800;}
+    .stat-table .num{font-family:'JetBrains Mono',monospace;font-weight:700;text-align:right;}
+    .stat-table .pct-bar{
+      display:inline-block;width:80px;height:6px;background:var(--bg-3);border-radius:3px;vertical-align:middle;margin-left:8px;overflow:hidden;
+    }
+    .stat-table .pct-bar > div{height:100%;background:var(--primary);}
+
+    /* Source */
+    .source-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .source-row{
+      display:grid;grid-template-columns:24px 1fr auto auto;gap:10px;align-items:center;
+      padding:8px 0;font-size:13px;
+    }
+    .source-row .ic{font-size:18px;}
+    .source-row .n{color:var(--ink);font-weight:700;}
+    .source-row .num{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--ink-2);text-align:right;min-width:60px;}
+    .source-row .pct{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--success);font-size:11px;text-align:right;min-width:50px;}
+
+    @media (max-width:1024px){
+      .kpi-grid{grid-template-columns:1fr 1fr;}
+      .twocol{grid-template-columns:1fr;}
+      .funnel-row{grid-template-columns:130px 1fr 80px 70px;}
+    }
+    @media (max-width:768px){
+      .kpi-grid{grid-template-columns:1fr;}
+      .gnb-mini{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">CONSOLE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-channels.html">채널 매니저</a>
+        <a href="admin-suppliers.html">공급사</a>
+        <a href="mapper.html">스키마 매퍼</a>
+        <a href="#" class="on">사용자 분석</a>
+      </nav>
+      <div class="header-actions">
+        <button class="period-pill" data-p="7d">7일</button>
+        <button class="period-pill on" data-p="30d">30일</button>
+        <button class="period-pill" data-p="90d">90일</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">📊 User Funnel · 사용자 흐름 분석 (mock)</div>
+      <h1 class="page-title">사용자 흐름 분석</h1>
+      <p class="page-sub">최근 30일 — 페이지뷰 · 검색→상품→예약 퍼널 · 골프텔 vs 패키지 전환율 · 트래픽 소스 (실제 GA4 연동 전 mock 데이터)</p>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-lb">방문자 (UV)</div>
+        <div class="kpi-val">42,318<span class="small">명</span></div>
+        <div class="kpi-diff up">▲ 전월 +18.2%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lb">페이지뷰 (PV)</div>
+        <div class="kpi-val">186,422<span class="small">회</span></div>
+        <div class="kpi-diff up">▲ 전월 +12.7%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lb">예약 완료</div>
+        <div class="kpi-val">1,847<span class="small">건</span></div>
+        <div class="kpi-diff up">▲ 전월 +24.5%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lb">전환율 (UV→예약)</div>
+        <div class="kpi-val">4.37<span class="small">%</span></div>
+        <div class="kpi-diff up">▲ 전월 +0.5%p (업계 평균 2.1%)</div>
+      </div>
+    </div>
+
+    <!-- 퍼널 -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">🔥 검색 → 예약 퍼널</h2>
+        <span class="sec-sub">각 단계 전환율 + 이탈률</span>
+      </div>
+      <div class="funnel-panel" id="funnelPanel"></div>
+    </section>
+
+    <!-- 골프텔 vs 패키지 SKU 비교 -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">⛳ vs 📦 SKU 성과 비교</h2>
+        <span class="sec-sub">전환율·평균 결제액·후기 평점</span>
+      </div>
+      <div class="twocol">
+        <div class="sku-card" style="border-left:3px solid var(--golf);">
+          <div class="sku-head">
+            <div class="sku-name"><span class="ic">⛳</span>골프텔 / 골프투어</div>
+            <span style="font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;background:#2C1810;color:var(--primary);font-family:'JetBrains Mono',monospace;">MAIN SKU</span>
+          </div>
+          <div class="sku-row"><span class="k">조회수 (검색→상세)</span><span class="v">28,142</span></div>
+          <div class="sku-row"><span class="k">예약 건수</span><span class="v">1,224건</span></div>
+          <div class="sku-row"><span class="k">전환율</span><span class="v ok">4.35%</span></div>
+          <div class="sku-row"><span class="k">평균 결제액</span><span class="v">2,140,000원</span></div>
+          <div class="sku-row"><span class="k">평균 후기 평점</span><span class="v ok">★ 4.68 / 5</span></div>
+          <div class="sku-row"><span class="k">재방문 (3개월 내)</span><span class="v ok">22.4%</span></div>
+        </div>
+        <div class="sku-card" style="border-left:3px solid var(--info);">
+          <div class="sku-head">
+            <div class="sku-name"><span class="ic">📦</span>일반 패키지</div>
+            <span style="font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;background:var(--bg-3);color:var(--ink-3);font-family:'JetBrains Mono',monospace;">SUB SKU</span>
+          </div>
+          <div class="sku-row"><span class="k">조회수 (검색→상세)</span><span class="v">14,176</span></div>
+          <div class="sku-row"><span class="k">예약 건수</span><span class="v">623건</span></div>
+          <div class="sku-row"><span class="k">전환율</span><span class="v ok">4.40%</span></div>
+          <div class="sku-row"><span class="k">평균 결제액</span><span class="v">980,000원</span></div>
+          <div class="sku-row"><span class="k">평균 후기 평점</span><span class="v">★ 4.32 / 5</span></div>
+          <div class="sku-row"><span class="k">재방문 (3개월 내)</span><span class="v">14.8%</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:14px;background:var(--bg-2);border:1px dashed var(--accent);border-radius:10px;font-size:13px;color:var(--ink-2);line-height:1.6;">
+        <strong style="color:var(--accent);">💡 인사이트:</strong>
+        골프텔의 평균 결제액은 패키지의 <strong style="color:var(--ink);font-family:'JetBrains Mono',monospace;">2.18배</strong> (+118%).
+        재방문율도 <strong style="color:var(--success);">22.4%</strong>로 패키지(14.8%)보다 51% 높음 — 골프텔 중심 전환 전략이 LTV 측면에서 옳은 방향 확인.
+      </div>
+    </section>
+
+    <!-- 국가 / 디바이스 / 소스 -->
+    <section class="section">
+      <div class="twocol">
+        <!-- 국가별 트래픽 -->
+        <div>
+          <div class="sec-head">
+            <h2 class="sec-title">🌏 국가별 트래픽</h2>
+            <span class="sec-sub">최근 30일 UV 기준</span>
+          </div>
+          <div class="stat-table">
+            <table>
+              <thead><tr><th>국가</th><th>UV</th><th>예약</th><th>점유율</th></tr></thead>
+              <tbody>
+                <tr><td><span class="name">🇰🇷 한국 (국내)</span></td><td class="num">38,142</td><td class="num">1,684</td><td class="num">90.1%<span class="pct-bar"><div style="width:90%;"></div></span></td></tr>
+                <tr><td><span class="name">🇯🇵 일본 (인바운드)</span></td><td class="num">1,827</td><td class="num">58</td><td class="num">4.3%<span class="pct-bar"><div style="width:4%;"></div></span></td></tr>
+                <tr><td><span class="name">🇨🇳 중국 (인바운드)</span></td><td class="num">1,103</td><td class="num">42</td><td class="num">2.6%<span class="pct-bar"><div style="width:3%;"></div></span></td></tr>
+                <tr><td><span class="name">🇹🇼 대만 (인바운드)</span></td><td class="num">628</td><td class="num">28</td><td class="num">1.5%<span class="pct-bar"><div style="width:2%;"></div></span></td></tr>
+                <tr><td><span class="name">🇺🇸 미국·기타</span></td><td class="num">618</td><td class="num">35</td><td class="num">1.5%<span class="pct-bar"><div style="width:2%;"></div></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 디바이스 -->
+        <div>
+          <div class="sec-head">
+            <h2 class="sec-title">📱 디바이스 분포</h2>
+            <span class="sec-sub">PV 기준</span>
+          </div>
+          <div class="stat-table">
+            <table>
+              <thead><tr><th>디바이스</th><th>PV</th><th>UV</th><th>전환율</th></tr></thead>
+              <tbody>
+                <tr><td><span class="name">📱 모바일 (iOS)</span></td><td class="num">98,742</td><td class="num">22,418</td><td class="num">4.62%</td></tr>
+                <tr><td><span class="name">📱 모바일 (Android)</span></td><td class="num">62,418</td><td class="num">14,328</td><td class="num">3.94%</td></tr>
+                <tr><td><span class="name">💻 데스크톱</span></td><td class="num">21,842</td><td class="num">4,818</td><td class="num">5.18%</td></tr>
+                <tr><td><span class="name">📺 태블릿</span></td><td class="num">3,420</td><td class="num">754</td><td class="num">3.42%</td></tr>
+              </tbody>
+            </table>
+            <div style="padding:12px 14px;background:var(--bg-3);border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);">
+              💡 모바일 점유율 <strong style="color:var(--accent);font-family:'JetBrains Mono',monospace;">86.7%</strong> · 데스크톱 전환율 더 높음 → 결제 단계 모바일 UX 추가 최적화 필요
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 트래픽 소스 -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">📈 트래픽 소스</h2>
+        <span class="sec-sub">검색·소셜·직접·크리에이터 피드</span>
+      </div>
+      <div class="source-card">
+        <div class="source-row"><span class="ic">🔍</span><span class="n">네이버 검색 (organic)</span><span class="num">14,218 UV</span><span class="pct">33.6%</span></div>
+        <div class="source-row"><span class="ic">🎬</span><span class="n">크리에이터 피드 (feed.html)</span><span class="num">8,824 UV</span><span class="pct">20.9%</span></div>
+        <div class="source-row"><span class="ic">📱</span><span class="n">카카오톡 공유 링크</span><span class="num">6,712 UV</span><span class="pct">15.9%</span></div>
+        <div class="source-row"><span class="ic">🔍</span><span class="n">구글 검색 (organic)</span><span class="num">4,824 UV</span><span class="pct">11.4%</span></div>
+        <div class="source-row"><span class="ic">📸</span><span class="n">인스타그램 광고</span><span class="num">3,512 UV</span><span class="pct">8.3%</span></div>
+        <div class="source-row"><span class="ic">📺</span><span class="n">YouTube 광고</span><span class="num">2,418 UV</span><span class="pct">5.7%</span></div>
+        <div class="source-row"><span class="ic">🔗</span><span class="n">직접 접속</span><span class="num">1,810 UV</span><span class="pct">4.3%</span></div>
+      </div>
+    </section>
+
+    <div style="text-align:center;padding:40px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS Analytics · v0.5 · 실제 GA4 연동 시 Realtime API + 자동 동기화로 전환
+    </div>
+  </main>
+
+  <script>
+    // ===== 퍼널 데이터 (mock) =====
+    const FUNNEL = [
+      { stage:'홈 방문',           ic:'🏠', value:42318, prev:42318 },
+      { stage:'검색·국가 페이지',   ic:'🔍', value:31420, prev:42318 },
+      { stage:'골프텔/상품 상세',   ic:'⛳', value:18642, prev:31420 },
+      { stage:'슬롯/객실 선택',     ic:'🕐', value:7218,  prev:18642 },
+      { stage:'결제 시작 (checkout)', ic:'💳', value:3284,  prev:7218 },
+      { stage:'결제 완료 (complete)', ic:'✅', value:1847,  prev:3284 }
+    ];
+    const maxV = FUNNEL[0].value;
+
+    function renderFunnel(){
+      document.getElementById('funnelPanel').innerHTML = FUNNEL.map((f, i) => {
+        const pct = (f.value / maxV) * 100;
+        const conv = i === 0 ? 100 : (f.value / f.prev) * 100;
+        const drop = i === 0 ? 0 : f.prev - f.value;
+        return `
+          <div class="funnel-row">
+            <div class="funnel-stage"><span class="ic">${f.ic}</span>${f.stage}</div>
+            <div class="funnel-bar"><div style="width:${pct.toFixed(1)}%;">${f.value.toLocaleString('ko-KR')}</div></div>
+            <div class="funnel-conv">
+              ${conv.toFixed(1)}%
+              ${i > 0 ? `<span class="change ${conv >= 50 ? '' : 'down'}">${conv >= 50 ? '✓ 양호' : '⚠️ 이탈 높음'}</span>` : ''}
+            </div>
+            <div class="funnel-drop">${i === 0 ? '-' : '-' + drop.toLocaleString('ko-KR')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 기간 토글 (mock — 실제 데이터 변경 안 함)
+    document.querySelectorAll('.period-pill').forEach(p => {
+      p.addEventListener('click', () => {
+        document.querySelectorAll('.period-pill').forEach(x => x.classList.remove('on'));
+        p.classList.add('on');
+      });
+    });
+
+    renderFunnel();
+  </script>
+</body>
+</html>

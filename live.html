@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>🔴 LIVE — 다낭 골프텔 단독특가 | 오마이트립</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#FF0033" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--accent:#FFD23F;--golf:#0B6E4F;
+      --live:#FF0033;--live-pulse:#FF3355;
+      --ink:#fff;--ink-2:rgba(255,255,255,.85);--ink-3:rgba(255,255,255,.65);
+      --line:rgba(255,255,255,.12);
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
+
+    /* 풀스크린 비디오 (mock — 그라데이션 + 이미지) */
+    .video-bg{
+      position:fixed;inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.7) 0%, transparent 25%, transparent 70%, rgba(0,0,0,.85) 100%),
+        url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1600&q=80') center/cover;
+      animation:zoomKenBurns 30s ease-in-out infinite alternate;
+    }
+    @keyframes zoomKenBurns{
+      from{transform:scale(1.02);}
+      to{transform:scale(1.12);}
+    }
+
+    /* 폰 프레임 (데스크톱 랩핑) */
+    @media (min-width:1024px){
+      body{display:flex;align-items:center;justify-content:center;background:#1a1a1a;}
+      .phone-frame{
+        width:380px;height:780px;border-radius:38px;overflow:hidden;
+        box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 8px #2a2a2a, 0 0 0 10px #1a1a1a;
+        position:relative;
+      }
+      .phone-frame .video-bg{position:absolute;}
+    }
+    @media (max-width:1023px){
+      .phone-frame{height:100vh;}
+    }
+
+    /* 상단 LIVE 배지 + 시청자 + 닫기 */
+    .top-bar{
+      position:absolute;top:env(safe-area-inset-top,12px);left:12px;right:12px;
+      display:flex;align-items:center;gap:8px;z-index:30;
+      padding:12px 0;
+    }
+    .live-badge{
+      display:inline-flex;align-items:center;gap:5px;
+      background:var(--live);color:#fff;padding:5px 10px;border-radius:5px;
+      font-size:11px;font-weight:900;letter-spacing:.06em;
+    }
+    .live-badge .dot{
+      width:6px;height:6px;border-radius:50%;background:#fff;
+      animation:livePulse 1s ease-in-out infinite;
+    }
+    @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+    .viewer-count{
+      display:inline-flex;align-items:center;gap:5px;
+      background:rgba(0,0,0,.55);color:#fff;padding:5px 10px;border-radius:5px;
+      font-size:11px;font-weight:800;backdrop-filter:blur(8px);
+    }
+    .close-btn{
+      margin-left:auto;width:32px;height:32px;border-radius:50%;
+      background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;
+      font-size:18px;font-weight:900;backdrop-filter:blur(8px);
+    }
+    .close-btn:hover{background:rgba(0,0,0,.75);}
+
+    /* 크리에이터 정보 */
+    .creator-bar{
+      position:absolute;top:calc(env(safe-area-inset-top,12px) + 48px);left:12px;
+      display:flex;align-items:center;gap:10px;z-index:30;
+      padding:6px 12px 6px 6px;background:rgba(0,0,0,.55);border-radius:999px;
+      backdrop-filter:blur(8px);
+    }
+    .creator-avatar{
+      width:32px;height:32px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px;
+    }
+    .creator-info{font-size:12px;}
+    .creator-name{font-weight:900;display:flex;align-items:center;gap:4px;}
+    .creator-name::after{content:"✓";color:var(--accent);font-size:11px;}
+    .creator-subs{font-size:10px;opacity:.7;}
+    .follow-btn{
+      padding:5px 12px;background:var(--primary);color:#fff;border-radius:999px;
+      font-size:11px;font-weight:900;margin-left:4px;cursor:pointer;
+    }
+    .follow-btn.on{background:rgba(255,255,255,.18);}
+
+    /* 진행 중 상품 카드 (좌하단) */
+    .product-card{
+      position:absolute;bottom:calc(160px + env(safe-area-inset-bottom,0));left:12px;right:80px;
+      background:rgba(0,0,0,.7);border-radius:14px;padding:12px;display:flex;gap:10px;
+      backdrop-filter:blur(10px);border:1px solid var(--line);z-index:20;
+      animation:slideIn .5s ease;
+    }
+    @keyframes slideIn{from{transform:translateX(-30px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    .product-thumb{
+      width:64px;height:64px;border-radius:10px;background-size:cover;background-position:center;flex-shrink:0;
+      position:relative;
+    }
+    .product-thumb::before{
+      content:"⛳";position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;
+      background:var(--accent);color:#1A1A1A;display:grid;place-items:center;font-size:12px;font-weight:900;
+    }
+    .product-info{flex:1;min-width:0;}
+    .product-tag{
+      display:inline-block;padding:2px 7px;background:var(--live);color:#fff;border-radius:4px;
+      font-size:9px;font-weight:900;letter-spacing:.04em;margin-bottom:4px;
+    }
+    .product-name{
+      font-size:13px;font-weight:900;line-height:1.3;
+      overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    }
+    .product-price{
+      display:flex;align-items:baseline;gap:6px;margin-top:4px;
+    }
+    .product-price .old{font-size:11px;color:var(--ink-3);text-decoration:line-through;}
+    .product-price .new{font-size:15px;font-weight:900;color:var(--accent);letter-spacing:-0.01em;}
+    .product-buy-btn{
+      width:100%;margin-top:8px;padding:10px;background:var(--primary);color:#fff;
+      border-radius:8px;font-weight:900;font-size:13px;cursor:pointer;
+      box-shadow:0 4px 14px rgba(255,107,53,.45);
+      animation:pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{box-shadow:0 4px 14px rgba(255,107,53,.45);}
+      50%{box-shadow:0 4px 24px rgba(255,107,53,.75);}
+    }
+
+    /* 우측 액션 (좋아요·공유·찜) */
+    .side-actions{
+      position:absolute;right:12px;bottom:calc(180px + env(safe-area-inset-bottom,0));
+      display:flex;flex-direction:column;gap:14px;z-index:20;
+    }
+    .side-btn{
+      width:48px;height:48px;border-radius:50%;
+      background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
+      display:grid;place-items:center;color:#fff;font-size:22px;cursor:pointer;
+      transition:transform .15s;
+    }
+    .side-btn:hover{transform:scale(1.08);}
+    .side-btn .label{
+      position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+      font-size:9px;font-weight:900;color:#fff;
+      background:transparent;text-shadow:0 1px 3px rgba(0,0,0,.8);
+    }
+    .side-btn.liked{animation:likePop .4s ease;}
+    @keyframes likePop{
+      0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}
+    }
+
+    /* 채팅 (하단) */
+    .chat-wrap{
+      position:absolute;bottom:env(safe-area-inset-bottom,0);left:0;right:0;
+      padding:0 12px 12px;z-index:25;
+    }
+    .chat-msgs{
+      max-height:120px;overflow:hidden;padding:0 4px 8px;
+      mask-image:linear-gradient(180deg, transparent 0%, #000 30%);
+      -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 30%);
+    }
+    .chat-msg{
+      display:flex;gap:6px;margin-bottom:5px;animation:chatSlide .35s ease;
+    }
+    @keyframes chatSlide{from{transform:translateY(8px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .chat-msg .who{
+      font-size:11px;font-weight:900;color:var(--accent);
+      text-shadow:0 1px 3px rgba(0,0,0,.8);
+    }
+    .chat-msg .body{
+      font-size:12px;color:#fff;
+      text-shadow:0 1px 3px rgba(0,0,0,.8);
+    }
+    .chat-msg.system .body{color:var(--accent);font-weight:700;}
+
+    .chat-input-row{
+      display:flex;gap:8px;align-items:center;
+      background:rgba(0,0,0,.55);border-radius:999px;
+      padding:6px 6px 6px 16px;backdrop-filter:blur(8px);
+      border:1px solid var(--line);
+    }
+    .chat-input-row input{
+      flex:1;background:transparent;border:none;color:#fff;font-family:inherit;
+      font-size:13px;outline:none;
+    }
+    .chat-input-row input::placeholder{color:rgba(255,255,255,.5);}
+    .chat-send{
+      width:34px;height:34px;border-radius:50%;background:var(--primary);
+      display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;cursor:pointer;
+    }
+
+    /* 진행 바 (재고 임박) */
+    .stock-bar{
+      position:absolute;bottom:calc(140px + env(safe-area-inset-bottom,0));left:12px;right:80px;
+      z-index:20;font-size:10px;color:#fff;
+    }
+    .stock-label{
+      display:flex;justify-content:space-between;margin-bottom:4px;
+      text-shadow:0 1px 3px rgba(0,0,0,.8);
+    }
+    .stock-label .urgent{color:var(--accent);font-weight:900;}
+    .stock-progress{
+      height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;
+    }
+    .stock-progress > div{
+      height:100%;background:linear-gradient(90deg,var(--live),var(--accent));
+      transition:width .8s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="video-bg"></div>
+
+    <!-- 상단 -->
+    <div class="top-bar">
+      <span class="live-badge"><span class="dot"></span>LIVE</span>
+      <span class="viewer-count">👁️ <span id="viewerCount">1,247</span></span>
+      <a href="index.html" class="close-btn">✕</a>
+    </div>
+
+    <!-- 크리에이터 -->
+    <div class="creator-bar">
+      <div class="creator-avatar">베</div>
+      <div class="creator-info">
+        <div class="creator-name">베트남살이</div>
+        <div class="creator-subs">구독 23만</div>
+      </div>
+      <button class="follow-btn" id="followBtn" onclick="toggleFollow()">팔로우</button>
+    </div>
+
+    <!-- 재고 임박 바 -->
+    <div class="stock-bar">
+      <div class="stock-label">
+        <span>📦 남은 수량</span>
+        <span class="urgent" id="stockUrgent">12 / 50 (76% 완판)</span>
+      </div>
+      <div class="stock-progress"><div id="stockBar" style="width:76%;"></div></div>
+    </div>
+
+    <!-- 상품 카드 -->
+    <div class="product-card">
+      <div class="product-thumb" style="background-image:url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=300&q=80')"></div>
+      <div class="product-info">
+        <span class="product-tag">🔥 라이브 특가</span>
+        <div class="product-name">[직영] 다낭 바나힐스 골프 4박5일 (라운딩 3회)</div>
+        <div class="product-price">
+          <span class="old">1,680,000</span>
+          <span class="new">1,260,000원</span>
+        </div>
+        <button class="product-buy-btn" onclick="buyNow()">🛒 라이브 특가로 지금 구매 →</button>
+      </div>
+    </div>
+
+    <!-- 우측 액션 -->
+    <div class="side-actions">
+      <div class="side-btn" id="likeBtn" onclick="toggleLike()" style="position:relative;">
+        ❤️
+        <span class="label" id="likeCount">2.4K</span>
+      </div>
+      <div class="side-btn" onclick="addToWishlist()" style="position:relative;">
+        🔖
+        <span class="label">찜</span>
+      </div>
+      <div class="side-btn" onclick="shareLive()" style="position:relative;">
+        🔗
+        <span class="label">공유</span>
+      </div>
+      <div class="side-btn" onclick="alert('알림 등록되었어요!')" style="position:relative;">
+        🔔
+        <span class="label">알림</span>
+      </div>
+    </div>
+
+    <!-- 채팅 -->
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chatMsgs"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="메시지 보내기..." maxlength="100" />
+        <button class="chat-send" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 라이브 시뮬레이션 — 시청자 수 증감 / 채팅 실시간 / 재고 감소
+    // ============================================================
+
+    // 시청자 수 시뮬 (랜덤 ±10)
+    let viewers = 1247;
+    setInterval(() => {
+      viewers += Math.floor(Math.random() * 21) - 8;
+      if(viewers < 1100) viewers = 1100;
+      if(viewers > 1800) viewers = 1800;
+      document.getElementById('viewerCount').textContent = viewers.toLocaleString('ko-KR');
+    }, 2200);
+
+    // 재고 시뮬 — 가끔 1~2개 줄어듦
+    let stock = 12;
+    let initialStock = 50;
+    function updateStock(){
+      const sold = initialStock - stock;
+      const pct = (sold / initialStock) * 100;
+      document.getElementById('stockBar').style.width = pct + '%';
+      document.getElementById('stockUrgent').textContent = `${stock} / ${initialStock} (${pct.toFixed(0)}% 완판)`;
+      if(stock < 8) document.getElementById('stockUrgent').textContent = `🔥 ${stock}개만 남았어요! (${pct.toFixed(0)}% 완판)`;
+    }
+    setInterval(() => {
+      if(stock > 1 && Math.random() < 0.3){
+        stock -= 1;
+        updateStock();
+        addChat('system', '🛒 ' + getRandomBuyer(), '구매하셨어요!');
+      }
+    }, 6000);
+
+    // 좋아요
+    let liked = false;
+    let likeCount = 2400;
+    function toggleLike(){
+      liked = !liked;
+      const el = document.getElementById('likeBtn');
+      el.classList.toggle('liked', liked);
+      if(liked){
+        likeCount += 1;
+        el.innerHTML = '❤️<span class="label" id="likeCount">' + (likeCount/1000).toFixed(1) + 'K</span>';
+      }
+    }
+
+    // 팔로우
+    let following = false;
+    function toggleFollow(){
+      following = !following;
+      const btn = document.getElementById('followBtn');
+      btn.textContent = following ? '✓ 팔로잉' : '팔로우';
+      btn.classList.toggle('on', following);
+      if(following) addChat('system', '시청자', '님이 팔로우 시작!');
+    }
+
+    // 채팅 (mock 자동 생성)
+    const SAMPLE_NICKNAMES = ['김프로','이여행','박골퍼','최라운딩','한나뚜','정홀인원','윤그린','오우디','임드라이버','조퍼터','강캐디'];
+    const SAMPLE_MSGS = [
+      '와 이 가격 실화?', '직영이라 다른 곳보다 진짜 싸네', '한국 캐디 100% 보장? 진짜?',
+      '저 작년에 다녀왔는데 코스 진짜 좋았어요', '풀빌라까지 포함?', '제주 골프 가격이랑 비슷한데?',
+      '바나힐스 진짜 가고싶었는데', '구매!', '와우...', '3박 추가하려면 어떻게?',
+      '캐디팁 별도인가요?', '7월에도 같은 가격?', '클럽 렌탈도 되나요?',
+      '저 어제 결제했어요 👍', '한국에서 출발 KE 직항 있어요?'
+    ];
+    function getRandomBuyer(){
+      return SAMPLE_NICKNAMES[Math.floor(Math.random() * SAMPLE_NICKNAMES.length)] + '*'.repeat(2 + Math.floor(Math.random()*2));
+    }
+    function getRandomMsg(){
+      return SAMPLE_MSGS[Math.floor(Math.random() * SAMPLE_MSGS.length)];
+    }
+
+    function addChat(type, who, body){
+      const el = document.createElement('div');
+      el.className = 'chat-msg ' + (type === 'system' ? 'system' : '');
+      el.innerHTML = `<span class="who">${who}</span><span class="body">${body}</span>`;
+      const wrap = document.getElementById('chatMsgs');
+      wrap.appendChild(el);
+      // 최근 20개만 유지
+      while(wrap.children.length > 20) wrap.removeChild(wrap.firstChild);
+      wrap.scrollTop = wrap.scrollHeight;
+    }
+
+    // 자동 채팅 (2~4초마다 1건)
+    function scheduleAutoChat(){
+      const delay = 1800 + Math.random() * 2500;
+      setTimeout(() => {
+        addChat('user', getRandomBuyer(), getRandomMsg());
+        scheduleAutoChat();
+      }, delay);
+    }
+    scheduleAutoChat();
+
+    // 사용자 채팅 전송
+    function sendChat(){
+      const input = document.getElementById('chatInput');
+      const txt = input.value.trim();
+      if(!txt) return;
+      addChat('user', '나', txt);
+      input.value = '';
+    }
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+      if(e.key === 'Enter') sendChat();
+    });
+
+    // 액션
+    function buyNow(){
+      // 라이브 특가는 카트 거치지 않고 즉시 결제 진입
+      // (시드 다낭 골프텔 booking 으로 시뮬)
+      location.href = 'payment.html?bn=OMT-3DK21A&pay=kakao';
+    }
+    function addToWishlist(){
+      alert('💛 찜 목록에 추가했어요!');
+    }
+    function shareLive(){
+      if(navigator.share){
+        navigator.share({
+          title:'🔴 LIVE — 다낭 골프텔 단독특가',
+          text:'베트남살이 크리에이터의 라이브 — 1,260,000원 (25% 할인)',
+          url:location.href
+        });
+      } else {
+        navigator.clipboard?.writeText(location.href);
+        alert('🔗 링크를 복사했어요!');
+      }
+    }
+
+    // 초기 채팅 시드
+    setTimeout(() => addChat('system', '🎉 환영합니다', '· 라이브에 입장하셨어요!'), 300);
+    setTimeout(() => addChat('user', '김프로**', '오! 진짜 1,260,000원?'), 1200);
+    setTimeout(() => addChat('user', '이여행***', '한국 캐디 100% 인증 가능한가요?'), 2400);
+  </script>
+</body>
+</html>

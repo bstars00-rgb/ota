@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="오마이트립" />
+  <style>
+    @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  </style>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#FF6B35" />
@@ -598,7 +601,12 @@
             <div class="home-sub-tabs">
               <button class="home-sub-tab" data-sub="following">팔로잉</button>
               <button class="home-sub-tab active" data-sub="recommended">추천</button>
-              <button class="home-sub-tab" data-sub="live">LIVE</button>
+              <button class="home-sub-tab" data-sub="live" onclick="location.href='live.html'" style="position:relative;">
+                <span style="display:inline-flex;align-items:center;gap:4px;">
+                  <span style="width:6px;height:6px;border-radius:50%;background:#FF0033;animation:livePulse 1s infinite;"></span>
+                  LIVE
+                </span>
+              </button>
             </div>
             <!-- Feed scroller populated by JS -->
             <div id="feedScroller" style="height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;"></div>
