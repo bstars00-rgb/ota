@@ -303,6 +303,26 @@
     .rules-list ul{margin:0;padding-left:18px;}
     .rules-list li{font-size:13px;color:var(--ink-2);margin:4px 0;line-height:1.5;}
 
+    /* 체크인 날짜 picker */
+    .date-picker-block{
+      margin-top:14px;padding:14px;background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);
+      border-radius:10px;border:1.5px solid var(--golf);
+    }
+    .dp-label{font-size:11px;font-weight:800;color:var(--golf-dark);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+    .dp-input{
+      width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;
+      font-size:14px;font-weight:800;color:var(--ink);background:#fff;cursor:pointer;
+      font-family:inherit;
+    }
+    .dp-input:focus{outline:none;border-color:var(--golf);box-shadow:0 0 0 3px rgba(11,110,79,.15);}
+    .dp-hint{font-size:11px;color:var(--ink-2);margin-top:6px;display:flex;align-items:center;gap:6px;}
+    .dp-hint .day-chip{
+      padding:1px 6px;border-radius:4px;font-size:10px;font-weight:900;
+    }
+    .dp-hint .day-chip.weekday{background:#E0F2FE;color:#0369A1;}
+    .dp-hint .day-chip.weekend{background:#FEE2E2;color:#B91C1C;}
+    .dp-hint .day-chip.holiday{background:linear-gradient(135deg, var(--accent), #F59E0B);color:#7C2D12;}
+
     /* book-panel — 객실 옵션 / 티타임 */
     .opt-block{
       margin-top:14px;padding:12px;background:var(--bg-soft);border-radius:10px;
@@ -1139,6 +1159,13 @@
               <div class="bp-price" id="bpPrice">${g.pricePerPerson.toLocaleString('ko-KR')}원<small> ~</small></div>
               <div class="bp-basis">2인 1실 기준 · 항공 별도</div>
 
+              <!-- 체크인 날짜 picker -->
+              <div class="date-picker-block">
+                <div class="dp-label">📅 체크인 날짜</div>
+                <input type="date" id="checkinDate" class="dp-input" />
+                <div class="dp-hint" id="dpHint">날짜 선택 시 라운딩별 주중/주말 가격 적용</div>
+              </div>
+
               <!-- 객실 옵션 -->
               <div class="opt-block">
                 <div class="lb">🏨 객실 옵션</div>
@@ -1188,8 +1215,71 @@
       bindRoomOption();
       bindTeeFilters();
       bindTeeOptions();
+      bindCheckinDate();
       renderTeeSlots();
       bindFAQ();
+    }
+
+    // ===== 체크인 날짜 picker =====
+    function _fmtDate(d){
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function _parseDate(s){
+      if(!s) return null;
+      const [y,m,d] = s.split('-').map(Number);
+      return new Date(y, m-1, d);
+    }
+    // 라운딩 N번째 날짜 (체크인일 + N-1, 0-indexed)
+    function _slotDate(roundIdx){
+      if(!checkinDate) return null;
+      const d = new Date(checkinDate); d.setDate(d.getDate() + roundIdx);
+      return d;
+    }
+    function _isWeekend(d){ return d && (d.getDay() === 0 || d.getDay() === 6); }
+    // 공휴일은 holidays 배열에 매칭 시도 (간단 mock — "01월 01일" 같은 형식 비교)
+    function _isHoliday(d, g){
+      if(!d || !g.holidays?.length) return false;
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      return g.holidays.some(h => h.includes(`${mm}월 ${dd}일`) || h.includes(`${mm}월`));
+    }
+    function _dayKind(d, g){
+      if(_isHoliday(d, g)) return 'holiday';
+      if(_isWeekend(d)) return 'weekend';
+      return 'weekday';
+    }
+
+    function bindCheckinDate(){
+      const input = document.getElementById('checkinDate');
+      if(!input) return;
+      // 기본값: 오늘 + 30일
+      const def = new Date(); def.setDate(def.getDate() + 30);
+      input.value = _fmtDate(def);
+      input.min = _fmtDate(new Date());
+      checkinDate = def;
+      updateCheckinHint();
+      input.addEventListener('change', () => {
+        checkinDate = _parseDate(input.value);
+        updateCheckinHint();
+        renderTeeSlots();  // 슬롯 재렌더 (가격 모디파이어 반영)
+        updateTotal();
+      });
+    }
+    function updateCheckinHint(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g || !checkinDate) return;
+      const hint = document.getElementById('dpHint');
+      if(!hint) return;
+      const checkout = new Date(checkinDate); checkout.setDate(checkout.getDate() + g.nights);
+      // 라운딩 일자별 분류
+      const chips = [];
+      const dayLabels = ['일','월','화','수','목','금','토'];
+      for(let i=0;i<g.rounds;i++){
+        const d = _slotDate(i);
+        const kind = _dayKind(d, g);
+        chips.push(`<span class="day-chip ${kind}">R${i+1} ${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]})</span>`);
+      }
+      hint.innerHTML = `${g.nights}박 ${g.nights+1}일 · 체크아웃 ${checkout.getMonth()+1}/${checkout.getDate()}<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${chips.join('')}</div>`;
     }
 
     // FAQ 아코디언
@@ -1311,11 +1401,19 @@
       return Math.round(base * mod * designerPremium + cart + caddy);
     }
 
-    // 모든 슬롯 생성 (시간 × 코스)
+    // 모든 슬롯 생성 (시간 × 코스) — 체크인 날짜 기준 모디파이어 적용
     function generateAllSlots(g){
       const teeOff = g.operatingInfo?.teeOff || {};
       const courseIds = g.courseIds || [];
       const slots = [];
+      // 현재 선택된 슬롯 수(=라운딩 인덱스)를 기준으로 다음 라운딩 일자 계산
+      const nextRoundIdx = selectedSlots.length;
+      const roundDate = _slotDate(nextRoundIdx);
+      const dayKind = roundDate ? _dayKind(roundDate, g) : 'weekday';
+      let surcharge = 0;
+      if(dayKind === 'weekend') surcharge = WEEKEND_SURCHARGE;
+      else if(dayKind === 'holiday') surcharge = HOLIDAY_SURCHARGE;
+
       (g.teeTimeWindows || []).forEach(w => {
         const range = teeOff[w];
         if(!range) return;
@@ -1324,7 +1422,8 @@
           courseIds.forEach((cid, ci) => {
             const course = D.GOLF_COURSES.find(c => c.id === cid);
             if(!course) return;
-            const price = computeSlotPrice(g, course, w);
+            const basePrice = computeSlotPrice(g, course, w);
+            const price = Math.round(basePrice * (1 + surcharge));
             const channel = D.CHANNEL_MANAGERS[course.channelManager] || D.CHANNEL_MANAGERS.partner;
             slots.push({
               key: `${w}:${t}:${cid}`,
@@ -1336,7 +1435,10 @@
               courseIdx: ci,
               inclLabel: buildInclusionLabel(g),
               price,
-              // 채널 매니저 메타 (ELLIS가 어떤 시스템에 부킹 요청을 보낼지)
+              basePrice,
+              surcharge,
+              dayKind,           // 'weekday' | 'weekend' | 'holiday'
+              roundIdx: nextRoundIdx,
               channelManager: course.channelManager,
               channelShort: channel.short,
               realTime: !!course.realTimeBooking
@@ -1397,7 +1499,19 @@
       const groups = groupByHour(allSlots);
 
       // 5. HTML 렌더
-      grid.innerHTML = groups.map(([hourLabel, slots]) => `
+      // 그룹 헤더에 표시할 day-kind (라운딩 N번째 일자 기준)
+      const headerDayKind = allSlots[0]?.dayKind || 'weekday';
+      const dayBadge = headerDayKind === 'holiday'
+        ? `<span style="margin-left:8px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:900;background:linear-gradient(135deg,var(--accent),#F59E0B);color:#7C2D12;">🎌 공휴일 +15%</span>`
+        : headerDayKind === 'weekend'
+        ? `<span style="margin-left:8px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:900;background:#FEE2E2;color:#B91C1C;">📅 주말 +10%</span>`
+        : `<span style="margin-left:8px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:900;background:#E0F2FE;color:#0369A1;">📅 주중 기본가</span>`;
+      const nextR = (allSlots[0]?.roundIdx ?? 0) + 1;
+      const roundHint = checkinDate
+        ? `<div style="font-size:12px;color:var(--ink-2);font-weight:700;margin-bottom:10px;">${nextR}라운딩 슬롯 (체크인 +${(allSlots[0]?.roundIdx ?? 0)}일) ${dayBadge}</div>`
+        : '';
+
+      grid.innerHTML = roundHint + groups.map(([hourLabel, slots]) => `
         <div class="tee-hour-group">
           <div class="th-head">${hourLabel}</div>
           <div class="th-slots">
@@ -1405,8 +1519,9 @@
               const on = selectedSlots.some(x => x.key === s.key);
               const discount = s.window !== 'morning';
               const courseClass = s.courseIdx === 0 ? '' : 'alt';
+              const dayMarker = s.dayKind === 'holiday' ? 'weekend' : (s.dayKind === 'weekend' ? 'weekend' : '');
               return `
-                <button type="button" class="ts-card ${on?'on':''}" data-key="${s.key}" aria-pressed="${on}">
+                <button type="button" class="ts-card ${on?'on':''} ${dayMarker}" data-key="${s.key}" aria-pressed="${on}">
                   <div class="ts-top">
                     <span class="ts-time">${s.time}</span>
                     <span class="ts-course ${courseClass}" title="${s.courseName}">${s.courseName}</span>
@@ -1514,6 +1629,9 @@
     let selectedSlots = [];   // [{ slotKey, window, time, courseId, courseName, price, includesLabel }]
     let teeFilter = 'all';
     let teeOptions = { cheapest:false, realtime:false };
+    let checkinDate = null;   // Date object | null
+    const WEEKEND_SURCHARGE = 0.10;   // 주말 그린피 +10%
+    const HOLIDAY_SURCHARGE = 0.15;   // 공휴일 그린피 +15%
 
     function changePax(delta){
       pax = Math.max(1, Math.min(8, pax + delta));

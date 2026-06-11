@@ -213,6 +213,14 @@
       amenities:['와이파이','24시간 프론트','역 도보 5분'],
       description:'가성비 좋은 비즈니스 호텔, 신주쿠역 인근.' },
 
+    // Okinawa
+    { id:'h-kanucha-okinawa',  city:'okinawa', country:'japan',
+      img:'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
+      gallery:['https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=80','https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80'],
+      name:'카누차 베이 호텔&빌라', area:'안부 (얀바루)', areaId:'kanucha', stars:5, score:9.0, reviews:1248, price:298000, oldPrice:359000,
+      amenities:['조식 포함','와이파이','수영장','스파','프라이빗 비치','골프장 부지내','셔틀'],
+      description:'리조트 내 18홀 골프코스 보유 — 오션뷰 객실 + 셀프 라운딩 가능한 오키나와 대표 골프 리조트.' },
+
     // Fukuoka
     { id:'h-hyatt-fukuoka',    city:'fukuoka', country:'japan',
       img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80',
@@ -1051,7 +1059,9 @@
       reviews: [
         { id:'r1', author:'jp_yoon82', initial:'윤', rating:5, date:'2026-05-12', text:'리조트 안에 코스가 있어서 새벽 라운딩 후 바로 객실로 돌아갈 수 있는 게 최고. 오션뷰 객실은 일출이 환상적입니다.', positives:['오션뷰','접근성'], reply:_omtReplyTo('리조트 부지내 코스의 장점을 가장 잘 활용해 주신 후기네요!','다음 방문 때는 야간 라운딩도 추천드립니다.') },
         { id:'r2', author:'kim_golf', initial:'김', rating:4, date:'2026-04-28', text:'셀프 라운딩이라 가격은 합리적인데, 한국 캐디 익숙한 분들은 처음에 좀 어색할 수 있어요. 코스 자체는 페어웨이 넓고 좋습니다.', positives:['페어웨이/그린'], negatives:['캐디 부재'], reply:_omtReplyTo('','다음 방문 시 추가 비용으로 한국어 캐디 옵션도 가능합니다. 채팅으로 문의 부탁드려요.') },
-        { id:'r3', author:'park_kim', initial:'박', rating:5, date:'2026-04-15', text:'카누차 리조트 자체가 휴양지 느낌이라 가족과 같이 가도 만족합니다. 풀빌라 + 골프 조합이 좋아요.', positives:['리조트 부지내 골프','오션뷰','접근성'], reply:'' }
+        { id:'r3', author:'park_kim', initial:'박', rating:5, date:'2026-04-15', text:'카누차 리조트 자체가 휴양지 느낌이라 가족과 같이 가도 만족합니다. 풀빌라 + 골프 조합이 좋아요.', positives:['리조트 부지내 골프','오션뷰','접근성'], reply:'' },
+        { id:'r4', author:'jeong_oki', initial:'정', rating:4, date:'2026-03-22', text:'골프 + 리조트는 최고인데 리조트 내 식당 가격이 좀 비쌌어요. 시내까지 50km라 외식 나가기도 애매. 다음엔 식사 옵션 미리 정해놓고 갈게요.', positives:['리조트 부지내 골프'], negatives:['식당 가격','가격대비'], reply:_omtReplyTo('','얀바루 지역 특성상 외식 옵션이 제한적이라 식사 포함 옵션을 검토 중입니다.') },
+        { id:'r5', author:'choi_oki5', initial:'최', rating:5, date:'2026-03-10', text:'3대 가족 여행 — 어르신은 풀빌라에서 휴식, 30~40대 부부는 새벽 셀프 라운딩. 누구도 빠지지 않는 완벽한 골프 패키지였어요.', positives:['리조트 부지내 골프','오션뷰'], reply:'' }
       ]
     },
     'gt-jp-fukuoka-kitakyushu-2n': {
@@ -1068,7 +1078,9 @@
       reviews: [
         { id:'r1', author:'lee_fk', initial:'이', rating:5, date:'2026-05-10', text:'텐진 한복판 호텔이라 골프 끝나고 시내 쇼핑까지 한 번에. 2박3일이 짧게 느껴질 만큼 알찼습니다. 한국인 캐디 신청은 강추!', positives:['시내 호텔','한국인 캐디'], reply:_omtReplyTo('텐진의 도심+골프 조합 만족해 주셔서 감사합니다!','다음 방문 시 인근 코스 추가 라운딩도 추천드려요.') },
         { id:'r2', author:'kim_fukuoka', initial:'김', rating:4, date:'2026-04-22', text:'호텔에서 골프장까지 약 1시간 이동이 좀 부담. 그래도 후쿠오카 시내가 좋아서 만족.', positives:['시내 호텔','가성비'], negatives:['골프장 이동시간'], reply:_omtReplyTo('','이동 시간 단축을 위해 골프장 인근 호텔 옵션도 신규 도입 검토 중입니다.') },
-        { id:'r3', author:'shin_yj', initial:'신', rating:5, date:'2026-04-08', text:'가성비 최고. 2박에 그린피·캐디까지 다 포함이라 한국 1박 골프보다 싸요.', positives:['가성비','쇼핑 도보'], reply:'' }
+        { id:'r3', author:'shin_yj', initial:'신', rating:5, date:'2026-04-08', text:'가성비 최고. 2박에 그린피·캐디까지 다 포함이라 한국 1박 골프보다 싸요.', positives:['가성비','쇼핑 도보'], reply:'' },
+        { id:'r4', author:'park_pus', initial:'박', rating:5, date:'2026-03-19', text:'부산에서 비행기 55분이면 도착. 텐진역 도보 5분 + 호텔에서 바로 셔틀이라 가족 4인 짐 들고도 너무 편했어요. 단풍 시즌 추천.', positives:['가성비','쇼핑 도보'], reply:'' },
+        { id:'r5', author:'oh_fk', initial:'오', rating:4, date:'2026-02-28', text:'평일 라운딩이라 그런지 코스가 한산해서 좋았어요. 다만 한국 캐디는 사전 신청 안 하면 불가. 채팅 상담으로 미리 잡으세요.', positives:['한국인 캐디'], negatives:['골프장 이동시간'], reply:_omtReplyTo('한국인 캐디는 인기가 많아 사전 신청 필수예요!','') }
       ]
     },
 
@@ -1111,7 +1123,9 @@
       reviews: [
         { id:'r1', author:'cho_golfer', initial:'조', rating:5, date:'2026-05-09', text:'5박 동안 4라운딩 했는데 매번 1인 1카트라 정말 쾌적했어요. 빈펄 워터파크도 가족이 좋아했고 진짜 풀패키지 그 자체.', positives:['27홀 무제한','워터파크 무료','1인 1카트'], reply:_omtReplyTo('1인 1카트의 쾌적함 + 워터파크 만족도가 푸꾸옥의 장점이지요!','') },
         { id:'r2', author:'na_phuquoc', initial:'나', rating:5, date:'2026-04-14', text:'섬이라 한적하고 코스 자체도 27홀로 다양해서 4박 5박이 짧게 느껴졌어요. 빈펄 사파리도 무료라 가성비 최고.', positives:['섬 풍경','27홀 무제한'], reply:'' },
-        { id:'r3', author:'park_pq', initial:'박', rating:4, date:'2026-03-28', text:'리조트 내부는 완벽한데 섬 외부로 나가려면 차량 부르기 좀 번거롭습니다. 그래도 무제한 라운딩이 좋아서 만족.', positives:['27홀 무제한'], negatives:['섬 외부 이동'], reply:'' }
+        { id:'r3', author:'park_pq', initial:'박', rating:4, date:'2026-03-28', text:'리조트 내부는 완벽한데 섬 외부로 나가려면 차량 부르기 좀 번거롭습니다. 그래도 무제한 라운딩이 좋아서 만족.', positives:['27홀 무제한'], negatives:['섬 외부 이동'], reply:'' },
+        { id:'r4', author:'kim_pq4', initial:'김', rating:5, date:'2026-03-15', text:'직항 4시간이라 부담 없고, 골프 + 휴양 둘 다 가능. 27홀 무제한이라 같이 간 일행 실력 차이 있어도 모두 만족했어요.', positives:['27홀 무제한','섬 풍경'], reply:_omtReplyTo('실력별로 코스 선택이 가능한 27홀이 푸꾸옥의 매력입니다!','') },
+        { id:'r5', author:'jang_pq', initial:'장', rating:4, date:'2026-02-25', text:'식당 선택지가 리조트 안에 한정적이라 5박 동안 같은 메뉴 반복. 차로 즈엉동 시내 나가야 하는데 우버 잡기 힘들 때 있어요.', positives:['1인 1카트'], negatives:['섬 외부 이동','식당 옵션'], reply:_omtReplyTo('','즈엉동 시내 셔틀 도입 검토 중입니다.') }
       ]
     },
 
@@ -1129,7 +1143,9 @@
       reviews: [
         { id:'r1', author:'lee_bkk', initial:'이', rating:5, date:'2026-05-11', text:'시내 호텔에서 골프장까지 30분이 적당. 그렉 노먼 설계라 그런지 진짜 챔피언십 분위기 나요. 시내 쇼핑·맛집 즐기면서 골프까지 한 번에.', positives:['그렉 노먼 설계 코스','시내 + 골프'], reply:_omtReplyTo('타나시티 코스의 진가를 알아봐 주셨네요!','') },
         { id:'r2', author:'choi_bkk', initial:'최', rating:4, date:'2026-04-19', text:'코스는 만족. 다만 캐디팁이 500바트인 줄 모르고 갔다가 4인 합치니 부담. 사전 안내 강조 부탁드려요.', positives:['BTS 직결'], negatives:['캐디팁'], reply:_omtReplyTo('캐디팁 안내 강조 즉시 반영하겠습니다.','') },
-        { id:'r3', author:'kim_thana', initial:'김', rating:5, date:'2026-04-02', text:'BTS 아속역 직결이라 짐 들고 이동 정말 편해요. 골프 안 치는 가족도 시내 구경하기 좋고.', positives:['BTS 직결','시내 + 골프'], reply:'' }
+        { id:'r3', author:'kim_thana', initial:'김', rating:5, date:'2026-04-02', text:'BTS 아속역 직결이라 짐 들고 이동 정말 편해요. 골프 안 치는 가족도 시내 구경하기 좋고.', positives:['BTS 직결','시내 + 골프'], reply:'' },
+        { id:'r4', author:'park_bk', initial:'박', rating:5, date:'2026-03-08', text:'아침 라운딩 → 호텔 풀에서 휴식 → 저녁 야시장. 3박4일이 가장 효율적인 패키지인 듯. 노보텔 조식도 만족.', positives:['시내 + 골프','BTS 직결'], reply:'' },
+        { id:'r5', author:'jeong_thana', initial:'정', rating:4, date:'2026-02-12', text:'캐디 분이 한국말 한두 마디 하셨는데 친절했어요. 다만 식당 가격이 예상보다 비쌌네요. 야시장 추천!', positives:['그렉 노먼 설계 코스'], negatives:['식당 가격'], reply:'' }
       ]
     },
     'gt-th-pattaya-siamcc-4n': {
@@ -1145,7 +1161,9 @@
       reviews: [
         { id:'r1', author:'han_pty', initial:'한', rating:5, date:'2026-05-06', text:'사이암CC 처음 가봤는데 진짜 명불허전. 4박 동안 3라운딩 모두 다른 코스로 돌았어요. 센타라 오션뷰 객실에서 일출 보며 시작하는 라운딩이 일품.', positives:['사이암CC 명문','오션뷰 객실','해변 + 골프'], reply:_omtReplyTo('태국 베스트 코스 TOP 10을 경험해 주셔서 감사합니다!','') },
         { id:'r2', author:'min_thai', initial:'민', rating:4, date:'2026-04-20', text:'방콕→파타야 전용차 무료가 컸어요. 짐 들고 이동할 일 없이 편하게.', positives:['방콕→파타야 전용차'], reply:'' },
-        { id:'r3', author:'oh_pty', initial:'오', rating:4, date:'2026-03-30', text:'성수기라 그런지 캐디팁이랑 추가 비용이 약간 부담스러웠지만 코스 자체는 훌륭.', positives:['사이암CC 명문'], negatives:['캐디팁','성수기 가격'], reply:'' }
+        { id:'r3', author:'oh_pty', initial:'오', rating:4, date:'2026-03-30', text:'성수기라 그런지 캐디팁이랑 추가 비용이 약간 부담스러웠지만 코스 자체는 훌륭.', positives:['사이암CC 명문'], negatives:['캐디팁','성수기 가격'], reply:'' },
+        { id:'r4', author:'son_pty', initial:'손', rating:5, date:'2026-03-18', text:'코스 컨디션 진짜 좋습니다. 일행 중 70대 어르신도 18홀 완주 가능할 정도로 카트가 잘 다녀요. 페어웨이 진입 가능한 게 큰 장점.', positives:['사이암CC 명문','해변 + 골프'], reply:_omtReplyTo('연배 있으신 분들도 편하게 즐기실 수 있는 코스죠!','') },
+        { id:'r5', author:'lim_pty', initial:'임', rating:4, date:'2026-02-22', text:'호텔이 해변가라 골프 끝나고 비치 워크 산책이 일상이 됨. 다만 파타야 시내 워킹스트리트는 너무 시끄러워서 비추.', positives:['오션뷰 객실','해변 + 골프'], reply:'' }
       ]
     },
 
@@ -1163,7 +1181,9 @@
       reviews: [
         { id:'r1', author:'song_cebu', initial:'송', rating:5, date:'2026-05-13', text:'알타비스타 산속 코스라 시내 전망 끝내줘요. 샹그릴라 막탄 비치 + 산속 골프 조합이 일품.', positives:['시내 전망','산속 코스','샹그릴라 비치'], reply:_omtReplyTo('알타비스타의 시내 전망 + 샹그릴라 막탄의 비치 조합은 세부만의 매력입니다!','') },
         { id:'r2', author:'kang_ph', initial:'강', rating:5, date:'2026-04-26', text:'한국인 캐디라 처음 필리핀 가는데도 편했어요. 코스 난이도도 적당.', positives:['한국인 캐디'], reply:'' },
-        { id:'r3', author:'jung_pdc', initial:'정', rating:4, date:'2026-04-11', text:'막탄 ↔ 알타비스타 골프장 이동이 좀 멉니다 (1시간). 그래도 코스 좋아서 만족.', positives:['산속 코스'], negatives:['시내 ↔ 골프장 이동'], reply:_omtReplyTo('이동시간 단축을 위해 셔틀 시간 최적화를 진행 중입니다.','') }
+        { id:'r3', author:'jung_pdc', initial:'정', rating:4, date:'2026-04-11', text:'막탄 ↔ 알타비스타 골프장 이동이 좀 멉니다 (1시간). 그래도 코스 좋아서 만족.', positives:['산속 코스'], negatives:['시내 ↔ 골프장 이동'], reply:_omtReplyTo('이동시간 단축을 위해 셔틀 시간 최적화를 진행 중입니다.','') },
+        { id:'r4', author:'kim_cebu', initial:'김', rating:5, date:'2026-03-25', text:'아이 둘 데리고 갔는데 샹그릴라 키즈클럽이 정말 잘 되어 있어요. 부부는 오전 라운딩 갔다가 오후엔 가족 시간. 패밀리 골프 여행 강추.', positives:['샹그릴라 비치','한국인 캐디'], reply:_omtReplyTo('가족 골프 여행지로 막탄 샹그릴라는 정말 좋은 선택이지요!','') },
+        { id:'r5', author:'choi_pdo', initial:'최', rating:4, date:'2026-02-19', text:'캐디 보너스가 별도로 한화 1만원 정도 — 이거 사전 안내 더 강하게 해주세요. 4인 라운딩이면 적지 않은 돈이라.', positives:['산속 코스'], negatives:['캐디 보너스'], reply:_omtReplyTo('캐디 보너스 안내를 상품 상세에 굵게 표시하도록 즉시 반영하겠습니다.','') }
       ]
     },
     'gt-ph-clark-mimosa-5n': {
@@ -1180,7 +1200,8 @@
         { id:'r1', author:'baek_clark', initial:'백', rating:5, date:'2026-05-15', text:'5박 동안 매일 라운딩하고도 시간이 남아 18홀 추가까지. 진짜 무제한 맞아요. 한국인 운영이라 의사소통도 편하고.', positives:['36홀 무제한','한국인 캐디 100%'], reply:_omtReplyTo('미모사 36홀 무제한은 골프 매니아들의 성지죠!','') },
         { id:'r2', author:'oh_clark', initial:'오', rating:5, date:'2026-04-30', text:'조식·석식 전일 포함이라 5박 동안 추가 식비가 거의 없었어요. 클럽도 좋은 거 빌릴 수 있고.', positives:['조식·석식 전일','가성비'], reply:'' },
         { id:'r3', author:'park_mimosa', initial:'박', rating:4, date:'2026-04-18', text:'마닐라 공항으로 들어가시는 분들은 픽업비 2,500페소 별도라 약간 부담. 가능하면 클락 공항 추천.', positives:['한국인 캐디 100%'], negatives:['마닐라 공항 픽업비'], reply:_omtReplyTo('','클락 공항 직항이 가장 효율적입니다. 필요 시 안내드릴게요.') },
-        { id:'r4', author:'kim_omc', initial:'김', rating:5, date:'2026-04-02', text:'골프만 하기엔 완벽한데, 5박 동안 클락 외 관광지가 좀 부족. 그래도 골프 목적이면 진짜 추천!', positives:['36홀 무제한','한국인 캐디 100%'], negatives:['클락 외 관광 부족'], reply:'' }
+        { id:'r4', author:'kim_omc', initial:'김', rating:5, date:'2026-04-02', text:'골프만 하기엔 완벽한데, 5박 동안 클락 외 관광지가 좀 부족. 그래도 골프 목적이면 진짜 추천!', positives:['36홀 무제한','한국인 캐디 100%'], negatives:['클락 외 관광 부족'], reply:'' },
+        { id:'r5', author:'lee_clk', initial:'이', rating:5, date:'2026-03-12', text:'한국인 사장님이 직접 운영하셔서 정산·문의 모두 한국말로 처리. 5박 동안 6라운딩에 클럽 렌탈까지 했는데도 가격이 합리적이었어요.', positives:['한국인 캐디 100%','가성비','조식·석식 전일'], reply:_omtReplyTo('한국인 직접 운영의 안심감을 가장 잘 표현해 주셨네요!','') }
       ]
     }
   };
