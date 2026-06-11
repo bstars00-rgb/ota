@@ -67,7 +67,22 @@
       display:grid;place-items:center;font-size:32px;font-weight:900;margin:0 auto 14px;
       animation:pop .4s ease;
     }
+    .pg-stage .fail-x{
+      width:64px;height:64px;border-radius:50%;background:#EF4444;color:#fff;
+      display:grid;place-items:center;font-size:32px;font-weight:900;margin:0 auto 14px;
+      animation:pop .4s ease, shake .4s ease;
+    }
     @keyframes pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+    @keyframes shake{
+      0%,100%{transform:translateX(0);}
+      20%,60%{transform:translateX(-6px);}
+      40%,80%{transform:translateX(6px);}
+    }
+    .fail-reason{
+      margin-top:14px;padding:10px 14px;background:#FEF2F2;color:#991B1B;
+      border-radius:8px;font-size:12px;font-weight:600;text-align:left;line-height:1.5;
+    }
+    .fail-reason strong{display:block;font-size:12px;font-weight:900;color:#7F1D1D;margin-bottom:4px;}
 
     .pg-stage .title{font-size:18px;font-weight:900;margin:0 0 4px;}
     .pg-stage .sub{font-size:13px;color:var(--ink-2);margin:0;}
@@ -190,20 +205,30 @@
       `;
     }
 
-    // 3단계 시뮬레이션
+    // 3단계 시뮬레이션 (마지막 단계에서 10% 확률로 실패)
     const stages = meta.steps;
+    const FAIL_REASONS = {
+      kakao: { reason: '카카오톡 인증 시간 초과', detail: '인증 코드를 입력하지 않으셨거나 네트워크가 불안정합니다. 다시 시도해주세요.' },
+      naver: { reason: '네이버 페이 한도 초과', detail: '오늘 결제 한도(200만원)를 초과했습니다. 한도 상향 후 재시도해주세요.' },
+      card:  { reason: '카드사 승인 거절', detail: '발급사 정책으로 거절되었습니다. 카드사(1599-0000)에 문의 후 재시도해주세요.' },
+      bank:  { reason: '가상계좌 발급 실패', detail: '은행 시스템 점검 중입니다. 잠시 후 다시 시도해주세요.' }
+    };
+
     let stageIdx = 0;
+    let isRetry = false;
+
     function advance(){
       stageIdx++;
-      // pill 업데이트
       document.getElementById('pill' + stageIdx).classList.add('on');
       if(stageIdx < stages.length){
         document.getElementById('stageTitle').textContent = stages[stageIdx] + '...';
         document.getElementById('stageSub').textContent = `${stageIdx + 1} / ${stages.length} 단계`;
         setTimeout(advance, 1200 + Math.random() * 600);
       } else {
-        // 완료
-        completePayment();
+        // 마지막 단계 — 첫 시도엔 10% 실패, 재시도는 무조건 성공
+        const shouldFail = !isRetry && Math.random() < 0.10;
+        if(shouldFail) failPayment();
+        else completePayment();
       }
     }
     setTimeout(advance, 1500);
@@ -216,6 +241,42 @@
         <p class="sub">예약이 확정되었습니다. 카카오톡으로 확인서 발송됩니다.</p>
       `;
       document.getElementById('pgActions').hidden = false;
+    }
+
+    function failPayment(){
+      const stageEl = document.getElementById('pgStage');
+      const fr = FAIL_REASONS[pay] || FAIL_REASONS.kakao;
+      stageEl.innerHTML = `
+        <div class="fail-x">✕</div>
+        <h2 class="title" style="color:#991B1B;">결제 실패</h2>
+        <p class="sub">결제가 정상적으로 완료되지 않았습니다.</p>
+        <div class="fail-reason">
+          <strong>⚠️ ${fr.reason}</strong>
+          ${fr.detail}
+        </div>
+      `;
+      // 액션 영역 — 재시도 / 다른 수단
+      const actions = document.getElementById('pgActions');
+      actions.innerHTML = `
+        <button class="pg-btn ${meta.btnClass}" onclick="retryPayment()">다시 시도</button>
+        <button class="pg-btn ghost" onclick="location.href='checkout.html'">다른 결제 수단</button>
+      `;
+      actions.hidden = false;
+    }
+
+    function retryPayment(){
+      isRetry = true;
+      stageIdx = 0;
+      document.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('on', i === 0));
+      const stageEl = document.getElementById('pgStage');
+      stageEl.innerHTML = `
+        <div class="spinner"></div>
+        <h2 class="title" id="stageTitle">${stages[0]}...</h2>
+        <p class="sub" id="stageSub">재시도 중 · 1 / ${stages.length} 단계</p>
+      `;
+      stageEl.classList.add(meta.stageClass);
+      document.getElementById('pgActions').hidden = true;
+      setTimeout(advance, 1200);
     }
 
     function goComplete(){

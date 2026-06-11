@@ -1128,6 +1128,18 @@
       saveUserInquiries(list2);
       renderInquiries();
       toast('새 답변이 도착했습니다 💬');
+
+      // 알림 자동 생성 (마이페이지 알림함·홈 대시보드에 즉시 반영)
+      OMT.State.addUserNotification({
+        id: 'inq-reply-' + inq.id,
+        type: 'review',
+        icon: '💬',
+        title: '문의 답변이 도착했어요',
+        body: `[${target.subject}] · ${(AUTO_REPLY[cat] || AUTO_REPLY.other).slice(0, 60)}...`,
+        link: 'mypage.html#inquiries',
+        actionLabel: '답변 보기 →'
+      });
+      document.getElementById('badgeNotifs').textContent = OMT.State.getUnreadNotifCount();
     }, 4000);
   };
 

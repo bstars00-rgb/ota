@@ -387,6 +387,20 @@
   } else {
     renderBooking();
     spawnConfetti();
+    // 예약 확정 알림 자동 생성 (중복 방지)
+    try {
+      const isGT = booking.productType === 'golftel' || booking.productType === 'golftel-air' || (booking.productId && booking.productId.startsWith('gt-'));
+      const sku = booking.productType === 'golftel-air' ? '골프투어' : (isGT ? '골프텔' : '패키지');
+      OMT.State.addUserNotification({
+        id: 'booking-confirmed-' + booking.bookingNumber,
+        type: 'booking',
+        icon: '✅',
+        title: `${sku} 예약 확정`,
+        body: `${booking.productName || booking.productId || '상품'} · ${booking.dates || ''} · 예약번호 ${booking.bookingNumber}`,
+        link: 'complete.html?bk=' + encodeURIComponent(booking.bookingNumber),
+        actionLabel: '확인서 보기 →'
+      });
+    } catch(e){}
   }
 
   const krw = n => n.toLocaleString('ko-KR') + '원';

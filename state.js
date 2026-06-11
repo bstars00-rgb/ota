@@ -22,7 +22,8 @@
     recentlyViewed:'omt_recently_viewed',
     user:          'omt_user_session',
     membership:    'omt_membership_v1',
-    notifReadIds:  'omt_notif_read_v1'   // 읽은 알림 ID 목록
+    notifReadIds:  'omt_notif_read_v1',  // 읽은 알림 ID 목록
+    userNotifs:    'omt_user_notifs_v1'  // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
   };
 
   // ============================================================
@@ -104,12 +105,44 @@
     return out;
   }
 
+  // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
+  function getUserNotifications(){
+    return read(KEYS.userNotifs, []);
+  }
+  function addUserNotification(notif){
+    // notif: { id?, type, icon, title, body, link?, actionLabel? }
+    const list = getUserNotifications();
+    // 중복 방지 (같은 id가 이미 있으면 skip)
+    if(notif.id && list.some(n => n.id === notif.id)) return false;
+    const now = new Date();
+    const entry = {
+      id: notif.id || ('user-' + Date.now()),
+      type: notif.type || 'system',
+      icon: notif.icon || '🔔',
+      title: notif.title || '알림',
+      body: notif.body || '',
+      link: notif.link || null,
+      actionLabel: notif.actionLabel || null,
+      date: now.toISOString().slice(0,10),
+      daysAgo: 0,
+      read: false,
+      createdAt: now.toISOString()
+    };
+    list.unshift(entry);
+    // 최대 50건 유지
+    if(list.length > 50) list.length = 50;
+    write(KEYS.userNotifs, list);
+    notify('notifications', list);
+    return true;
+  }
+
   function getNotifications(){
     const staticNotifs = (window.OMT?.DATA?.NOTIFICATIONS || []);
     const dynamicNotifs = _buildDynamicNotifications();
+    const userNotifs = getUserNotifications();
     const readIds = read(KEYS.notifReadIds, []);
-    // 동적 → 정적 순으로 (동적이 최신)
-    return [...dynamicNotifs, ...staticNotifs].map(n => ({
+    // 사용자 알림 → 동적 → 정적 순 (사용자 알림이 최신)
+    return [...userNotifs, ...dynamicNotifs, ...staticNotifs].map(n => ({
       ...n, read: n.read || readIds.includes(n.id)
     }));
   }
@@ -448,6 +481,7 @@
     getRecentlyViewed, addRecentlyViewed,
     // Notifications
     getNotifications, getUnreadNotifCount, markNotifRead, markAllNotifsRead,
+    getUserNotifications, addUserNotification,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

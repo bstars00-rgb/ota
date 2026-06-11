@@ -1035,21 +1035,48 @@
       <div class="p-stat-cell"><div class="v">${Math.round(points/1000)}K</div><div class="l">포인트</div></div>
     `;
 
-    // Booking mini list (top 3 active)
+    // Booking mini list (top 3 active) — 골프텔 SKU 인식
     const active = bookings.filter(b => b.status !== 'cancelled').slice(0, 3);
+    // D-day 계산 헬퍼
+    const _calcDday = (dates) => {
+      if(!dates) return null;
+      const m = String(dates).match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+      if(!m) return null;
+      const s = new Date(+m[1], +m[2]-1, +m[3]);
+      const t = new Date(); t.setHours(0,0,0,0);
+      return Math.round((s - t) / 86400000);
+    };
     document.getElementById('profBookings').innerHTML = active.length === 0
       ? `<div style="padding:24px;text-align:center;color:var(--ink-3);font-size:12px;background:var(--bg-soft);border-radius:10px;">예약이 없어요. 여행을 계획해보세요!</div>`
       : active.map(b => {
-        const p = b.productId ? OMT.getProduct(b.productId) : null;
-        const img = p?.images?.[0] || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=200&q=80';
+        const isGT = b.productType === 'golftel' || b.productType === 'golftel-air' || (b.productId && b.productId.startsWith('gt-'));
+        const g = isGT && b.productId ? OMT.DATA.GOLFTELS.find(x => x.id === b.productId) : null;
+        const p = isGT ? null : (b.productId ? OMT.getProduct(b.productId) : null);
+        const img = g?.images?.[0] || p?.images?.[0] || b.productImage || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=200&q=80';
         const statusLabel = { confirmed:'● 확정', pending:'● 대기', completed:'● 완료' }[b.status];
+        const dday = _calcDday(b.dates);
+        const ddayChip = (dday !== null && dday >= 0)
+          ? `<span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#FFD23F;color:#1A1A1A;font-size:9px;font-weight:900;margin-left:4px;">D-${dday===0?'DAY':dday}</span>`
+          : '';
+        const skuBadge = b.productType === 'golftel-air'
+          ? '<span style="display:inline-block;padding:1px 5px;border-radius:4px;background:#FFF0E8;color:#E85826;font-size:9px;font-weight:900;margin-right:3px;">✈️ 골프투어</span>'
+          : isGT
+          ? '<span style="display:inline-block;padding:1px 5px;border-radius:4px;background:#E6F4EE;color:#075440;font-size:9px;font-weight:900;margin-right:3px;">⛳ 골프텔</span>'
+          : '';
+        const golftelMeta = isGT && g
+          ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박</div>`
+          : '';
         return `
           <div class="booking-mini" onclick="location.href='complete.html?bk=${b.bookingNumber}'">
             <div class="bm-thumb" style="background-image:url('${img}')"></div>
             <div class="bm-info">
-              <span class="bm-status ${b.status}">${statusLabel}</span>
-              <div class="bm-name">${p?.name || '예약 상품'}</div>
+              <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
+                <span class="bm-status ${b.status}">${statusLabel}</span>
+                ${skuBadge}${ddayChip}
+              </div>
+              <div class="bm-name">${b.productName || g?.name || p?.name || '예약 상품'}</div>
               <div class="bm-meta">${b.dates}</div>
+              ${golftelMeta}
             </div>
             <div class="bm-price">${krw(b.total)}</div>
           </div>
