@@ -674,19 +674,32 @@
       return (weekendCount * WEEKEND_SURCHARGE) / N;   // 평균 가산률
     }
 
+    // 호텔: 박마다 주말 카운트 후 총 가산액 비율 (박이 N일 동안 K박 주말이면 K/N × 0.10)
+    function _avgHotelModifier(){
+      if(!S.checkinDate) return 0;
+      const N = S.nights;
+      let weekendCount = 0;
+      for(let i=0;i<N;i++){
+        const d = _roundDay(i);   // 같은 헬퍼 재사용 (체크인 + i일)
+        if(_isWeekend(d)) weekendCount++;
+      }
+      return (weekendCount * WEEKEND_SURCHARGE) / N;
+    }
+
     function computePrice(){
       const hotel = S.hotelId ? D.HOTELS.find(h => h.id === S.hotelId) : null;
       const greenFee = GREEN_FEE[S.country] || 150000;
       const airFare = AIR_FARE[S.country] || 400000;
       const modifier = _avgGreenModifier();
+      const hotelMod = _avgHotelModifier();
       const greenFeeAdj = Math.round(greenFee * (1 + modifier));
 
       // Sub items
       const items = [];
-      // Hotel: pax는 2인1실이라 hotel.price × nights는 객실 단위, 1인 = /2
-      // 사용자 pax는 자유롭게 변경되므로 객실 수 = ceil(pax/2)
+      // Hotel: 박마다 주말 가산 (평균 모디파이어 적용)
       const rooms = Math.ceil(S.pax / 2);
-      const hotelTotal = hotel ? hotel.price * S.nights * rooms : 0;
+      const hotelBase = hotel ? hotel.price * S.nights * rooms : 0;
+      const hotelTotal = Math.round(hotelBase * (1 + hotelMod));
 
       // Golf: 코스당 라운딩 균등 분배 가정 — 그린피는 라운딩×인원 (날짜 모디파이어 반영)
       const greenTotal = S.courseIds.length > 0 ? greenFeeAdj * S.rounds * S.pax : 0;
@@ -711,7 +724,7 @@
       const total = hotelTotal + greenTotal + optTotal + airTotal;
       const perPerson = Math.round(total / S.pax);
 
-      return { hotel, greenFee: greenFeeAdj, baseGreenFee: greenFee, modifier, hotelTotal, greenTotal, optTotal, optBreakdown, airTotal, airFare, total, perPerson, rooms };
+      return { hotel, greenFee: greenFeeAdj, baseGreenFee: greenFee, modifier, hotelMod, hotelTotal, greenTotal, optTotal, optBreakdown, airTotal, airFare, total, perPerson, rooms };
     }
 
     // ============================================================
@@ -749,9 +762,17 @@
         const bg = wk ? '#FEE2E2;color:#B91C1C' : '#E0F2FE;color:#0369A1';
         chips.push(`<span style="display:inline-block;padding:2px 7px;border-radius:5px;background:${bg};font-size:10px;font-weight:900;">R${i+1} ${d.getMonth()+1}/${d.getDate()}(${_DAY_LABEL[d.getDay()]}${wk?'·주말':''})</span>`);
       }
-      const surcharge = weekendCount > 0
-        ? `<div style="margin-top:6px;color:var(--primary);font-weight:800;">⚠️ 주말 ${weekendCount}회 → 그린피 +${Math.round((weekendCount * WEEKEND_SURCHARGE * 100) / S.rounds)}% 평균 가산</div>`
-        : `<div style="margin-top:6px;color:var(--golf);font-weight:800;">✓ 전 라운딩 주중 — 기본가 적용</div>`;
+      // 호텔 박 단위 주말 카운트
+      let hotelWeekendCount = 0;
+      for(let i=0;i<S.nights;i++){
+        const d = _roundDay(i);
+        if(_isWeekend(d)) hotelWeekendCount++;
+      }
+      const greenAvg = S.rounds > 0 ? Math.round((weekendCount * WEEKEND_SURCHARGE * 100) / S.rounds) : 0;
+      const hotelAvg = S.nights > 0 ? Math.round((hotelWeekendCount * WEEKEND_SURCHARGE * 100) / S.nights) : 0;
+      const surcharge = (weekendCount > 0 || hotelWeekendCount > 0)
+        ? `<div style="margin-top:6px;color:var(--primary);font-weight:800;line-height:1.5;">⚠️ 주말 가산: ⛳ 그린피 +${greenAvg}% · 🏨 호텔 +${hotelAvg}%</div>`
+        : `<div style="margin-top:6px;color:var(--golf);font-weight:800;">✓ 전 일정 주중 — 기본가 적용</div>`;
       el.innerHTML = `${S.nights}박 ${S.nights+1}일 · 체크아웃 ${checkout.getMonth()+1}/${checkout.getDate()}<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">${chips.join('')}</div>${surcharge}`;
     }
 

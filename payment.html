@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 진행 중 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
+      --line:#E5E7EB;--bg-soft:#F7F7F9;--success:#10B981;
+      --kakao:#FEE500;--kakao-ink:#3C1E1E;
+      --naver:#03C75A;
+      --toss:#0064FF;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg-soft);line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;padding:20px;}
+
+    .wrap{max-width:420px;width:100%;}
+
+    .pg-card{
+      background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.08);
+      overflow:hidden;animation:slideUp .4s ease;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    /* 결제수단별 헤더 컬러 */
+    .pg-head{padding:24px;text-align:center;color:#fff;position:relative;}
+    .pg-head.kakao{background:var(--kakao);color:var(--kakao-ink);}
+    .pg-head.naver{background:var(--naver);}
+    .pg-head.toss{background:var(--toss);}
+    .pg-logo{font-size:24px;font-weight:900;letter-spacing:-0.02em;margin:0;}
+    .pg-step{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.85;margin-bottom:8px;}
+
+    .pg-body{padding:22px;}
+
+    .order-card{
+      background:var(--bg-soft);border-radius:12px;padding:16px;margin-bottom:18px;
+    }
+    .order-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);padding:4px 0;}
+    .order-row .k{color:var(--ink-3);font-weight:600;}
+    .order-row .v{font-weight:700;color:var(--ink);}
+    .order-row.total{
+      margin-top:8px;padding-top:10px;border-top:2px solid var(--ink);
+      font-size:16px;
+    }
+    .order-row.total .v{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;}
+
+    /* 결제 단계 */
+    .pg-stage{
+      text-align:center;padding:24px 16px;margin-bottom:16px;
+    }
+    .pg-stage .spinner{
+      width:64px;height:64px;border:4px solid var(--line);border-top-color:var(--primary);
+      border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite;
+    }
+    .pg-stage.kakao .spinner{border-top-color:var(--kakao-ink);}
+    .pg-stage.naver .spinner{border-top-color:var(--naver);}
+    .pg-stage.toss .spinner{border-top-color:var(--toss);}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .pg-stage .check{
+      width:64px;height:64px;border-radius:50%;background:var(--success);color:#fff;
+      display:grid;place-items:center;font-size:32px;font-weight:900;margin:0 auto 14px;
+      animation:pop .4s ease;
+    }
+    @keyframes pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+    .pg-stage .title{font-size:18px;font-weight:900;margin:0 0 4px;}
+    .pg-stage .sub{font-size:13px;color:var(--ink-2);margin:0;}
+
+    .pg-actions{display:flex;flex-direction:column;gap:10px;}
+    .pg-btn{
+      width:100%;padding:14px;border-radius:10px;font-weight:900;font-size:14px;
+      border:none;cursor:pointer;font-family:inherit;transition:opacity .15s;
+    }
+    .pg-btn.primary{background:var(--primary);color:#fff;}
+    .pg-btn.kakao{background:var(--kakao);color:var(--kakao-ink);}
+    .pg-btn.naver{background:var(--naver);color:#fff;}
+    .pg-btn.toss{background:var(--toss);color:#fff;}
+    .pg-btn.ghost{background:var(--bg-soft);color:var(--ink-2);}
+    .pg-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+    .pg-foot{
+      padding:14px 22px 22px;font-size:11px;color:var(--ink-3);text-align:center;line-height:1.6;
+    }
+    .pg-foot strong{color:var(--ink-2);}
+
+    /* 진행 단계 표시 */
+    .stage-pills{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+    .stage-pills .pill{
+      width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .3s;
+    }
+    .stage-pills .pill.on{background:var(--primary);width:22px;}
+    .stage-pills .pill.kakao.on{background:var(--kakao-ink);}
+    .stage-pills .pill.naver.on{background:var(--naver);}
+    .stage-pills .pill.toss.on{background:var(--toss);}
+
+    .mock-banner{
+      background:#FEF3C7;color:#92400E;padding:8px 14px;border-radius:8px;font-size:11px;font-weight:800;text-align:center;margin-bottom:16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="pg-card">
+      <div class="pg-head" id="pgHead">
+        <div class="pg-step">STEP 2 / 3 · 결제 진행</div>
+        <h1 class="pg-logo" id="pgLogo">결제</h1>
+      </div>
+
+      <div class="pg-body">
+        <div class="mock-banner">⚠️ 프로토타입 — 실제 결제 발생하지 않음</div>
+
+        <!-- 주문 요약 -->
+        <div class="order-card" id="orderCard">로딩 중...</div>
+
+        <!-- 진행 상태 핀 -->
+        <div class="stage-pills" id="stagePills">
+          <div class="pill on" id="pill1"></div>
+          <div class="pill" id="pill2"></div>
+          <div class="pill" id="pill3"></div>
+        </div>
+
+        <!-- 단계 표시 -->
+        <div class="pg-stage" id="pgStage">
+          <div class="spinner"></div>
+          <h2 class="title" id="stageTitle">결제 인증 중...</h2>
+          <p class="sub" id="stageSub">잠시만 기다려주세요</p>
+        </div>
+
+        <div class="pg-actions" id="pgActions" hidden>
+          <button class="pg-btn primary" id="completeBtn" onclick="goComplete()">예약 확인서 보기 →</button>
+          <button class="pg-btn ghost" onclick="location.href='index.html'">홈으로</button>
+        </div>
+      </div>
+
+      <div class="pg-foot">
+        <strong>OMT 오마이트립</strong> · 결제대행: <span id="pgVendor">-</span><br>
+        결제 문의 1588-0000 · 24시간 카카오 상담
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const bn = params.get('bn');                       // 예약번호 (state에 이미 저장됨)
+    const pay = params.get('pay') || 'kakao';          // 결제수단
+    const fallbackTotal = +params.get('total') || 0;   // bn 없을 때
+
+    const PAY_META = {
+      kakao: { label:'카카오페이', vendor:'카카오페이 ㈜', headerClass:'kakao', stageClass:'kakao', pillClass:'kakao', btnClass:'kakao', logo:'kakao pay', steps:['카카오 인증', '결제 수단 확인', '결제 승인'] },
+      naver: { label:'네이버페이', vendor:'네이버파이낸셜 ㈜', headerClass:'naver', stageClass:'naver', pillClass:'naver', btnClass:'naver', logo:'NAVER pay', steps:['네이버 인증', '포인트 확인', '결제 승인'] },
+      card:  { label:'신용카드 (Toss)', vendor:'토스페이먼츠 ㈜', headerClass:'toss', stageClass:'toss', pillClass:'toss', btnClass:'toss', logo:'TOSS', steps:['카드사 인증', 'ISP/안심클릭', '결제 승인'] },
+      bank:  { label:'무통장 입금 (Toss)', vendor:'토스페이먼츠 ㈜', headerClass:'toss', stageClass:'toss', pillClass:'toss', btnClass:'toss', logo:'TOSS', steps:['가상계좌 발급', '입금 확인', '결제 완료'] }
+    };
+    const meta = PAY_META[pay] || PAY_META.kakao;
+
+    // 헤더 + 푸터 적용
+    const head = document.getElementById('pgHead');
+    head.classList.add(meta.headerClass);
+    document.getElementById('pgLogo').textContent = meta.logo;
+    document.getElementById('pgVendor').textContent = meta.vendor;
+    document.getElementById('pgStage').classList.add(meta.stageClass);
+    document.querySelectorAll('.pill').forEach(p => p.classList.add(meta.pillClass));
+    document.getElementById('completeBtn').classList.remove('primary');
+    document.getElementById('completeBtn').classList.add(meta.btnClass);
+
+    // 주문 요약 로드
+    const booking = bn ? OMT.State.getBooking(bn) : null;
+    if(booking){
+      const isGT = booking.productType === 'golftel' || booking.productType === 'golftel-air';
+      document.getElementById('orderCard').innerHTML = `
+        <div class="order-row"><span class="k">상품</span><span class="v" style="text-align:right;max-width:220px;">${booking.productName || booking.productId || '예약 상품'}</span></div>
+        <div class="order-row"><span class="k">유형</span><span class="v">${isGT ? (booking.productType === 'golftel-air' ? '✈️ 골프투어' : '⛳ 골프텔') : '📦 패키지'}</span></div>
+        <div class="order-row"><span class="k">예약번호</span><span class="v" style="font-family:'JetBrains Mono',monospace;font-size:11px;">${booking.bookingNumber}</span></div>
+        <div class="order-row"><span class="k">일정</span><span class="v">${booking.dates}</span></div>
+        <div class="order-row"><span class="k">인원</span><span class="v">성인 ${booking.paxCount}명</span></div>
+        <div class="order-row total"><span class="k">총 결제금액</span><span class="v">${(booking.total || 0).toLocaleString('ko-KR')}원</span></div>
+      `;
+    } else {
+      document.getElementById('orderCard').innerHTML = `
+        <div class="order-row total"><span class="k">결제 금액</span><span class="v">${fallbackTotal.toLocaleString('ko-KR')}원</span></div>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">${meta.label}로 결제</div>
+      `;
+    }
+
+    // 3단계 시뮬레이션
+    const stages = meta.steps;
+    let stageIdx = 0;
+    function advance(){
+      stageIdx++;
+      // pill 업데이트
+      document.getElementById('pill' + stageIdx).classList.add('on');
+      if(stageIdx < stages.length){
+        document.getElementById('stageTitle').textContent = stages[stageIdx] + '...';
+        document.getElementById('stageSub').textContent = `${stageIdx + 1} / ${stages.length} 단계`;
+        setTimeout(advance, 1200 + Math.random() * 600);
+      } else {
+        // 완료
+        completePayment();
+      }
+    }
+    setTimeout(advance, 1500);
+
+    function completePayment(){
+      const stageEl = document.getElementById('pgStage');
+      stageEl.innerHTML = `
+        <div class="check">✓</div>
+        <h2 class="title">결제 완료</h2>
+        <p class="sub">예약이 확정되었습니다. 카카오톡으로 확인서 발송됩니다.</p>
+      `;
+      document.getElementById('pgActions').hidden = false;
+    }
+
+    function goComplete(){
+      if(bn) location.href = 'complete.html?bk=' + encodeURIComponent(bn);
+      else location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

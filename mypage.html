@@ -345,7 +345,7 @@
         <div class="panel-card">
           <div class="panel-head">
             <div><h2 class="panel-title">💬 문의 내역</h2><div class="panel-sub" id="inquirySub"></div></div>
-            <button class="sub-tab" onclick="alert('새 문의 작성 (프로토타입)')">+ 새 문의</button>
+            <button class="sub-tab" onclick="openInquiryModal()">+ 새 문의</button>
           </div>
           <div id="inquiryList"></div>
         </div>
@@ -400,6 +400,48 @@
     </section>
   </main>
 
+  <!-- 💬 문의 작성 모달 -->
+  <div class="modal-overlay" id="inquiryModal">
+    <div class="modal">
+      <h3>💬 새 문의 작성</h3>
+      <p class="sub">예약·골프장·결제 등 궁금한 점을 보내주세요. 답변까지 평균 4시간.</p>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:800;color:var(--ink-2);display:block;margin-bottom:6px;">카테고리</label>
+        <select id="inqCategory" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;">
+          <option value="booking">📋 예약 변경/취소</option>
+          <option value="golf">⛳ 골프장 운영 (캐디·카트·코스)</option>
+          <option value="hotel">🏨 호텔 (객실·체크인·시설)</option>
+          <option value="payment">💳 결제·환불</option>
+          <option value="rental">🏌️ 클럽 렌탈</option>
+          <option value="other">❓ 기타</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:800;color:var(--ink-2);display:block;margin-bottom:6px;">관련 예약 (선택)</label>
+        <select id="inqBooking" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;">
+          <option value="">— 일반 문의 —</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:800;color:var(--ink-2);display:block;margin-bottom:6px;">제목</label>
+        <input type="text" id="inqSubject" placeholder="간단한 제목 (예: 다낭 골프 한국인 캐디 신청)" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;" maxlength="60" />
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:800;color:var(--ink-2);display:block;margin-bottom:6px;">문의 내용</label>
+        <textarea id="inqBody" placeholder="자세한 내용을 적어주세요. 예약번호·날짜 등 구체적인 정보를 함께 보내주시면 더 빠른 답변이 가능합니다." style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;outline:none;min-height:120px;resize:vertical;"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel" onclick="closeInquiryModal()">취소</button>
+        <button class="submit" onclick="submitInquiry()">문의 보내기 →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Review Modal -->
   <div class="modal-overlay" id="reviewModal">
     <div class="modal">
@@ -407,6 +449,20 @@
       <p class="sub" id="reviewModalSub">이 상품 어떠셨어요?</p>
       <div class="star-input" id="starInput"><span data-s="1">★</span><span data-s="2">★</span><span data-s="3">★</span><span data-s="4">★</span><span data-s="5">★</span></div>
       <textarea id="reviewText" placeholder="여행은 어떠셨나요? 다른 여행자에게 도움되는 후기를 남겨주세요 (최소 20자)"></textarea>
+
+      <!-- 📷 사진 첨부 -->
+      <div style="margin-top:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:800;color:var(--ink-2);">📷 사진 첨부 (선택, 최대 3장)</span>
+          <span id="photoCount" style="font-size:11px;color:var(--ink-3);font-weight:700;">0 / 3</span>
+        </div>
+        <div id="photoPreviews" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;"></div>
+        <label for="photoUpload" style="display:block;padding:12px;border:1.5px dashed var(--line);border-radius:10px;text-align:center;font-size:12px;font-weight:700;color:var(--ink-3);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)';" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--ink-3)';">
+          📷 사진 추가 (JPG/PNG, 5MB 이내)
+        </label>
+        <input type="file" id="photoUpload" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(event)" />
+      </div>
+
       <div class="modal-actions">
         <button class="cancel" onclick="closeReviewModal()">취소</button>
         <button class="submit" onclick="submitReview()">작성 완료 (+5,000P)</button>
@@ -685,15 +741,20 @@
       return;
     }
     document.getElementById('reviewList').innerHTML = reviews.map(r => {
-      const p = OMT.getProduct(r.productId);
+      const isGT = r.productId?.startsWith('gt-');
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : OMT.getProduct(r.productId);
+      const link = isGT ? `golftel.html?id=${r.productId}` : `product.html?id=${r.productId}`;
+      const thumb = item?.images?.[0] || '';
+      const photos = r.images || [];
       return `
         <div class="book-card">
-          <div class="bc-thumb" style="background-image:url('${p?.images?.[0]||''}')" onclick="location.href='product.html?id=${r.productId}'"></div>
+          <div class="bc-thumb" style="background-image:url('${thumb}')" onclick="location.href='${link}'"></div>
           <div>
             <div style="color:var(--accent);margin-bottom:4px;">${'★'.repeat(r.score)}${'☆'.repeat(5-r.score)}</div>
-            <div class="bc-name">${p?.name||'상품'}</div>
+            <div class="bc-name">${item?.name||'상품'}</div>
             <div class="bc-meta" style="font-style:italic;color:var(--ink-2);margin-top:4px;">"${r.text}"</div>
-            <div class="bc-num">${r.date} 작성</div>
+            ${photos.length ? `<div style="display:flex;gap:4px;margin-top:6px;">${photos.slice(0,3).map(src => `<img src="${src}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;" />`).join('')}${photos.length > 3 ? `<span style="font-size:11px;color:var(--ink-3);align-self:center;font-weight:700;">+${photos.length - 3}</span>` : ''}</div>` : ''}
+            <div class="bc-num">${r.date} 작성${photos.length ? ' · 📷 사진 ' + photos.length + '장' : ''}</div>
           </div>
           <div class="bc-right"><span style="font-weight:900;color:var(--primary);font-size:14px;">${r.score}/5</span></div>
         </div>
@@ -702,19 +763,55 @@
   }
 
   /* ===== Review Modal ===== */
-  let reviewState = { bookingId:null, productId:null, score:5 };
+  let reviewState = { bookingId:null, productId:null, score:5, photos:[] };
 
   window.openReviewModal = (bookingId) => {
     const b = OMT.State.getBookings().find(x => x.id === bookingId);
     if(!b) return;
-    reviewState = { bookingId, productId: b.productId, score: 5 };
-    const p = OMT.getProduct(b.productId);
-    document.getElementById('reviewModalSub').textContent = p ? `"${p.name}" 어떠셨나요?` : '이 상품 어떠셨어요?';
+    // 골프텔 + 일반 패키지 모두 지원
+    const isGT = b.productId?.startsWith('gt-');
+    const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === b.productId) : OMT.getProduct(b.productId);
+    reviewState = { bookingId, productId: b.productId, score: 5, photos: [] };
+    document.getElementById('reviewModalSub').textContent = item ? `"${item.name}" 어떠셨나요?` : '이 상품 어떠셨어요?';
     document.getElementById('reviewText').value = '';
+    document.getElementById('photoPreviews').innerHTML = '';
+    document.getElementById('photoCount').textContent = '0 / 3';
     document.querySelectorAll('.star-input span').forEach((s,i) => s.classList.toggle('on', i < 5));
     document.getElementById('reviewModal').classList.add('open');
   };
   window.closeReviewModal = () => document.getElementById('reviewModal').classList.remove('open');
+
+  // 📷 사진 업로드 (FileReader → dataURL preview)
+  window.handlePhotoUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => {
+      if(reviewState.photos.length >= 3){ toast('사진은 최대 3장까지'); return; }
+      if(f.size > 5 * 1024 * 1024){ toast('5MB 이내 사진만 업로드 가능'); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        reviewState.photos.push(ev.target.result);
+        renderPhotoPreviews();
+      };
+      reader.readAsDataURL(f);
+    });
+    e.target.value = '';  // 같은 파일 재선택 가능하도록
+  };
+
+  function renderPhotoPreviews(){
+    const el = document.getElementById('photoPreviews');
+    el.innerHTML = reviewState.photos.map((src, i) => `
+      <div style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#eee;">
+        <img src="${src}" style="width:100%;height:100%;object-fit:cover;" alt="리뷰 사진 ${i+1}" />
+        <button type="button" onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:14px;font-weight:900;line-height:1;cursor:pointer;border:none;">×</button>
+      </div>
+    `).join('');
+    document.getElementById('photoCount').textContent = `${reviewState.photos.length} / 3`;
+  }
+  window.removePhoto = (i) => {
+    reviewState.photos.splice(i, 1);
+    renderPhotoPreviews();
+  };
+
   window.submitReview = () => {
     const text = document.getElementById('reviewText').value.trim();
     if(text.length < 20){ toast('최소 20자 이상 작성해주세요'); return; }
@@ -723,12 +820,13 @@
       bookingId: reviewState.bookingId,
       score: reviewState.score,
       text,
+      images: reviewState.photos,
       travelType: '구매 확인', duration: ''
     });
-    OMT.State.addPoints(5000, '리뷰 작성 보너스');
+    OMT.State.addPoints(5000 + (reviewState.photos.length > 0 ? 2000 : 0), '리뷰 작성 보너스' + (reviewState.photos.length > 0 ? ' (사진 보너스 +2,000P)' : ''));
     closeReviewModal();
     renderMyReviews(); renderBookings(); renderProfileStats();
-    toast('리뷰 등록 완료! +5,000P 적립');
+    toast(`리뷰 등록 완료! +${5000 + (reviewState.photos.length > 0 ? 2000 : 0).toLocaleString('ko-KR')}P 적립`);
   };
 
   document.querySelectorAll('.star-input span').forEach((s,i) => {
@@ -930,8 +1028,20 @@
   }
 
   /* ===== 💬 문의 내역 ===== */
+  // localStorage 사용자 문의 (mock과 합쳐 표시)
+  function getUserInquiries(){
+    try { return JSON.parse(localStorage.getItem('omt_user_inquiries') || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveUserInquiries(list){
+    try { localStorage.setItem('omt_user_inquiries', JSON.stringify(list)); } catch(e){}
+  }
+  function getAllInquiries(){
+    return [...getUserInquiries(), ...(OMT.DATA.INQUIRIES || [])];
+  }
+
   function renderInquiries(){
-    const list = OMT.DATA.INQUIRIES || [];
+    const list = getAllInquiries();
     document.getElementById('inquirySub').textContent = `총 ${list.length}건 · 답변 대기 ${list.filter(i=>i.status==='pending').length}건`;
     document.getElementById('inquiryList').innerHTML = list.map(q => `
       <div class="inq-card">
@@ -948,8 +1058,78 @@
           `).join('')}
         </div>
       </div>
-    `).join('') || `<div class="empty-inner"><h3>문의 내역이 없어요</h3></div>`;
+    `).join('') || `<div class="empty-inner"><h3>문의 내역이 없어요</h3><p>예약 관련 궁금한 점이 있으면 새 문의를 작성해보세요</p></div>`;
   }
+
+  /* ===== 💬 문의 작성 모달 ===== */
+  window.openInquiryModal = () => {
+    // 관련 예약 옵션 채우기
+    const bookings = OMT.State.getBookings().filter(b => b.status !== 'cancelled');
+    const sel = document.getElementById('inqBooking');
+    sel.innerHTML = '<option value="">— 일반 문의 —</option>' + bookings.map(b => {
+      const isGT = b.productType === 'golftel' || b.productType === 'golftel-air';
+      const icon = isGT ? '⛳' : '📦';
+      return `<option value="${b.bookingNumber}">${icon} ${b.bookingNumber} · ${b.productName || b.productId}</option>`;
+    }).join('');
+    document.getElementById('inqCategory').value = 'booking';
+    document.getElementById('inqSubject').value = '';
+    document.getElementById('inqBody').value = '';
+    document.getElementById('inquiryModal').classList.add('open');
+  };
+  window.closeInquiryModal = () => document.getElementById('inquiryModal').classList.remove('open');
+
+  // 카테고리별 자동 응답 템플릿 (mock — 약 4초 후)
+  const AUTO_REPLY = {
+    booking:  '안녕하세요 고객님! 예약 변경/취소 문의 확인했습니다. 출발 21일 전 무료 변경 가능하며, 자세한 사항은 예약 안내 탭을 참고해주세요. 추가 도움이 필요하면 답변 부탁드립니다 :)',
+    golf:    '안녕하세요! 골프장 운영 관련 문의 감사합니다. 한국인 캐디·카트 정책 등은 골프텔별 상이하니 예약번호 공유해주시면 정확히 안내드릴게요.',
+    hotel:   '호텔 관련 문의 확인했습니다. 객실 변경·체크인 시간·시설 이용 모두 안내 가능합니다. 정확한 답변을 위해 예약번호와 희망사항을 함께 보내주세요.',
+    payment: '결제·환불 문의 감사합니다. 카드 결제는 영업일 기준 3~5일, 카카오페이/네이버페이는 즉시 환불됩니다. 환불 진행 시 결제수단으로 자동 처리되니 별도 신청 불필요합니다.',
+    rental:  '클럽 렌탈 문의 감사합니다. 골프텔별 보유 브랜드와 가격이 다르며, 사전 예약 시 원하는 세트 확보가 가능합니다. 예약번호 공유 부탁드립니다.',
+    other:   '문의 감사합니다. 더 정확한 답변을 위해 추가 정보 요청드릴 수 있어요. 답변까지 평균 4시간 이내 답변드리겠습니다.'
+  };
+
+  window.submitInquiry = () => {
+    const cat = document.getElementById('inqCategory').value;
+    const bn  = document.getElementById('inqBooking').value;
+    const subject = document.getElementById('inqSubject').value.trim();
+    const body = document.getElementById('inqBody').value.trim();
+    if(subject.length < 5){ toast('제목을 5자 이상 입력해주세요'); return; }
+    if(body.length < 10){ toast('내용을 10자 이상 작성해주세요'); return; }
+
+    const now = new Date();
+    const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const inq = {
+      id: 'uq-' + Date.now(),
+      subject: subject + (bn ? ` [${bn}]` : ''),
+      status: 'pending',
+      category: cat,
+      bookingNumber: bn || null,
+      date: stamp.slice(0,10),
+      messages: [{ who:'me', body, when: stamp }]
+    };
+    const list = getUserInquiries();
+    list.unshift(inq);
+    saveUserInquiries(list);
+    closeInquiryModal();
+    renderInquiries();
+    toast('문의가 등록되었습니다 · 평균 4시간 내 답변');
+
+    // 4초 후 자동 답변 시뮬레이션
+    setTimeout(() => {
+      const replyStamp = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      })();
+      const list2 = getUserInquiries();
+      const target = list2.find(x => x.id === inq.id);
+      if(!target) return;
+      target.messages.push({ who:'omt', body: AUTO_REPLY[cat] || AUTO_REPLY.other, when: replyStamp });
+      target.status = 'answered';
+      saveUserInquiries(list2);
+      renderInquiries();
+      toast('새 답변이 도착했습니다 💬');
+    }, 4000);
+  };
 
   /* ===== Tab switching ===== */
   document.querySelectorAll('.sn-item[data-tab]').forEach(btn => {

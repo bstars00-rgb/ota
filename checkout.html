@@ -913,7 +913,8 @@
     }));
 
     // TODO: API 연동 - POST /api/bookings (booking 객체 전송)
-    location.href = 'complete.html?bk=' + booking.bookingNumber;
+    // 카드/카카오/네이버/토스 — payment.html 결제 게이트웨이 경유
+    location.href = 'payment.html?bn=' + encodeURIComponent(booking.bookingNumber) + '&pay=' + encodeURIComponent(payMethod);
   }
 
   function computeTotal(){
