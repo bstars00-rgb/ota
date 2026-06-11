@@ -677,7 +677,9 @@ CREATE INDEX idx_supplier_settlement_period ON supplier_settlements(supplier_id,
 CREATE INDEX idx_supplier_settlement_status ON supplier_settlements(status);
 ```
 
-### 11.2 백오피스 API 엔드포인트 (요약 — 상세는 BACKOFFICE_SPEC.md §6)
+### 11.2 백오피스 API 엔드포인트 (요약 — **상세는 [ELLIS_API_BACKOFFICE.md](./ELLIS_API_BACKOFFICE.md)**)
+
+> v1.0 (2026-06-11) 기준 22개 엔드포인트가 풀 명세화됨. Request/Response JSON 예시, 에러 코드, Rate Limit, 멱등성 키, audit_logs/알림톡 트리거 모두 별도 문서 참고.
 
 | 메서드 | 경로 | 권한 |
 |---|---|---|

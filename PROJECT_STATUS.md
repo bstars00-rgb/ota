@@ -1,5 +1,5 @@
 # 오마이트립 프로토타입 — 프로젝트 상태
-**마지막 업데이트**: 2026-06-11 (백오피스 8 모듈 모두 완성 🎯 — 정산 관리 + CMS 추가)
+**마지막 업데이트**: 2026-06-11 (백오피스 백엔드 API 풀 명세 — ELLIS_API_BACKOFFICE.md v1.0)
 **리포지토리**: https://github.com/bstars00-rgb/ota
 **라이브**: https://bstars00-rgb.github.io/ota/
 **백엔드(예정)**: ELLIS — 프론트 데이터 모델은 ELLIS 마이그레이션 호환으로 설계
@@ -490,7 +490,7 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (12th · 백오피스 8 모듈 완성 🎯) · **36 pages** (백오피스 +2 신규: settlement/cms) · 2 JS modules · 9 docs (BACKOFFICE_SPEC v1.2) · PWA + 운영 콘솔 5 + **백오피스 8 모듈** · 110 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (13th · 백엔드 API 풀 명세) · 36 pages · 2 JS modules · **10 docs** (ELLIS_API_BACKOFFICE.md +1) · PWA + 운영 콘솔 5 + 백오피스 8 모듈 · 112 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
 
 ---
 
@@ -515,6 +515,7 @@ _Status snapshot 2026-06-11 (12th · 백오피스 8 모듈 완성 🎯) · **36 
 | **10 (#98~103)** | **🆕 백오피스 신설 (MD-only 백엔드 원칙 도입)** | BACKOFFICE_SPEC.md 구상 (8 모듈/4 ROLE/Phase 1·2·3) + admin-dashboard (8 모듈 카드 + 긴급 큐) + admin-bookings (예약 검색 + 슬라이드아웃 + 감사 로그) + admin-products (골프텔 카드 + 가격 룰 6종 + 채널 동기화 모니터) + ELLIS_SPEC §11/§12 갱신 |
 | **11 (#104~107)** | **🆕 백오피스 Phase 1 완료 + Phase 2 진입** | admin-cs (3탭: 문의 큐 + 답변 폼 TPL-007 트리거 + 리뷰 관리 + 알림톡 10 템플릿 통계) + admin-customers (5등급 분포 + 회원 검색 + 슬라이드아웃: 4 통계/예약/포인트/감사) + admin-users (운영자 24명 + 4 ROLE 권한 매트릭스 + 감사 로그 15건 with diff 시각화 + 초대 모달) + 기존 백오피스 3페이지 GNB 연결 |
 | **12 (#108~110)** | **🎯 백오피스 8 모듈 완성** | admin-settlement (4탭: 크리에이터 12 정산 + 공급사 9 정산 + PG 3사 정산 카드 + 송금 이력 8 + 정산 실행 모달) + admin-cms (4탭: 배너 8 슬롯별 + 인기 검색어 6 with 가중치 슬라이더 + 공지·FAQ 6 + 가격 룰 6) + 8 페이지 GNB 통일 (대시보드·예약·상품·회원·CS·정산·CMS·권한) |
+| **13 (#111~112)** | **🔌 백오피스 백엔드 API 풀 명세** | ELLIS_API_BACKOFFICE.md v1.0 신규 — 공통 (인증 JWT 8h/2FA TOTP/IP whitelist/에러 11종/Rate Limit 5단계/멱등성 키) + 22 API 풀 스펙 (Request/Response JSON 예시 + audit_logs + alimtalk 트리거 명시) + 권한 매트릭스 빠른 참조 + 멱등성 키 설계 가이드 |
 
 ### 데이터 인벤토리
 
@@ -580,21 +581,23 @@ admin-dashboard (8 모듈 진입 + 오늘 KPI + 긴급 큐 + 활동 로그)
 
 > ⚠️ **백엔드 = MD 문서로만 유지**. 실서버 코드 없음. 프론트 변경 시 관련 MD 함께 갱신 → 추후 실 개발팀이 본격 구현.
 
-- ✅ **ELLIS_SPEC.md** — PostgreSQL DDL (12 도메인) + 9 어댑터 인터페이스 + 4 환경별 엔드포인트 + **§11 백오피스 추가** + §12 프론트 변경 반영
+- ✅ **ELLIS_SPEC.md** — PostgreSQL DDL (12 도메인) + 9 어댑터 인터페이스 + 4 환경별 엔드포인트 + §11 백오피스 + §12 프론트 변경 반영
+- ✅ **ELLIS_API_BACKOFFICE.md** ⭐ NEW — 백오피스 API 22개 풀 명세 (Request/Response JSON 예시 + 에러 코드 + Rate Limit + 멱등성 + audit/alimtalk 트리거)
 - ✅ **ALIMTALK_TEMPLATES.md** — 10 템플릿 + 월 비용 시뮬 + 14단계 마이그레이션 체크리스트
-- ✅ **BACKOFFICE_SPEC.md** ⭐ NEW — 8 운영 모듈 + 4 ROLE 권한 매트릭스 + Phase 1/2/3 + 신규 5 테이블 DDL (admins/audit_logs/cms_*/pricing_rules/supplier_settlements) + 22 API 엔드포인트
+- ✅ **BACKOFFICE_SPEC.md** — 8 운영 모듈 + 4 ROLE 권한 매트릭스 + Phase 1/2/3 + 신규 5 테이블 DDL
 - ✅ **mapper.html** — data.js → DDL 자동 변환 (8 모델)
 - ✅ 모든 데이터 ID 참조 정규화 (FK 가능)
 - ⏳ 실제 API·서버 코드 (추후 개발팀이 본 명세 기반으로 구현)
 - ⏳ 다국어 (영/일/중) — 추후 결정 (inbound.html에 3개 언어 기반 코드 작업됨)
 
-### 📚 문서 9종 (백엔드 명세 + 운영 가이드)
-1. `ELLIS_SPEC.md` — 백엔드 전체 명세
-2. `ALIMTALK_TEMPLATES.md` — 카톡 알림톡 10 템플릿
-3. `BACKOFFICE_SPEC.md` ⭐ NEW — 백오피스 구상
-4. `PROJECT_STATUS.md` — 본 문서
-5. `QA_CHECKLIST.md` — 300+ QA 항목
-6. `README.md` — 프로젝트 소개
-7. `DEPLOY.md` — 배포 가이드
-8. `CHANGELOG.md` — 변경 이력
-9. `CONTRIBUTING.md` — 기여 가이드
+### 📚 문서 10종 (백엔드 명세 + 운영 가이드)
+1. `ELLIS_SPEC.md` — 백엔드 전체 명세 (12 도메인 DDL + §11 백오피스 + §12 프론트 변경)
+2. `ELLIS_API_BACKOFFICE.md` ⭐ NEW — 백오피스 API 22개 풀 명세 (OpenAPI 스타일)
+3. `ALIMTALK_TEMPLATES.md` — 카톡 알림톡 10 템플릿
+4. `BACKOFFICE_SPEC.md` — 백오피스 구상
+5. `PROJECT_STATUS.md` — 본 문서
+6. `QA_CHECKLIST.md` — 300+ QA 항목
+7. `README.md` — 프로젝트 소개
+8. `DEPLOY.md` — 배포 가이드
+9. `CHANGELOG.md` — 변경 이력
+10. `CONTRIBUTING.md` — 기여 가이드
