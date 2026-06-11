@@ -858,12 +858,87 @@
     await sleep(400);
   }
 
+  /* ===== 골프 의도 감지 → GOLFTELS 추천으로 분기 ===== */
+  const COUNTRY_SLUG = { '일본':'japan', '베트남':'vietnam', '태국':'thailand', '필리핀':'philippines' };
+  function isGolfIntent(){
+    const styleText = (state.style || '').toLowerCase();
+    if(/골프|라운딩|티오프|⛳/.test(styleText)) return true;
+    // 자유 입력 질문에서 골프 키워드
+    const q = (state.q || '').toLowerCase();
+    if(/골프|라운딩|티오프|골프장/.test(q)) return true;
+    return false;
+  }
+
+  function recommendGolftels(destination){
+    const slug = COUNTRY_SLUG[destination];
+    if(!slug) return null;
+    const candidates = window.OMT?.DATA?.GOLFTELS?.filter(g => g.country === slug) || [];
+    if(candidates.length < 2) return null;
+    // 가격 정렬해서 3티어 분리
+    const sorted = [...candidates].sort((a,b) => (a.pricePerPerson || 0) - (b.pricePerPerson || 0));
+    const t1 = sorted[0];                                 // 가성비 (최저가)
+    const t3 = sorted[sorted.length - 1];                 // 프리미엄 (최고가)
+    const t2 = sorted[Math.floor(sorted.length / 2)] || t1; // 밸런스 (중간)
+    const out = [];
+    [{ g:t1, tier:'t1', tierLabel:'가성비 추천' },
+     { g:t2, tier:'t2', tierLabel:'밸런스 추천' },
+     { g:t3, tier:'t3', tierLabel:'프리미엄 추천' }].forEach(({g, tier, tierLabel}) => {
+      if(out.some(x => x.id === g.id)) return;  // 중복 회피
+      const own = window.OMT.DATA.OWNERSHIP[g.country];
+      const courses = (g.courseIds || []).map(cid => window.OMT.DATA.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean);
+      out.push({
+        id: g.id, tier, tierLabel, title: g.name,
+        img: g.images?.[0],
+        hotel: `${g.hotelName} (${g.nights}박)`,
+        rounds: `${g.rounds}회 라운딩 · ${courses.join(' · ') || '명문 코스'}`,
+        ownership: own.label,
+        ownershipModel: own.model,
+        price: g.pricePerPerson,
+        isGolftel: true
+      });
+    });
+    return out;
+  }
+
   /* Render 3 recommendation cards */
   function renderRecommendations(destination){
-    const recs = RECOMMENDATIONS[destination] || RECOMMENDATIONS['일본'];
+    let recs;
+    let isGT = false;
+    if(isGolfIntent()){
+      const golftelRecs = recommendGolftels(destination);
+      if(golftelRecs && golftelRecs.length){
+        recs = golftelRecs;
+        isGT = true;
+      }
+    }
+    if(!recs){
+      recs = RECOMMENDATIONS[destination] || RECOMMENDATIONS['일본'];
+    }
+
     const group = document.createElement('div');
     group.className = 'rec-group';
-    group.innerHTML = recs.map((r, i) => `
+    group.innerHTML = recs.map((r, i) => isGT ? `
+      <article class="rec-card">
+        <div class="rec-img" style="background-image:url('${r.img}')" role="img" aria-label="${r.title}"></div>
+        <div class="rec-body">
+          <span class="rec-tier ${r.tier}">${r.tierLabel}</span>
+          <span style="display:inline-block;font-size:10px;font-weight:900;padding:2px 7px;border-radius:5px;margin-left:4px;background:${r.ownershipModel==='direct'?'linear-gradient(135deg,#075440,#0B6E4F);color:#fff':'#fff;color:#1A1A1A;border:1px solid #E5E7EB'};">${r.ownership}</span>
+          <h3 class="rec-title">${r.title}</h3>
+          <div class="rec-compo">
+            <div><strong>🏨 호텔</strong>${r.hotel}</div>
+            <div><strong>⛳ 골프</strong>${r.rounds}</div>
+            <div><strong>📦 SKU</strong>골프텔 (호텔 + 라운딩) — 항공 별도</div>
+          </div>
+          <div class="rec-price-row">
+            <div>
+              <div class="rec-label">1인 (2인 1실)</div>
+              <div class="rec-price">${r.price.toLocaleString('ko-KR')}원~</div>
+            </div>
+            <button class="rec-book" data-id="${r.id}" data-gt="1">골프텔 상세 보기 →</button>
+          </div>
+        </div>
+      </article>
+    ` : `
       <article class="rec-card">
         <div class="rec-img" style="background-image:url('${r.img}')" role="img" aria-label="${r.title}"></div>
         <div class="rec-body">
@@ -886,7 +961,7 @@
     `).join('');
     chatBody.appendChild(group);
 
-    // Map destination → productIds (tier: 가성비 / 밸런스 / 프리미엄)
+    // Map destination → productIds (legacy 패키지 모드)
     const PRODUCT_MAP = {
       '일본':   ['prod-jp-03','prod-jp-02','prod-jp-01'],
       '베트남': ['prod-vn-02','prod-vn-03','prod-vn-01'],
@@ -897,10 +972,14 @@
 
     group.querySelectorAll('.rec-book').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = +btn.dataset.idx;
-        const pid = productIds[idx] || productIds[0];
-        // TODO: API 연동 - POST /api/cart { productId, source:'ai-planner', context: state }
-        location.href = 'product.html?id=' + pid;
+        if(btn.dataset.gt === '1'){
+          // 골프텔 모드 — 직접 ID 사용
+          location.href = 'golftel.html?id=' + btn.dataset.id;
+        } else {
+          const idx = +btn.dataset.idx;
+          const pid = productIds[idx] || productIds[0];
+          location.href = 'product.html?id=' + pid;
+        }
       });
     });
 

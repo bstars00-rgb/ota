@@ -26,12 +26,92 @@
   };
 
   // ============================================================
-  // 알림 (NOTIFICATIONS) — data.js mock + localStorage 읽음 상태
+  // 알림 (NOTIFICATIONS) — 정적 mock + 사용자 예약 기반 동적 생성 + localStorage 읽음
   // ============================================================
+
+  // 예약 dates 문자열에서 시작일 추출
+  function _parseStartDate(dates){
+    if(!dates) return null;
+    const m = String(dates).match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+    if(!m) return null;
+    return new Date(+m[1], +m[2]-1, +m[3]);
+  }
+
+  // 예약 dates → 오늘 기준 D-day 차이
+  function _ddayFromDates(dates){
+    const d = _parseStartDate(dates); if(!d) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    return Math.round((d - today) / 86400000);
+  }
+
+  // 사용자 예약 기반 동적 알림 생성 (D-7 / D-3 / D-1 / 출발 당일)
+  function _buildDynamicNotifications(){
+    const userBookings = (read(KEYS.bookings, null) || []).filter(b =>
+      b.status === 'confirmed' || b.status === 'pending'
+    );
+    const todayStr = new Date().toISOString().slice(0,10);
+    const out = [];
+    userBookings.forEach(b => {
+      const d = _ddayFromDates(b.dates);
+      if(d === null) return;
+      const isGT = b.productType === 'golftel' || b.productType === 'golftel-air' || (b.productId && b.productId.startsWith('gt-'));
+      const link = isGT
+        ? `complete.html?bk=${b.bookingNumber}`
+        : `complete.html?bk=${b.bookingNumber}`;
+      const productName = b.productName || (b.productId ? b.productId : '예약 상품');
+
+      // D-7
+      if(d === 7){
+        out.push({
+          id: `dyn-${b.id}-d7`, type:'reminder', icon: isGT ? '⛳' : '✈️',
+          title: isGT ? '골프 라운딩 D-7' : '출발 D-7',
+          body: `${productName} · ${b.dates.split(' - ')[0]} 출발 · 장비 / 여권 점검 시작`,
+          date: todayStr, daysAgo:0, read:false,
+          link, actionLabel: '체크리스트 →'
+        });
+      }
+      // D-3
+      if(d === 3){
+        out.push({
+          id: `dyn-${b.id}-d3`, type:'reminder', icon:'📋',
+          title: '출국 D-3 체크리스트',
+          body: `${productName} · 여권 유효기간 6개월 / 캐디팁 환전 / 항공 클래스·수하물 확인`,
+          date: todayStr, daysAgo:0, read:false,
+          link, actionLabel: '예약 확인 →'
+        });
+      }
+      // D-1
+      if(d === 1){
+        out.push({
+          id: `dyn-${b.id}-d1`, type:'reminder', icon:'🛫',
+          title: '내일 출발이에요',
+          body: `${productName} · 공항 도착 권장 2.5h 전 · 픽업 차량 확인`,
+          date: todayStr, daysAgo:0, read:false,
+          link, actionLabel: '예약 확인 →'
+        });
+      }
+      // D-Day
+      if(d === 0){
+        out.push({
+          id: `dyn-${b.id}-d0`, type:'reminder', icon:'🎉',
+          title: '오늘 출발 — 즐거운 여행 되세요!',
+          body: `${productName} · 비상 연락: 1588-0000`,
+          date: todayStr, daysAgo:0, read:false,
+          link, actionLabel: '예약 확인 →'
+        });
+      }
+    });
+    return out;
+  }
+
   function getNotifications(){
-    const allNotifs = (window.OMT?.DATA?.NOTIFICATIONS || []);
+    const staticNotifs = (window.OMT?.DATA?.NOTIFICATIONS || []);
+    const dynamicNotifs = _buildDynamicNotifications();
     const readIds = read(KEYS.notifReadIds, []);
-    return allNotifs.map(n => ({ ...n, read: n.read || readIds.includes(n.id) }));
+    // 동적 → 정적 순으로 (동적이 최신)
+    return [...dynamicNotifs, ...staticNotifs].map(n => ({
+      ...n, read: n.read || readIds.includes(n.id)
+    }));
   }
   function getUnreadNotifCount(){
     return getNotifications().filter(n => !n.read).length;
@@ -41,7 +121,7 @@
     if(!readIds.includes(id)){ readIds.push(id); write(KEYS.notifReadIds, readIds); }
   }
   function markAllNotifsRead(){
-    const all = (window.OMT?.DATA?.NOTIFICATIONS || []).map(n => n.id);
+    const all = getNotifications().map(n => n.id);
     write(KEYS.notifReadIds, all);
   }
 

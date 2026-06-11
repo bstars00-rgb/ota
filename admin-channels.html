@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELLIS 채널 매니저 콘솔 | 오마이트립 운영</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --golf:#39D353;--golf-dim:#22863A;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --radius:10px;--radius-lg:14px;
+      --shadow:0 4px 12px rgba(0,0,0,.4);
+      --header-h:60px;--max-w:1440px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    /* Header */
+    .header{
+      position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line);
+    }
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;color:var(--ink);}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{
+      padding:3px 9px;background:var(--golf-dim);color:var(--golf);border-radius:5px;
+      font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;
+    }
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center;}
+    .live-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--success);
+      box-shadow:0 0 0 0 rgba(57,211,83,.5);animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%{box-shadow:0 0 0 0 rgba(57,211,83,.5);}
+      70%{box-shadow:0 0 0 8px rgba(57,211,83,0);}
+      100%{box-shadow:0 0 0 0 rgba(57,211,83,0);}
+    }
+    .live-text{font-size:11px;font-weight:700;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+
+    /* Page heading */
+    .page-head{
+      padding:32px 0 24px;border-bottom:1px solid var(--line);
+    }
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+    .page-title{font-size:28px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .page-sub{font-size:14px;color:var(--ink-3);margin:0;}
+
+    /* KPI bar */
+    .kpi-grid{
+      display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin:24px 0;
+    }
+    .kpi{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:18px;position:relative;overflow:hidden;
+    }
+    .kpi-lb{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+    .kpi-val{font-size:28px;font-weight:900;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .kpi-val .small{font-size:14px;color:var(--ink-3);font-weight:700;margin-left:4px;}
+    .kpi-diff{font-size:11px;margin-top:6px;font-weight:700;}
+    .kpi-diff.up{color:var(--success);}
+    .kpi-diff.warn{color:var(--warning);}
+
+    /* Section */
+    .section{margin:28px 0;}
+    .sec-head{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:14px;gap:10px;flex-wrap:wrap;
+    }
+    .sec-title{font-size:18px;font-weight:900;letter-spacing:-0.01em;margin:0;}
+    .sec-sub{font-size:12px;color:var(--ink-3);font-weight:600;}
+
+    /* Adapter cards grid */
+    .adapter-grid{
+      display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;
+    }
+    .adapter{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:18px;transition:border-color .15s, transform .15s;
+    }
+    .adapter:hover{border-color:var(--line-2);transform:translateY(-2px);}
+    .adapter.tier-1{border-left:3px solid var(--success);}
+    .adapter.tier-2{border-left:3px solid var(--info);}
+    .adapter.tier-3{border-left:3px solid var(--ink-3);}
+    .ad-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .ad-name{font-size:15px;font-weight:900;letter-spacing:-0.01em;}
+    .ad-name .id{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;}
+    .ad-status{
+      display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;
+      font-size:11px;font-weight:800;letter-spacing:.02em;font-family:'JetBrains Mono',monospace;
+    }
+    .ad-status.ok{background:rgba(57,211,83,.12);color:var(--success);}
+    .ad-status.degraded{background:rgba(245,158,11,.12);color:var(--warning);}
+    .ad-status.down{background:rgba(248,81,73,.12);color:var(--danger);}
+    .ad-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+    .ad-label{font-size:12px;color:var(--ink-3);margin:0 0 14px;}
+    .ad-metrics{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;
+      padding-top:12px;border-top:1px solid var(--line);
+    }
+    .ad-metric .m-lb{font-size:10px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;}
+    .ad-metric .m-val{font-size:14px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+    .ad-metric .m-val.ok{color:var(--success);}
+    .ad-metric .m-val.warn{color:var(--warning);}
+    .ad-foot{
+      margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);
+    }
+    .ad-foot .mono{color:var(--ink-2);}
+
+    /* Course mapping table */
+    .map-table{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
+    }
+    .map-table table{width:100%;border-collapse:collapse;font-size:13px;}
+    .map-table th{
+      padding:12px 16px;background:var(--bg-3);color:var(--ink-3);
+      font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;text-align:left;
+      border-bottom:1px solid var(--line);
+    }
+    .map-table td{
+      padding:12px 16px;border-bottom:1px solid var(--line);color:var(--ink-2);
+    }
+    .map-table tr:last-child td{border-bottom:none;}
+    .map-table tr:hover td{background:rgba(255,255,255,.02);}
+    .map-table .name{color:var(--ink);font-weight:800;}
+    .map-table .country-flag{margin-right:6px;}
+    .channel-chip{
+      display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;
+      font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;
+    }
+    .channel-chip.tier-1{background:rgba(57,211,83,.12);color:var(--success);}
+    .channel-chip.tier-2{background:rgba(88,166,255,.12);color:var(--info);}
+    .channel-chip.tier-3{background:var(--bg-3);color:var(--ink-3);}
+    .rt-badge{
+      display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:5px;
+      font-size:10px;font-weight:900;
+    }
+    .rt-badge.on{background:linear-gradient(135deg, var(--accent), #FFA500);color:#1A1A1A;}
+    .rt-badge.off{background:var(--bg-3);color:var(--ink-3);}
+
+    /* Sync log */
+    .log{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:18px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;
+      max-height:300px;overflow-y:auto;
+    }
+    .log-row{display:grid;grid-template-columns:60px 80px 100px 1fr auto;gap:14px;padding:4px 0;}
+    .log-row .time{color:var(--ink-3);}
+    .log-row .lv{font-weight:900;}
+    .log-row .lv.info{color:var(--info);}
+    .log-row .lv.warn{color:var(--warning);}
+    .log-row .lv.ok{color:var(--success);}
+    .log-row .lv.err{color:var(--danger);}
+    .log-row .ch{color:var(--accent);font-weight:700;}
+    .log-row .msg{color:var(--ink-2);}
+    .log-row .dur{color:var(--ink-3);font-size:11px;}
+
+    /* Architecture diagram */
+    .arch-box{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+      padding:24px;
+    }
+    .arch-layer{
+      display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;
+    }
+    .arch-node{
+      padding:12px 16px;background:var(--bg-3);border:1px solid var(--line-2);border-radius:8px;
+      font-size:12px;font-weight:700;color:var(--ink-2);min-width:130px;text-align:center;
+    }
+    .arch-node.client{background:var(--bg);border-color:var(--primary);color:var(--primary);}
+    .arch-node.ellis{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+    .arch-node.adapter{background:var(--bg);border-color:var(--info);color:var(--info);}
+    .arch-arrow{text-align:center;font-size:18px;color:var(--ink-3);margin:6px 0;}
+
+    @media (max-width:1024px){
+      .kpi-grid{grid-template-columns:1fr 1fr;}
+      .adapter-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:768px){
+      .kpi-grid, .adapter-grid{grid-template-columns:1fr;}
+      .gnb-mini{display:none;}
+      .map-table{font-size:11px;overflow-x:auto;}
+      .log-row{grid-template-columns:auto auto 1fr;font-size:10px;}
+      .log-row .dur{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">CONSOLE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="#" class="on">채널 매니저</a>
+        <a href="#" onclick="alert('운영 콘솔 데모 - 다른 메뉴 준비 중')">예약 시스템</a>
+        <a href="#" onclick="alert('운영 콘솔 데모')">크리에이터</a>
+        <a href="#" onclick="alert('운영 콘솔 데모')">정산</a>
+      </nav>
+      <div class="header-actions">
+        <div class="live-dot"></div>
+        <span class="live-text" id="liveClock">LIVE · 00:00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">⛳ Golf Channel Manager · v1.0</div>
+      <h1 class="page-title">채널 매니저 어댑터 콘솔</h1>
+      <p class="page-sub">ELLIS 백엔드 ↔ 외부 골프장 티시트 시스템 통합 현황 — 호텔의 PMS-CMS-OTA 구조의 골프 버전</p>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Architecture -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">🏗️ 통합 아키텍처</h2>
+        <span class="sec-sub">Channel Adapter Layer 패턴 — 어댑터별로 외부 API 추상화</span>
+      </div>
+      <div class="arch-box">
+        <div class="arch-layer">
+          <div class="arch-node client">🌐 OMT Frontend<br><span style="font-size:10px;opacity:.7;">golftels / golftel / builder</span></div>
+        </div>
+        <div class="arch-arrow">↓ Slot 선택 / 부킹 요청</div>
+        <div class="arch-layer">
+          <div class="arch-node ellis">🛠️ ELLIS Booking Service<br><span style="font-size:10px;opacity:.7;">/api/channel/quote · /book</span></div>
+        </div>
+        <div class="arch-arrow">↓ adapterId 분기</div>
+        <div class="arch-layer" id="archAdapters"></div>
+        <div class="arch-arrow">↓ 시스템별 API</div>
+        <div class="arch-layer">
+          <div class="arch-node" style="background:var(--bg);border-color:var(--success);color:var(--success);min-width:auto;">🏌️ Tee Sheet Systems (외부)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Adapter cards -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">📡 어댑터 (9개)</h2>
+        <span class="sec-sub">Tier 1 = 핵심 · Tier 2 = 보완 · Tier 3 = 분산 시장 직거래</span>
+      </div>
+      <div class="adapter-grid" id="adapterGrid"></div>
+    </section>
+
+    <!-- Course mapping -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">⛳ 골프 코스 매핑 (10개)</h2>
+        <span class="sec-sub">각 코스가 어떤 어댑터로 인벤토리 조회되는지</span>
+      </div>
+      <div class="map-table">
+        <table>
+          <thead>
+            <tr>
+              <th>국가 · 코스명</th>
+              <th>도시</th>
+              <th>홀 · Par · 야드</th>
+              <th>채널 매니저</th>
+              <th>실시간</th>
+              <th>마지막 동기화</th>
+            </tr>
+          </thead>
+          <tbody id="courseTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Sync log -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">📜 동기화 로그 (실시간)</h2>
+        <span class="sec-sub">최근 12건 · ELLIS Channel Adapter의 외부 시스템 호출 기록</span>
+      </div>
+      <div class="log" id="syncLog"></div>
+    </section>
+
+    <div style="text-align:center;padding:40px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS Console · 운영자 전용 · 일반 사용자 노출 X
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    const D = window.OMT.DATA;
+    const CM = D.CHANNEL_MANAGERS;
+    const COURSES = D.GOLF_COURSES;
+
+    // ===== 어댑터 mock 상태 =====
+    // 실제 운영에선 ELLIS healthcheck API에서 받아옴
+    const ADAPTER_STATUS = {
+      direct:      { status:'ok',       lastSync:'now',   inventory:3, realtimeRate:100, avgLatency:42,  errorRate:0.0 },
+      gdo:         { status:'ok',       lastSync:'1분 전', inventory:2, realtimeRate:100, avgLatency:120, errorRate:0.2 },
+      gora:        { status:'degraded', lastSync:'8분 전', inventory:0, realtimeRate:0,   avgLatency:340, errorRate:5.4 },
+      golfnow:     { status:'ok',       lastSync:'3분 전', inventory:0, realtimeRate:100, avgLatency:90,  errorRate:0.1 },
+      golfmanager: { status:'ok',       lastSync:'5분 전', inventory:0, realtimeRate:100, avgLatency:180, errorRate:0.3 },
+      kakaogolf:   { status:'down',     lastSync:'2시간 전',inventory:0, realtimeRate:0,   avgLatency:0,   errorRate:100 },
+      xgolf:       { status:'ok',       lastSync:'2분 전', inventory:0, realtimeRate:95,  avgLatency:160, errorRate:0.8 },
+      golfdigg:    { status:'ok',       lastSync:'1분 전', inventory:2, realtimeRate:98,  avgLatency:140, errorRate:0.5 },
+      partner:     { status:'ok',       lastSync:'30분 전',inventory:3, realtimeRate:33,  avgLatency:'N/A', errorRate:0 }
+    };
+
+    // 코스별 마지막 동기화 시간 (mock)
+    const COURSE_SYNC = {
+      'gc-jp-kanucha':     '8초 전',
+      'gc-jp-okinawa-cc':  '52초 전',
+      'gc-jp-kita-ko':     '1분 전',
+      'gc-vn-ba-na-hills': '4초 전',
+      'gc-vn-montgomerie': '12초 전',
+      'gc-vn-vinpearl-pq': '32분 전 (수동)',
+      'gc-th-thana-city':  '46초 전',
+      'gc-th-siam-cc':     '1분 전',
+      'gc-ph-alta-vista':  '24분 전 (수동)',
+      'gc-ph-mimosa':      '2분 전'
+    };
+
+    const COUNTRY_FLAG = { japan:'🗻', vietnam:'🌊', thailand:'🛕', philippines:'🏖️' };
+    const COUNTRY_NAME = { japan:'일본', vietnam:'베트남', thailand:'태국', philippines:'필리핀' };
+
+    // ===== KPI =====
+    function renderKPI(){
+      const adapters = Object.entries(ADAPTER_STATUS);
+      const okCount = adapters.filter(([,s]) => s.status === 'ok').length;
+      const rtCourses = COURSES.filter(c => c.realTimeBooking).length;
+      const avgLatency = Math.round(adapters
+        .filter(([,s]) => typeof s.avgLatency === 'number' && s.status === 'ok')
+        .reduce((a,[,s]) => a + s.avgLatency, 0) / adapters.filter(([,s]) => typeof s.avgLatency === 'number' && s.status === 'ok').length);
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi">
+          <div class="kpi-lb">전체 어댑터</div>
+          <div class="kpi-val">${adapters.length}<span class="small">개</span></div>
+          <div class="kpi-diff up">▲ ${okCount}개 정상 · ${adapters.length - okCount}개 점검 필요</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">실시간 가능 코스</div>
+          <div class="kpi-val">${rtCourses}<span class="small">/ ${COURSES.length}</span></div>
+          <div class="kpi-diff up">▲ ${Math.round(rtCourses/COURSES.length*100)}% 실시간 확정 비율</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">평균 응답 시간</div>
+          <div class="kpi-val">${avgLatency}<span class="small">ms</span></div>
+          <div class="kpi-diff up">▲ 어제 대비 -8ms</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lb">24h 부킹 건수</div>
+          <div class="kpi-val">147<span class="small">건</span></div>
+          <div class="kpi-diff up">▲ 어제 대비 +23건 (+18.5%)</div>
+        </div>
+      `;
+    }
+
+    // ===== Architecture (어댑터 노드 동적 생성) =====
+    function renderArch(){
+      document.getElementById('archAdapters').innerHTML = ['direct','gdo','golfnow','golfdigg','partner']
+        .map(k => `<div class="arch-node adapter">${CM[k].short}<br><span style="font-size:10px;opacity:.7;">${CM[k].label.split('(')[0].trim()}</span></div>`)
+        .join('');
+    }
+
+    // ===== Adapter cards =====
+    function renderAdapters(){
+      const html = Object.entries(CM).map(([key, cm]) => {
+        const s = ADAPTER_STATUS[key] || { status:'ok' };
+        const statusLabel = { ok:'● HEALTHY', degraded:'● DEGRADED', down:'● DOWN' }[s.status];
+        return `
+          <div class="adapter ${cm.tier}">
+            <div class="ad-head">
+              <div class="ad-name">${cm.short}<span class="id">${key}</span></div>
+              <span class="ad-status ${s.status}">${statusLabel}</span>
+            </div>
+            <div class="ad-label">${cm.label}</div>
+            <div class="ad-metrics">
+              <div class="ad-metric">
+                <div class="m-lb">인벤토리 코스</div>
+                <div class="m-val ${s.inventory > 0 ? 'ok' : ''}">${s.inventory}</div>
+              </div>
+              <div class="ad-metric">
+                <div class="m-lb">실시간율</div>
+                <div class="m-val ${s.realtimeRate >= 90 ? 'ok' : (s.realtimeRate >= 50 ? 'warn' : '')}">${s.realtimeRate}%</div>
+              </div>
+              <div class="ad-metric">
+                <div class="m-lb">평균 응답</div>
+                <div class="m-val">${typeof s.avgLatency === 'number' ? s.avgLatency + 'ms' : s.avgLatency}</div>
+              </div>
+              <div class="ad-metric">
+                <div class="m-lb">에러율 (24h)</div>
+                <div class="m-val ${s.errorRate < 1 ? 'ok' : (s.errorRate < 5 ? 'warn' : '')}">${s.errorRate}%</div>
+              </div>
+            </div>
+            <div class="ad-foot">
+              <span>마지막 동기화</span>
+              <span class="mono">${s.lastSync}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('adapterGrid').innerHTML = html;
+    }
+
+    // ===== Course mapping table =====
+    function renderCourseTable(){
+      document.getElementById('courseTable').innerHTML = COURSES.map(c => {
+        const cm = CM[c.channelManager] || CM.partner;
+        return `
+          <tr>
+            <td><span class="country-flag">${COUNTRY_FLAG[c.country]}</span><span class="name">${c.name}</span></td>
+            <td>${c.city}</td>
+            <td class="mono" style="font-size:11px;">${c.holes}홀 · Par ${c.par} · ${c.yardage.toLocaleString()}yd</td>
+            <td><span class="channel-chip ${cm.tier}">${cm.short}</span></td>
+            <td>${c.realTimeBooking
+              ? `<span class="rt-badge on">⚡ 실시간</span>`
+              : `<span class="rt-badge off">⏱ 견적</span>`}</td>
+            <td class="mono" style="font-size:11px;color:var(--ink-3);">${COURSE_SYNC[c.id] || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ===== Sync log (mock) =====
+    const LOG_TEMPLATES = [
+      { lv:'ok',   ch:'direct',   msg:'POST /book/slot succeeded',                           dur:42  },
+      { lv:'ok',   ch:'gdo',      msg:'GET /teesheet/availability synced (1 course)',        dur:118 },
+      { lv:'ok',   ch:'golfdigg', msg:'GET /courses/gc-th-thana-city/slots synced 32 slots', dur:146 },
+      { lv:'ok',   ch:'direct',   msg:'PUT /inventory updated bana-hills rounds=14',         dur:38  },
+      { lv:'warn', ch:'gora',     msg:'API rate limit warning (90/100 req/min)',             dur:215 },
+      { lv:'ok',   ch:'gdo',      msg:'POST /book/slot succeeded for OMT-7K8A2P',            dur:124 },
+      { lv:'err',  ch:'kakaogolf',msg:'Connection refused — circuit breaker OPEN',           dur:0   },
+      { lv:'ok',   ch:'direct',   msg:'GET /teesheet/availability synced (8 slots)',         dur:36  },
+      { lv:'info', ch:'partner',  msg:'Manual sync triggered for gc-ph-alta-vista',          dur:0   },
+      { lv:'ok',   ch:'golfdigg', msg:'POST /book/slot succeeded',                           dur:138 },
+      { lv:'ok',   ch:'xgolf',    msg:'Heartbeat OK (last 5min)',                            dur:8   },
+      { lv:'ok',   ch:'direct',   msg:'GET /teesheet/availability synced (12 slots)',        dur:39  }
+    ];
+    function renderLog(){
+      const now = Date.now();
+      document.getElementById('syncLog').innerHTML = LOG_TEMPLATES.map((t, i) => {
+        const t2 = new Date(now - i * (20000 + Math.random()*15000));
+        const hh = String(t2.getHours()).padStart(2,'0');
+        const mm = String(t2.getMinutes()).padStart(2,'0');
+        const ss = String(t2.getSeconds()).padStart(2,'0');
+        return `
+          <div class="log-row">
+            <span class="time">${hh}:${mm}:${ss}</span>
+            <span class="lv ${t.lv}">${t.lv.toUpperCase()}</span>
+            <span class="ch">${t.ch}</span>
+            <span class="msg">${t.msg}</span>
+            <span class="dur">${t.dur ? t.dur + 'ms' : '-'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ===== Live clock =====
+    function tickClock(){
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      const el = document.getElementById('liveClock');
+      if(el) el.textContent = `LIVE · ${hh}:${mm}:${ss}`;
+    }
+
+    // ===== INIT =====
+    renderKPI();
+    renderArch();
+    renderAdapters();
+    renderCourseTable();
+    renderLog();
+    tickClock();
+    setInterval(tickClock, 1000);
+  </script>
+</body>
+</html>
