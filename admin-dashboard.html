@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>백오피스 대시보드 | ELLIS BackOffice</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F1419" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --radius:10px;--radius-lg:14px;
+      --header-h:60px;--max-w:1440px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+
+    .quick-search{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:4px 12px;min-width:280px;}
+    .quick-search input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-size:12px;font-family:inherit;}
+    .quick-search input::placeholder{color:var(--ink-4);}
+    .quick-search .shortcut{font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;background:var(--bg-3);padding:1px 6px;border-radius:4px;}
+
+    .user-pill{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;cursor:pointer;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:28px 0 18px;border-bottom:1px solid var(--line);}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:30px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--ink-3);margin:0;}
+
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin:20px 0;}
+    .kpi{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
+    .kpi-lb{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .kpi-val{font-size:30px;font-weight:900;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;}
+    .kpi-val .small{font-size:14px;color:var(--ink-3);font-weight:700;margin-left:4px;}
+    .kpi-diff{font-size:11px;margin-top:6px;font-weight:700;}
+    .kpi-diff.up{color:var(--success);}
+    .kpi-diff.warn{color:var(--warning);}
+
+    /* Module grid */
+    .section{margin:28px 0;}
+    .sec-head{margin-bottom:14px;}
+    .sec-title{font-size:18px;font-weight:900;letter-spacing:-0.01em;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+    .sec-sub{font-size:12px;color:var(--ink-3);font-weight:600;}
+
+    .module-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .module-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;
+      cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px;
+    }
+    .module-card:hover{transform:translateY(-2px);background:var(--bg-3);border-color:var(--line-2);}
+    .module-card.disabled{opacity:.4;cursor:not-allowed;}
+    .module-card .ic{
+      width:42px;height:42px;border-radius:10px;background:rgba(255,107,53,.12);color:var(--primary);
+      display:grid;place-items:center;font-size:20px;margin-bottom:6px;
+    }
+    .module-card.cs .ic{background:rgba(57,211,83,.12);color:var(--success);}
+    .module-card.product .ic{background:rgba(88,166,255,.12);color:var(--info);}
+    .module-card.finance .ic{background:rgba(255,210,63,.12);color:var(--accent);}
+    .module-card.cms .ic{background:rgba(245,158,11,.12);color:var(--warning);}
+    .module-card.security .ic{background:rgba(248,81,73,.12);color:var(--danger);}
+
+    .module-card .name{font-size:14px;font-weight:900;letter-spacing:-0.01em;}
+    .module-card .desc{font-size:11px;color:var(--ink-3);line-height:1.5;margin-bottom:auto;}
+    .module-card .count{
+      font-size:11px;font-weight:800;color:var(--ink-3);padding-top:8px;border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .module-card .count strong{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+    .module-card .badge{
+      padding:2px 7px;border-radius:4px;font-size:10px;font-weight:900;letter-spacing:.04em;
+    }
+    .module-card .badge.role{background:rgba(255,107,53,.12);color:var(--primary);}
+
+    /* 2-col 레이아웃 */
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+    /* 긴급 작업 큐 */
+    .urgent-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+    .urgent-head{padding:14px 18px;background:var(--bg-3);font-size:13px;font-weight:900;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .urgent-head .count-badge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:5px;background:var(--danger);color:#fff;}
+    .urgent-list{max-height:380px;overflow-y:auto;}
+    .urgent-item{
+      display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:12px 18px;
+      border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;
+      align-items:center;
+    }
+    .urgent-item:hover{background:rgba(255,255,255,.02);}
+    .urgent-item:last-child{border-bottom:none;}
+    .urgent-item .level{
+      width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0;
+    }
+    .urgent-item .level.high{background:rgba(248,81,73,.18);color:var(--danger);}
+    .urgent-item .level.mid{background:rgba(245,158,11,.18);color:var(--warning);}
+    .urgent-item .level.low{background:rgba(88,166,255,.18);color:var(--info);}
+    .urgent-item .info .title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:2px;}
+    .urgent-item .info .meta{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .urgent-item .due{font-size:11px;font-weight:900;color:var(--danger);font-family:'JetBrains Mono',monospace;text-align:right;}
+    .urgent-item .due.mid{color:var(--warning);}
+
+    /* 활동 로그 */
+    .log-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+    .log-head{padding:14px 18px;background:var(--bg-3);font-size:13px;font-weight:900;border-bottom:1px solid var(--line);}
+    .log-list{max-height:380px;overflow-y:auto;}
+    .log-item{
+      display:grid;grid-template-columns:32px 1fr auto;gap:10px;padding:11px 18px;
+      border-bottom:1px solid var(--line);font-size:12px;align-items:center;
+    }
+    .log-item:last-child{border-bottom:none;}
+    .log-item .avatar{
+      width:28px;height:28px;border-radius:50%;background:var(--bg-3);
+      display:grid;place-items:center;font-size:11px;font-weight:900;color:var(--accent);
+    }
+    .log-item .text{color:var(--ink-2);line-height:1.5;}
+    .log-item .text strong{color:var(--ink);}
+    .log-item .text .target{color:var(--info);font-family:'JetBrains Mono',monospace;font-size:11px;}
+    .log-item .when{font-size:10px;color:var(--ink-4);font-family:'JetBrains Mono',monospace;}
+
+    @media (max-width:1024px){
+      .kpi-grid{grid-template-columns:1fr 1fr;}
+      .module-grid{grid-template-columns:1fr 1fr;}
+      .twocol{grid-template-columns:1fr;}
+    }
+    @media (max-width:768px){
+      .kpi-grid, .module-grid{grid-template-columns:1fr;}
+      .gnb-mini{display:none;}
+      .quick-search{min-width:auto;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="#" class="on">🏠 대시보드</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="#" onclick="alert('Phase 2 — admin-customers.html 준비 중')">👥 회원</a>
+        <a href="#" onclick="alert('Phase 1 — admin-cs.html 준비 중')">💬 CS</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
+      </nav>
+      <div class="quick-search">
+        <span style="font-size:12px;color:var(--ink-3);">🔍</span>
+        <input type="text" placeholder="예약번호·회원·상품 빠른 검색" />
+        <span class="shortcut">⌘K</span>
+      </div>
+      <div class="user-pill">
+        <div class="avatar">K</div>
+        <div>
+          <div class="name">김운영</div>
+          <div class="role">MANAGER</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">🏠 BackOffice Home · v1.0</div>
+      <h1 class="page-title">백오피스 대시보드</h1>
+      <p class="page-sub">2026년 6월 11일 화요일 · 14:32 KST · 운영팀 김운영 (MANAGER)</p>
+    </section>
+
+    <!-- 오늘의 운영 KPI -->
+    <div class="kpi-grid">
+      <div class="kpi" style="border-left:3px solid var(--primary);">
+        <div class="kpi-lb">📅 오늘 예약</div>
+        <div class="kpi-val">38<span class="small">건</span></div>
+        <div class="kpi-diff up">▲ 어제 +12건 · 골프텔 24 / 패키지 14</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--warning);">
+        <div class="kpi-lb">⏰ 견적 확정 대기</div>
+        <div class="kpi-val">14<span class="small">건</span></div>
+        <div class="kpi-diff warn">⚠️ 24h 내 확정 필요 · 7건 D-1 미만</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--success);">
+        <div class="kpi-lb">💬 답변 대기 문의</div>
+        <div class="kpi-val">23<span class="small">건</span></div>
+        <div class="kpi-diff warn">평균 응답시간 3.2h</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--info);">
+        <div class="kpi-lb">👥 신규 회원</div>
+        <div class="kpi-val">142<span class="small">명</span></div>
+        <div class="kpi-diff up">▲ 어제 +28명 · 인바운드 4명</div>
+      </div>
+    </div>
+
+    <!-- 8 모듈 진입 카드 -->
+    <section class="section">
+      <div class="sec-head">
+        <h2 class="sec-title">🧩 운영 모듈</h2>
+        <div class="sec-sub">권한 ROLE: <strong style="color:var(--accent);">MANAGER</strong> · 전체 8 모듈 중 7 모듈 사용 가능</div>
+      </div>
+      <div class="module-grid">
+        <div class="module-card" onclick="location.href='admin-bookings.html'">
+          <div class="ic">🎫</div>
+          <div class="name">예약 운영</div>
+          <div class="desc">예약 검색 · 수동 확정 · 취소·환불 · 견적 확정 큐</div>
+          <div class="count"><span>오늘 38건</span><strong>2,486건 누적</strong></div>
+        </div>
+        <div class="module-card product" onclick="location.href='admin-products.html'">
+          <div class="ic">⛳</div>
+          <div class="name">상품 관리</div>
+          <div class="desc">골프텔/패키지/액티비티 CRUD · 가격 관리 · 인벤토리 동기화</div>
+          <div class="count"><span>전체 45 상품</span><strong>판매중 42</strong></div>
+        </div>
+        <div class="module-card cs" onclick="alert('Phase 1 — admin-customers.html 준비 중')">
+          <div class="ic">👥</div>
+          <div class="name">회원 관리</div>
+          <div class="desc">회원 검색 · 등급 변경 · 포인트 조정 · VIP 관리</div>
+          <div class="count"><span>전체 12,418명</span><strong>VIP 24명</strong></div>
+        </div>
+        <div class="module-card cs" onclick="alert('Phase 1 — admin-cs.html 준비 중')">
+          <div class="ic">💬</div>
+          <div class="name">CS 운영</div>
+          <div class="desc">문의 응대 · 리뷰 관리 · 알림톡 발송 이력</div>
+          <div class="count"><span>답변 대기 23</span><strong>오늘 처리 89</strong></div>
+        </div>
+        <div class="module-card finance" onclick="alert('Phase 2 — admin-settlement.html 준비 중')">
+          <div class="ic">💰</div>
+          <div class="name">정산 관리</div>
+          <div class="desc">크리에이터 커미션 · 공급사 정산 · 매출 리포트</div>
+          <div class="count"><span>이번달 정산</span><strong>대기 4,820만</strong></div>
+        </div>
+        <div class="module-card cms" onclick="alert('Phase 3 — admin-cms.html 준비 중')">
+          <div class="ic">📝</div>
+          <div class="name">CMS</div>
+          <div class="desc">메인 배너 · 카테고리 · 인기 검색어 · 공지·FAQ</div>
+          <div class="count"><span>활성 배너 3</span><strong>이번주 +2</strong></div>
+        </div>
+        <div class="module-card security disabled" onclick="alert('SUPER_ADMIN 권한 필요')">
+          <div class="ic">🔐</div>
+          <div class="name">권한·계정 <span class="badge role">SUPER_ADMIN</span></div>
+          <div class="desc">운영자 추가 · ROLE 변경 · 활동 로그 · 2FA</div>
+          <div class="count"><span>운영자 24명</span><strong>최근 7일 0건</strong></div>
+        </div>
+        <div class="module-card finance" onclick="location.href='admin-analytics.html'">
+          <div class="ic">📊</div>
+          <div class="name">사용자 분석</div>
+          <div class="desc">검색→예약 퍼널 · LIVE 메트릭 · SKU 비교</div>
+          <div class="count"><span>전환율 4.37%</span><strong>▲ 전월 +0.5%p</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 긴급 작업 큐 + 활동 로그 -->
+    <section class="section">
+      <div class="twocol">
+        <!-- 긴급 작업 큐 -->
+        <div class="urgent-card">
+          <div class="urgent-head">
+            🔥 긴급 작업 큐
+            <span class="count-badge">7건</span>
+          </div>
+          <div class="urgent-list">
+            <div class="urgent-item" onclick="alert('admin-bookings.html#OMT-XYZ로 이동')">
+              <div class="level high">⏰</div>
+              <div class="info">
+                <div class="title">견적 확정 D-1 임박 — 클락 미모사 5박</div>
+                <div class="meta">OMT-CL9X2A · 박○○ 010-XXXX-1234 · 출발 6/13</div>
+              </div>
+              <div class="due">22h 14m</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-bookings.html#OMT-XYZ')">
+              <div class="level high">💳</div>
+              <div class="info">
+                <div class="title">결제 실패 재시도 요청 — 다낭 풀빌라</div>
+                <div class="meta">OMT-VN8K3M · 김○○ 010-XXXX-5678 · 카카오페이</div>
+              </div>
+              <div class="due">실시간</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-bookings.html#OMT-XYZ')">
+              <div class="level mid">⏰</div>
+              <div class="info">
+                <div class="title">견적 확정 D-2 — 푸꾸옥 빈펄 6박</div>
+                <div class="meta">OMT-PQ2N7K · 정○○ · 출발 6/14</div>
+              </div>
+              <div class="due mid">42h 18m</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-cs.html')">
+              <div class="level mid">💬</div>
+              <div class="info">
+                <div class="title">24h+ 미답변 문의 — "환불 진행 상황"</div>
+                <div class="meta">최○○ · 카테고리: 결제·환불 · 어제 14:22 등록</div>
+              </div>
+              <div class="due mid">26h+</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-bookings.html')">
+              <div class="level mid">📞</div>
+              <div class="info">
+                <div class="title">현지 클레임 — 호이안 호텔 예약 변경 요청</div>
+                <div class="meta">OMT-VN4L2P · 이○○ · 카카오 24h 상담 연결됨</div>
+              </div>
+              <div class="due mid">진행 중</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-bookings.html')">
+              <div class="level low">⛳</div>
+              <div class="info">
+                <div class="title">한국인 캐디 사전 신청 — 오키나와 카누차</div>
+                <div class="meta">OMT-JP6F2K · 윤○○ · 출발 6/22 (D-11)</div>
+              </div>
+              <div class="due" style="color:var(--ink-3);">11d</div>
+            </div>
+            <div class="urgent-item" onclick="alert('admin-bookings.html')">
+              <div class="level low">📷</div>
+              <div class="info">
+                <div class="title">리뷰 사진 검수 대기 — 다낭 바나힐스</div>
+                <div class="meta">서○○ · 사진 5장 · 어제 17:18 등록</div>
+              </div>
+              <div class="due" style="color:var(--ink-3);">검수</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 최근 활동 로그 -->
+        <div class="log-card">
+          <div class="log-head">📜 운영팀 최근 활동</div>
+          <div class="log-list">
+            <div class="log-item">
+              <div class="avatar">박</div>
+              <div class="text"><strong>박CS</strong> 님이 예약 <span class="target">OMT-3DK21A</span> 취소 처리</div>
+              <div class="when">2분 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">이</div>
+              <div class="text"><strong>이MD</strong> 님이 상품 <span class="target">gt-vn-danang-ba-na-4n</span> 가격 -10%</div>
+              <div class="when">14분 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">최</div>
+              <div class="text"><strong>최CS</strong> 님이 문의 <span class="target">uq-2618</span> 답변</div>
+              <div class="when">22분 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">정</div>
+              <div class="text"><strong>정재무</strong> 님이 크리에이터 정산 <span class="target">2026-05</span> 실행</div>
+              <div class="when">38분 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">강</div>
+              <div class="text"><strong>강마케팅</strong> 님이 메인 배너 <span class="target">banner-9</span> 활성화</div>
+              <div class="when">1h 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">윤</div>
+              <div class="text"><strong>윤CS</strong> 님이 회원 <span class="target">user-128</span> 등급 GOLD→PLATINUM</div>
+              <div class="when">1h 12m 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">박</div>
+              <div class="text"><strong>박CS</strong> 님이 예약 <span class="target">OMT-PT9X4K</span> 수동 확정</div>
+              <div class="when">2h 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">이</div>
+              <div class="text"><strong>이MD</strong> 님이 신규 상품 <span class="target">gt-ph-cebu-new-3n</span> 등록</div>
+              <div class="when">2h 28m 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">관</div>
+              <div class="text"><strong>관리자</strong> 님이 운영자 <span class="target">admin-09</span> 추가 (OPERATOR)</div>
+              <div class="when">3h 전</div>
+            </div>
+            <div class="log-item">
+              <div class="avatar">박</div>
+              <div class="text"><strong>박CS</strong> 님이 환불 <span class="target">OMT-VN8M2K</span> 승인 (1,290,000원)</div>
+              <div class="when">3h 18m 전</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center;padding:32px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice v1.0 · BACKOFFICE_SPEC.md 기반 · <a href="ELLIS_SPEC.md" style="color:var(--primary);">백엔드 스펙 보기</a>
+    </div>
+  </main>
+
+  <script>
+    // Cmd+K 빠른 검색 단축키
+    document.addEventListener('keydown', e => {
+      if((e.metaKey || e.ctrlKey) && e.key === 'k'){
+        e.preventDefault();
+        document.querySelector('.quick-search input')?.focus();
+      }
+    });
+  </script>
+</body>
+</html>

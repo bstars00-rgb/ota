@@ -533,3 +533,259 @@ seeds/
 ---
 
 _변경 시 GIT TAG로 버전 관리 (`spec-v1.0`, `spec-v1.1`...). Breaking change는 메이저 버전 업._
+
+---
+
+## 11. 백오피스 (ELLIS BackOffice) 영역
+
+> 상세 명세: [BACKOFFICE_SPEC.md](./BACKOFFICE_SPEC.md)
+>
+> **본 섹션은 ELLIS 백엔드의 백오피스 측 데이터 모델 + 인증·권한 만 정의**. UI 명세·페이지 구조·운영 흐름은 BACKOFFICE_SPEC.md 참고.
+
+### 11.1 추가 도메인 DDL
+
+**운영자 계정 (`admins`)**
+
+```sql
+CREATE TABLE admins (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  email               TEXT          UNIQUE NOT NULL,
+  password_hash       TEXT          NOT NULL,                    -- bcrypt cost 12+
+  name                TEXT          NOT NULL,
+  role                VARCHAR(20)   NOT NULL CHECK (role IN ('SUPER_ADMIN','MANAGER','OPERATOR','VIEWER')),
+  team                VARCHAR(30),                                -- 'CS' | 'MD' | 'FINANCE' | 'MARKETING' | 'SYSTEM'
+  is_active           BOOLEAN       DEFAULT TRUE,
+  totp_secret         TEXT,                                       -- 2FA TOTP secret (KMS 암호화 저장)
+  ip_whitelist        INET[],                                     -- nullable; null이면 제한 없음
+  last_login_at       TIMESTAMPTZ,
+  last_login_ip       INET,
+  failed_attempts     SMALLINT      DEFAULT 0,                    -- 5회 초과 시 잠금
+  locked_until        TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_admins_email ON admins(email);
+CREATE INDEX idx_admins_role ON admins(role);
+```
+
+**감사 로그 (`audit_logs`)**
+
+```sql
+CREATE TABLE audit_logs (
+  id                  BIGSERIAL     PRIMARY KEY,
+  admin_id            VARCHAR(64)   REFERENCES admins(id),
+  action              VARCHAR(50)   NOT NULL,                    -- 'booking.cancel' | 'product.update' | 'user.grade-change' 등
+  target_type         VARCHAR(20)   NOT NULL,                    -- 'booking' | 'product' | 'user' | 'admin' | 'banner' | ...
+  target_id           VARCHAR(64),
+  before_value        JSONB,
+  after_value         JSONB,
+  reason              TEXT,                                       -- 운영자가 작성한 변경 사유 (환불 등 민감 작업 의무)
+  ip_address          INET,
+  user_agent          TEXT,
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_audit_admin ON audit_logs(admin_id);
+CREATE INDEX idx_audit_target ON audit_logs(target_type, target_id);
+CREATE INDEX idx_audit_action ON audit_logs(action);
+CREATE INDEX idx_audit_created ON audit_logs(created_at DESC);
+```
+
+**CMS — 메인 배너 / 인기 검색어 / 공지**
+
+```sql
+CREATE TABLE cms_banners (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  slot                VARCHAR(30)   NOT NULL,                    -- 'hero' | 'sidebar' | 'mobile-home'
+  image_url           TEXT          NOT NULL,
+  link_url            TEXT,
+  title               TEXT,
+  starts_at           TIMESTAMPTZ,
+  ends_at             TIMESTAMPTZ,
+  priority            SMALLINT      DEFAULT 0,
+  click_count         INT           DEFAULT 0,
+  is_active           BOOLEAN       DEFAULT TRUE,
+  created_by          VARCHAR(64)   REFERENCES admins(id),
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+
+CREATE TABLE cms_trending_keywords (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  query               TEXT          NOT NULL,
+  rank                SMALLINT      NOT NULL,
+  score_label         TEXT,                                       -- '+128%' | '1위' | '추천' 등
+  icon                VARCHAR(4),                                 -- 🔥 🆕 🏆 ⭐
+  boost_factor        NUMERIC(3,2)  DEFAULT 1.0,
+  starts_at           TIMESTAMPTZ,
+  ends_at             TIMESTAMPTZ,
+  created_by          VARCHAR(64)   REFERENCES admins(id),
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+
+CREATE TABLE cms_notices (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  title               TEXT          NOT NULL,
+  body                TEXT          NOT NULL,
+  slot                VARCHAR(30)   NOT NULL,                    -- 'main-top' | 'mypage-top' | 'modal'
+  starts_at           TIMESTAMPTZ,
+  ends_at             TIMESTAMPTZ,
+  is_pinned           BOOLEAN       DEFAULT FALSE,
+  view_count          INT           DEFAULT 0,
+  created_by          VARCHAR(64)   REFERENCES admins(id),
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+```
+
+**가격 정책 룰 (`pricing_rules`)**
+
+```sql
+CREATE TABLE pricing_rules (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  name                TEXT          NOT NULL,                    -- '성수기 가산' | '주말 가산' | 'VIP 회원' 등
+  rule_type           VARCHAR(20)   NOT NULL,                    -- 'season' | 'weekday' | 'holiday' | 'group' | 'tier'
+  scope               JSONB         NOT NULL,                    -- {country:'vn,ph'} | {weekday:[6,7]} | {tier:'VIP'} 등
+  starts_at           DATE,
+  ends_at             DATE,
+  delta_pct           NUMERIC(5,2)  NOT NULL,                    -- +18.00 / -12.00 등
+  applies_to          VARCHAR(20)   NOT NULL,                    -- 'all' | 'golftel' | 'package' | 'activity'
+  is_active           BOOLEAN       DEFAULT TRUE,
+  priority            SMALLINT      DEFAULT 0,                   -- 충돌 시 우선순위
+  created_by          VARCHAR(64)   REFERENCES admins(id),
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_pricing_rules_active ON pricing_rules(is_active, starts_at, ends_at);
+```
+
+**공급사 정산 (`supplier_settlements`)** — 크리에이터 정산은 `settlements` 테이블 별도
+
+```sql
+CREATE TABLE supplier_settlements (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  supplier_id         VARCHAR(64)   NOT NULL,                    -- admin-suppliers SUPPLIERS와 매칭
+  period_start        DATE          NOT NULL,
+  period_end          DATE          NOT NULL,
+  total_sales_krw     BIGINT,
+  commission_pct      NUMERIC(5,4),
+  commission_amount   BIGINT,
+  net_payout          BIGINT,                                    -- 송금 금액
+  bank_account        TEXT,                                      -- 암호화 저장
+  status              VARCHAR(20)   NOT NULL DEFAULT 'pending',  -- 'pending' | 'paid' | 'on_hold'
+  paid_at             TIMESTAMPTZ,
+  paid_by             VARCHAR(64)   REFERENCES admins(id),
+  invoice_url         TEXT,
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_supplier_settlement_period ON supplier_settlements(supplier_id, period_start);
+CREATE INDEX idx_supplier_settlement_status ON supplier_settlements(status);
+```
+
+### 11.2 백오피스 API 엔드포인트 (요약 — 상세는 BACKOFFICE_SPEC.md §6)
+
+| 메서드 | 경로 | 권한 |
+|---|---|---|
+| `POST` | `/api/admin/auth/login` | (공개) |
+| `POST` | `/api/admin/auth/2fa/verify` | (로그인 토큰) |
+| `POST` | `/api/admin/auth/logout` | VIEWER+ |
+| `GET` | `/api/admin/dashboard/summary` | VIEWER+ |
+| `GET/POST/PATCH/DELETE` | `/api/admin/bookings/*` | OPERATOR+ |
+| `POST` | `/api/admin/bookings/:id/cancel` | OPERATOR+ |
+| `POST` | `/api/admin/bookings/:id/refund` | MANAGER+ |
+| `POST` | `/api/admin/bookings/:id/resend-alimtalk` | OPERATOR+ |
+| `GET/POST/PATCH/DELETE` | `/api/admin/products/*` | MANAGER+ |
+| `POST` | `/api/admin/products/:id/sync` | OPERATOR+ |
+| `POST` | `/api/admin/pricing-rules/bulk` | MANAGER+ |
+| `GET/PATCH` | `/api/admin/users/*` | VIEWER+ |
+| `POST` | `/api/admin/users/:id/grade` | MANAGER+ |
+| `POST` | `/api/admin/users/:id/points` | MANAGER+ |
+| `GET` | `/api/admin/cs/inquiries` | OPERATOR+ |
+| `POST` | `/api/admin/cs/inquiries/:id/reply` | OPERATOR+ |
+| `GET/POST/PATCH/DELETE` | `/api/admin/cms/*` | MANAGER+ |
+| `GET` | `/api/admin/settlement/creators` | VIEWER+ |
+| `POST` | `/api/admin/settlement/creators/run` | SUPER_ADMIN |
+| `GET` | `/api/admin/settlement/suppliers` | VIEWER+ |
+| `GET/POST/PATCH` | `/api/admin/admins/*` | SUPER_ADMIN |
+| `GET` | `/api/admin/audit-logs` | MANAGER+ |
+
+### 11.3 인증·세션
+
+- **로그인**: 이메일 + 비밀번호 + 2FA TOTP
+- **JWT Access**: 8h (`/api/admin/*` 접근)
+- **JWT Refresh**: 24h
+- **세션 비활성 30분**: 자동 만료
+- **민감 작업** (환불·회원탈퇴·운영자 추가): 비밀번호 재입력 또는 2FA 재인증
+- **모든 mutating 요청**: `audit_logs` 자동 INSERT (미들웨어)
+
+### 11.4 자동 트리거
+
+- 운영자가 예약 수동 취소 → `bookings.status = 'cancelled'` + `notifications` INSERT + ALIMTALK TPL-009 발송
+- 운영자가 환불 승인 → `bookings.status = 'refunded'` + 결제 게이트웨이 환불 API 호출 + ALIMTALK TPL-009 발송
+- 운영자가 문의 답변 → `user_inquiries.status = 'replied'` + ALIMTALK TPL-007 발송
+- 운영자가 상품 가격 변경 → `pricing_rules` INSERT + 모든 미확정 견적 재계산 (옵션)
+
+---
+
+## 12. 프론트엔드 변경 반영 (2026-06-11 기준)
+
+다음 프론트 변경 사항이 본 스펙에 반영됨:
+
+### 12.1 라이브 commerce
+- `live.html` 풀스크린 라이브 페이지 + 시청 이력 추적
+- 신규 도메인 추가 권장:
+  ```sql
+  CREATE TABLE live_streams (
+    id            VARCHAR(64) PRIMARY KEY,
+    creator_id    VARCHAR(64),
+    title         TEXT,
+    starts_at     TIMESTAMPTZ,
+    ends_at       TIMESTAMPTZ,
+    viewer_peak   INT,
+    products      JSONB,                                 -- [{productId, soldCount, soldAmount}]
+    chat_count    INT,
+    created_at    TIMESTAMPTZ DEFAULT NOW()
+  );
+  CREATE TABLE live_watch_history (
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       VARCHAR(64),
+    live_id       VARCHAR(64) REFERENCES live_streams(id),
+    watched_at    TIMESTAMPTZ DEFAULT NOW(),
+    watch_seconds INT,
+    converted_booking_id VARCHAR(64)                     -- nullable, 시청 후 예약 전환 추적
+  );
+  ```
+
+### 12.2 마이페이지 통계 카드
+- `mypage.html` 적립/절감/방문국가/라운딩 4 KPI 카드
+- 데이터는 기존 `bookings` + `users.points` 집계로 계산 (별도 테이블 불필요)
+
+### 12.3 사용자 알림 (이번달 추가)
+- `users.notifications` 컬럼 대신 별도 `user_notifications` 테이블 권장 (이미 §3.6에 정의됨)
+- 모바일 PWA의 FCM 토큰은 `user_devices.fcm_token` 컬럼에 저장 (신규):
+  ```sql
+  CREATE TABLE user_devices (
+    id              VARCHAR(64) PRIMARY KEY,
+    user_id         VARCHAR(64) NOT NULL,
+    platform        VARCHAR(20),     -- 'web' | 'ios' | 'android' | 'pwa'
+    fcm_token       TEXT,
+    last_seen_at    TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+  );
+  ```
+
+### 12.4 D-day 알림 트리거 시스템
+- `mobile.html`의 D-7 / D-3 / D-1 알림 시뮬레이션은 백엔드에서 cron으로 처리:
+  - `cron: 0 9 * * *` (매일 9시) → D-day 계산 후 ALIMTALK 발송 (TPL-002 / TPL-003)
+  - 발송 이력은 §6.2의 `alimtalk_logs` 테이블에 기록
+
+### 12.5 결제 실패 시나리오
+- `payment.html`의 10% 실패 시뮬레이션 → `bookings.payment_attempts` JSONB로 시도 이력 보관:
+  ```sql
+  ALTER TABLE bookings ADD COLUMN payment_attempts JSONB DEFAULT '[]';
+  -- [{attempt_no, method, status, error_code, attempted_at}, ...]
+  ```
+
+### 12.6 백오피스 운영 도구 (NEW)
+- 본 v1.0에 §11 백오피스 영역 신규 추가
+- 신규 페이지: `admin-dashboard.html` / `admin-bookings.html` / `admin-products.html`
+- 신규 테이블: `admins`, `audit_logs`, `cms_banners`, `cms_trending_keywords`, `cms_notices`, `pricing_rules`, `supplier_settlements`
+
+---
+
+_v1.0 — 2026-06-11 백오피스 섹션 + 프론트 변경 반영 갱신_

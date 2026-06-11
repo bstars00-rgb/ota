@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상품 관리 | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:24px 0 12px;display:flex;justify-content:space-between;align-items:end;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+    .new-btn{
+      padding:9px 16px;background:var(--primary);color:#fff;border-radius:8px;font-weight:800;font-size:13px;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .new-btn:hover{background:#FF8B5C;}
+
+    /* KPI */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    }
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;}
+    .tab{
+      padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);
+      cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;
+    }
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+
+    /* Filter row */
+    .filter-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+    .filter-row .search-mini{
+      flex:1;min-width:240px;display:flex;align-items:center;gap:6px;
+      background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;
+    }
+    .filter-row .search-mini input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-size:13px;}
+    .filter-row .search-mini input::placeholder{color:var(--ink-4);}
+    .filter-row select{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+      padding:7px 12px;color:var(--ink);font-size:12px;outline:none;font-weight:700;
+    }
+    .filter-row .price-chip{
+      padding:7px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+      font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer;
+    }
+    .filter-row .price-chip:hover{background:var(--bg-3);}
+
+    /* Product grid */
+    .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+    .product-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+      display:flex;flex-direction:column;
+    }
+    .product-card .thumb{
+      width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,var(--bg-3),var(--line));
+      display:grid;place-items:center;font-size:48px;color:var(--ink-3);position:relative;
+    }
+    .product-card .thumb .status-corner{
+      position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:5px;
+      font-size:10px;font-weight:900;letter-spacing:.04em;
+    }
+    .product-card .thumb .sku-corner{
+      position:absolute;top:10px;right:10px;padding:3px 9px;border-radius:5px;
+      font-size:10px;font-weight:900;font-family:'JetBrains Mono',monospace;
+      background:rgba(0,0,0,.6);color:var(--accent);
+    }
+    .status-active{background:rgba(57,211,83,.2);color:var(--success);}
+    .status-paused{background:rgba(245,158,11,.2);color:var(--warning);}
+    .status-stopped{background:rgba(248,81,73,.2);color:var(--danger);}
+    .product-card .body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
+    .product-card .name{font-size:14px;font-weight:900;letter-spacing:-0.01em;color:var(--ink);}
+    .product-card .meta{font-size:11px;color:var(--ink-3);}
+    .product-card .meta .own-direct{color:var(--primary);font-weight:800;}
+    .product-card .meta .own-fc{color:var(--accent);font-weight:800;}
+    .product-card .stats{
+      display:flex;gap:12px;padding-top:8px;margin-top:auto;border-top:1px solid var(--line);
+      font-size:11px;
+    }
+    .product-card .stats .stat .lb{color:var(--ink-4);font-size:10px;}
+    .product-card .stats .stat .vl{color:var(--ink);font-weight:800;font-family:'JetBrains Mono',monospace;}
+    .product-card .price{
+      font-size:16px;font-weight:900;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:4px;
+    }
+    .product-card .price .from{font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;}
+    .product-card .actions{
+      display:flex;gap:4px;padding:10px 14px;border-top:1px solid var(--line);background:var(--bg-3);
+    }
+    .product-card .actions .act{
+      flex:1;padding:6px 0;background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;
+    }
+    .product-card .actions .act:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+
+    /* Inventory sync panel */
+    .sync-panel{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:24px;
+    }
+    .sync-panel .h{font-size:14px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .sync-panel .h .live-dot{
+      width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+    .sync-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .sync-table th{text-align:left;padding:8px 10px;color:var(--ink-3);font-weight:800;font-size:10px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line);}
+    .sync-table td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--ink-2);}
+    .sync-table tr:last-child td{border-bottom:none;}
+    .sync-table .channel{font-weight:800;color:var(--ink);}
+    .sync-table .last{font-family:'JetBrains Mono',monospace;color:var(--ink-3);}
+    .sync-table .ok{color:var(--success);font-weight:800;}
+    .sync-table .err{color:var(--danger);font-weight:800;}
+    .sync-table .warn{color:var(--warning);font-weight:800;}
+    .sync-table .sync-btn{
+      padding:4px 10px;background:var(--primary);color:#fff;border-radius:5px;font-size:11px;font-weight:800;
+    }
+    .sync-table .sync-btn:hover{background:#FF8B5C;}
+
+    /* Pricing rules */
+    .pricing-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:24px;
+    }
+    .pricing-card .h{font-size:14px;font-weight:900;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+    .pricing-card .h .bulk{
+      padding:6px 12px;background:var(--bg-3);border:1px solid var(--line);border-radius:6px;
+      font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;
+    }
+    .pricing-card .h .bulk:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+    .rule-row{
+      display:grid;grid-template-columns:140px 1fr 120px 100px;gap:10px;align-items:center;
+      padding:10px 0;border-bottom:1px dashed var(--line);font-size:12px;
+    }
+    .rule-row:last-child{border-bottom:none;}
+    .rule-row .name{font-weight:800;color:var(--ink);}
+    .rule-row .range{color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:11px;}
+    .rule-row .delta{font-family:'JetBrains Mono',monospace;font-weight:900;}
+    .rule-row .delta.up{color:var(--danger);}
+    .rule-row .delta.down{color:var(--success);}
+    .rule-row .edit{
+      padding:4px 10px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;
+    }
+
+    @media (max-width:1024px){
+      .product-grid{grid-template-columns:1fr 1fr;}
+      .kpi-row{grid-template-columns:1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+    @media (max-width:768px){
+      .product-grid{grid-template-columns:1fr;}
+      .rule-row{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠 대시보드</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="#" class="on">⛳ 상품</a>
+        <a href="#" onclick="alert('Phase 2 — admin-customers.html 준비 중')">👥 회원</a>
+        <a href="#" onclick="alert('Phase 1 — admin-cs.html 준비 중')">💬 CS</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">K</div>
+        <div>
+          <div class="name">김운영</div>
+          <div class="role">MANAGER</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div>
+        <div class="page-eyebrow">⛳ PRODUCT MANAGEMENT</div>
+        <h1 class="page-title">상품 관리</h1>
+        <p class="page-sub">골프텔·패키지·액티비티 CRUD · 가격 정책 · 인벤토리 동기화</p>
+      </div>
+      <button class="new-btn" onclick="alert('신규 상품 등록 모달 — 호텔/코스/가격/이미지 입력')">+ 신규 상품 등록</button>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <div class="lb">전체 상품</div>
+        <div class="val">45<span class="small">개</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">판매중</div>
+        <div class="val" style="color:var(--success);">42<span class="small">개</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">일시중지</div>
+        <div class="val" style="color:var(--warning);">2<span class="small">개</span></div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">판매중지</div>
+        <div class="val" style="color:var(--danger);">1<span class="small">개</span></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab on" data-tab="golftel">⛳ 골프텔 <span class="badge">8</span></div>
+      <div class="tab" data-tab="golftel-air">✈️ 골프텔+항공 <span class="badge">12</span></div>
+      <div class="tab" data-tab="package">📦 패키지 <span class="badge">14</span></div>
+      <div class="tab" data-tab="hotel">🏨 호텔 단품 <span class="badge">6</span></div>
+      <div class="tab" data-tab="activity">🎟️ 액티비티 <span class="badge">5</span></div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <div class="search-mini">
+        <span style="font-size:13px;color:var(--ink-3);">🔍</span>
+        <input type="text" placeholder="상품명 · 호텔ID · 코스ID 검색" />
+      </div>
+      <select>
+        <option>전체 국가</option>
+        <option>일본 (직영)</option>
+        <option>베트남 (직영)</option>
+        <option>태국 (FC)</option>
+        <option>필리핀 (FC)</option>
+      </select>
+      <select>
+        <option>전체 상태</option>
+        <option>판매중</option>
+        <option>일시중지</option>
+        <option>판매중지</option>
+      </select>
+      <select>
+        <option>전체 오너십</option>
+        <option>직영 (22.5%)</option>
+        <option>프랜차이즈 (15%)</option>
+      </select>
+      <button class="price-chip">💰 가격 일괄 변경</button>
+      <button class="price-chip">📥 CSV 내보내기</button>
+    </div>
+
+    <!-- Inventory Sync 모니터링 -->
+    <div class="sync-panel">
+      <div class="h">
+        <span class="live-dot"></span>
+        🔄 인벤토리 동기화 모니터링 — 채널 매니저 9 시스템
+        <span style="margin-left:auto;font-size:11px;color:var(--ink-3);font-weight:600;">마지막 갱신 14:32:08 KST</span>
+      </div>
+      <table class="sync-table">
+        <thead>
+          <tr>
+            <th>채널 매니저</th>
+            <th>대상 상품</th>
+            <th>마지막 동기화</th>
+            <th>상태</th>
+            <th>불일치</th>
+            <th>액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="channel">🟢 Direct (자체 인벤토리)</span></td>
+            <td>8 골프텔 · 12 골프텔+항공</td>
+            <td class="last">실시간</td>
+            <td><span class="ok">✓ 정상</span></td>
+            <td>0</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🟢 GDO (일본)</span></td>
+            <td>3 코스 · 카누차/PGM</td>
+            <td class="last">2분 전</td>
+            <td><span class="ok">✓ 정상</span></td>
+            <td>0</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🟡 GolfNow (글로벌)</span></td>
+            <td>4 코스 · 동남아 전역</td>
+            <td class="last">8분 전</td>
+            <td><span class="warn">⚠ 지연</span></td>
+            <td>2 슬롯</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🟢 Golfdigg (태국)</span></td>
+            <td>3 코스 · 알파인/방콕</td>
+            <td class="last">5분 전</td>
+            <td><span class="ok">✓ 정상</span></td>
+            <td>0</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🟢 카카오골프</span></td>
+            <td>아웃바운드 디스플레이</td>
+            <td class="last">12분 전</td>
+            <td><span class="ok">✓ 정상</span></td>
+            <td>0</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🔴 XGOLF</span></td>
+            <td>한국인 골퍼 노출</td>
+            <td class="last">2h 14m 전</td>
+            <td><span class="err">✗ 토큰 만료</span></td>
+            <td>전체 8</td>
+            <td><button class="sync-btn" onclick="alert('XGOLF 인증 갱신 — admin-channels.html')">인증 갱신</button></td>
+          </tr>
+          <tr>
+            <td><span class="channel">🟢 Partner (필리핀 FC)</span></td>
+            <td>2 골프텔 · 미모사/페스타</td>
+            <td class="last">22분 전</td>
+            <td><span class="ok">✓ 정상</span></td>
+            <td>0</td>
+            <td><button class="sync-btn">강제 동기화</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pricing rules -->
+    <div class="pricing-card">
+      <div class="h">
+        💰 가격 정책 (전체 적용 룰)
+        <button class="bulk" onclick="alert('가격 룰 추가 모달')">+ 룰 추가</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">🌸 성수기 가산</div>
+        <div class="range">2026-07-15 ~ 08-25 · 베트남·필리핀</div>
+        <div class="delta up">+18%</div>
+        <button class="edit">편집</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">🎌 일본 골든위크</div>
+        <div class="range">2026-04-29 ~ 05-06 · 일본 직영 전체</div>
+        <div class="delta up">+25%</div>
+        <button class="edit">편집</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">📅 주말 가산</div>
+        <div class="range">매주 토·일 라운딩 · 전 국가</div>
+        <div class="delta up">+10%</div>
+        <button class="edit">편집</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">❄️ 비수기 할인</div>
+        <div class="range">2026-09-01 ~ 11-15 · 태국·필리핀</div>
+        <div class="delta down">-12%</div>
+        <button class="edit">편집</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">👥 단체 5인 이상</div>
+        <div class="range">전 상품 · 5인 이상 동시 예약</div>
+        <div class="delta down">-5%</div>
+        <button class="edit">편집</button>
+      </div>
+      <div class="rule-row">
+        <div class="name">⭐ VIP 회원</div>
+        <div class="range">VIP·PLATINUM 등급 · 직영 골프텔</div>
+        <div class="delta down">-7%</div>
+        <button class="edit">편집</button>
+      </div>
+    </div>
+
+    <!-- Product grid (골프텔 8개) -->
+    <h3 style="font-size:14px;font-weight:900;margin:24px 0 12px;display:flex;align-items:center;gap:8px;">
+      ⛳ 골프텔 상품 <span style="font-size:11px;color:var(--ink-3);font-weight:700;">8개 · 정렬: 최근 등록순</span>
+    </h3>
+    <div class="product-grid" id="productGrid"></div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · 상품 관리 · ELLIS_SPEC.md §3.1 Golftels / §3.2 Courses 도메인 기반
+    </div>
+  </main>
+
+  <script>
+    const PRODUCTS = [
+      {id:'gt-jp-kanucha-okinawa-3n', name:'카누차 오키나와 3박 2R', country:'일본', ownership:'direct', icon:'🌺', status:'active', price:'1,310,000', bookings:'24', rating:'4.8', updated:'2026-06-08'},
+      {id:'gt-vn-danang-ba-na-4n', name:'다낭 바나힐스 4박 3R', country:'베트남', ownership:'direct', icon:'⛰️', status:'active', price:'1,890,000', bookings:'42', rating:'4.7', updated:'2026-06-10'},
+      {id:'gt-vn-phu-quoc-vinpearl-6n', name:'푸꾸옥 빈펄 6박 5R', country:'베트남', ownership:'direct', icon:'🏝️', status:'active', price:'2,840,000', bookings:'18', rating:'4.9', updated:'2026-06-09'},
+      {id:'gt-ph-clark-mimosa-5n', name:'클락 미모사 5박 4R', country:'필리핀', ownership:'franchise', icon:'🌴', status:'active', price:'1,145,000', bookings:'67', rating:'4.6', updated:'2026-06-07'},
+      {id:'gt-ph-cebu-mactan-5n', name:'세부 막탄 5박 5R', country:'필리핀', ownership:'franchise', icon:'🏖️', status:'active', price:'1,847,500', bookings:'29', rating:'4.7', updated:'2026-06-05'},
+      {id:'gt-th-pattaya-kanchana-3n', name:'파타야 칸차나 3박 2R', country:'태국', ownership:'franchise', icon:'🏯', status:'paused', price:'945,000', bookings:'8', rating:'4.5', updated:'2026-05-28'},
+      {id:'gt-th-bangkok-alpine-4n', name:'방콕 알파인 4박 3R', country:'태국', ownership:'franchise', icon:'🏙️', status:'active', price:'1,445,000', bookings:'34', rating:'4.6', updated:'2026-06-06'},
+      {id:'gt-vn-nha-trang-vinpearl-7n', name:'나트랑 빈펄 7박 럭셔리', country:'베트남', ownership:'direct', icon:'🏰', status:'active', price:'4,920,000', bookings:'12', rating:'4.9', updated:'2026-06-10'},
+    ];
+    const STATUS_LABELS = {active:'판매중', paused:'일시중지', stopped:'판매중지'};
+    const OWN_LABELS = {direct:'직영', franchise:'프랜차이즈'};
+    const SKU_TAG = {active:'GT', paused:'GT-PAUSE', stopped:'GT-STOP'};
+
+    function renderProducts(){
+      const g = document.getElementById('productGrid');
+      g.innerHTML = PRODUCTS.map(p => `
+        <div class="product-card">
+          <div class="thumb">
+            ${p.icon}
+            <span class="status-corner status-${p.status}">${STATUS_LABELS[p.status]}</span>
+            <span class="sku-corner">${p.id.slice(0,18)}…</span>
+          </div>
+          <div class="body">
+            <div class="meta">
+              ${p.country} · <span class="${p.ownership==='direct'?'own-direct':'own-fc'}">${OWN_LABELS[p.ownership]}</span> · 갱신 ${p.updated}
+            </div>
+            <div class="name">${p.name}</div>
+            <div class="price"><span class="from">1인 기준</span>${p.price}원</div>
+            <div class="stats">
+              <div class="stat"><div class="lb">이번달 예약</div><div class="vl">${p.bookings}건</div></div>
+              <div class="stat"><div class="lb">평점</div><div class="vl">⭐ ${p.rating}</div></div>
+              <div class="stat"><div class="lb">상태</div><div class="vl" style="color:${p.status==='active'?'var(--success)':p.status==='paused'?'var(--warning)':'var(--danger)'};">${STATUS_LABELS[p.status]}</div></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="act" onclick="alert('상품 편집 화면 — golftel.html 미리보기 + 폼')">편집</button>
+            <button class="act" onclick="alert('가격 변경 모달')">가격</button>
+            <button class="act" onclick="alert('${p.status==='active'?'일시중지':'재개'} 확인')">${p.status==='active'?'일시중지':'재개'}</button>
+            <button class="act" onclick="alert('인벤토리 강제 동기화 트리거')">동기화</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderProducts();
+
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>

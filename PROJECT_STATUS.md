@@ -1,5 +1,5 @@
 # 오마이트립 프로토타입 — 프로젝트 상태
-**마지막 업데이트**: 2026-06-11 (몽키 패턴 정착 — 골프텔 상세/슬롯/마이페이지 고도화)
+**마지막 업데이트**: 2026-06-11 (백오피스 영역 신설 — 운영팀 일상 업무 콘솔 3종 + BACKOFFICE_SPEC.md 구상)
 **리포지토리**: https://github.com/bstars00-rgb/ota
 **라이브**: https://bstars00-rgb.github.io/ota/
 **백엔드(예정)**: ELLIS — 프론트 데이터 모델은 ELLIS 마이그레이션 호환으로 설계
@@ -12,7 +12,7 @@
 
 | 항목 | 배점 | 점수 | 근거 |
 |---|---|---|---|
-| 페이지 커버리지 | 30 | **30** | **28 페이지** (웹 26 + 모바일 1 + 크리에이터 1) — offline.html 추가 |
+| 페이지 커버리지 | 30 | **30** | **31 페이지** (웹 26 + 모바일 1 + 크리에이터 1 + **백오피스 3 신규**) — admin-dashboard/bookings/products 추가 |
 | 비즈니스 모델 완성도 | 20 | **20** | 골프텔 중심 + 채널 매니저 9 + 공급사 9 + ELLIS_SPEC.md 백엔드 풀스펙 완성 |
 | UX 플로우 완결성 | 20 | **20** | 검색(자동완성)→상세→슬롯→checkout→payment→complete(자동 알림+e-바우처+카톡 알림톡)→마이페이지(통합검색) 완전 E2E |
 | 기능 정교함 | 20 | **20** | 몽키 표준 + 결제 3종 + 모디파이어 + PWA + FCM 푸시 + 카톡 알림톡 + 통합 검색 + 자동완성 |
@@ -490,7 +490,7 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (final · 9th) · **28 pages** · 2 JS modules · 8 docs · PWA 설치 + 오프라인 폴백 · 97 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (10th · 백오피스 신설) · **31 pages** (백오피스 +3) · 2 JS modules · **9 docs** (BACKOFFICE_SPEC.md +1) · PWA + 운영 콘솔 5 + 백오피스 3 · 103 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
 
 ---
 
@@ -512,6 +512,7 @@ _Status snapshot 2026-06-11 (final · 9th) · **28 pages** · 2 JS modules · 8 
 | 5 (#47~57) | **사용자 알림 시스템** | addUserNotification + D-day 트리거 + 모바일 통합 + 골프텔 카트 + voucher + admin-suppliers |
 | 6 (#58~73) | **검색 / 분석 / 인바운드** | 통합 검색 + 자동완성 + 매퍼 + 사용자 분석 + 인바운드 SEO + 라이브 + ALIMTALK |
 | 7-9 (#74~97) | **운영 폴리시·고급 UX** | 직영 우선 정렬 + 인기 검색어 + 클립 캡쳐 + 자동 추천 + 페이지네이션 + 통계 카드 + 라이브 메트릭 |
+| **10 (#98~103)** | **🆕 백오피스 신설 (MD-only 백엔드 원칙 도입)** | BACKOFFICE_SPEC.md 구상 (8 모듈/4 ROLE/Phase 1·2·3) + admin-dashboard (8 모듈 카드 + 긴급 큐) + admin-bookings (예약 검색 + 슬라이드아웃 + 감사 로그) + admin-products (골프텔 카드 + 가격 룰 6종 + 채널 동기화 모니터) + ELLIS_SPEC §11/§12 갱신 |
 
 ### 데이터 인벤토리
 
@@ -538,13 +539,26 @@ _Status snapshot 2026-06-11 (final · 9th) · **28 pages** · 2 JS modules · 8 
   → 마이페이지 (홈 대시보드 + 검색 + 통계 + 라이브 다시보기)
 ```
 
-### 운영 콘솔 5 (admin)
+### 운영 콘솔 5 (시스템·인프라)
 
 ```
 admin-channels (실시간 로그) ↔ admin-suppliers (인벤토리) ↔
 mapper (DDL 생성) ↔ admin-analytics (퍼널+라이브 메트릭) ↔
 creator-dashboard (LIVE 통계 + ELLIS 콘솔 드롭다운)
 ```
+
+### 백오피스 3 (운영팀 일상 업무) — Phase 1 신설
+
+```
+admin-dashboard (8 모듈 진입 + 오늘 KPI + 긴급 큐 + 활동 로그)
+  ↔ admin-bookings (예약 검색 · 견적 D-1 큐 · 슬라이드아웃 상세 + 감사 로그)
+  ↔ admin-products (골프텔 CRUD · 가격 룰 6종 · 채널 매니저 9 동기화 모니터)
+```
+
+**구상 문서**: [BACKOFFICE_SPEC.md](BACKOFFICE_SPEC.md) — 8 모듈 + 4 ROLE 권한 매트릭스 + Phase 1/2/3 우선순위
+**다음 사이클 (Phase 1 잔여)**: `admin-cs.html` (문의 응대), `admin-users.html` (운영자 권한·감사 로그)
+**Phase 2**: `admin-customers.html`, `admin-settlement.html`
+**Phase 3**: `admin-cms.html`
 
 ### PWA 완성도
 
@@ -554,11 +568,25 @@ creator-dashboard (LIVE 통계 + ELLIS 콘솔 드롭다운)
 - ✅ "홈 화면에 추가" 배너 (Android Chrome)
 - ✅ apple-mobile-web-app 메타 (iOS Safari)
 
-### 백엔드 준비도
+### 백엔드 준비도 (MD-only 원칙)
 
-- ✅ **ELLIS_SPEC.md** — PostgreSQL DDL + 9 어댑터 인터페이스 + 4 환경별 엔드포인트
+> ⚠️ **백엔드 = MD 문서로만 유지**. 실서버 코드 없음. 프론트 변경 시 관련 MD 함께 갱신 → 추후 실 개발팀이 본격 구현.
+
+- ✅ **ELLIS_SPEC.md** — PostgreSQL DDL (12 도메인) + 9 어댑터 인터페이스 + 4 환경별 엔드포인트 + **§11 백오피스 추가** + §12 프론트 변경 반영
 - ✅ **ALIMTALK_TEMPLATES.md** — 10 템플릿 + 월 비용 시뮬 + 14단계 마이그레이션 체크리스트
+- ✅ **BACKOFFICE_SPEC.md** ⭐ NEW — 8 운영 모듈 + 4 ROLE 권한 매트릭스 + Phase 1/2/3 + 신규 5 테이블 DDL (admins/audit_logs/cms_*/pricing_rules/supplier_settlements) + 22 API 엔드포인트
 - ✅ **mapper.html** — data.js → DDL 자동 변환 (8 모델)
 - ✅ 모든 데이터 ID 참조 정규화 (FK 가능)
-- ⏳ 실제 API 연동 (백엔드 구현 단계에서)
+- ⏳ 실제 API·서버 코드 (추후 개발팀이 본 명세 기반으로 구현)
 - ⏳ 다국어 (영/일/중) — 추후 결정 (inbound.html에 3개 언어 기반 코드 작업됨)
+
+### 📚 문서 9종 (백엔드 명세 + 운영 가이드)
+1. `ELLIS_SPEC.md` — 백엔드 전체 명세
+2. `ALIMTALK_TEMPLATES.md` — 카톡 알림톡 10 템플릿
+3. `BACKOFFICE_SPEC.md` ⭐ NEW — 백오피스 구상
+4. `PROJECT_STATUS.md` — 본 문서
+5. `QA_CHECKLIST.md` — 300+ QA 항목
+6. `README.md` — 프로젝트 소개
+7. `DEPLOY.md` — 배포 가이드
+8. `CHANGELOG.md` — 변경 이력
+9. `CONTRIBUTING.md` — 기여 가이드
