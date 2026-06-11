@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>정산 관리 | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --kakao:#FEE500;--naver:#03C75A;--toss:#0064FF;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;flex-wrap:wrap;}
+    .gnb-mini a{padding:6px 10px;border-radius:6px;font-weight:700;font-size:11.5px;color:var(--ink-3);white-space:nowrap;}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--warning));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:24px 0 12px;display:flex;justify-content:space-between;align-items:flex-end;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+    .period-selector{
+      display:flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;
+    }
+    .period-selector select{
+      background:transparent;border:none;outline:none;color:var(--ink-2);font-size:12px;font-weight:700;cursor:pointer;
+    }
+    .period-selector .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+
+    /* KPI - 정산 요약 */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+    .kpi-mini::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .kpi-mini.pending::before{background:var(--warning);}
+    .kpi-mini.paid::before{background:var(--success);}
+    .kpi-mini.creator::before{background:linear-gradient(90deg,var(--primary),var(--accent));}
+    .kpi-mini.supplier::before{background:var(--info);}
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .kpi-mini .sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;justify-content:space-between;align-items:flex-end;}
+    .tab-group{display:flex;gap:2px;}
+    .tab{padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;}
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+    .run-btn{
+      padding:8px 14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:6px;
+      font-size:12px;font-weight:900;display:flex;align-items:center;gap:5px;letter-spacing:.02em;
+    }
+    .run-btn:hover{filter:brightness(1.08);}
+
+    .tab-pane{display:none;}
+    .tab-pane.on{display:block;}
+
+    /* Filter row */
+    .filter-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+    .filter-row select, .filter-row input{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+      padding:7px 12px;color:var(--ink);font-size:12px;outline:none;font-weight:700;
+    }
+    .filter-row .chip-grp{display:flex;gap:4px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:3px;}
+    .filter-row .chip-grp button{
+      padding:4px 10px;border-radius:4px;font-size:11px;font-weight:800;color:var(--ink-3);
+    }
+    .filter-row .chip-grp button.on{background:var(--primary);color:#fff;}
+
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .toolbar-left{font-size:12px;color:var(--ink-3);}
+    .toolbar-left strong{color:var(--ink);font-family:'JetBrains Mono',monospace;}
+    .toolbar-right{display:flex;gap:6px;}
+    .toolbar-right button{
+      padding:5px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+      font-size:11px;font-weight:700;color:var(--ink-2);
+    }
+    .toolbar-right button:hover{background:var(--bg-3);}
+
+    /* Table */
+    .table-wrap{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:var(--bg-3);}
+    th{
+      text-align:left;font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;
+      text-transform:uppercase;padding:11px 14px;border-bottom:1px solid var(--line);
+    }
+    th.right{text-align:right;}
+    td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);}
+    td.right{text-align:right;}
+    tbody tr:hover{background:rgba(255,255,255,.025);}
+    tbody tr:last-child td{border-bottom:none;}
+
+    .creator-cell{display:flex;align-items:center;gap:10px;}
+    .creator-av{
+      width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--bg-3),var(--line));
+      display:grid;place-items:center;font-weight:900;font-size:13px;color:var(--accent);flex-shrink:0;
+    }
+    .creator-info .name{font-weight:800;color:var(--ink);font-size:13px;}
+    .creator-info .meta{font-size:11px;color:var(--ink-3);}
+
+    .tier-pill{
+      display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:900;
+      font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+    }
+    .tier-platinum{background:rgba(88,166,255,.18);color:var(--info);}
+    .tier-gold{background:rgba(255,210,63,.18);color:var(--accent);}
+    .tier-silver{background:rgba(176,183,195,.18);color:#B0B7C3;}
+    .tier-bronze{background:rgba(205,127,50,.18);color:#CD7F32;}
+
+    .amt{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--ink);}
+    .amt.big{color:var(--accent);font-size:14px;}
+    .amt.commission{color:var(--success);}
+    .amt.net{color:var(--primary);font-size:14px;}
+
+    .status-pill{
+      display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:800;
+    }
+    .status-pending{background:rgba(245,158,11,.15);color:var(--warning);}
+    .status-paid{background:rgba(57,211,83,.15);color:var(--success);}
+    .status-hold{background:rgba(248,81,73,.15);color:var(--danger);}
+    .status-scheduled{background:rgba(88,166,255,.15);color:var(--info);}
+
+    .action-row{display:flex;gap:4px;}
+    .action-btn{padding:4px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;font-size:11px;font-weight:700;color:var(--ink-2);}
+    .action-btn:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+    .action-btn.pay{background:var(--success);color:#fff;border-color:var(--success);}
+    .action-btn.pay:hover{background:#2CA941;}
+
+    /* PG 결제대행 정산 패널 */
+    .pg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+    .pg-card{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+      display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;
+    }
+    .pg-card::before{
+      content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+    }
+    .pg-card.kakao::before{background:var(--kakao);}
+    .pg-card.naver::before{background:var(--naver);}
+    .pg-card.toss::before{background:var(--toss);}
+    .pg-card .top{display:flex;justify-content:space-between;align-items:center;}
+    .pg-card .pg-name{font-size:14px;font-weight:900;letter-spacing:-0.01em;}
+    .pg-card .pg-name.kakao{color:#3C1E1E;background:var(--kakao);padding:3px 10px;border-radius:5px;font-size:11px;}
+    .pg-card .pg-name.naver{color:#fff;background:var(--naver);padding:3px 10px;border-radius:5px;font-size:11px;}
+    .pg-card .pg-name.toss{color:#fff;background:var(--toss);padding:3px 10px;border-radius:5px;font-size:11px;}
+    .pg-card .last-payout{font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .pg-card .total{
+      font-size:24px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent);
+    }
+    .pg-card .total .unit{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .pg-card .breakdown{font-size:11px;color:var(--ink-3);padding-top:8px;border-top:1px solid var(--line);}
+    .pg-card .breakdown .row{display:flex;justify-content:space-between;padding:3px 0;}
+    .pg-card .breakdown .row .v{color:var(--ink-2);font-family:'JetBrains Mono',monospace;font-weight:700;}
+    .pg-card .breakdown .row.fee .v{color:var(--danger);}
+    .pg-card .breakdown .row.net .v{color:var(--success);font-weight:900;font-size:13px;}
+    .pg-card .next{
+      margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--ink-3);
+    }
+    .pg-card .next strong{color:var(--info);font-family:'JetBrains Mono',monospace;}
+
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:18px 0;}
+    .pagination button{padding:6px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--ink-2);}
+    .pagination button.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .pagination .ellipsis{color:var(--ink-4);padding:0 4px;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;display:grid;place-items:center;}
+    .modal-overlay.on{opacity:1;pointer-events:auto;}
+    .modal{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:14px;
+      width:min(520px,92vw);max-height:88vh;overflow-y:auto;
+    }
+    .modal-head{padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bg-3);display:flex;justify-content:space-between;align-items:center;}
+    .modal-head .h{font-size:15px;font-weight:900;}
+    .modal-head .close{font-size:18px;color:var(--ink-3);cursor:pointer;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;}
+    .modal-head .close:hover{background:var(--bg);color:var(--ink);}
+    .modal-body{padding:20px;}
+    .modal-body .h{font-size:13px;font-weight:900;margin-bottom:10px;}
+    .modal-body .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .modal-body .stat-grid .s{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+    .modal-body .stat-grid .s .lb{font-size:10px;color:var(--ink-3);font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
+    .modal-body .stat-grid .s .vl{font-size:16px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent);margin-top:4px;}
+    .modal-body .checklist{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;color:var(--ink-2);}
+    .modal-body .checklist li{margin-bottom:6px;}
+    .modal-foot{padding:14px 20px;border-top:1px solid var(--line);background:var(--bg-3);display:flex;gap:8px;justify-content:flex-end;}
+    .modal-foot .btn{padding:8px 16px;border-radius:6px;font-size:12px;font-weight:800;}
+    .modal-foot .btn-primary{background:var(--primary);color:#fff;}
+    .modal-foot .btn-ghost{background:var(--bg-2);color:var(--ink-2);border:1px solid var(--line);}
+
+    @media (max-width:1024px){
+      .pg-grid{grid-template-columns:1fr;}
+      .kpi-row{grid-template-columns:1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="admin-customers.html">👥 회원</a>
+        <a href="admin-cs.html">💬 CS</a>
+        <a href="#" class="on">💰 정산</a>
+        <a href="admin-cms.html">📝 CMS</a>
+        <a href="admin-users.html">🔐</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">정</div>
+        <div>
+          <div class="name">정재무</div>
+          <div class="role">MANAGER</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div>
+        <div class="page-eyebrow">💰 SETTLEMENT MANAGEMENT</div>
+        <h1 class="page-title">정산 관리</h1>
+        <p class="page-sub">크리에이터 커미션 + 공급사 정산 + 결제대행(PG) 정산 — ELLIS_SPEC §5 / §11.1</p>
+      </div>
+      <div class="period-selector">
+        <span class="lb">정산 주기</span>
+        <select>
+          <option>2026-05 (5월)</option>
+          <option>2026-04 (4월)</option>
+          <option>2026-06 (6월 진행 중)</option>
+          <option>2026-Q2 (분기)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-mini creator">
+        <div class="lb">🎬 크리에이터 정산 예정 (5월)</div>
+        <div class="val">68,420,000<span class="small">원</span></div>
+        <div class="sub">48명 · 평균 142만원 / 인</div>
+      </div>
+      <div class="kpi-mini supplier">
+        <div class="lb">🤝 공급사 정산 예정 (5월)</div>
+        <div class="val">142,840,000<span class="small">원</span></div>
+        <div class="sub">9 공급사 · 평균 1,587만원 / 사</div>
+      </div>
+      <div class="kpi-mini pending">
+        <div class="lb">⏰ 송금 대기</div>
+        <div class="val" style="color:var(--warning);">48,290,000<span class="small">원</span></div>
+        <div class="sub">14건 · 6/15 일괄 송금 예정</div>
+      </div>
+      <div class="kpi-mini paid">
+        <div class="lb">✅ 이번달 송금 완료</div>
+        <div class="val" style="color:var(--success);">162,970,000<span class="small">원</span></div>
+        <div class="sub">73건 · 평균 3.2일 처리</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab-group">
+        <div class="tab on" data-tab="creator">🎬 크리에이터 정산 <span class="badge">48</span></div>
+        <div class="tab" data-tab="supplier">🤝 공급사 정산 <span class="badge">9</span></div>
+        <div class="tab" data-tab="pg">💳 결제대행(PG) <span class="badge">3</span></div>
+        <div class="tab" data-tab="history">📜 송금 이력 <span class="badge">1,284</span></div>
+      </div>
+      <button class="run-btn" onclick="openRunModal()">⚡ 5월 정산 실행</button>
+    </div>
+
+    <!-- 크리에이터 정산 -->
+    <div class="tab-pane on" id="pane-creator">
+      <div class="filter-row">
+        <select>
+          <option>전체 등급</option>
+          <option>플래티넘 (500만+)</option>
+          <option>골드 (200~500만)</option>
+          <option>실버 (50~200만)</option>
+          <option>브론즈 (~50만)</option>
+        </select>
+        <select>
+          <option>전체 상태</option>
+          <option>대기 (pending)</option>
+          <option>송금 완료 (paid)</option>
+          <option>보류 (on_hold)</option>
+        </select>
+        <div class="chip-grp">
+          <button class="on">전체</button>
+          <button>직영 상품만</button>
+          <button>프랜차이즈만</button>
+        </div>
+        <select>
+          <option>커미션 높은순</option>
+          <option>판매액 높은순</option>
+          <option>등급순</option>
+        </select>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">5월 정산 대상 <strong>48명</strong> · 총 커미션 <strong>68,420,000원</strong> · 평균 등급 보너스 <strong>+0.84%p</strong></div>
+        <div class="toolbar-right">
+          <button>📥 CSV 다운로드</button>
+          <button>📩 알림톡 일괄 발송</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" /></th>
+              <th>크리에이터</th>
+              <th style="width:90px;">등급</th>
+              <th class="right" style="width:120px;">판매액</th>
+              <th class="right" style="width:90px;">기본 커미션</th>
+              <th class="right" style="width:90px;">보너스</th>
+              <th class="right" style="width:120px;">정산액</th>
+              <th style="width:90px;">상태</th>
+              <th style="width:140px;">액션</th>
+            </tr>
+          </thead>
+          <tbody id="creatorTbody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button>‹</button>
+        <button class="on">1</button>
+        <button>2</button>
+        <button>3</button>
+        <button>4</button>
+        <button>›</button>
+      </div>
+    </div>
+
+    <!-- 공급사 정산 -->
+    <div class="tab-pane" id="pane-supplier">
+      <div class="filter-row">
+        <select>
+          <option>전체 Tier</option>
+          <option>Tier 1 (직영)</option>
+          <option>Tier 2 (프랜차이즈)</option>
+          <option>Tier 3 (외부)</option>
+        </select>
+        <select>
+          <option>전체 카테고리</option>
+          <option>골프장</option>
+          <option>호텔</option>
+          <option>액티비티</option>
+          <option>렌탈</option>
+        </select>
+        <select>
+          <option>전체 상태</option>
+          <option>대기</option>
+          <option>송금 완료</option>
+          <option>보류</option>
+        </select>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">5월 정산 대상 <strong>9 공급사</strong> · 총 정산액 <strong>142,840,000원</strong> · 평균 수수료 <strong>13.8%</strong></div>
+        <div class="toolbar-right">
+          <button>📥 인보이스 일괄 다운로드</button>
+          <button>📧 청구서 발송</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>공급사</th>
+              <th style="width:110px;">카테고리</th>
+              <th style="width:90px;">Tier</th>
+              <th class="right" style="width:120px;">매출</th>
+              <th class="right" style="width:110px;">수수료율</th>
+              <th class="right" style="width:140px;">정산액 (송금)</th>
+              <th style="width:100px;">상태</th>
+              <th style="width:140px;">액션</th>
+            </tr>
+          </thead>
+          <tbody id="supplierTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 결제대행 (PG) 정산 -->
+    <div class="tab-pane" id="pane-pg">
+      <h3 style="font-size:14px;font-weight:900;margin:0 0 14px;">📊 5월 PG 정산 (T+3 기준)</h3>
+
+      <div class="pg-grid">
+        <div class="pg-card kakao">
+          <div class="top">
+            <span class="pg-name kakao">카카오페이</span>
+            <span class="last-payout">마지막 입금 06-08</span>
+          </div>
+          <div class="total">182,420,000<span class="unit">원</span></div>
+          <div class="breakdown">
+            <div class="row"><span>매출 총액</span><span class="v">187,840,000원</span></div>
+            <div class="row fee"><span>PG 수수료 (2.9%)</span><span class="v">-5,420,000원</span></div>
+            <div class="row net"><span>실 정산액</span><span class="v">182,420,000원</span></div>
+          </div>
+          <div class="next">다음 입금일 <strong>2026-06-11 (오늘)</strong> · 8,420,000원 (T+3)</div>
+        </div>
+
+        <div class="pg-card naver">
+          <div class="top">
+            <span class="pg-name naver">네이버페이</span>
+            <span class="last-payout">마지막 입금 06-09</span>
+          </div>
+          <div class="total">98,640,000<span class="unit">원</span></div>
+          <div class="breakdown">
+            <div class="row"><span>매출 총액</span><span class="v">101,580,000원</span></div>
+            <div class="row fee"><span>PG 수수료 (2.9%)</span><span class="v">-2,940,000원</span></div>
+            <div class="row net"><span>실 정산액</span><span class="v">98,640,000원</span></div>
+          </div>
+          <div class="next">다음 입금일 <strong>2026-06-12</strong> · 5,180,000원 (T+3)</div>
+        </div>
+
+        <div class="pg-card toss">
+          <div class="top">
+            <span class="pg-name toss">토스페이먼츠</span>
+            <span class="last-payout">마지막 입금 06-10</span>
+          </div>
+          <div class="total">142,840,000<span class="unit">원</span></div>
+          <div class="breakdown">
+            <div class="row"><span>매출 총액</span><span class="v">147,180,000원</span></div>
+            <div class="row fee"><span>PG 수수료 (2.95%)</span><span class="v">-4,340,000원</span></div>
+            <div class="row net"><span>실 정산액</span><span class="v">142,840,000원</span></div>
+          </div>
+          <div class="next">다음 입금일 <strong>2026-06-13</strong> · 6,820,000원 (T+3)</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:14px;font-weight:900;margin:24px 0 14px;">📅 일별 PG 정산 이력 (최근 10일)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px;">입금일</th>
+              <th>PG사</th>
+              <th class="right">매출</th>
+              <th class="right">수수료</th>
+              <th class="right">실 입금액</th>
+              <th>입금 계좌</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-10</td>
+              <td><span class="pg-name toss" style="background:var(--toss);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;">TOSS</span></td>
+              <td class="right amt">8,420,000원</td>
+              <td class="right" style="color:var(--danger);font-family:'JetBrains Mono',monospace;">-248,000원</td>
+              <td class="right amt commission">8,172,000원</td>
+              <td>국민 ***-**-89421 (OMT 법인)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-09</td>
+              <td><span class="pg-name naver" style="background:var(--naver);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;">NAVER</span></td>
+              <td class="right amt">5,180,000원</td>
+              <td class="right" style="color:var(--danger);font-family:'JetBrains Mono',monospace;">-150,000원</td>
+              <td class="right amt commission">5,030,000원</td>
+              <td>국민 ***-**-89421 (OMT 법인)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-08</td>
+              <td><span class="pg-name kakao" style="background:var(--kakao);color:#3C1E1E;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;">KAKAO</span></td>
+              <td class="right amt">14,280,000원</td>
+              <td class="right" style="color:var(--danger);font-family:'JetBrains Mono',monospace;">-414,000원</td>
+              <td class="right amt commission">13,866,000원</td>
+              <td>국민 ***-**-89421 (OMT 법인)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-07</td>
+              <td><span class="pg-name toss" style="background:var(--toss);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;">TOSS</span></td>
+              <td class="right amt">6,820,000원</td>
+              <td class="right" style="color:var(--danger);font-family:'JetBrains Mono',monospace;">-201,000원</td>
+              <td class="right amt commission">6,619,000원</td>
+              <td>국민 ***-**-89421 (OMT 법인)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-06</td>
+              <td><span class="pg-name naver" style="background:var(--naver);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;">NAVER</span></td>
+              <td class="right amt">4,940,000원</td>
+              <td class="right" style="color:var(--danger);font-family:'JetBrains Mono',monospace;">-143,000원</td>
+              <td class="right amt commission">4,797,000원</td>
+              <td>국민 ***-**-89421 (OMT 법인)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 송금 이력 -->
+    <div class="tab-pane" id="pane-history">
+      <div class="filter-row">
+        <select>
+          <option>전체 (크리에이터 + 공급사)</option>
+          <option>크리에이터만</option>
+          <option>공급사만</option>
+        </select>
+        <input type="date" value="2026-05-01" />
+        <input type="date" value="2026-06-11" />
+        <select>
+          <option>전체 상태</option>
+          <option>송금 완료</option>
+          <option>송금 실패</option>
+          <option>보류</option>
+        </select>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">최근 30일 송금 <strong>87건</strong> · 총액 <strong>247,820,000원</strong> · 실패율 <strong>0.8%</strong></div>
+        <div class="toolbar-right">
+          <button>📥 CSV</button>
+          <button>📊 통계 차트</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px;">송금일</th>
+              <th style="width:70px;">유형</th>
+              <th>수취인</th>
+              <th class="right" style="width:130px;">금액</th>
+              <th>계좌</th>
+              <th style="width:90px;">상태</th>
+              <th style="width:100px;">담당</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-10</td>
+              <td><span class="tier-pill tier-platinum">크리에이터</span></td>
+              <td><strong style="color:var(--ink);">@golf_yuna_pro</strong> · 윤유나</td>
+              <td class="right amt big">4,820,000원</td>
+              <td>신한 ***-***-12345</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-10</td>
+              <td><span class="tier-pill tier-gold">공급사</span></td>
+              <td><strong style="color:var(--ink);">미모사 GC (필리핀)</strong></td>
+              <td class="right amt big">14,280,000원</td>
+              <td>BPI ***-***-89421 (USD)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-09</td>
+              <td><span class="tier-pill tier-gold">크리에이터</span></td>
+              <td><strong style="color:var(--ink);">@golf_minjun</strong> · 최민준</td>
+              <td class="right amt big">2,840,000원</td>
+              <td>카카오 ***-***-67890</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-09</td>
+              <td><span class="tier-pill tier-platinum">공급사</span></td>
+              <td><strong style="color:var(--ink);">카누차 오키나와</strong> (일본 직영)</td>
+              <td class="right amt big">28,920,000원</td>
+              <td>MUFG ***-***-12345 (JPY)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-08</td>
+              <td><span class="tier-pill tier-silver">크리에이터</span></td>
+              <td><strong style="color:var(--ink);">@golf_sera</strong> · 김세라</td>
+              <td class="right amt big">1,420,000원</td>
+              <td>국민 ***-***-24680</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-08</td>
+              <td><span class="tier-pill tier-bronze">크리에이터</span></td>
+              <td><strong style="color:var(--ink);">@golf_dohyun</strong> · 박도현</td>
+              <td class="right amt big">280,000원</td>
+              <td>토스 ***-***-13579</td>
+              <td><span class="status-pill status-hold">실패 · 계좌오류</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-07</td>
+              <td><span class="tier-pill tier-gold">공급사</span></td>
+              <td><strong style="color:var(--ink);">빈펄 다낭</strong> (베트남 직영)</td>
+              <td class="right amt big">22,140,000원</td>
+              <td>VCB ***-***-89421 (USD)</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-06-06</td>
+              <td><span class="tier-pill tier-platinum">크리에이터</span></td>
+              <td><strong style="color:var(--ink);">@golf_jihoon</strong> · 이지훈</td>
+              <td class="right amt big">5,280,000원</td>
+              <td>신한 ***-***-98765</td>
+              <td><span class="status-pill status-paid">완료</span></td>
+              <td>정재무</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · 정산 관리 · ELLIS_SPEC §5 settlements / §11.1 supplier_settlements
+    </div>
+  </main>
+
+  <!-- 정산 실행 모달 -->
+  <div class="modal-overlay" id="runOverlay" onclick="if(event.target===this)closeRunModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="h">⚡ 5월 정산 실행</div>
+        <button class="close" onclick="closeRunModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="h">📊 정산 대상 요약</div>
+        <div class="stat-grid">
+          <div class="s">
+            <div class="lb">크리에이터</div>
+            <div class="vl">48명 · 6,842만</div>
+          </div>
+          <div class="s">
+            <div class="lb">공급사</div>
+            <div class="vl">9 공급사 · 1억 4,284만</div>
+          </div>
+          <div class="s">
+            <div class="lb">총 송금액</div>
+            <div class="vl" style="color:var(--primary);">2억 1,126만</div>
+          </div>
+          <div class="s">
+            <div class="lb">예상 처리 시간</div>
+            <div class="vl">~3.2 시간</div>
+          </div>
+        </div>
+
+        <div class="h">⚠️ 실행 전 체크리스트</div>
+        <ul class="checklist">
+          <li>✓ 5월 모든 예약 확정/완료 상태 확인 (2,486건)</li>
+          <li>✓ 환불·취소 정산 차감 반영 (-94건 · -1,820,000원)</li>
+          <li>✓ 크리에이터 등급 보너스 산정 (평균 +0.84%p)</li>
+          <li>✓ 공급사 수수료율 적용 확인 (직영 22.5% / FC 15%)</li>
+          <li>⚠️ 정산 실행 시 audit_logs INSERT 자동 + 알림톡 일괄 발송 (TPL-005 변형)</li>
+          <li>⚠️ 송금은 정산 실행 후 SUPER_ADMIN의 별도 승인 필요</li>
+        </ul>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeRunModal()">취소</button>
+        <button class="btn btn-primary" onclick="alert('✅ 5월 정산 실행됨\n· 57건 settlement INSERT\n· audit_logs INSERT (settlement.run)\n· 다음: SUPER_ADMIN 송금 승인 대기');closeRunModal();">⚡ 정산 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CREATORS = [
+      {handle:'@golf_yuna_pro', name:'윤유나', tier:'platinum', sales:'48,200,000원', baseRate:'10%', bonus:'+2%p', commission:'4,820,000원', status:'pending', avatar:'윤'},
+      {handle:'@golf_jihoon', name:'이지훈', tier:'platinum', sales:'52,800,000원', baseRate:'10%', bonus:'+2%p', commission:'5,280,000원', status:'paid', avatar:'이'},
+      {handle:'@golf_minjun', name:'최민준', tier:'gold', sales:'28,400,000원', baseRate:'10%', bonus:'+1%p', commission:'2,840,000원', status:'pending', avatar:'최'},
+      {handle:'@golf_sera', name:'김세라', tier:'silver', sales:'18,920,000원', baseRate:'7.5%', bonus:'+0.5%p', commission:'1,420,000원', status:'paid', avatar:'김'},
+      {handle:'@golf_dohyun', name:'박도현', tier:'bronze', sales:'5,600,000원', baseRate:'5%', bonus:'+0%p', commission:'280,000원', status:'hold', avatar:'박'},
+      {handle:'@golf_master_kim', name:'김장수', tier:'gold', sales:'32,400,000원', baseRate:'10%', bonus:'+1%p', commission:'3,564,000원', status:'pending', avatar:'김'},
+      {handle:'@yuna_golf_life', name:'정유나', tier:'gold', sales:'24,800,000원', baseRate:'10%', bonus:'+1%p', commission:'2,728,000원', status:'pending', avatar:'정'},
+      {handle:'@golf_in_asia', name:'한진수', tier:'silver', sales:'14,200,000원', baseRate:'7.5%', bonus:'+0.5%p', commission:'1,136,000원', status:'pending', avatar:'한'},
+      {handle:'@swing_sister', name:'서지영', tier:'silver', sales:'11,800,000원', baseRate:'7.5%', bonus:'+0.5%p', commission:'944,000원', status:'paid', avatar:'서'},
+      {handle:'@golf_kang', name:'강민호', tier:'bronze', sales:'4,200,000원', baseRate:'5%', bonus:'+0%p', commission:'210,000원', status:'pending', avatar:'강'},
+      {handle:'@putting_queen', name:'송다은', tier:'gold', sales:'29,100,000원', baseRate:'10%', bonus:'+1%p', commission:'3,201,000원', status:'pending', avatar:'송'},
+      {handle:'@birdie_oh', name:'오현우', tier:'silver', sales:'13,600,000원', baseRate:'7.5%', bonus:'+0.5%p', commission:'1,088,000원', status:'paid', avatar:'오'},
+    ];
+    const TIER_LABEL = {platinum:'💎 플래티넘', gold:'🥇 골드', silver:'🥈 실버', bronze:'🥉 브론즈'};
+    const STATUS_LABEL = {pending:'대기', paid:'송금완료', hold:'보류'};
+
+    function renderCreators(){
+      const tb = document.getElementById('creatorTbody');
+      tb.innerHTML = CREATORS.map(c => `
+        <tr>
+          <td><input type="checkbox" /></td>
+          <td>
+            <div class="creator-cell">
+              <div class="creator-av">${c.avatar}</div>
+              <div class="creator-info">
+                <div class="name">${c.handle}</div>
+                <div class="meta">${c.name}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="tier-pill tier-${c.tier}">${TIER_LABEL[c.tier]}</span></td>
+          <td class="right amt">${c.sales}</td>
+          <td class="right" style="color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:12px;">${c.baseRate}</td>
+          <td class="right" style="color:var(--success);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;">${c.bonus}</td>
+          <td class="right amt net">${c.commission}</td>
+          <td><span class="status-pill status-${c.status}">${STATUS_LABEL[c.status]}</span></td>
+          <td>
+            <div class="action-row">
+              <button class="action-btn" onclick="alert('정산 명세서 PDF 미리보기')">명세서</button>
+              ${c.status==='pending'?'<button class="action-btn pay" onclick="alert(\'송금 실행 (SUPER_ADMIN 승인 필요)\')">송금</button>':''}
+              ${c.status==='hold'?'<button class="action-btn" onclick="alert(\'계좌 정보 재확인 모달\')">계좌수정</button>':''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+    renderCreators();
+
+    const SUPPLIERS = [
+      {name:'카누차 오키나와', category:'골프장+호텔', tier:'platinum', tierName:'Tier 1 (직영)', sales:'128,800,000원', rate:'22.5%', amount:'28,920,000원', status:'paid'},
+      {name:'빈펄 다낭', category:'골프장+호텔', tier:'platinum', tierName:'Tier 1 (직영)', sales:'98,400,000원', rate:'22.5%', amount:'22,140,000원', status:'paid'},
+      {name:'빈펄 푸꾸옥', category:'골프장+호텔', tier:'platinum', tierName:'Tier 1 (직영)', sales:'78,200,000원', rate:'22.5%', amount:'17,595,000원', status:'pending'},
+      {name:'빈펄 나트랑', category:'골프장+호텔', tier:'platinum', tierName:'Tier 1 (직영)', sales:'62,400,000원', rate:'22.5%', amount:'14,040,000원', status:'pending'},
+      {name:'미모사 GC', category:'골프장', tier:'gold', tierName:'Tier 2 (FC · PH)', sales:'95,200,000원', rate:'15%', amount:'14,280,000원', status:'paid'},
+      {name:'페스타 GC', category:'골프장', tier:'gold', tierName:'Tier 2 (FC · PH)', sales:'62,400,000원', rate:'15%', amount:'9,360,000원', status:'pending'},
+      {name:'알파인 방콕', category:'골프장', tier:'gold', tierName:'Tier 2 (FC · TH)', sales:'58,200,000원', rate:'15%', amount:'8,730,000원', status:'pending'},
+      {name:'칸차나 파타야', category:'호텔', tier:'gold', tierName:'Tier 2 (FC · TH)', sales:'42,800,000원', rate:'15%', amount:'6,420,000원', status:'pending'},
+      {name:'GDO Japan', category:'채널 매니저', tier:'silver', tierName:'Tier 3 (외부)', sales:'140,800,000원', rate:'15%', amount:'21,120,000원', status:'pending'},
+    ];
+
+    function renderSuppliers(){
+      const tb = document.getElementById('supplierTbody');
+      tb.innerHTML = SUPPLIERS.map(s => `
+        <tr>
+          <td><strong style="color:var(--ink);font-size:13px;">${s.name}</strong></td>
+          <td style="color:var(--ink-3);font-size:12px;">${s.category}</td>
+          <td><span class="tier-pill tier-${s.tier}">${s.tierName}</span></td>
+          <td class="right amt">${s.sales}</td>
+          <td class="right" style="color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:12px;">${s.rate}</td>
+          <td class="right amt net">${s.amount}</td>
+          <td><span class="status-pill status-${s.status}">${STATUS_LABEL[s.status]}</span></td>
+          <td>
+            <div class="action-row">
+              <button class="action-btn" onclick="alert('인보이스 PDF 생성')">인보이스</button>
+              ${s.status==='pending'?'<button class="action-btn pay" onclick="alert(\'해외 송금 SWIFT 처리\')">송금</button>':''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+    renderSuppliers();
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        const tab = t.dataset.tab;
+        if(!tab) return;
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+        document.getElementById('pane-'+tab).classList.add('on');
+      });
+    });
+
+    // Run modal
+    function openRunModal(){document.getElementById('runOverlay').classList.add('on');}
+    function closeRunModal(){document.getElementById('runOverlay').classList.remove('on');}
+  </script>
+</body>
+</html>

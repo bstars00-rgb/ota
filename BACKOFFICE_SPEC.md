@@ -457,16 +457,16 @@ CREATE TABLE supplier_settlements (
 
 ## 10. 마이그레이션 체크리스트
 
-### ✅ 프론트엔드 프로토타입 (6/8 모듈 완료)
-- [x] BACKOFFICE_SPEC.md 작성 (v1.0)
+### ✅ 프론트엔드 프로토타입 (8/8 모듈 완료) 🎯
+- [x] BACKOFFICE_SPEC.md 작성 (v1.0 → v1.2)
 - [x] admin-dashboard.html — 사이클 10
 - [x] admin-bookings.html — 사이클 10
 - [x] admin-products.html — 사이클 10
-- [x] **admin-cs.html — 사이클 11** ⭐ NEW (3 탭: 문의 응대 + 리뷰 관리 + 알림톡 이력)
-- [x] **admin-customers.html — 사이클 11** ⭐ NEW (Phase 2 조기 진행 · 5등급 분포)
-- [x] **admin-users.html — 사이클 11** ⭐ NEW (24명 운영자 + 권한 매트릭스 + 감사 로그)
-- [ ] admin-settlement.html — Phase 2 잔여
-- [ ] admin-cms.html — Phase 3
+- [x] admin-cs.html — 사이클 11 (3 탭: 문의 응대 + 리뷰 관리 + 알림톡 이력)
+- [x] admin-customers.html — 사이클 11 (Phase 2 조기 · 5등급 분포)
+- [x] admin-users.html — 사이클 11 (24명 운영자 + 권한 매트릭스 + 감사 로그)
+- [x] **admin-settlement.html — 사이클 12** ⭐ NEW (크리에이터 12명 + 공급사 9 + PG 3종 + 송금 이력 8건 + 정산 실행 모달)
+- [x] **admin-cms.html — 사이클 12** ⭐ NEW (배너 8 + 인기 검색어 6 + 공지·FAQ 6 + 가격 룰 6)
 
 ### ⏳ 백엔드 구현 (추후 개발팀)
 - [ ] ELLIS DB 스키마 ALTER (admins / audit_logs / cms_* / pricing_rules / supplier_settlements)
@@ -491,7 +491,8 @@ CREATE TABLE supplier_settlements (
 
 | 버전 | 일자 | 변경 |
 |---|---|---|
-| **v1.1** | 2026-06-11 | 사이클 11 — admin-cs / admin-customers / admin-users 3 페이지 추가 · Phase 1 완료 + Phase 2 조기 진입 |
+| **v1.2** | 2026-06-11 | 사이클 12 — admin-settlement / admin-cms 2 페이지 추가 · **8 모듈 모두 완성** 🎯 · 8 페이지 GNB 통일 (8 모듈 균등) |
+| v1.1 | 2026-06-11 | 사이클 11 — admin-cs / admin-customers / admin-users 3 페이지 · Phase 1 완료 + Phase 2 조기 진입 |
 | v1.0 | 2026-06-11 | 초기 구상 — 8 모듈 · 4 ROLE · admin-dashboard/bookings/products 3 페이지 |
 
 ---

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMS | ELLIS BackOffice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--warning:#F59E0B;--danger:#F85149;--info:#58A6FF;
+      --radius:8px;--radius-lg:12px;
+      --header-h:60px;--max-w:1600px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select,textarea{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;flex-wrap:wrap;}
+    .gnb-mini a{padding:6px 10px;border-radius:6px;font-weight:700;font-size:11.5px;color:var(--ink-3);white-space:nowrap;}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+    .gnb-mini .divider{width:1px;height:18px;background:var(--line);margin:auto 4px;}
+    .user-pill{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg-3);border-radius:8px;}
+    .user-pill .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--info),var(--primary));display:grid;place-items:center;font-weight:900;font-size:11px;color:#fff;}
+    .user-pill .name{font-size:12px;font-weight:800;color:var(--ink);}
+    .user-pill .role{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.04em;}
+
+    /* Page head */
+    .page-head{padding:24px 0 12px;display:flex;justify-content:space-between;align-items:flex-end;}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--ink-3);margin:0;}
+    .new-btn{
+      padding:9px 16px;background:var(--primary);color:#fff;border-radius:8px;font-weight:800;font-size:13px;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .new-btn:hover{background:#FF8B5C;}
+
+    /* KPI */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+    .kpi-mini{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;border-left:3px solid var(--info);}
+    .kpi-mini .lb{font-size:10px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-mini .val{font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .kpi-mini .val .small{font-size:13px;color:var(--ink-3);font-weight:700;margin-left:2px;}
+    .kpi-mini .sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;}
+    .tab{padding:10px 16px;font-size:13px;font-weight:800;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;}
+    .tab:hover{color:var(--ink-2);}
+    .tab.on{color:var(--ink);border-bottom-color:var(--primary);}
+    .tab .badge{font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;background:var(--bg-3);color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .tab.on .badge{background:rgba(255,107,53,.2);color:var(--primary);}
+
+    .tab-pane{display:none;}
+    .tab-pane.on{display:block;}
+
+    /* 배너 */
+    .banner-toolbar{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;
+    }
+    .slot-chips{display:flex;gap:6px;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:4px;}
+    .slot-chips button{
+      padding:6px 14px;border-radius:5px;font-size:12px;font-weight:800;color:var(--ink-3);
+    }
+    .slot-chips button.on{background:var(--primary);color:#fff;}
+    .slot-chips button .ic{margin-right:4px;}
+
+    .banner-list{
+      background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    }
+    .banner-row{
+      display:grid;grid-template-columns:32px 200px 1fr 90px 130px 80px 80px 100px;gap:14px;align-items:center;
+      padding:14px 18px;border-bottom:1px solid var(--line);transition:background .12s;
+    }
+    .banner-row:hover{background:rgba(255,255,255,.025);}
+    .banner-row:last-child{border-bottom:none;}
+    .banner-row.draft{opacity:.55;}
+    .banner-row .drag{font-size:14px;color:var(--ink-4);cursor:grab;}
+    .banner-row .drag:hover{color:var(--accent);}
+    .banner-thumb{
+      width:200px;height:100px;border-radius:8px;background:linear-gradient(135deg,var(--bg-3),var(--line));
+      display:grid;place-items:center;font-size:32px;color:var(--ink-3);position:relative;overflow:hidden;
+    }
+    .banner-thumb.hero-1{background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;}
+    .banner-thumb.hero-2{background:linear-gradient(135deg,#58A6FF,#39D353);color:#fff;}
+    .banner-thumb.hero-3{background:linear-gradient(135deg,#DA70D6,#FF6B35);color:#fff;}
+    .banner-thumb.sidebar-1{background:linear-gradient(135deg,#FFD23F,#FF9A6C);color:#fff;}
+    .banner-thumb.mobile-1{background:linear-gradient(135deg,#1A237E,#5C6BC0);color:#fff;}
+    .banner-thumb .priority-mark{
+      position:absolute;top:6px;left:6px;width:24px;height:24px;background:rgba(0,0,0,.6);color:var(--accent);
+      border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;font-family:'JetBrains Mono',monospace;
+    }
+    .banner-info .name{font-size:14px;font-weight:900;color:var(--ink);margin-bottom:3px;}
+    .banner-info .link{font-size:11px;color:var(--info);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;display:block;}
+    .banner-info .desc{font-size:11px;color:var(--ink-3);margin-top:3px;}
+    .slot-tag{
+      display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:900;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .slot-hero{background:rgba(255,107,53,.18);color:var(--primary);}
+    .slot-sidebar{background:rgba(255,210,63,.18);color:var(--accent);}
+    .slot-mobile-home{background:rgba(88,166,255,.18);color:var(--info);}
+    .banner-period{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;line-height:1.4;}
+    .banner-period .now{color:var(--success);font-weight:800;}
+    .banner-period .future{color:var(--warning);font-weight:800;}
+    .banner-period .past{color:var(--ink-4);}
+    .banner-stat{text-align:right;font-family:'JetBrains Mono',monospace;}
+    .banner-stat .num{font-size:14px;font-weight:900;color:var(--accent);}
+    .banner-stat .lb{font-size:10px;color:var(--ink-3);}
+    .toggle{
+      position:relative;width:36px;height:20px;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;cursor:pointer;
+    }
+    .toggle::after{
+      content:'';position:absolute;top:1px;left:1px;width:16px;height:16px;background:var(--ink-3);border-radius:50%;
+      transition:all .15s;
+    }
+    .toggle.on{background:var(--success);border-color:var(--success);}
+    .toggle.on::after{left:17px;background:#fff;}
+    .banner-actions{display:flex;gap:4px;justify-content:flex-end;}
+    .banner-actions button{
+      padding:4px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:11px;font-weight:700;color:var(--ink-2);
+    }
+    .banner-actions button:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+
+    /* 인기 검색어 */
+    .keyword-grid{display:grid;grid-template-columns:380px 1fr;gap:18px;}
+    .keyword-list{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+    .keyword-head{padding:12px 16px;background:var(--bg-3);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .keyword-head .h{font-size:13px;font-weight:900;}
+    .keyword-row{
+      display:grid;grid-template-columns:28px 32px 1fr 70px 60px 70px;gap:8px;align-items:center;
+      padding:11px 16px;border-bottom:1px solid var(--line);
+    }
+    .keyword-row:last-child{border-bottom:none;}
+    .keyword-row .rank{
+      font-size:14px;font-weight:900;font-family:'JetBrains Mono',monospace;text-align:center;
+    }
+    .keyword-row .rank.top3{color:var(--primary);}
+    .keyword-row .rank.normal{color:var(--ink-3);}
+    .keyword-row .ic{font-size:16px;text-align:center;}
+    .keyword-row .name{font-size:13px;font-weight:800;color:var(--ink);}
+    .keyword-row .score{font-size:11px;color:var(--success);font-weight:800;font-family:'JetBrains Mono',monospace;text-align:right;}
+    .keyword-row .score.down{color:var(--danger);}
+    .keyword-row .boost{font-size:11px;color:var(--accent);font-weight:800;font-family:'JetBrains Mono',monospace;text-align:right;}
+    .keyword-row .edit-btn{
+      padding:3px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:10px;font-weight:700;color:var(--ink-2);
+    }
+    .keyword-row .edit-btn:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+    .keyword-row .drag{font-size:13px;color:var(--ink-4);cursor:grab;}
+
+    .keyword-form{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
+    .keyword-form .h{font-size:14px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .form-field{margin-bottom:14px;}
+    .form-field label{font-size:11px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:5px;}
+    .form-field input, .form-field select, .form-field textarea{
+      width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 12px;
+      color:var(--ink);font-size:13px;outline:none;
+    }
+    .form-field .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .form-field .hint{font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.5;}
+    .form-actions{display:flex;gap:8px;}
+    .form-actions button{flex:1;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:800;}
+    .form-actions .save{background:var(--primary);color:#fff;}
+    .form-actions .ghost{background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line);}
+
+    /* 공지·FAQ */
+    .notice-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+    .notice-list{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+    .notice-row{
+      display:grid;grid-template-columns:24px 1fr 110px 120px 70px 100px;gap:14px;align-items:center;
+      padding:12px 18px;border-bottom:1px solid var(--line);transition:background .12s;
+    }
+    .notice-row:hover{background:rgba(255,255,255,.025);}
+    .notice-row:last-child{border-bottom:none;}
+    .notice-row.pinned{background:rgba(255,210,63,.04);border-left:3px solid var(--accent);}
+    .notice-row .pin{font-size:14px;text-align:center;}
+    .notice-row .pin.active{color:var(--accent);}
+    .notice-row .pin.dim{color:var(--ink-4);}
+    .notice-row .title{font-size:13px;font-weight:800;color:var(--ink);}
+    .notice-row .body{font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+    .notice-row .slot{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;}
+    .notice-row .period{font-size:11px;color:var(--ink-2);font-family:'JetBrains Mono',monospace;}
+    .notice-row .views{font-size:12px;color:var(--accent);font-weight:800;font-family:'JetBrains Mono',monospace;text-align:right;}
+    .notice-row .acts{display:flex;gap:3px;justify-content:flex-end;}
+    .notice-row .acts button{
+      padding:3px 8px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:10px;font-weight:700;color:var(--ink-2);
+    }
+    .notice-row .acts button:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+
+    /* 가격 정책 (재사용) */
+    .pricing-card{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;}
+    .pricing-card .h{font-size:14px;font-weight:900;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+    .rule-row{
+      display:grid;grid-template-columns:160px 1fr 100px 110px 100px;gap:10px;align-items:center;
+      padding:11px 0;border-bottom:1px dashed var(--line);font-size:12px;
+    }
+    .rule-row:last-child{border-bottom:none;}
+    .rule-row .name{font-weight:800;color:var(--ink);}
+    .rule-row .range{color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:11px;}
+    .rule-row .scope{color:var(--info);font-family:'JetBrains Mono',monospace;font-size:11px;}
+    .rule-row .delta{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:14px;text-align:right;}
+    .rule-row .delta.up{color:var(--danger);}
+    .rule-row .delta.down{color:var(--success);}
+    .rule-row .acts{display:flex;gap:4px;justify-content:flex-end;}
+    .rule-row .acts button{
+      padding:3px 9px;background:var(--bg-3);border:1px solid var(--line);border-radius:5px;
+      font-size:10px;font-weight:700;color:var(--ink-2);
+    }
+    .rule-row .acts button:hover{background:var(--bg);color:var(--ink);border-color:var(--primary);}
+
+    /* Preview frame */
+    .preview-frame{
+      background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:14px;
+      margin-bottom:14px;font-size:11px;color:var(--ink-3);
+    }
+    .preview-frame .h{font-size:11px;font-weight:900;color:var(--ink-2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+    .preview-frame .preview-banner{
+      background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;padding:24px 28px;border-radius:8px;
+      font-weight:900;font-size:14px;display:flex;justify-content:space-between;align-items:center;
+    }
+    .preview-frame .preview-banner .right{font-size:11px;opacity:.85;}
+
+    @media (max-width:1024px){
+      .keyword-grid{grid-template-columns:1fr;}
+      .banner-row{grid-template-columns:1fr;text-align:center;}
+      .banner-thumb{width:100%;}
+      .kpi-row{grid-template-columns:1fr 1fr;}
+      .gnb-mini a:not(.on){display:none;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="admin-dashboard.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">BACKOFFICE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-dashboard.html">🏠</a>
+        <a href="admin-bookings.html">🎫 예약</a>
+        <a href="admin-products.html">⛳ 상품</a>
+        <a href="admin-customers.html">👥 회원</a>
+        <a href="admin-cs.html">💬 CS</a>
+        <a href="admin-settlement.html">💰 정산</a>
+        <a href="#" class="on">📝 CMS</a>
+        <a href="admin-users.html">🔐</a>
+        <span class="divider"></span>
+        <a href="admin-channels.html" style="color:var(--ink-4);">시스템 →</a>
+      </nav>
+      <div class="user-pill">
+        <div class="avatar">강</div>
+        <div>
+          <div class="name">강마케팅</div>
+          <div class="role">MANAGER</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div>
+        <div class="page-eyebrow">📝 CONTENT MANAGEMENT</div>
+        <h1 class="page-title">CMS</h1>
+        <p class="page-sub">메인 배너 · 인기 검색어 · 공지·FAQ · 가격 정책 룰 — ELLIS_SPEC §11.1 cms_*</p>
+      </div>
+      <button class="new-btn" onclick="alert('새 컨텐츠 등록 — 슬롯별 폼 분기')">+ 새 컨텐츠</button>
+    </section>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-mini">
+        <div class="lb">🖼️ 활성 배너</div>
+        <div class="val">8<span class="small">개</span></div>
+        <div class="sub">Hero 3 / Sidebar 2 / Mobile 3</div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">🔥 인기 검색어</div>
+        <div class="val">6<span class="small">개</span></div>
+        <div class="sub">실시간 1위 · "푸꾸옥 골프텔"</div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">📢 공지·FAQ</div>
+        <div class="val">24<span class="small">건</span></div>
+        <div class="sub">상단 고정 3 / 진행 중 18</div>
+      </div>
+      <div class="kpi-mini">
+        <div class="lb">💸 활성 가격 룰</div>
+        <div class="val">6<span class="small">개</span></div>
+        <div class="sub">성수기 +18% 적용 중</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab on" data-tab="banner">🖼️ 메인 배너 <span class="badge">8</span></div>
+      <div class="tab" data-tab="keyword">🔥 인기 검색어 <span class="badge">6</span></div>
+      <div class="tab" data-tab="notice">📢 공지·FAQ <span class="badge">24</span></div>
+      <div class="tab" data-tab="pricing">💸 가격 정책 <span class="badge">6</span></div>
+    </div>
+
+    <!-- 배너 -->
+    <div class="tab-pane on" id="pane-banner">
+      <div class="banner-toolbar">
+        <div class="slot-chips">
+          <button class="on" data-slot="all">전체</button>
+          <button data-slot="hero"><span class="ic">🎯</span>Hero (메인 상단)</button>
+          <button data-slot="sidebar"><span class="ic">📍</span>Sidebar (검색결과 우측)</button>
+          <button data-slot="mobile-home"><span class="ic">📱</span>Mobile Home</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);">드래그로 우선순위 정렬 · 토글로 활성/비활성</div>
+      </div>
+
+      <div class="preview-frame">
+        <div class="h">🎬 현재 1순위 Hero 배너 미리보기 (index.html)</div>
+        <div class="preview-banner">
+          <div>
+            <div style="font-size:20px;font-weight:900;margin-bottom:4px;">🌸 6월 골프텔 특가 </div>
+            <div style="font-size:12px;font-weight:700;opacity:.9;">베트남 · 일본 직영 골프텔 최대 25% 할인 · 6/30까지</div>
+          </div>
+          <div class="right">▶ /search.html?promo=summer-2026</div>
+        </div>
+      </div>
+
+      <div class="banner-list" id="bannerList"></div>
+    </div>
+
+    <!-- 인기 검색어 -->
+    <div class="tab-pane" id="pane-keyword">
+      <div class="keyword-grid">
+        <div class="keyword-list">
+          <div class="keyword-head">
+            <div class="h">🔥 실시간 인기 검색어 TOP 6</div>
+            <select style="background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:4px 8px;color:var(--ink-2);font-size:11px;font-weight:700;outline:none;">
+              <option>실시간 (1h)</option>
+              <option>오늘</option>
+              <option>이번주</option>
+              <option>이번달</option>
+            </select>
+          </div>
+          <div id="keywordList"></div>
+        </div>
+
+        <div class="keyword-form">
+          <div class="h">✏️ 키워드 편집 / 등록</div>
+          <div class="form-field">
+            <label>검색 키워드</label>
+            <input type="text" value="푸꾸옥 골프텔" />
+          </div>
+          <div class="form-field">
+            <label>표시 순위 (수동)</label>
+            <select>
+              <option>자동 (인기도)</option>
+              <option selected>1위 (고정)</option>
+              <option>2위</option>
+              <option>3위</option>
+              <option>4위</option>
+              <option>5위</option>
+              <option>6위</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>점수 라벨</label>
+            <div class="row">
+              <input type="text" value="+128%" placeholder="+128%" />
+              <select>
+                <option selected>🔥 Hot</option>
+                <option>🆕 New</option>
+                <option>🏆 1위</option>
+                <option>⭐ 추천</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>표시 기간</label>
+            <div class="row">
+              <input type="date" value="2026-06-10" />
+              <input type="date" value="2026-06-30" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label>검색 가중치 (boost_factor)</label>
+            <input type="range" min="0.5" max="3" step="0.1" value="1.5" />
+            <div class="hint">현재 <strong style="color:var(--accent);font-family:'JetBrains Mono',monospace;">1.5x</strong> · 1.0이 기본, 검색 결과에서 우선 노출</div>
+          </div>
+          <div class="form-field">
+            <label>비고 (운영 메모)</label>
+            <textarea rows="2" style="resize:vertical;">베트남 직영국 노출 강화 · 6월 프로모션 연계</textarea>
+          </div>
+          <div class="form-actions">
+            <button class="ghost" onclick="alert('취소')">취소</button>
+            <button class="save" onclick="alert('✅ cms_trending_keywords UPDATE\\n· audit_logs INSERT\\n· 캐시 무효화 (5분 내 반영)')">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공지·FAQ -->
+    <div class="tab-pane" id="pane-notice">
+      <div class="notice-toolbar">
+        <div class="slot-chips">
+          <button class="on">전체</button>
+          <button>📌 메인 상단</button>
+          <button>👤 마이페이지 상단</button>
+          <button>🔔 모달 공지</button>
+          <button>❓ FAQ</button>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <select style="background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--ink-2);font-size:11px;font-weight:700;outline:none;">
+            <option>전체 상태</option>
+            <option>진행 중</option>
+            <option>예약</option>
+            <option>종료</option>
+          </select>
+          <button class="new-btn" style="padding:6px 14px;font-size:11px;" onclick="alert('새 공지 작성 모달')">+ 공지 작성</button>
+        </div>
+      </div>
+
+      <div class="notice-list">
+        <div class="notice-row pinned">
+          <div class="pin active">📌</div>
+          <div>
+            <div class="title">🌸 2026 여름 성수기 안내 (7/15 ~ 8/25)</div>
+            <div class="body">베트남·필리핀 골프텔 성수기 가산 (+18%) 적용 안내 + 예약 확정 D-7일까지 마감…</div>
+          </div>
+          <div class="slot">main-top</div>
+          <div class="period">2026-06-01<br>~ 2026-08-25</div>
+          <div class="views">2,840</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+        <div class="notice-row pinned">
+          <div class="pin active">📌</div>
+          <div>
+            <div class="title">⚡ 카카오페이 결제 일시 점검 (6/15 02:00~04:00)</div>
+            <div class="body">2026-06-15 새벽 점검 시간 동안 카카오페이 결제 불가. 네이버페이·토스 정상 이용 가능합니다.</div>
+          </div>
+          <div class="slot">modal</div>
+          <div class="period">2026-06-10<br>~ 2026-06-15</div>
+          <div class="views">1,284</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+        <div class="notice-row pinned">
+          <div class="pin active">📌</div>
+          <div>
+            <div class="title">🛂 베트남 무비자 입국 안내 (개정 2026-05)</div>
+            <div class="body">45일 무비자 입국 가능 (한국 여권). 입국 시 출국 항공권 + 호텔 예약 확인서 지참 권장…</div>
+          </div>
+          <div class="slot">mypage-top</div>
+          <div class="period">2026-05-01<br>~ <strong>무기한</strong></div>
+          <div class="views">8,420</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+        <div class="notice-row">
+          <div class="pin dim">○</div>
+          <div>
+            <div class="title">신규 골프텔 오픈 — 나트랑 빈펄 7박 럭셔리</div>
+            <div class="body">2026년 6월 베트남 직영 신규 골프텔 오픈! VIP 매니저 1:1 케어 + 무료 공항 픽업.</div>
+          </div>
+          <div class="slot">main-top</div>
+          <div class="period">2026-06-05<br>~ 2026-07-05</div>
+          <div class="views">1,847</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+        <div class="notice-row">
+          <div class="pin dim">○</div>
+          <div>
+            <div class="title">FAQ — 라운드 당일 비/태풍 시 어떻게 되나요?</div>
+            <div class="body">악천후 시 골프장 정책에 따라 환불·일정 변경 가능. 자세한 사항은 골프텔 상세 페이지 "악천후 규정"…</div>
+          </div>
+          <div class="slot">FAQ</div>
+          <div class="period">상시</div>
+          <div class="views">3,420</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+        <div class="notice-row">
+          <div class="pin dim">○</div>
+          <div>
+            <div class="title">FAQ — 캐디 팁은 얼마 정도 드려야 하나요?</div>
+            <div class="body">국가별 차이 있음. 베트남 $5-10 / 태국 200-300바트 / 필리핀 ₱200-300 / 일본 필요 없음 (서비스 포함)…</div>
+          </div>
+          <div class="slot">FAQ</div>
+          <div class="period">상시</div>
+          <div class="views">2,840</div>
+          <div class="acts">
+            <button onclick="alert('편집 모달')">편집</button>
+            <button onclick="alert('미리보기')">👁️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 가격 정책 -->
+    <div class="tab-pane" id="pane-pricing">
+      <div class="pricing-card">
+        <div class="h">
+          💸 가격 정책 룰 (전체 적용) <span style="font-size:11px;color:var(--ink-3);font-weight:700;">admin-products.html과 공유</span>
+          <button class="new-btn" style="padding:6px 14px;font-size:11px;" onclick="alert('가격 룰 추가 모달')">+ 룰 추가</button>
+        </div>
+        <div class="rule-row">
+          <div class="name">🌸 성수기 가산</div>
+          <div class="range">2026-07-15 ~ 08-25</div>
+          <div class="scope">VN · PH</div>
+          <div class="delta up">+18%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+        <div class="rule-row">
+          <div class="name">🎌 일본 골든위크</div>
+          <div class="range">2026-04-29 ~ 05-06</div>
+          <div class="scope">JP 직영 전체</div>
+          <div class="delta up">+25%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+        <div class="rule-row">
+          <div class="name">📅 주말 가산</div>
+          <div class="range">매주 토·일 라운딩</div>
+          <div class="scope">전 국가</div>
+          <div class="delta up">+10%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+        <div class="rule-row">
+          <div class="name">❄️ 비수기 할인</div>
+          <div class="range">2026-09-01 ~ 11-15</div>
+          <div class="scope">TH · PH</div>
+          <div class="delta down">-12%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+        <div class="rule-row">
+          <div class="name">👥 단체 5인 이상</div>
+          <div class="range">상시</div>
+          <div class="scope">전 상품</div>
+          <div class="delta down">-5%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+        <div class="rule-row">
+          <div class="name">⭐ VIP 회원</div>
+          <div class="range">상시</div>
+          <div class="scope">VIP·PLATINUM 등급</div>
+          <div class="delta down">-7%</div>
+          <div class="acts">
+            <button onclick="alert('편집')">편집</button>
+            <button onclick="alert('비활성화')">⏸</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-2);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--ink-3);">
+        💡 <strong style="color:var(--ink);">참고:</strong> 가격 룰은 admin-products.html에서도 동일하게 노출되며, 변경 시 모든 미확정 견적이 자동 재계산됩니다.
+        룰 충돌 시 priority 높은 룰이 우선 적용되며, audit_logs에 자동 기록됩니다.
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--ink-4);font-size:11px;">
+      ELLIS BackOffice · CMS · ELLIS_SPEC §11.1 cms_banners / cms_trending_keywords / cms_notices / pricing_rules
+    </div>
+  </main>
+
+  <script>
+    // 배너 데이터
+    const BANNERS = [
+      {id:'b-9', slot:'hero', priority:1, name:'🌸 6월 골프텔 특가', link:'/search.html?promo=summer-2026', period:{start:'2026-06-01', end:'2026-06-30', status:'now'}, click:8420, active:true, thumb:'hero-1', icon:'🌸'},
+      {id:'b-8', slot:'hero', priority:2, name:'🎌 일본 직영 골프텔 신규 오픈', link:'/golftels.html?country=japan', period:{start:'2026-06-05', end:'2026-07-05', status:'now'}, click:4280, active:true, thumb:'hero-2', icon:'🎌'},
+      {id:'b-7', slot:'hero', priority:3, name:'⭐ VIP 회원 전용 7% 할인', link:'/mypage.html?tab=vip', period:{start:'2026-05-15', end:'2026-12-31', status:'now'}, click:2840, active:true, thumb:'hero-3', icon:'⭐'},
+      {id:'b-6', slot:'sidebar', priority:1, name:'🆕 푸꾸옥 빈펄 6박 5R', link:'/golftel.html?id=gt-vn-phu-quoc-vinpearl-6n', period:{start:'2026-06-08', end:'2026-08-08', status:'now'}, click:1840, active:true, thumb:'sidebar-1', icon:'🏝️'},
+      {id:'b-5', slot:'sidebar', priority:2, name:'📷 라이브 커머스 매주 토 20시', link:'/live.html', period:{start:'2026-05-01', end:'무기한', status:'now'}, click:5420, active:true, thumb:'sidebar-1', icon:'📷'},
+      {id:'b-4', slot:'mobile-home', priority:1, name:'📱 PWA 설치 안내', link:'/install', period:{start:'2026-05-01', end:'무기한', status:'now'}, click:12480, active:true, thumb:'mobile-1', icon:'📱'},
+      {id:'b-3', slot:'mobile-home', priority:2, name:'🤖 AI 골프 플래너', link:'/ai-planner.html', period:{start:'2026-05-01', end:'무기한', status:'now'}, click:6240, active:true, thumb:'mobile-1', icon:'🤖'},
+      {id:'b-2', slot:'mobile-home', priority:3, name:'🛫 7월 항공권 결합 특가 (예약)', link:'/search.html?type=golftel-air', period:{start:'2026-06-20', end:'2026-07-20', status:'future'}, click:0, active:false, thumb:'mobile-1', icon:'🛫'},
+    ];
+    const SLOT_LABEL = {hero:'🎯 Hero', sidebar:'📍 Sidebar', 'mobile-home':'📱 Mobile'};
+
+    function renderBanners(filter='all'){
+      const c = document.getElementById('bannerList');
+      const list = filter==='all' ? BANNERS : BANNERS.filter(b => b.slot===filter);
+      c.innerHTML = list.map(b => `
+        <div class="banner-row ${b.active?'':'draft'}">
+          <span class="drag" title="드래그로 우선순위 변경">⋮⋮</span>
+          <div class="banner-thumb ${b.thumb}">
+            <span class="priority-mark">${b.priority}</span>
+            <span style="font-size:32px;">${b.icon}</span>
+          </div>
+          <div class="banner-info">
+            <div class="name">${b.name}</div>
+            <a href="#" class="link">${b.link}</a>
+            <div class="desc">${SLOT_LABEL[b.slot]} · 우선순위 #${b.priority}</div>
+          </div>
+          <div><span class="slot-tag slot-${b.slot}">${b.slot}</span></div>
+          <div class="banner-period">
+            <span class="${b.period.status}">${b.period.start}</span><br>
+            ~ <span class="${b.period.status}">${b.period.end}</span>
+          </div>
+          <div class="banner-stat">
+            <div class="num">${b.click.toLocaleString()}</div>
+            <div class="lb">클릭</div>
+          </div>
+          <div><div class="toggle ${b.active?'on':''}" onclick="toggleBanner(this, '${b.id}')"></div></div>
+          <div class="banner-actions">
+            <button onclick="alert('편집 모달 · 이미지 업로드/링크/기간')">편집</button>
+            <button onclick="alert('미리보기 (index.html?preview=${b.id})')">👁️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderBanners();
+
+    function toggleBanner(el, id){
+      el.classList.toggle('on');
+      const active = el.classList.contains('on');
+      console.log('banner toggle', id, active);
+    }
+
+    // Slot chips
+    document.querySelectorAll('.slot-chips button').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.slot-chips button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        if(b.dataset.slot) renderBanners(b.dataset.slot);
+      });
+    });
+
+    // 인기 검색어
+    const KEYWORDS = [
+      {rank:1, icon:'🔥', name:'푸꾸옥 골프텔', score:'+128%', boost:'1.5x', up:true},
+      {rank:2, icon:'🆕', name:'카누차 오키나와', score:'+89%', boost:'1.3x', up:true},
+      {rank:3, icon:'🏆', name:'다낭 4박', score:'+62%', boost:'1.2x', up:true},
+      {rank:4, icon:'⭐', name:'클락 골프 패키지', score:'+48%', boost:'1.0x', up:true},
+      {rank:5, icon:'🆕', name:'나트랑 빈펄', score:'+34%', boost:'1.1x', up:true},
+      {rank:6, icon:'', name:'파타야 칸차나', score:'-8%', boost:'1.0x', up:false},
+    ];
+    function renderKeywords(){
+      const c = document.getElementById('keywordList');
+      c.innerHTML = KEYWORDS.map(k => `
+        <div class="keyword-row">
+          <span class="drag">⋮⋮</span>
+          <span class="rank ${k.rank<=3?'top3':'normal'}">${k.rank}</span>
+          <div>
+            <span class="ic" style="margin-right:6px;">${k.icon}</span>
+            <span class="name">${k.name}</span>
+          </div>
+          <span class="score ${k.up?'':'down'}">${k.score}</span>
+          <span class="boost">${k.boost}</span>
+          <button class="edit-btn" onclick="alert('키워드 편집 폼 로드')">편집</button>
+        </div>
+      `).join('');
+    }
+    renderKeywords();
+
+    // Tab switching
+    document.querySelectorAll('.tabs > .tab').forEach(t => {
+      t.addEventListener('click', () => {
+        const tab = t.dataset.tab;
+        if(!tab) return;
+        document.querySelectorAll('.tabs > .tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+        document.getElementById('pane-'+tab).classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>

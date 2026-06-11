@@ -1,5 +1,5 @@
 # 오마이트립 프로토타입 — 프로젝트 상태
-**마지막 업데이트**: 2026-06-11 (백오피스 Phase 1 완료 + Phase 2 조기 진입 — 6 모듈 구축 + 감사 로그)
+**마지막 업데이트**: 2026-06-11 (백오피스 8 모듈 모두 완성 🎯 — 정산 관리 + CMS 추가)
 **리포지토리**: https://github.com/bstars00-rgb/ota
 **라이브**: https://bstars00-rgb.github.io/ota/
 **백엔드(예정)**: ELLIS — 프론트 데이터 모델은 ELLIS 마이그레이션 호환으로 설계
@@ -12,7 +12,7 @@
 
 | 항목 | 배점 | 점수 | 근거 |
 |---|---|---|---|
-| 페이지 커버리지 | 30 | **30** | **34 페이지** (웹 26 + 모바일 1 + 크리에이터 1 + **백오피스 6 (3+3)**) — admin-dashboard/bookings/products/**cs/customers/users** |
+| 페이지 커버리지 | 30 | **30** | **36 페이지** (웹 26 + 모바일 1 + 크리에이터 1 + **백오피스 8 모듈 완성** 🎯) — dashboard/bookings/products/customers/cs/settlement/cms/users |
 | 비즈니스 모델 완성도 | 20 | **20** | 골프텔 중심 + 채널 매니저 9 + 공급사 9 + ELLIS_SPEC.md 백엔드 풀스펙 완성 |
 | UX 플로우 완결성 | 20 | **20** | 검색(자동완성)→상세→슬롯→checkout→payment→complete(자동 알림+e-바우처+카톡 알림톡)→마이페이지(통합검색) 완전 E2E |
 | 기능 정교함 | 20 | **20** | 몽키 표준 + 결제 3종 + 모디파이어 + PWA + FCM 푸시 + 카톡 알림톡 + 통합 검색 + 자동완성 |
@@ -490,7 +490,7 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (11th · 백오피스 Phase 1 완료) · **34 pages** (백오피스 +3 신규) · 2 JS modules · 9 docs (BACKOFFICE_SPEC v1.1) · PWA + 운영 콘솔 5 + 백오피스 6 · 107 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (12th · 백오피스 8 모듈 완성 🎯) · **36 pages** (백오피스 +2 신규: settlement/cms) · 2 JS modules · 9 docs (BACKOFFICE_SPEC v1.2) · PWA + 운영 콘솔 5 + **백오피스 8 모듈** · 110 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
 
 ---
 
@@ -514,6 +514,7 @@ _Status snapshot 2026-06-11 (11th · 백오피스 Phase 1 완료) · **34 pages*
 | 7-9 (#74~97) | **운영 폴리시·고급 UX** | 직영 우선 정렬 + 인기 검색어 + 클립 캡쳐 + 자동 추천 + 페이지네이션 + 통계 카드 + 라이브 메트릭 |
 | **10 (#98~103)** | **🆕 백오피스 신설 (MD-only 백엔드 원칙 도입)** | BACKOFFICE_SPEC.md 구상 (8 모듈/4 ROLE/Phase 1·2·3) + admin-dashboard (8 모듈 카드 + 긴급 큐) + admin-bookings (예약 검색 + 슬라이드아웃 + 감사 로그) + admin-products (골프텔 카드 + 가격 룰 6종 + 채널 동기화 모니터) + ELLIS_SPEC §11/§12 갱신 |
 | **11 (#104~107)** | **🆕 백오피스 Phase 1 완료 + Phase 2 진입** | admin-cs (3탭: 문의 큐 + 답변 폼 TPL-007 트리거 + 리뷰 관리 + 알림톡 10 템플릿 통계) + admin-customers (5등급 분포 + 회원 검색 + 슬라이드아웃: 4 통계/예약/포인트/감사) + admin-users (운영자 24명 + 4 ROLE 권한 매트릭스 + 감사 로그 15건 with diff 시각화 + 초대 모달) + 기존 백오피스 3페이지 GNB 연결 |
+| **12 (#108~110)** | **🎯 백오피스 8 모듈 완성** | admin-settlement (4탭: 크리에이터 12 정산 + 공급사 9 정산 + PG 3사 정산 카드 + 송금 이력 8 + 정산 실행 모달) + admin-cms (4탭: 배너 8 슬롯별 + 인기 검색어 6 with 가중치 슬라이더 + 공지·FAQ 6 + 가격 룰 6) + 8 페이지 GNB 통일 (대시보드·예약·상품·회원·CS·정산·CMS·권한) |
 
 ### 데이터 인벤토리
 
@@ -548,21 +549,24 @@ mapper (DDL 생성) ↔ admin-analytics (퍼널+라이브 메트릭) ↔
 creator-dashboard (LIVE 통계 + ELLIS 콘솔 드롭다운)
 ```
 
-### 백오피스 6 (운영팀 일상 업무) — Phase 1 완료 + Phase 2 일부
+### 백오피스 8 모듈 (운영팀 일상 업무) — 전체 완성 🎯
 
 ```
 admin-dashboard (8 모듈 진입 + 오늘 KPI + 긴급 큐 + 활동 로그)
   ↔ admin-bookings (예약 검색 · 견적 D-1 큐 · 슬라이드아웃 + 감사 로그)
-  ↔ admin-products (골프텔 CRUD · 가격 룰 6종 · 채널 매니저 9 동기화 모니터)
-  ↔ admin-cs ⭐ (문의 응대 큐 + 답변 폼 TPL-007 트리거 + 리뷰 관리 + 알림톡 통계)
-  ↔ admin-customers ⭐ (회원 12,418명 검색 + 5등급 분포 + 슬라이드아웃 상세)
-  ↔ admin-users ⭐ (운영자 24명 + ROLE 변경 + 감사 로그 18,420 + 권한 매트릭스)
+  ↔ admin-products (골프텔 CRUD · 가격 룰 6 · 채널 매니저 9 동기화)
+  ↔ admin-customers (회원 12,418명 검색 + 5등급 분포 + 슬라이드아웃 상세)
+  ↔ admin-cs (문의 응대 큐 + 답변 폼 TPL-007 트리거 + 리뷰 관리 + 알림톡 통계)
+  ↔ admin-settlement ⭐ (크리에이터 12명 + 공급사 9 + PG 3종 + 송금 이력 + 정산 실행 모달)
+  ↔ admin-cms ⭐ (배너 8 + 인기 검색어 6 + 공지·FAQ 6 + 가격 룰 6)
+  ↔ admin-users (운영자 24명 + ROLE 변경 + 감사 로그 18,420 + 권한 매트릭스)
 ```
 
-**구상 문서**: [BACKOFFICE_SPEC.md](BACKOFFICE_SPEC.md) v1.1 — 8 모듈 + 4 ROLE 권한 매트릭스 + Phase 1/2/3
-**Phase 1 완료**: ✅ 대시보드 / 예약 / 상품 / CS / 권한 (5/5)
-**Phase 2 진행 중**: ✅ 회원 관리 (3/3) — 정산 잔여
-**Phase 3**: CMS
+**구상 문서**: [BACKOFFICE_SPEC.md](BACKOFFICE_SPEC.md) v1.2 — 8 모듈 + 4 ROLE 권한 매트릭스
+**Phase 1**: ✅ 대시보드 / 예약 / 상품 / CS / 권한 (5/5)
+**Phase 2**: ✅ 회원 관리 / 정산 (2/2) 🎯
+**Phase 3**: ✅ CMS (1/1) 🎯
+**모든 8 페이지 GNB 통일** — 정산·CMS 추가 후 8 모듈 균등 노출
 
 ### PWA 완성도
 

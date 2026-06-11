@@ -167,12 +167,14 @@
         <span class="console-tag">BACKOFFICE</span>
       </a>
       <nav class="gnb-mini">
-        <a href="#" class="on">🏠 대시보드</a>
+        <a href="#" class="on">🏠</a>
         <a href="admin-bookings.html">🎫 예약</a>
         <a href="admin-products.html">⛳ 상품</a>
         <a href="admin-customers.html">👥 회원</a>
         <a href="admin-cs.html">💬 CS</a>
-        <a href="admin-users.html">🔐 권한</a>
+        <a href="admin-settlement.html">💰 정산</a>
+        <a href="admin-cms.html">📝 CMS</a>
+        <a href="admin-users.html">🔐</a>
         <span class="divider"></span>
         <a href="admin-channels.html" style="color:var(--ink-4);">시스템 콘솔 →</a>
       </nav>
@@ -226,7 +228,7 @@
     <section class="section">
       <div class="sec-head">
         <h2 class="sec-title">🧩 운영 모듈</h2>
-        <div class="sec-sub">권한 ROLE: <strong style="color:var(--accent);">MANAGER</strong> · 전체 8 모듈 중 7 모듈 사용 가능 · Phase 1 완료 + Phase 2 일부</div>
+        <div class="sec-sub">권한 ROLE: <strong style="color:var(--accent);">MANAGER</strong> · 전체 8 모듈 사용 가능 · Phase 1/2/3 완료 🎯</div>
       </div>
       <div class="module-grid">
         <div class="module-card" onclick="location.href='admin-bookings.html'">
@@ -253,17 +255,17 @@
           <div class="desc">문의 응대 · 리뷰 관리 · 알림톡 발송 이력</div>
           <div class="count"><span>답변 대기 23</span><strong>오늘 처리 89</strong></div>
         </div>
-        <div class="module-card finance" onclick="alert('Phase 2 — admin-settlement.html 준비 중')">
+        <div class="module-card finance" onclick="location.href='admin-settlement.html'">
           <div class="ic">💰</div>
           <div class="name">정산 관리</div>
-          <div class="desc">크리에이터 커미션 · 공급사 정산 · 매출 리포트</div>
-          <div class="count"><span>이번달 정산</span><strong>대기 4,820만</strong></div>
+          <div class="desc">크리에이터 커미션 · 공급사 정산 · PG 정산</div>
+          <div class="count"><span>5월 정산 대상</span><strong>2억 1,126만</strong></div>
         </div>
-        <div class="module-card cms" onclick="alert('Phase 3 — admin-cms.html 준비 중')">
+        <div class="module-card cms" onclick="location.href='admin-cms.html'">
           <div class="ic">📝</div>
           <div class="name">CMS</div>
-          <div class="desc">메인 배너 · 카테고리 · 인기 검색어 · 공지·FAQ</div>
-          <div class="count"><span>활성 배너 3</span><strong>이번주 +2</strong></div>
+          <div class="desc">메인 배너 · 인기 검색어 · 공지·FAQ · 가격 정책</div>
+          <div class="count"><span>활성 배너 8</span><strong>인기 검색어 6</strong></div>
         </div>
         <div class="module-card security" onclick="location.href='admin-users.html'">
           <div class="ic">🔐</div>
