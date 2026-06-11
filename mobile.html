@@ -600,6 +600,9 @@
             <!-- ⏰ 다가오는 티오프 카운트다운 위젯 (예약 D-3 이내일 때만 표시) -->
             <div id="teeoffCountdown" style="display:none;"></div>
 
+            <!-- 🗺️ 동선 기반 자동 추천 (예약 D-1 이내 또는 출발지 기반 추천) -->
+            <div id="itineraryWidget" style="display:none;"></div>
+
             <!-- sub tabs overlay on feed -->
             <div class="home-sub-tabs">
               <button class="home-sub-tab" data-sub="following">팔로잉</button>
@@ -695,15 +698,23 @@
             </section>
           </section>
 
-          <!-- NOTIFICATIONS -->
+          <!-- NOTIFICATIONS — 푸시 알림 센터 (고도화) -->
           <section id="tab-notif" class="tab-panel">
             <div style="padding:calc(env(safe-area-inset-top) + 50px) 16px 0;">
-              <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;letter-spacing:-0.02em;">알림</h2>
-              <div class="notif-filter-tabs">
-                <button class="notif-filter-tab active">전체</button>
-                <button class="notif-filter-tab">🎫 예약</button>
-                <button class="notif-filter-tab">❤️ 소셜</button>
-                <button class="notif-filter-tab">🎁 특가</button>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <h2 style="margin:0;font-size:22px;font-weight:900;letter-spacing:-0.02em;">알림</h2>
+                <div style="display:flex;gap:6px;">
+                  <button onclick="markAllNotifRead()" id="markAllReadBtn" style="padding:6px 12px;background:#F3F4F6;border:none;border-radius:8px;font-size:11px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;">모두 읽음</button>
+                  <button onclick="openNotifSettings()" style="padding:6px 12px;background:#F3F4F6;border:none;border-radius:8px;font-size:11px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;">⚙️ 설정</button>
+                </div>
+              </div>
+              <div class="notif-filter-tabs" id="notifFilterTabs">
+                <button class="notif-filter-tab active" data-filter="all">전체 <span class="cnt">0</span></button>
+                <button class="notif-filter-tab" data-filter="booking">🎫 예약 <span class="cnt">0</span></button>
+                <button class="notif-filter-tab" data-filter="payment">💳 결제 <span class="cnt">0</span></button>
+                <button class="notif-filter-tab" data-filter="promotion">🎁 특가 <span class="cnt">0</span></button>
+                <button class="notif-filter-tab" data-filter="system">⚙️ 시스템 <span class="cnt">0</span></button>
+                <button class="notif-filter-tab" data-filter="social">❤️ 소셜 <span class="cnt">0</span></button>
               </div>
             </div>
             <div class="notif-list" id="notifList"></div>
@@ -1072,17 +1083,57 @@
   /* ========================================================================
      NOTIFICATIONS
      ======================================================================== */
-  function renderNotifications(){
-    // OMT.State.getNotifications()로 사용자 + 동적 + 정적 모두 가져옴
-    const all = OMT.State.getNotifications();
+  // 알림 타입 → 카테고리 매핑 (5 카테고리)
+  const NOTIF_CATEGORY = {
+    booking:'booking', reminder:'booking', dday:'booking',
+    payment:'payment', refund:'payment',
+    promotion:'promotion', coupon:'promotion', sale:'promotion',
+    system:'system', points:'system', review:'system', update:'system',
+    follow:'social', like:'social', comment:'social'
+  };
+  let currentNotifFilter = 'all';
 
-    // type → iconClass 매핑 (모바일 디자인 토큰)
+  function renderNotifications(){
+    const all = OMT.State.getNotifications();
+    const settings = OMT.State.getNotifSettings ? OMT.State.getNotifSettings() : {};
+
+    // 카테고리 카운트
+    const counts = { all: 0, booking: 0, payment: 0, promotion: 0, system: 0, social: 0 };
+    all.forEach(n => {
+      const cat = NOTIF_CATEGORY[n.type] || 'system';
+      counts.all++;
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    // 카테고리 카운트 표시 업데이트
+    document.querySelectorAll('#notifFilterTabs .notif-filter-tab').forEach(t => {
+      const f = t.dataset.filter;
+      const cntEl = t.querySelector('.cnt');
+      if(cntEl){
+        cntEl.textContent = counts[f] || 0;
+        cntEl.style.cssText = `display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:${counts[f]>0?'rgba(255,107,53,.15)':'transparent'};color:${counts[f]>0?'#FF6B35':'#9CA3AF'};font-size:9px;font-weight:900;font-family:'JetBrains Mono',monospace;`;
+      }
+    });
+
+    // 필터 적용
+    let filtered = all;
+    if(currentNotifFilter !== 'all'){
+      filtered = all.filter(n => (NOTIF_CATEGORY[n.type] || 'system') === currentNotifFilter);
+    }
+
+    // 카테고리 OFF 상태인 알림은 흐리게 표시
+    filtered = filtered.map(n => {
+      const cat = NOTIF_CATEGORY[n.type] || 'system';
+      return { ...n, _muted: settings[cat] === false };
+    });
+
+    // ICON_CLASS 매핑
     const ICON_CLASS = {
-      booking:'booking', reminder:'booking',
-      promotion:'promo', coupon:'promo',
-      points:'system', review:'system', system:'system'
+      booking:'booking', reminder:'booking', dday:'booking',
+      payment:'system', refund:'system',
+      promotion:'promo', coupon:'promo', sale:'promo',
+      points:'system', review:'system', system:'system', update:'system',
+      follow:'system', like:'system', comment:'system'
     };
-    // daysAgo → 한국어 시간 표시
     const fmtTime = (n) => {
       if(n.daysAgo === 0) return '오늘';
       if(n.daysAgo === 1) return '어제';
@@ -1092,24 +1143,180 @@
       return Math.floor(n.daysAgo/30) + '개월 전';
     };
 
-    document.getElementById('notifList').innerHTML = all.map(n => {
-      const iconClass = ICON_CLASS[n.type] || 'system';
-      const action = n.actionLabel || (n.link ? '자세히 보기' : '');
-      const linkAttr = n.link
-        ? `onclick="OMT.State.markNotifRead('${n.id}');location.href='${n.link}'"`
-        : `onclick="OMT.State.markNotifRead('${n.id}');this.classList.remove('unread')"`;
+    // 그룹화: 오늘 / 이번주 / 이전
+    const groups = { today: [], thisWeek: [], earlier: [] };
+    filtered.forEach(n => {
+      if(n.daysAgo === 0) groups.today.push(n);
+      else if(n.daysAgo < 7) groups.thisWeek.push(n);
+      else groups.earlier.push(n);
+    });
+
+    const renderGroup = (items, label) => {
+      if(!items.length) return '';
       return `
-        <div class="notif-item ${n.read?'':'unread'}" ${linkAttr} style="cursor:pointer;">
-          <div class="notif-ico ${iconClass}">${n.icon}</div>
-          <div class="notif-body">
-            <div class="notif-title"><strong>${n.title}</strong> ${n.body ? '· ' + n.body.slice(0, 60) + (n.body.length > 60 ? '...' : '') : ''}</div>
-            <div class="notif-time">${fmtTime(n)}</div>
-            ${action ? `<a class="notif-action">${action} →</a>` : ''}
-          </div>
-        </div>
+        <div style="padding:14px 16px 6px;font-size:11px;font-weight:900;color:#9CA3AF;letter-spacing:.06em;text-transform:uppercase;">${label} <span style="margin-left:4px;font-family:'JetBrains Mono',monospace;">${items.length}</span></div>
+        ${items.map(n => {
+          const iconClass = ICON_CLASS[n.type] || 'system';
+          const action = n.actionLabel || (n.link ? '자세히 보기' : '');
+          const linkAttr = n.link
+            ? `onclick="OMT.State.markNotifRead('${n.id}');location.href='${n.link}'"`
+            : `onclick="OMT.State.markNotifRead('${n.id}');this.classList.remove('unread');renderNotifications();"`;
+          const mutedStyle = n._muted ? 'opacity:.45;' : '';
+          const mutedLabel = n._muted ? '<span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:#F3F4F6;color:#9CA3AF;font-size:9px;font-weight:900;">🔕 음소거</span>' : '';
+          return `
+            <div class="notif-item ${n.read?'':'unread'}" ${linkAttr} style="cursor:pointer;${mutedStyle}">
+              <div class="notif-ico ${iconClass}">${n.icon}</div>
+              <div class="notif-body">
+                <div class="notif-title"><strong>${n.title}</strong>${mutedLabel} ${n.body ? '· ' + n.body.slice(0, 60) + (n.body.length > 60 ? '...' : '') : ''}</div>
+                <div class="notif-time">${fmtTime(n)}</div>
+                ${action ? `<a class="notif-action">${action} →</a>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
       `;
-    }).join('') || `<div style="padding:60px 20px;text-align:center;color:var(--ink-3);"><div style="font-size:32px;">🔔</div><p style="margin-top:8px;font-size:13px;">새 알림이 없어요</p></div>`;
+    };
+
+    const html = renderGroup(groups.today, '📅 오늘')
+              + renderGroup(groups.thisWeek, '🗓️ 이번주')
+              + renderGroup(groups.earlier, '📜 이전');
+
+    document.getElementById('notifList').innerHTML = html || `
+      <div style="padding:80px 20px;text-align:center;color:var(--ink-3);">
+        <div style="font-size:48px;margin-bottom:8px;">🔔</div>
+        <div style="font-size:14px;font-weight:800;color:#1A1A1A;">${currentNotifFilter === 'all' ? '새 알림이 없어요' : '이 카테고리 알림이 없어요'}</div>
+        <div style="font-size:12px;margin-top:6px;line-height:1.5;">${currentNotifFilter === 'all' ? '여행을 예약하면<br>D-7, D-3, D-1 자동 안내드릴게요' : '다른 카테고리도 확인해보세요'}</div>
+      </div>
+    `;
+
+    // markAllRead 버튼 활성/비활성
+    const unreadCount = all.filter(n => !n.read).length;
+    const btn = document.getElementById('markAllReadBtn');
+    if(btn){
+      btn.style.opacity = unreadCount > 0 ? '1' : '0.4';
+      btn.disabled = unreadCount === 0;
+    }
   }
+
+  window.markAllNotifRead = () => {
+    if(confirm('모든 알림을 읽음으로 처리할까요?')){
+      OMT.State.markAllNotifsRead();
+      renderNotifications();
+      toast('✓ 모든 알림 읽음 처리');
+    }
+  };
+
+  /* ========================================================================
+     ⚙️ 알림 설정 모달 (카테고리별 토글 + 방해 금지 시간)
+     ======================================================================== */
+  window.openNotifSettings = () => {
+    const settings = OMT.State.getNotifSettings();
+    const overlay = document.createElement('div');
+    overlay.id = 'notifSettingsOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;animation:nsFadeIn .25s ease;';
+    overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+
+    const categories = [
+      { key:'booking', icon:'🎫', label:'예약', desc:'예약 확정·D-day·취소 안내' },
+      { key:'payment', icon:'💳', label:'결제', desc:'결제 완료·실패·환불' },
+      { key:'promotion', icon:'🎁', label:'특가·이벤트', desc:'할인·쿠폰·프로모션' },
+      { key:'system', icon:'⚙️', label:'시스템', desc:'공지·업데이트·포인트 적립' },
+      { key:'social', icon:'❤️', label:'소셜', desc:'팔로우·좋아요·댓글' }
+    ];
+
+    overlay.innerHTML = `
+      <style>
+        @keyframes nsFadeIn{from{background:rgba(0,0,0,0);}to{background:rgba(0,0,0,.5);}}
+        @keyframes nsSlideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+        .ns-toggle{position:relative;width:42px;height:24px;background:#E5E7EB;border:none;border-radius:12px;cursor:pointer;transition:background .2s;flex-shrink:0;}
+        .ns-toggle.on{background:#FF6B35;}
+        .ns-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+        .ns-toggle.on::after{left:20px;}
+      </style>
+      <div style="width:100%;background:#fff;border-radius:24px 24px 0 0;max-height:88vh;overflow-y:auto;animation:nsSlideUp .3s cubic-bezier(.34,1.56,.64,1);">
+        <div style="display:flex;justify-content:center;padding:12px 0 0;">
+          <div style="width:40px;height:4px;background:#E5E7EB;border-radius:2px;"></div>
+        </div>
+        <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:18px;font-weight:900;color:#1A1A1A;">알림 설정</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:2px;">카테고리별로 알림 받기 / 끄기</div>
+          </div>
+          <button onclick="document.getElementById('notifSettingsOverlay').remove()" style="width:32px;height:32px;border-radius:8px;background:#F3F4F6;border:none;font-size:18px;cursor:pointer;color:#6B7280;">×</button>
+        </div>
+        <div style="padding:0 20px 16px;">
+          <div style="font-size:11px;font-weight:900;color:#6B7280;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;">📂 카테고리별 알림</div>
+          ${categories.map(c => `
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #F3F4F6;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#FFF5F0;display:grid;place-items:center;font-size:18px;flex-shrink:0;">${c.icon}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:800;color:#1A1A1A;">${c.label}</div>
+                <div style="font-size:11px;color:#6B7280;margin-top:2px;">${c.desc}</div>
+              </div>
+              <button class="ns-toggle ${settings[c.key] ? 'on' : ''}" onclick="toggleNotifCategory('${c.key}', this)"></button>
+            </div>
+          `).join('')}
+        </div>
+        <div style="padding:0 20px 16px;border-top:8px solid #F9FAFB;">
+          <div style="padding:14px 0 8px;font-size:11px;font-weight:900;color:#6B7280;letter-spacing:.04em;text-transform:uppercase;">🌙 방해 금지 시간</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:10px 0;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#EEF2FF;display:grid;place-items:center;font-size:18px;flex-shrink:0;">🌙</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14px;font-weight:800;color:#1A1A1A;">방해 금지 시간 활성화</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:2px;">${settings.quietHours?.start || 22}시 ~ ${settings.quietHours?.end || 7}시 알림 음소거</div>
+            </div>
+            <button class="ns-toggle ${settings.quietHours?.enabled ? 'on' : ''}" onclick="toggleQuietHours(this)"></button>
+          </div>
+          ${settings.quietHours?.enabled ? `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:800;color:#6B7280;display:block;margin-bottom:5px;">시작 시간</label>
+                <select onchange="setQuietHour('start', this.value)" style="width:100%;padding:10px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;">
+                  ${Array.from({length:24}, (_,i)=>`<option value="${i}" ${(settings.quietHours?.start||22)===i?'selected':''}>${i}시</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:800;color:#6B7280;display:block;margin-bottom:5px;">종료 시간</label>
+                <select onchange="setQuietHour('end', this.value)" style="width:100%;padding:10px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;">
+                  ${Array.from({length:24}, (_,i)=>`<option value="${i}" ${(settings.quietHours?.end||7)===i?'selected':''}>${i}시</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        <div style="padding:14px 20px calc(env(safe-area-inset-bottom) + 14px);background:#F9FAFB;border-radius:0;">
+          <div style="font-size:11px;color:#9CA3AF;text-align:center;line-height:1.5;">💡 카테고리를 끄면 푸시·인앱 모두 음소거됩니다.<br>예약 확정·결제 실패는 항상 받는 것을 권장해요.</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  };
+
+  window.toggleNotifCategory = (key, btn) => {
+    const settings = OMT.State.getNotifSettings();
+    settings[key] = !settings[key];
+    OMT.State.setNotifSettings(settings);
+    btn.classList.toggle('on');
+    renderNotifications();
+  };
+
+  window.toggleQuietHours = (btn) => {
+    const settings = OMT.State.getNotifSettings();
+    settings.quietHours = settings.quietHours || { enabled: false, start: 22, end: 7 };
+    settings.quietHours.enabled = !settings.quietHours.enabled;
+    OMT.State.setNotifSettings(settings);
+    btn.classList.toggle('on');
+    // 모달 다시 그리기 (시간 선택 UI 토글)
+    document.getElementById('notifSettingsOverlay').remove();
+    openNotifSettings();
+  };
+
+  window.setQuietHour = (which, val) => {
+    const settings = OMT.State.getNotifSettings();
+    settings.quietHours = settings.quietHours || { enabled: false, start: 22, end: 7 };
+    settings.quietHours[which] = parseInt(val);
+    OMT.State.setNotifSettings(settings);
+  };
 
   /* ========================================================================
      PROFILE (MYPAGE LITE)
@@ -1636,6 +1843,232 @@
   }
 
   /* ========================================================================
+     🗺️ 동선 기반 자동 추천 위젯
+     - 다가오는 예약 D-1 이내: 공항→호텔→골프장 동선 카드
+     - 그 외: 출발지(권역) → 직항 골프 도시 추천
+     ======================================================================== */
+  // 권역별 메타 정보
+  const REGION_INFO = {
+    seoul:   { label:'서울·수도권', airport:'ICN', airportName:'인천국제공항', flag:'🛫' },
+    busan:   { label:'부산·경남', airport:'PUS', airportName:'김해국제공항', flag:'🛫' },
+    daegu:   { label:'대구·경북', airport:'TAE', airportName:'대구국제공항', flag:'🛫' },
+    gwangju: { label:'광주·전남', airport:'KWJ', airportName:'광주국제공항', flag:'🛫' },
+    jeju:    { label:'제주', airport:'CJU', airportName:'제주국제공항', flag:'🛫' }
+  };
+
+  // 권역 → 직항 가능 골프 목적지 (현실 노선 반영)
+  const DIRECT_ROUTES = {
+    ICN: [
+      { country:'japan', city:'오키나와', code:'OKA', durationH:2.5, dailyFlights:8, airlines:['대한항공','진에어','제주항공'] },
+      { country:'japan', city:'후쿠오카', code:'FUK', durationH:1.5, dailyFlights:12, airlines:['대한항공','아시아나','진에어'] },
+      { country:'vietnam', city:'다낭', code:'DAD', durationH:4.5, dailyFlights:14, airlines:['베트남항공','대한항공','진에어'] },
+      { country:'vietnam', city:'호치민', code:'SGN', durationH:5.5, dailyFlights:10, airlines:['베트남항공','대한항공'] },
+      { country:'vietnam', city:'푸꾸옥', code:'PQC', durationH:5, dailyFlights:6, airlines:['베트남항공','진에어'] },
+      { country:'vietnam', city:'나트랑', code:'CXR', durationH:5.5, dailyFlights:5, airlines:['베트남항공','진에어'] },
+      { country:'thailand', city:'방콕', code:'BKK', durationH:5.5, dailyFlights:18, airlines:['타이항공','대한항공','진에어'] },
+      { country:'philippines', city:'클락', code:'CRK', durationH:4, dailyFlights:7, airlines:['세부퍼시픽','진에어','제주항공'] },
+      { country:'philippines', city:'세부', code:'CEB', durationH:4.5, dailyFlights:10, airlines:['세부퍼시픽','대한항공','진에어'] }
+    ],
+    PUS: [
+      { country:'japan', city:'후쿠오카', code:'FUK', durationH:1, dailyFlights:10, airlines:['대한항공','에어부산','진에어'] },
+      { country:'japan', city:'오키나와', code:'OKA', durationH:2, dailyFlights:4, airlines:['에어부산','진에어'] },
+      { country:'vietnam', city:'다낭', code:'DAD', durationH:4.5, dailyFlights:7, airlines:['에어부산','베트남항공'] },
+      { country:'thailand', city:'방콕', code:'BKK', durationH:5.5, dailyFlights:6, airlines:['에어부산','타이항공','진에어'] },
+      { country:'philippines', city:'클락', code:'CRK', durationH:4, dailyFlights:3, airlines:['진에어','제주항공'] }
+    ],
+    TAE: [
+      { country:'japan', city:'오사카', code:'KIX', durationH:1.5, dailyFlights:3, airlines:['티웨이항공'] },
+      { country:'vietnam', city:'다낭', code:'DAD', durationH:4.5, dailyFlights:2, airlines:['티웨이항공'] },
+      { country:'thailand', city:'방콕', code:'BKK', durationH:5.5, dailyFlights:2, airlines:['티웨이항공'] }
+    ],
+    KWJ: [
+      { country:'japan', city:'오사카', code:'KIX', durationH:1.5, dailyFlights:2, airlines:['진에어'] },
+      { country:'vietnam', city:'다낭', code:'DAD', durationH:4.5, dailyFlights:1, airlines:['진에어'] }
+    ],
+    CJU: [
+      { country:'japan', city:'오사카', code:'KIX', durationH:1.5, dailyFlights:2, airlines:['진에어'] }
+    ]
+  };
+
+  function renderItineraryWidget(){
+    const el = document.getElementById('itineraryWidget');
+    if(!el) return;
+
+    const bookings = OMT.State.getBookings ? OMT.State.getBookings() : [];
+
+    // D-1 이내 예약 동선 카드
+    const imminent = bookings
+      .filter(b => b.status === 'confirmed' || b.status === 'pending')
+      .map(b => {
+        const m = String(b.dates || '').match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+        if(!m) return null;
+        const departAt = new Date(+m[1], +m[2]-1, +m[3], 7, 0, 0);
+        const dayDiff = Math.ceil((departAt - new Date()) / 86400000);
+        return { ...b, departAt, dayDiff };
+      })
+      .filter(b => b && b.dayDiff >= 0 && b.dayDiff <= 1);
+
+    if(imminent.length > 0){
+      // D-1 이내 — 공항→호텔→골프장 풀 동선 카드
+      const b = imminent[0];
+      const isGT = b.productType === 'golftel' || (b.productId && b.productId.startsWith('gt-'));
+      const g = isGT && b.productId ? (OMT.DATA.GOLFTELS || []).find(x => x.id === b.productId) : null;
+      const loc = OMT.State.getUserLocation ? OMT.State.getUserLocation() : { region:'seoul', airport:'ICN' };
+      const region = REGION_INFO[loc.region] || REGION_INFO.seoul;
+      const routes = DIRECT_ROUTES[loc.airport] || DIRECT_ROUTES.ICN;
+      const route = routes.find(r => r.country === (g?.country)) || routes[0];
+      const flightTime = route ? `${Math.floor(route.durationH)}h ${Math.round((route.durationH%1)*60)}m` : '5h';
+
+      el.style.display = 'block';
+      el.innerHTML = `
+        <div style="margin:8px 12px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.06);">
+          <div style="padding:14px 16px;background:linear-gradient(135deg,#075440,#0B6E4F);color:#fff;">
+            <div style="font-size:10px;font-weight:900;letter-spacing:.12em;opacity:.85;text-transform:uppercase;">🗺️ 출발일 동선 안내</div>
+            <div style="font-size:16px;font-weight:900;margin-top:3px;">${b.dayDiff === 0 ? '오늘' : '내일'} 출발 · ${b.productName || g?.name || '예약'}</div>
+          </div>
+          <div style="padding:14px 16px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;border-bottom:1px dashed #E5E7EB;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#FFF5F0;color:#FF6B35;display:grid;place-items:center;font-size:20px;font-weight:900;flex-shrink:0;">①</div>
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;text-transform:uppercase;">${b.dayDiff === 0 ? '04:00' : '오늘 24:00 출발 권장'}</div>
+                <div style="font-size:14px;font-weight:900;color:#1A1A1A;margin-top:2px;">${region.airportName} 도착</div>
+                <div style="font-size:11px;color:#6B7280;margin-top:3px;">${region.label} → ${region.airport} · 국제선 청사 출발 3h 전 권장</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px dashed #E5E7EB;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#EEF2FF;color:#3B82F6;display:grid;place-items:center;font-size:20px;font-weight:900;flex-shrink:0;">②</div>
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:900;color:#3B82F6;letter-spacing:.04em;text-transform:uppercase;">${b.dayDiff === 0 ? '07:00' : '내일 07:00'} · ${flightTime}</div>
+                <div style="font-size:14px;font-weight:900;color:#1A1A1A;margin-top:2px;">${route ? region.airport + ' → ' + route.code + ' (' + route.city + ')' : '직항편 탑승'}</div>
+                <div style="font-size:11px;color:#6B7280;margin-top:3px;">${route ? route.airlines.slice(0,2).join(' · ') : '항공사 추후 확정'} · 비행시간 ${flightTime}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px dashed #E5E7EB;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#EFF6FF;color:#0EA5E9;display:grid;place-items:center;font-size:20px;font-weight:900;flex-shrink:0;">③</div>
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:900;color:#0EA5E9;letter-spacing:.04em;text-transform:uppercase;">현지 도착 후 30분</div>
+                <div style="font-size:14px;font-weight:900;color:#1A1A1A;margin-top:2px;">픽업 차량 대기 → 호텔 체크인</div>
+                <div style="font-size:11px;color:#6B7280;margin-top:3px;">🚐 OMT 무료 픽업 · 차량번호 카톡 전송 예정</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding-top:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#F0FDF4;color:#16A34A;display:grid;place-items:center;font-size:20px;font-weight:900;flex-shrink:0;">④</div>
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:900;color:#16A34A;letter-spacing:.04em;text-transform:uppercase;">다음날 골프장 픽업</div>
+                <div style="font-size:14px;font-weight:900;color:#1A1A1A;margin-top:2px;">티오프 30분 전 호텔 픽업</div>
+                <div style="font-size:11px;color:#6B7280;margin-top:3px;">⛳ ${g?.rounds || 3}회 라운딩 예정 · 정확한 시간은 D-1 카톡 알림</div>
+              </div>
+            </div>
+          </div>
+          <div onclick="location.href='complete.html?bk=${b.bookingNumber}'" style="padding:12px 16px;background:#FFF5F0;color:#FF6B35;font-size:12px;font-weight:900;text-align:center;cursor:pointer;border-top:1px solid #E5E7EB;">
+            📄 e-바우처 + 픽업 정보 자세히 보기 →
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // D-1 이내 예약 없음 → 출발지 기반 직항 추천
+    const loc = OMT.State.getUserLocation ? OMT.State.getUserLocation() : { region:'seoul', airport:'ICN' };
+    const region = REGION_INFO[loc.region] || REGION_INFO.seoul;
+    const routes = (DIRECT_ROUTES[loc.airport] || DIRECT_ROUTES.ICN).slice(0, 4);
+
+    // 매칭되는 골프텔 찾기 (직항 도시 + 거리 짧은순)
+    const matched = routes.map(r => {
+      const golftel = (OMT.DATA.GOLFTELS || []).find(g => g.country === r.country);
+      return { route: r, golftel };
+    }).filter(m => m.golftel);
+
+    if(matched.length === 0){ el.style.display = 'none'; return; }
+
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div style="margin:8px 12px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;">
+        <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #F3F4F6;">
+          <div>
+            <div style="font-size:10px;font-weight:900;letter-spacing:.12em;color:#FF6B35;text-transform:uppercase;">${region.flag} 동선 추천</div>
+            <div style="font-size:14px;font-weight:900;margin-top:2px;color:#1A1A1A;">${region.airportName}에서 직항</div>
+          </div>
+          <button onclick="openLocationPicker()" style="padding:5px 10px;background:#F3F4F6;border:none;border-radius:6px;font-size:11px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;">📍 ${region.label} ›</button>
+        </div>
+        <div style="padding:8px 12px 12px;display:grid;gap:8px;">
+          ${matched.map(m => {
+            const g = m.golftel;
+            const r = m.route;
+            const flightTime = `${Math.floor(r.durationH)}h${Math.round((r.durationH%1)*60).toString().padStart(2,'0')}`;
+            const own = OMT.DATA.OWNERSHIP[g.country] || {};
+            return `
+              <a href="golftel.html?id=${g.id}" style="display:flex;gap:10px;padding:10px;background:#FAFBFC;border:1px solid #F3F4F6;border-radius:10px;text-decoration:none;color:inherit;">
+                <div style="width:64px;height:64px;border-radius:8px;background:url('${g.images?.[0]}') center/cover;background-color:#eee;flex-shrink:0;"></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+                    <span style="font-size:11px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">${loc.airport}→${r.code}</span>
+                    <span style="font-size:10px;color:#9CA3AF;">·</span>
+                    <span style="font-size:11px;font-weight:800;color:#6B7280;">✈️ ${flightTime}</span>
+                    <span style="font-size:10px;color:#9CA3AF;">·</span>
+                    <span style="font-size:11px;font-weight:800;color:#6B7280;">📅 일 ${r.dailyFlights}편</span>
+                  </div>
+                  <div style="font-size:13px;font-weight:900;color:#1A1A1A;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${g.name}</div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px;">
+                    <span style="font-size:11px;color:#6B7280;font-weight:700;">${own.model === 'direct' ? '✦ ' + (own.label || '직영') : '🤝 ' + (own.label || '프랜차이즈')}</span>
+                    <span style="font-size:13px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">${(g.pricePerPerson/10000).toFixed(0)}만~</span>
+                  </div>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  /* ========================================================================
+     📍 출발지 선택 모달
+     ======================================================================== */
+  window.openLocationPicker = () => {
+    const current = OMT.State.getUserLocation();
+    const overlay = document.createElement('div');
+    overlay.id = 'locationPickerOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;animation:nsFadeIn .25s ease;';
+    overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+
+    overlay.innerHTML = `
+      <div style="width:100%;background:#fff;border-radius:24px 24px 0 0;max-height:80vh;overflow-y:auto;animation:nsSlideUp .3s cubic-bezier(.34,1.56,.64,1);">
+        <div style="display:flex;justify-content:center;padding:12px 0 0;">
+          <div style="width:40px;height:4px;background:#E5E7EB;border-radius:2px;"></div>
+        </div>
+        <div style="padding:16px 20px;">
+          <div style="font-size:18px;font-weight:900;color:#1A1A1A;">📍 출발지 선택</div>
+          <div style="font-size:12px;color:#6B7280;margin-top:2px;">직항 노선 + 동선 추천에 사용돼요</div>
+        </div>
+        <div style="padding:0 16px 16px;display:grid;gap:8px;">
+          ${Object.entries(REGION_INFO).map(([key, info]) => {
+            const routes = DIRECT_ROUTES[info.airport] || [];
+            const isSelected = current.region === key;
+            return `
+              <button onclick="pickLocation('${key}', '${info.airport}')" style="text-align:left;padding:14px 16px;background:${isSelected?'#FFF5F0':'#fff'};border:2px solid ${isSelected?'#FF6B35':'#E5E7EB'};border-radius:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:14px;font-weight:900;color:#1A1A1A;">${isSelected?'✓ ':''}${info.label}</div>
+                  <div style="font-size:11px;color:#6B7280;margin-top:3px;">${info.airportName} · 직항 ${routes.length}개 도시</div>
+                </div>
+                <span style="font-size:11px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">${info.airport}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  };
+
+  window.pickLocation = (region, airport) => {
+    OMT.State.setUserLocation({ region, airport });
+    document.getElementById('locationPickerOverlay').remove();
+    renderItineraryWidget();
+    toast('✓ 출발지 변경 · 동선 새로고침');
+  };
+
+  /* ========================================================================
      ✨ For You 개인화 추천 — 온보딩 답변 + 예약 이력 기반
      ======================================================================== */
   function buildForYouRecommendations(){
@@ -1898,7 +2331,18 @@
   renderNotifications();
   renderProfile();
   renderTeeoffCountdown();
+  renderItineraryWidget();
   switchTab('home');
+
+  // 알림 카테고리 필터 탭 클릭 핸들러
+  document.querySelectorAll('#notifFilterTabs .notif-filter-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#notifFilterTabs .notif-filter-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentNotifFilter = t.dataset.filter;
+      renderNotifications();
+    });
+  });
 
   // 첫 진입 시 온보딩 (회원이지만 미온보딩일 때)
   setTimeout(() => {

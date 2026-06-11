@@ -27,8 +27,46 @@
     liveHistory:   'omt_live_history_v1', // 라이브 시청 이력 (최대 20개)
     savedTrips:    'omt_saved_trips_v1',   // AI 플래너 저장된 여행 (최대 10개)
     preferences:   'omt_user_prefs_v1',    // 온보딩 답변 + 개인화 설정
-    onboarded:     'omt_onboarded_v1'      // 온보딩 완료 여부 boolean
+    onboarded:     'omt_onboarded_v1',     // 온보딩 완료 여부 boolean
+    notifSettings: 'omt_notif_settings_v1',// 카테고리별 알림 on/off + 방해 금지 시간
+    userLocation:  'omt_user_location_v1'  // 사용자 출발지 권역 (seoul/busan/daegu/gwangju/jeju)
   };
+
+  // ============================================================
+  // 🔔 알림 설정 (카테고리별 + 방해 금지 시간)
+  // ============================================================
+  function getNotifSettings(){
+    return read(KEYS.notifSettings, {
+      booking:    true,    // 예약 확정/D-day/취소
+      payment:    true,    // 결제 완료/실패/환불
+      promotion:  true,    // 특가/쿠폰/이벤트
+      system:     true,    // 공지/업데이트
+      social:     false,   // 팔로우/좋아요
+      quietHours: { enabled: false, start: 22, end: 7 }  // 방해 금지 시간 (22시~7시)
+    });
+  }
+  function setNotifSettings(settings){
+    const current = getNotifSettings();
+    const merged = { ...current, ...settings };
+    write(KEYS.notifSettings, merged);
+    return merged;
+  }
+
+  // ============================================================
+  // 📍 사용자 출발지 위치 (권역)
+  // ============================================================
+  function getUserLocation(){
+    return read(KEYS.userLocation, {
+      region: 'seoul',         // 'seoul' | 'busan' | 'daegu' | 'gwangju' | 'jeju'
+      airport: 'ICN'           // ICN(인천) | GMP(김포) | PUS(김해) | TAE(대구) | KWJ(광주) | CJU(제주)
+    });
+  }
+  function setUserLocation(location){
+    const current = getUserLocation();
+    const merged = { ...current, ...location };
+    write(KEYS.userLocation, merged);
+    return merged;
+  }
 
   // ============================================================
   // 🎯 사용자 선호 (온보딩 + 개인화)
@@ -569,6 +607,9 @@
     getSavedTrips, saveTrip, removeSavedTrip,
     // Preferences (온보딩 + 개인화)
     getPreferences, setPreferences, isOnboarded, markOnboarded,
+    // Notification settings + User location
+    getNotifSettings, setNotifSettings,
+    getUserLocation, setUserLocation,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)
