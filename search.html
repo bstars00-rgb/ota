@@ -190,6 +190,7 @@
         <div class="count" id="sortCount">0건 표시 중</div>
         <select id="sortSel" onchange="renderResults()">
           <option value="relevance">관련도순</option>
+          <option value="direct-first">⭐ OMT 직영 우선</option>
           <option value="price-asc">가격 낮은순</option>
           <option value="price-desc">가격 높은순</option>
           <option value="rating">평점순</option>
@@ -233,7 +234,8 @@
           keywords:[g.name, g.city, OMT.DATA.COUNTRIES[g.country]?.name || '', '골프', '골프텔'],
           image:g.images?.[0],
           price:g.pricePerPerson,
-          rating:g.reviewStats?.rating
+          rating:g.reviewStats?.rating,
+          ownership:own.model || 'partner'   // 'direct' | 'franchise' | 'partner'
         });
       });
       (OMT.DATA.PRODUCTS || []).forEach(p => {
@@ -334,6 +336,15 @@
       if(sort === 'price-asc') list.sort((a,b) => (a.price || Infinity) - (b.price || Infinity));
       if(sort === 'price-desc') list.sort((a,b) => (b.price || 0) - (a.price || 0));
       if(sort === 'rating') list.sort((a,b) => (b.rating || 0) - (a.rating || 0));
+      if(sort === 'direct-first'){
+        // 1순위: 직영 골프텔 → 2순위: 평점순 → 3순위: 기타 타입
+        list.sort((a,b) => {
+          const aDir = a.ownership === 'direct' ? 0 : (a.type === 'golftel' ? 1 : 2);
+          const bDir = b.ownership === 'direct' ? 0 : (b.type === 'golftel' ? 1 : 2);
+          if(aDir !== bDir) return aDir - bDir;
+          return (b.rating || 0) - (a.rating || 0);
+        });
+      }
       // relevance는 기본 순서 (이미 score 정렬됨)
 
       document.getElementById('sortCount').textContent = `${list.length}건 표시 중`;

@@ -457,6 +457,46 @@
           <div style="margin-top:12px;padding:12px;background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.2);border-radius:10px;font-size:11px;color:var(--accent);font-weight:700;line-height:1.6;" id="ratioTip"></div>
         </div>
 
+        <!-- 🔴 LIVE 통계 -->
+        <div class="card" style="margin-bottom:20px;border-left:3px solid #FF0033;">
+          <div class="card-head" style="margin-bottom:12px;">
+            <h3 class="card-title">🔴 LIVE 통계</h3>
+            <a href="live.html" class="card-more" style="background:#FF0033;color:#fff;font-weight:900;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;">
+              <span style="width:5px;height:5px;border-radius:50%;background:#fff;animation:livePulseStat 1s infinite;"></span>
+              내 LIVE →
+            </a>
+          </div>
+          <style>@keyframes livePulseStat{0%,100%{opacity:1;}50%{opacity:.3;}}</style>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:14px;">최근 4주 · 라이브 커머스 성과</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">누적 시청자</div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:4px;font-family:'JetBrains Mono',monospace;">48.2<span style="font-size:12px;color:rgba(255,255,255,.6);">K명</span></div>
+              <div style="font-size:10px;color:#39D353;font-weight:800;margin-top:2px;">▲ 전월 +28%</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">평균 시청 시간</div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:4px;font-family:'JetBrains Mono',monospace;">14:32</div>
+              <div style="font-size:10px;color:#39D353;font-weight:800;margin-top:2px;">▲ +2:48 vs 일반</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">LIVE 전환율</div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:4px;font-family:'JetBrains Mono',monospace;">8.4<span style="font-size:12px;color:rgba(255,255,255,.6);">%</span></div>
+              <div style="font-size:10px;color:var(--accent);font-weight:800;margin-top:2px;">★ 일반 4.4% 대비 1.9배</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">이번주 LIVE</div>
+              <div style="font-size:20px;font-weight:900;color:#fff;margin-top:4px;font-family:'JetBrains Mono',monospace;">3<span style="font-size:12px;color:rgba(255,255,255,.6);">회</span></div>
+              <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:800;margin-top:2px;">다음: 목 21:00</div>
+            </div>
+          </div>
+
+          <div style="padding:10px;background:rgba(255,0,51,.08);border:1px solid rgba(255,0,51,.2);border-radius:8px;font-size:11px;color:#FF6B95;font-weight:700;line-height:1.5;">
+            💡 라이브 커머스 평균 결제액 <strong style="color:#fff;">+42%</strong> · 시청 후 24h 내 구매율 <strong style="color:#fff;">12%</strong>
+          </div>
+        </div>
+
         <!-- ⛳ 추천 골프텔 SKU -->
         <div class="card" style="margin-bottom:20px;">
           <div class="card-head" style="margin-bottom:12px;">
