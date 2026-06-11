@@ -25,8 +25,35 @@
     notifReadIds:  'omt_notif_read_v1',  // 읽은 알림 ID 목록
     userNotifs:    'omt_user_notifs_v1', // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
     liveHistory:   'omt_live_history_v1', // 라이브 시청 이력 (최대 20개)
-    savedTrips:    'omt_saved_trips_v1'   // AI 플래너 저장된 여행 (최대 10개)
+    savedTrips:    'omt_saved_trips_v1',   // AI 플래너 저장된 여행 (최대 10개)
+    preferences:   'omt_user_prefs_v1',    // 온보딩 답변 + 개인화 설정
+    onboarded:     'omt_onboarded_v1'      // 온보딩 완료 여부 boolean
   };
+
+  // ============================================================
+  // 🎯 사용자 선호 (온보딩 + 개인화)
+  // ============================================================
+  function getPreferences(){
+    return read(KEYS.preferences, {
+      skill: null,        // 'beginner' | 'intermediate' | 'advanced'
+      budget: null,       // 'budget' | 'balanced' | 'premium'
+      companion: null,    // 'solo' | 'couple' | 'group' | 'family'
+      country: null,      // '일본' | '베트남' | '태국' | '필리핀' | 'any'
+      goal: null          // 'relax' | 'challenge' | 'social'
+    });
+  }
+  function setPreferences(prefs){
+    const current = getPreferences();
+    const merged = { ...current, ...prefs };
+    write(KEYS.preferences, merged);
+    return merged;
+  }
+  function isOnboarded(){
+    return read(KEYS.onboarded, false) === true;
+  }
+  function markOnboarded(){
+    write(KEYS.onboarded, true);
+  }
 
   // ============================================================
   // 💾 저장된 여행 (AI 플래너) — 회원이 짠 여행 계획을 저장하고 마이페이지에서 재진입
@@ -540,6 +567,8 @@
     getLiveHistory, addLiveHistory,
     // Saved trips (AI planner)
     getSavedTrips, saveTrip, removeSavedTrip,
+    // Preferences (온보딩 + 개인화)
+    getPreferences, setPreferences, isOnboarded, markOnboarded,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

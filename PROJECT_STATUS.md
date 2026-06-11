@@ -1,5 +1,5 @@
 # 오마이트립 프로토타입 — 프로젝트 상태
-**마지막 업데이트**: 2026-06-11 (AI 골프 플래너 5종 고도화 — 음성 입력 + 자유 Q&A + 여행 저장 + 비교 모드 + 프로필 인식)
+**마지막 업데이트**: 2026-06-11 (모바일 4종 고도화 — 온보딩 + For You 피드 + 티오프 카운트다운 + AI 친구 FAB)
 **리포지토리**: https://github.com/bstars00-rgb/ota
 **라이브**: https://bstars00-rgb.github.io/ota/
 **백엔드(예정)**: ELLIS — 프론트 데이터 모델은 ELLIS 마이그레이션 호환으로 설계
@@ -490,7 +490,7 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (15th · AI 플래너 고도화) · 36 pages · 2 JS modules (state.js +savedTrips) · 11 docs · PWA + 운영 콘솔 5 + 백오피스 8 모듈 + AI 플래너 5종 신규 기능 · 117 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (16th · 모바일 고도화) · 36 pages · 2 JS modules (state.js +preferences) · 11 docs · PWA + 운영 콘솔 5 + 백오피스 8 모듈 + AI 플래너 5종 + **모바일 4종 신규** · 120 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
 
 ---
 
@@ -518,6 +518,7 @@ _Status snapshot 2026-06-11 (15th · AI 플래너 고도화) · 36 pages · 2 JS
 | **13 (#111~112)** | **🔌 백오피스 백엔드 API 풀 명세** | ELLIS_API_BACKOFFICE.md v1.0 신규 — 공통 (인증 JWT 8h/2FA TOTP/IP whitelist/에러 11종/Rate Limit 5단계/멱등성 키) + 22 API 풀 스펙 (Request/Response JSON 예시 + audit_logs + alimtalk 트리거 명시) + 권한 매트릭스 빠른 참조 + 멱등성 키 설계 가이드 |
 | **14 (#113~114)** | **📖 운영자 사용 가이드** | BACKOFFICE_GUIDE.md v1.0 신규 — 로그인·세션·단축키 + 5 ROLE별 일상 워크플로우 (CS/MD/팀장/재무/SUPER_ADMIN 시간대별 표) + 5 핵심 시나리오 워크플로우 (환불·견적 확정·정산 실행·운영자 추가·CS 응대) + FAQ 10개 + 트러블슈팅 4 카테고리 + 보안 수칙 + 협업 채널 |
 | **15 (#115~117)** | **🤖 AI 골프 플래너 5종 고도화** | state.js savedTrips 키 + saveTrip/getSavedTrips/removeSavedTrip 헬퍼 · ai-planner.html 5종 신규: ① 음성 입력 mock (5초 자동 인식 + 마이크 애니메이션 + 7 샘플 음성) ② 자유 입력 골프 Q&A 데이터셋 15종 (캐디팁/복장/우천/초보/상급/항공/단체/렌탈/예산/포인트/취소/비자/혼자/가족/VIP) ③ 여행 저장 (state.saveTrip + localStorage 최대 10건) ④ 비교 모드 (3 추천 카드 표 비교 모달) ⑤ 사용자 프로필 자동 인식 (예약 이력 → 선호 국가 추출) + mypage 홈에 "저장한 여행" 카드 (?trip=tripId 딥링크) |
+| **16 (#118~120)** | **📱 모바일 4종 고도화** | state.js preferences + onboarded 키 + getPreferences/setPreferences/isOnboarded/markOnboarded 헬퍼 · mobile.html 4종 신규: ① 첫 진입 온보딩 4-step (실력·예산·동반자·국가 · 진행률 바 · 건너뛰기) → preferences 저장 ② 티오프 카운트다운 sticky 위젯 (D-3 이내 예약 자동 감지 + D-day 카운터) ③ For You 개인화 추천 5선 (점수 알고리즘: 선호+10/이력+5/예산+6/직영+2 · BEST 뱃지 + 추천 사유 칩) ④ AI 친구 FAB (우하단 floating 🤖 + 펄스 애니메이션 + 4 빠른 메뉴: 추천/캐디팁/초보/문의) |
 
 ### 데이터 인벤토리
 

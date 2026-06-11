@@ -597,10 +597,16 @@
 
           <!-- HOME: Shorts Feed -->
           <section id="tab-home" class="tab-panel active">
+            <!-- ⏰ 다가오는 티오프 카운트다운 위젯 (예약 D-3 이내일 때만 표시) -->
+            <div id="teeoffCountdown" style="display:none;"></div>
+
             <!-- sub tabs overlay on feed -->
             <div class="home-sub-tabs">
               <button class="home-sub-tab" data-sub="following">팔로잉</button>
               <button class="home-sub-tab active" data-sub="recommended">추천</button>
+              <button class="home-sub-tab" data-sub="forYou" style="background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;">
+                <span style="display:inline-flex;align-items:center;gap:4px;">✨ For You</span>
+              </button>
               <button class="home-sub-tab" data-sub="live" onclick="location.href='live.html'" style="position:relative;">
                 <span style="display:inline-flex;align-items:center;gap:4px;">
                   <span style="width:6px;height:6px;border-radius:50%;background:#FF0033;animation:livePulse 1s infinite;"></span>
@@ -1586,13 +1592,346 @@
   };
 
   /* ========================================================================
+     ⏰ 다가오는 티오프 카운트다운 위젯
+     ======================================================================== */
+  function renderTeeoffCountdown(){
+    const el = document.getElementById('teeoffCountdown');
+    if(!el) return;
+    const bookings = OMT.State.getBookings ? OMT.State.getBookings() : [];
+    const upcoming = bookings
+      .filter(b => b.status === 'confirmed' || b.status === 'pending')
+      .map(b => {
+        const m = String(b.dates || '').match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+        if(!m) return null;
+        const departAt = new Date(+m[1], +m[2]-1, +m[3], 7, 0, 0);
+        const dayDiff = Math.ceil((departAt - new Date()) / 86400000);
+        return { ...b, departAt, dayDiff };
+      })
+      .filter(b => b && b.dayDiff >= 0 && b.dayDiff <= 3)
+      .sort((a,b) => a.departAt - b.departAt);
+    if(!upcoming.length){ el.style.display = 'none'; return; }
+
+    const b = upcoming[0];
+    const isGT = b.productType === 'golftel' || b.productType === 'golftel-air' || (b.productId && b.productId.startsWith('gt-'));
+    const link = isGT ? `complete.html?bk=${b.bookingNumber}` : `complete.html?bk=${b.bookingNumber}`;
+    el.style.display = 'block';
+    el.innerHTML = `
+      <a href="${link}" style="display:block;margin:8px 12px;padding:14px 16px;background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;border-radius:14px;text-decoration:none;box-shadow:0 6px 20px rgba(255,107,53,.3);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(255,255,255,.15);border-radius:50%;"></div>
+        <div style="font-size:10px;font-weight:900;letter-spacing:.12em;opacity:.85;text-transform:uppercase;">⏰ 다가오는 티오프</div>
+        <div style="font-size:18px;font-weight:900;margin-top:4px;line-height:1.3;">${b.productName || '예약'}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.3);">
+          <div>
+            <div style="font-size:11px;opacity:.85;font-weight:700;">${b.dates || ''}</div>
+            <div style="font-size:11px;opacity:.85;font-weight:700;margin-top:2px;">👥 ${b.paxCount || 1}명</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:28px;font-weight:900;line-height:1;">D-${b.dayDiff}</div>
+            <div style="font-size:10px;opacity:.85;font-weight:700;margin-top:2px;">${b.dayDiff === 0 ? '오늘 출발!' : b.dayDiff === 1 ? '내일 출발' : '여행 임박'}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;opacity:.9;font-weight:700;">📩 e-바우처·티오프 시간 확인 →</div>
+      </a>
+    `;
+  }
+
+  /* ========================================================================
+     ✨ For You 개인화 추천 — 온보딩 답변 + 예약 이력 기반
+     ======================================================================== */
+  function buildForYouRecommendations(){
+    const prefs = OMT.State.getPreferences ? OMT.State.getPreferences() : {};
+    const bookings = OMT.State.getBookings ? OMT.State.getBookings() : [];
+    const golftels = OMT.DATA.GOLFTELS || [];
+
+    // 가장 많이 간 국가 (예약 이력 기반)
+    const countryCounts = {};
+    bookings.forEach(b => {
+      const c = (b.dates || '').toString();
+      if(c.includes('일본')) countryCounts['japan'] = (countryCounts['japan']||0)+1;
+      if(c.includes('베트남')) countryCounts['vietnam'] = (countryCounts['vietnam']||0)+1;
+      if(c.includes('태국')) countryCounts['thailand'] = (countryCounts['thailand']||0)+1;
+      if(c.includes('필리핀')) countryCounts['philippines'] = (countryCounts['philippines']||0)+1;
+    });
+    const COUNTRY_MAP = { '일본':'japan', '베트남':'vietnam', '태국':'thailand', '필리핀':'philippines' };
+    const preferredCountry = prefs.country && prefs.country !== 'any' ? COUNTRY_MAP[prefs.country] : null;
+    const historyCountry = Object.entries(countryCounts).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+    // 예산 매핑 (1인 기준)
+    const BUDGET_RANGES = {
+      budget:    [0, 1500000],
+      balanced:  [1500000, 3000000],
+      premium:   [3000000, Infinity]
+    };
+    const range = prefs.budget ? BUDGET_RANGES[prefs.budget] : [0, Infinity];
+
+    // 후보 필터링 + 점수
+    const scored = golftels.map(g => {
+      let score = 0;
+      let reasons = [];
+      if(preferredCountry && g.country === preferredCountry){ score += 10; reasons.push(`선호 ${prefs.country}`); }
+      if(historyCountry && g.country === historyCountry){ score += 5; reasons.push('자주 가는 곳'); }
+      if(g.pricePerPerson >= range[0] && g.pricePerPerson < range[1]){ score += 6; reasons.push('예산 적합'); }
+      // 동반자 → 라운드 수
+      if(prefs.companion === 'family' && g.rounds <= 3){ score += 3; reasons.push('가족 친화'); }
+      if(prefs.companion === 'group' && g.rounds >= 4){ score += 3; reasons.push('단체 적합'); }
+      // 실력
+      const easyCountries = ['vietnam','thailand','philippines'];
+      if(prefs.skill === 'beginner' && easyCountries.includes(g.country)){ score += 2; reasons.push('초보 추천'); }
+      if(prefs.skill === 'advanced' && g.country === 'japan'){ score += 4; reasons.push('상급자 도전'); }
+      // 직영 우선
+      const own = OMT.DATA.OWNERSHIP[g.country] || {};
+      if(own.model === 'direct'){ score += 2; reasons.push('OMT 직영'); }
+      return { ...g, _score: score, _reasons: reasons.slice(0, 2) };
+    }).sort((a,b) => b._score - a._score);
+
+    return scored.slice(0, 5);
+  }
+
+  function renderForYouFeed(){
+    const recs = buildForYouRecommendations();
+    const prefs = OMT.State.getPreferences ? OMT.State.getPreferences() : {};
+    const hasPrefs = prefs.skill || prefs.budget || prefs.country;
+    const greetingMsg = hasPrefs
+      ? `${prefs.country || '여러분'}을(를) 좋아하시는 분께 추천드려요`
+      : '회원님 맞춤 골프텔 5선';
+
+    const html = `
+      <div style="padding:80px 14px 14px;background:linear-gradient(180deg,#FFF5F0,#fff);">
+        <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#FF6B35;text-transform:uppercase;">✨ FOR YOU</div>
+        <div style="font-size:20px;font-weight:900;line-height:1.3;margin-top:4px;color:#1A1A1A;">${greetingMsg}</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">취향과 예약 이력을 분석한 개인화 추천 — 매일 갱신</div>
+
+        ${!hasPrefs ? `
+          <button onclick="showOnboarding()" style="margin-top:14px;width:100%;padding:14px;background:#fff;border:2px dashed #FF6B35;border-radius:12px;color:#FF6B35;font-weight:900;font-size:13px;font-family:inherit;cursor:pointer;">
+            🎯 30초 취향 설문하고 더 정확한 추천 받기 →
+          </button>
+        ` : ''}
+
+        <div style="display:grid;gap:12px;margin-top:16px;">
+          ${recs.map((g, idx) => {
+            const own = OMT.DATA.OWNERSHIP[g.country] || {};
+            const isDir = own.model === 'direct';
+            return `
+              <a href="golftel.html?id=${g.id}" style="display:block;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 4px 12px rgba(0,0,0,.04);">
+                <div style="position:relative;">
+                  <div style="aspect-ratio:16/9;background:url('${g.images?.[0]}') center/cover;background-color:#eee;"></div>
+                  <div style="position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;">
+                    ${idx === 0 ? `<span style="padding:3px 9px;border-radius:5px;background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;font-size:10px;font-weight:900;letter-spacing:.04em;">🏆 BEST</span>` : ''}
+                    ${isDir ? `<span style="padding:3px 9px;border-radius:5px;background:#075440;color:#fff;font-size:10px;font-weight:900;">✦ ${own.label || '직영'}</span>` : ''}
+                  </div>
+                  <div style="position:absolute;bottom:10px;left:10px;display:flex;gap:4px;flex-wrap:wrap;">
+                    ${g._reasons.map(r => `<span style="padding:2px 8px;border-radius:5px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:800;backdrop-filter:blur(4px);">✓ ${r}</span>`).join('')}
+                  </div>
+                </div>
+                <div style="padding:14px 16px;">
+                  <div style="font-size:14px;font-weight:900;color:#1A1A1A;line-height:1.3;">${g.name}</div>
+                  <div style="font-size:11px;color:#6B7280;margin-top:4px;">${g.nights}박 ${g.rounds}라운딩 · ${g.hotelName || ''}</div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;">
+                    <div>
+                      <div style="font-size:10px;color:#6B7280;font-weight:700;">1인 (2인1실)</div>
+                      <div style="font-size:18px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;margin-top:2px;">${(g.pricePerPerson/10000).toFixed(0)}만원~</div>
+                    </div>
+                    <div style="padding:7px 14px;background:#FF6B35;color:#fff;border-radius:8px;font-size:12px;font-weight:900;">상세 보기 →</div>
+                  </div>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+
+        <div onclick="location.href='golftels.html'" style="margin-top:14px;padding:14px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;text-align:center;font-size:13px;font-weight:800;color:#FF6B35;cursor:pointer;">
+          🌏 전체 골프텔 8선 보기 →
+        </div>
+      </div>
+    `;
+    return html;
+  }
+
+  /* ========================================================================
+     🎯 온보딩 4-step 모달
+     ======================================================================== */
+  const ONBOARDING_STEPS = [
+    {
+      key: 'skill', title: '⛳ 골프 실력은 어느 정도인가요?', sub: '맞춤 코스 난이도 추천에 사용해요',
+      options: [
+        { value:'beginner', label:'🌱 입문·초보', desc:'핸디 30 이상 · 쉬운 코스 위주' },
+        { value:'intermediate', label:'🎯 중급', desc:'핸디 15~30 · 다양한 코스' },
+        { value:'advanced', label:'🏆 상급·싱글', desc:'핸디 15 이하 · 챔피언 코스 도전' }
+      ]
+    },
+    {
+      key: 'budget', title: '💰 1인 예산은 어느 정도?', sub: '항공 별도 · 호텔+라운딩 기준',
+      options: [
+        { value:'budget', label:'💵 가성비 (~150만)', desc:'필리핀 · 태국 · 베트남 다낭' },
+        { value:'balanced', label:'⚖️ 밸런스 (150~300만)', desc:'베트남 빈펄 · 태국 알파인' },
+        { value:'premium', label:'⭐ 프리미엄 (300만+)', desc:'일본 카누차 · 나트랑 럭셔리' }
+      ]
+    },
+    {
+      key: 'companion', title: '👥 누구와 가시나요?', sub: '동반자에 따라 추천이 달라져요',
+      options: [
+        { value:'solo', label:'🚶 나 혼자', desc:'조인 라운딩 + 1:1 캐디 케어' },
+        { value:'couple', label:'💑 커플', desc:'프라이빗 픽업 + 럭셔리 호텔' },
+        { value:'group', label:'👥 친구·동료 4~8명', desc:'단체 할인 + 사진 촬영 서비스' },
+        { value:'family', label:'👨‍👩‍👧 가족', desc:'키즈 클럽 + 비골프 액티비티' }
+      ]
+    },
+    {
+      key: 'country', title: '🌏 가고 싶은 국가는?', sub: '직영국(일본·베트남)은 22.5% 마진으로 더 좋은 가격',
+      options: [
+        { value:'any', label:'🌐 어디든 좋아요', desc:'AI가 가장 추천하는 곳으로' },
+        { value:'일본', label:'🇯🇵 일본', desc:'OMT 직영 · 카누차 오키나와' },
+        { value:'베트남', label:'🇻🇳 베트남', desc:'OMT 직영 · 빈펄·다낭·푸꾸옥' },
+        { value:'태국', label:'🇹🇭 태국', desc:'프랜차이즈 · 방콕 알파인·파타야' },
+        { value:'필리핀', label:'🇵🇭 필리핀', desc:'프랜차이즈 · 클락 미모사·세부' }
+      ]
+    }
+  ];
+  let onboardingStep = 0;
+  const onboardingAnswers = {};
+
+  function showOnboarding(){
+    onboardingStep = 0;
+    Object.keys(onboardingAnswers).forEach(k => delete onboardingAnswers[k]);
+    renderOnboardingStep();
+  }
+  function renderOnboardingStep(){
+    const step = ONBOARDING_STEPS[onboardingStep];
+    if(!step){ finishOnboarding(); return; }
+    const progress = ((onboardingStep + 1) / ONBOARDING_STEPS.length) * 100;
+    let overlay = document.getElementById('onboardingOverlay');
+    if(!overlay){
+      overlay = document.createElement('div');
+      overlay.id = 'onboardingOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:200;background:#fff;display:flex;flex-direction:column;animation:obFadeIn .25s ease;';
+      document.body.appendChild(overlay);
+      const styleTag = document.createElement('style');
+      styleTag.textContent = '@keyframes obFadeIn{from{opacity:0;}to{opacity:1;}}@keyframes obSlideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}';
+      document.head.appendChild(styleTag);
+    }
+    overlay.innerHTML = `
+      <div style="padding:calc(env(safe-area-inset-top) + 16px) 18px 12px;border-bottom:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;font-weight:900;color:#6B7280;letter-spacing:.04em;">STEP ${onboardingStep + 1} / ${ONBOARDING_STEPS.length}</div>
+        <button onclick="skipOnboarding()" style="background:none;border:none;color:#6B7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">건너뛰기 →</button>
+      </div>
+      <div style="height:4px;background:#F3F4F6;">
+        <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,#FF6B35,#FFD23F);border-radius:2px;transition:width .3s;"></div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:24px 20px;animation:obSlideUp .3s ease-out;">
+        <div style="font-size:24px;font-weight:900;line-height:1.3;color:#1A1A1A;">${step.title}</div>
+        <div style="font-size:13px;color:#6B7280;margin-top:6px;">${step.sub}</div>
+        <div style="display:grid;gap:10px;margin-top:24px;">
+          ${step.options.map(opt => `
+            <button onclick="pickOnboarding('${step.key}', '${opt.value}')" style="text-align:left;padding:16px 18px;background:#fff;border:2px solid #E5E7EB;border-radius:14px;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.borderColor='#FF6B35';this.style.background='#FFF5F0'" onmouseout="this.style.borderColor='#E5E7EB';this.style.background='#fff'">
+              <div style="font-size:15px;font-weight:900;color:#1A1A1A;">${opt.label}</div>
+              <div style="font-size:12px;color:#6B7280;margin-top:4px;line-height:1.4;">${opt.desc}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      ${onboardingStep > 0 ? `
+        <div style="padding:14px 18px calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid #F3F4F6;">
+          <button onclick="backOnboarding()" style="width:100%;padding:12px;background:#F3F4F6;border:none;border-radius:10px;font-weight:800;font-size:13px;color:#6B7280;cursor:pointer;font-family:inherit;">← 이전</button>
+        </div>
+      ` : ''}
+    `;
+  }
+  window.pickOnboarding = (key, value) => {
+    onboardingAnswers[key] = value;
+    onboardingStep++;
+    renderOnboardingStep();
+  };
+  window.backOnboarding = () => {
+    onboardingStep = Math.max(0, onboardingStep - 1);
+    renderOnboardingStep();
+  };
+  window.skipOnboarding = () => {
+    OMT.State.markOnboarded();
+    const overlay = document.getElementById('onboardingOverlay');
+    if(overlay) overlay.remove();
+  };
+  window.showOnboarding = showOnboarding;
+
+  function finishOnboarding(){
+    OMT.State.setPreferences(onboardingAnswers);
+    OMT.State.markOnboarded();
+    const overlay = document.getElementById('onboardingOverlay');
+    if(overlay){
+      overlay.innerHTML = `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">
+          <div style="font-size:64px;animation:obSlideUp .4s ease-out;">🎉</div>
+          <div style="font-size:22px;font-weight:900;margin-top:14px;color:#1A1A1A;">맞춤 추천 준비 완료!</div>
+          <div style="font-size:13px;color:#6B7280;margin-top:6px;line-height:1.5;">이제 ✨ For You 탭에서<br>회원님께 딱 맞는 골프텔을 만나보세요</div>
+          <button onclick="confirmOnboarding()" style="margin-top:32px;padding:14px 32px;background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;border:none;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(255,107,53,.3);">✨ For You 보러 가기</button>
+        </div>
+      `;
+    }
+  }
+  window.confirmOnboarding = () => {
+    const overlay = document.getElementById('onboardingOverlay');
+    if(overlay) overlay.remove();
+    // For You 서브탭 활성화
+    document.querySelectorAll('.home-sub-tab').forEach(t => t.classList.remove('active'));
+    const forYouTab = document.querySelector('[data-sub="forYou"]');
+    if(forYouTab) forYouTab.classList.add('active');
+    // 피드를 For You로 교체
+    const feedEl = document.getElementById('feedScroller');
+    if(feedEl) feedEl.innerHTML = renderForYouFeed();
+  };
+
+  /* ========================================================================
+     🤖 AI 친구 FAB (Floating Action Button)
+     ======================================================================== */
+  function toggleAiFab(){
+    const menu = document.getElementById('aiFabMenu');
+    const back = document.getElementById('aiFabBackdrop');
+    if(menu) menu.classList.toggle('open');
+    if(back) back.classList.toggle('open');
+  }
+  window.toggleAiFab = toggleAiFab;
+
+  /* ========================================================================
      INIT
      ======================================================================== */
   renderFeed();
   renderExplore();
   renderNotifications();
   renderProfile();
+  renderTeeoffCountdown();
   switchTab('home');
+
+  // 첫 진입 시 온보딩 (회원이지만 미온보딩일 때)
+  setTimeout(() => {
+    if(OMT.State.isOnboarded && !OMT.State.isOnboarded()){
+      // 0.8초 지연 후 표시 — 사용자가 화면을 파악할 시간
+      showOnboarding();
+    }
+  }, 800);
+
+  // For You 서브탭 클릭 → 피드를 ForYou로 교체
+  document.querySelectorAll('.home-sub-tab').forEach(t => {
+    t.addEventListener('click', (e) => {
+      const sub = t.dataset.sub;
+      if(sub === 'forYou'){
+        e.preventDefault();
+        document.querySelectorAll('.home-sub-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const feedEl = document.getElementById('feedScroller');
+        if(feedEl){
+          feedEl.style.scrollSnapType = 'none';
+          feedEl.innerHTML = renderForYouFeed();
+        }
+      } else if(sub === 'recommended'){
+        document.querySelectorAll('.home-sub-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const feedEl = document.getElementById('feedScroller');
+        if(feedEl){
+          feedEl.style.scrollSnapType = 'y mandatory';
+          renderFeed();
+        }
+      }
+    });
+  });
 
   // 🔴 LIVE 시청자 카운터 실시간 변동 (홈 피드 LIVE 카드)
   setInterval(() => {
@@ -1933,5 +2272,61 @@
     simulateLiveStartPush();
   }, 45000);
   </script>
+
+  <!-- 🤖 AI 친구 FAB (Floating Action Button) -->
+  <style>
+    #aiFab{
+      position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 72px);z-index:80;
+      width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;
+      display:grid;place-items:center;font-size:24px;
+      box-shadow:0 8px 24px rgba(255,107,53,.4);
+      cursor:pointer;border:none;font-family:inherit;
+      animation:fabBob 3s ease-in-out infinite;
+    }
+    @keyframes fabBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+    #aiFab:active{transform:scale(.92);}
+    #aiFab::after{
+      content:'';position:absolute;inset:-4px;border-radius:50%;
+      background:linear-gradient(135deg,#FF6B35,#FFD23F);opacity:0;
+      animation:fabPing 2.4s ease-out infinite;z-index:-1;
+    }
+    @keyframes fabPing{0%{opacity:.4;transform:scale(1);}80%,100%{opacity:0;transform:scale(1.6);}}
+    #aiFabMenu{
+      position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 138px);z-index:79;
+      display:flex;flex-direction:column;gap:8px;
+      opacity:0;pointer-events:none;transform:translateY(12px) scale(.9);transform-origin:bottom right;
+      transition:all .22s cubic-bezier(.34,1.56,.64,1);
+    }
+    #aiFabMenu.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+    #aiFabMenu .fab-item{
+      display:flex;align-items:center;gap:10px;padding:10px 14px 10px 16px;
+      background:#fff;border-radius:30px;border:none;
+      box-shadow:0 4px 16px rgba(0,0,0,.12);
+      font-size:13px;font-weight:800;color:#1A1A1A;cursor:pointer;font-family:inherit;
+      text-decoration:none;white-space:nowrap;
+    }
+    #aiFabMenu .fab-item:active{transform:scale(.96);}
+    #aiFabMenu .fab-item .ic{
+      width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;
+      background:linear-gradient(135deg,#FFF5F0,#FFEDE0);color:#FF6B35;flex-shrink:0;
+    }
+    #aiFabBackdrop{
+      position:fixed;inset:0;z-index:78;background:rgba(0,0,0,.2);
+      opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);
+    }
+    #aiFabBackdrop.open{opacity:1;pointer-events:auto;}
+  </style>
+  <div id="aiFabBackdrop" onclick="toggleAiFab()"></div>
+  <div id="aiFabMenu">
+    <a href="ai-planner.html" class="fab-item"><span class="ic">⛳</span>골프텔 추천 받기</a>
+    <a href="ai-planner.html?q=캐디팁" class="fab-item"><span class="ic">💰</span>캐디팁·복장 질문</a>
+    <a href="ai-planner.html?q=초보" class="fab-item"><span class="ic">🌱</span>초보 코스 추천</a>
+    <a href="mypage.html?tab=inquiry" class="fab-item"><span class="ic">💬</span>1:1 문의</a>
+  </div>
+  <button id="aiFab" onclick="toggleAiFab()" aria-label="AI 골프 친구">
+    🤖
+  </button>
+
 </body>
 </html>
