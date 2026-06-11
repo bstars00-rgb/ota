@@ -445,15 +445,27 @@
         p: '패키지 포함'
       });
 
+      // 체크인 일자 추출 (dates "2026.06.14 - 2026.06.18" → 시작일)
+      const dateMatch = String(datesStr).match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+      const checkinDate = dateMatch ? new Date(+dateMatch[1], +dateMatch[2]-1, +dateMatch[3]) : null;
+      const dayLabels = ['일','월','화','수','목','금','토'];
+
       // 선택된 슬롯들
       const slots = pkg.selectedSlots || [];
       if(slots.length){
         slots.forEach((s, i) => {
           const W = { morning:'오전', afternoon:'오후', twilight:'트와일라잇', night:'야간' }[s.window] || s.window;
+          let dateStr = '';
+          if(checkinDate){
+            const d = new Date(checkinDate); d.setDate(d.getDate() + i);
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+            const dKind = isWeekend ? '주말' : '주중';
+            dateStr = ` · 📅 ${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]}·${dKind})`;
+          }
           items.push({
             ic:'⛳', t:`${i+1}라운딩`,
             n: s.courseName,
-            s: `${W} ${s.time} · ${s.price ? s.price.toLocaleString('ko-KR')+'원 (참고)' : '확정 시간'}`,
+            s: `${W} ${s.time}${dateStr} · ${s.price ? s.price.toLocaleString('ko-KR')+'원 (참고)' : '확정 시간'}`,
             p: '패키지 포함'
           });
         });

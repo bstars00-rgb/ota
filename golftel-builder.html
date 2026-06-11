@@ -345,6 +345,13 @@
           <h2>④ 옵션 · 항공권</h2>
           <p class="sub">필요한 옵션만 켜세요 — 합산 가격이 실시간 반영됩니다</p>
 
+          <!-- 체크인 날짜 -->
+          <div style="margin-bottom:18px;padding:14px;background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);border-radius:12px;border:1.5px solid var(--golf);">
+            <div style="font-size:11px;font-weight:800;color:var(--golf-dark);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">📅 체크인 날짜</div>
+            <input type="date" id="builderCheckin" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;font-weight:800;color:var(--ink);background:#fff;font-family:inherit;" />
+            <div id="builderDateHint" style="font-size:11px;color:var(--ink-2);margin-top:8px;line-height:1.6;"></div>
+          </div>
+
           <div style="margin-bottom:18px;">
             <div style="font-size:13px;font-weight:800;color:var(--ink-2);margin-bottom:10px;">⛳ 골프장 옵션</div>
             <div class="opt-grid" id="golfOpts"></div>
@@ -455,8 +462,11 @@
       rounds: 2,
       pax: 2,
       opts: { cartFee:true, caddyFee:false, golfShuttle:false, airportPickup:true, breakfast:true, dinner:false },
-      airOn: false
+      airOn: false,
+      checkinDate: null   // Date | null
     };
+    const WEEKEND_SURCHARGE = 0.10;
+    const HOLIDAY_SURCHARGE = 0.15;
 
     // ============================================================
     // STEP 1: Country / City
@@ -547,6 +557,7 @@
     function setNights(d){
       S.nights = Math.max(1, Math.min(10, S.nights + d));
       document.getElementById('nightsNum').textContent = S.nights;
+      updateBuilderDateHint();
       updateSummary();
     }
 
@@ -589,6 +600,7 @@
     function setRounds(d){
       S.rounds = Math.max(1, Math.min(10, S.rounds + d));
       document.getElementById('roundsNum').textContent = S.rounds;
+      updateBuilderDateHint();
       updateSummary();
     }
 
@@ -642,10 +654,32 @@
     // ============================================================
     // PRICING + SUMMARY
     // ============================================================
+    // 날짜 헬퍼
+    const _DAY_LABEL = ['일','월','화','수','목','금','토'];
+    function _isWeekend(d){ return d && (d.getDay()===0 || d.getDay()===6); }
+    function _roundDay(roundIdx){
+      if(!S.checkinDate) return null;
+      const d = new Date(S.checkinDate); d.setDate(d.getDate() + roundIdx);
+      return d;
+    }
+    // 라운딩 전체에서 평균 모디파이어 계산 (주말이 K번이면 K/N × 0.10)
+    function _avgGreenModifier(){
+      if(!S.checkinDate) return 0;
+      const N = S.rounds;
+      let weekendCount = 0;
+      for(let i=0;i<N;i++){
+        const d = _roundDay(i);
+        if(_isWeekend(d)) weekendCount++;
+      }
+      return (weekendCount * WEEKEND_SURCHARGE) / N;   // 평균 가산률
+    }
+
     function computePrice(){
       const hotel = S.hotelId ? D.HOTELS.find(h => h.id === S.hotelId) : null;
       const greenFee = GREEN_FEE[S.country] || 150000;
       const airFare = AIR_FARE[S.country] || 400000;
+      const modifier = _avgGreenModifier();
+      const greenFeeAdj = Math.round(greenFee * (1 + modifier));
 
       // Sub items
       const items = [];
@@ -654,8 +688,8 @@
       const rooms = Math.ceil(S.pax / 2);
       const hotelTotal = hotel ? hotel.price * S.nights * rooms : 0;
 
-      // Golf: 코스당 라운딩 균등 분배 가정 — 그린피는 라운딩×인원
-      const greenTotal = S.courseIds.length > 0 ? greenFee * S.rounds * S.pax : 0;
+      // Golf: 코스당 라운딩 균등 분배 가정 — 그린피는 라운딩×인원 (날짜 모디파이어 반영)
+      const greenTotal = S.courseIds.length > 0 ? greenFeeAdj * S.rounds * S.pax : 0;
 
       // Options
       let optTotal = 0;
@@ -677,7 +711,48 @@
       const total = hotelTotal + greenTotal + optTotal + airTotal;
       const perPerson = Math.round(total / S.pax);
 
-      return { hotel, greenFee, hotelTotal, greenTotal, optTotal, optBreakdown, airTotal, airFare, total, perPerson, rooms };
+      return { hotel, greenFee: greenFeeAdj, baseGreenFee: greenFee, modifier, hotelTotal, greenTotal, optTotal, optBreakdown, airTotal, airFare, total, perPerson, rooms };
+    }
+
+    // ============================================================
+    // 체크인 날짜 picker
+    // ============================================================
+    function bindCheckinDate(){
+      const input = document.getElementById('builderCheckin');
+      if(!input) return;
+      // 기본값: 오늘 + 30일
+      const def = new Date(); def.setDate(def.getDate() + 30);
+      const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      input.value = fmt(def);
+      input.min = fmt(new Date());
+      S.checkinDate = def;
+      updateBuilderDateHint();
+      input.addEventListener('change', () => {
+        if(!input.value){ S.checkinDate = null; updateBuilderDateHint(); updateSummary(); return; }
+        const [y,m,d] = input.value.split('-').map(Number);
+        S.checkinDate = new Date(y, m-1, d);
+        updateBuilderDateHint();
+        updateSummary();
+      });
+    }
+    function updateBuilderDateHint(){
+      const el = document.getElementById('builderDateHint');
+      if(!el) return;
+      if(!S.checkinDate){ el.textContent = '체크인 날짜 선택 시 라운딩별 주중/주말 가격 적용'; return; }
+      const checkout = new Date(S.checkinDate); checkout.setDate(checkout.getDate() + S.nights);
+      const chips = [];
+      let weekendCount = 0;
+      for(let i=0;i<S.rounds;i++){
+        const d = _roundDay(i);
+        const wk = _isWeekend(d);
+        if(wk) weekendCount++;
+        const bg = wk ? '#FEE2E2;color:#B91C1C' : '#E0F2FE;color:#0369A1';
+        chips.push(`<span style="display:inline-block;padding:2px 7px;border-radius:5px;background:${bg};font-size:10px;font-weight:900;">R${i+1} ${d.getMonth()+1}/${d.getDate()}(${_DAY_LABEL[d.getDay()]}${wk?'·주말':''})</span>`);
+      }
+      const surcharge = weekendCount > 0
+        ? `<div style="margin-top:6px;color:var(--primary);font-weight:800;">⚠️ 주말 ${weekendCount}회 → 그린피 +${Math.round((weekendCount * WEEKEND_SURCHARGE * 100) / S.rounds)}% 평균 가산</div>`
+        : `<div style="margin-top:6px;color:var(--golf);font-weight:800;">✓ 전 라운딩 주중 — 기본가 적용</div>`;
+      el.innerHTML = `${S.nights}박 ${S.nights+1}일 · 체크아웃 ${checkout.getMonth()+1}/${checkout.getDate()}<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">${chips.join('')}</div>${surcharge}`;
     }
 
     function updateSummary(){
@@ -807,6 +882,7 @@
       const params = new URLSearchParams(location.search);
       const c = params.get('c') || params.get('country');
       renderCountries();
+      bindCheckinDate();
       updateSummary();
       updateStepper(1);
       if(c && D.COUNTRIES[c]) selectCountry(c);

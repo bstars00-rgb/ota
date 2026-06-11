@@ -173,6 +173,10 @@
     .log-row .ch{color:var(--accent);font-weight:700;}
     .log-row .msg{color:var(--ink-2);}
     .log-row .dur{color:var(--ink-3);font-size:11px;}
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(-4px);background:rgba(57,211,83,.08);}
+      to{opacity:1;transform:translateY(0);background:transparent;}
+    }
 
     /* Architecture diagram */
     .arch-box{
@@ -440,8 +444,8 @@
       }).join('');
     }
 
-    // ===== Sync log (mock) =====
-    const LOG_TEMPLATES = [
+    // ===== Sync log (mock, 실시간 갱신) =====
+    const LOG_SEEDS = [
       { lv:'ok',   ch:'direct',   msg:'POST /book/slot succeeded',                           dur:42  },
       { lv:'ok',   ch:'gdo',      msg:'GET /teesheet/availability synced (1 course)',        dur:118 },
       { lv:'ok',   ch:'golfdigg', msg:'GET /courses/gc-th-thana-city/slots synced 32 slots', dur:146 },
@@ -455,23 +459,58 @@
       { lv:'ok',   ch:'xgolf',    msg:'Heartbeat OK (last 5min)',                            dur:8   },
       { lv:'ok',   ch:'direct',   msg:'GET /teesheet/availability synced (12 slots)',        dur:39  }
     ];
+    // 새 이벤트 풀 — 5초마다 1건 prepend
+    const LIVE_TEMPLATES = [
+      { lv:'ok',   ch:'direct',   msgs:['POST /book/slot succeeded', 'GET /teesheet/availability synced (8 slots)', 'GET /teesheet/availability synced (12 slots)', 'PUT /inventory updated kanucha rounds=24', 'POST /book/slot succeeded for OMT-' + 'X' + Math.random().toString(36).slice(2,8).toUpperCase()], dur:[36,42,38,45,40] },
+      { lv:'ok',   ch:'gdo',      msgs:['POST /book/slot succeeded', 'GET /teesheet/availability synced (1 course)', 'Heartbeat OK', 'GET /slots/2026-06-15 synced 18 slots'], dur:[112,124,118,135] },
+      { lv:'ok',   ch:'golfdigg', msgs:['POST /book/slot succeeded', 'GET /courses/gc-th-thana-city/slots synced 32 slots', 'GET /slots/2026-06-20 synced 28 slots', 'Heartbeat OK (5min)'], dur:[138,146,142,12] },
+      { lv:'ok',   ch:'xgolf',    msgs:['Heartbeat OK (last 5min)', 'GET /inventory polled (0 changes)'], dur:[8,165] },
+      { lv:'warn', ch:'gora',     msgs:['API rate limit warning (92/100 req/min)', 'Slow response (>200ms)', 'Retry attempt 2/3'], dur:[215,234,189] },
+      { lv:'err',  ch:'kakaogolf',msgs:['Connection refused — circuit breaker OPEN', 'Healthcheck failed — adapter DOWN', 'Retry skipped (circuit open)'], dur:[0,0,0] },
+      { lv:'info', ch:'partner',  msgs:['Manual sync triggered for gc-ph-alta-vista', 'Quote request sent (24h SLA)'], dur:[0,0] }
+    ];
+
+    let liveLogs = [];
+
+    function _pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function _makeLogRow(tpl, when){
+      const hh = String(when.getHours()).padStart(2,'0');
+      const mm = String(when.getMinutes()).padStart(2,'0');
+      const ss = String(when.getSeconds()).padStart(2,'0');
+      return `
+        <div class="log-row" style="animation:fadeIn .3s ease;">
+          <span class="time">${hh}:${mm}:${ss}</span>
+          <span class="lv ${tpl.lv}">${tpl.lv.toUpperCase()}</span>
+          <span class="ch">${tpl.ch}</span>
+          <span class="msg">${tpl.msg}</span>
+          <span class="dur">${tpl.dur ? tpl.dur + 'ms' : '-'}</span>
+        </div>
+      `;
+    }
+
     function renderLog(){
       const now = Date.now();
-      document.getElementById('syncLog').innerHTML = LOG_TEMPLATES.map((t, i) => {
-        const t2 = new Date(now - i * (20000 + Math.random()*15000));
-        const hh = String(t2.getHours()).padStart(2,'0');
-        const mm = String(t2.getMinutes()).padStart(2,'0');
-        const ss = String(t2.getSeconds()).padStart(2,'0');
-        return `
-          <div class="log-row">
-            <span class="time">${hh}:${mm}:${ss}</span>
-            <span class="lv ${t.lv}">${t.lv.toUpperCase()}</span>
-            <span class="ch">${t.ch}</span>
-            <span class="msg">${t.msg}</span>
-            <span class="dur">${t.dur ? t.dur + 'ms' : '-'}</span>
-          </div>
-        `;
-      }).join('');
+      const seedRows = LOG_SEEDS.map((t, i) => {
+        const t2 = new Date(now - (i+1) * (20000 + Math.random()*15000));
+        return _makeLogRow(t, t2);
+      });
+      liveLogs = seedRows;
+      document.getElementById('syncLog').innerHTML = liveLogs.join('');
+    }
+
+    function appendLiveLog(){
+      const tpl = _pickRandom(LIVE_TEMPLATES);
+      const msgIdx = Math.floor(Math.random() * tpl.msgs.length);
+      const newRow = _makeLogRow({
+        lv: tpl.lv,
+        ch: tpl.ch,
+        msg: tpl.msgs[msgIdx],
+        dur: tpl.dur[msgIdx] || 0
+      }, new Date());
+      liveLogs.unshift(newRow);
+      if(liveLogs.length > 30) liveLogs.pop();
+      const el = document.getElementById('syncLog');
+      if(el) el.innerHTML = liveLogs.join('');
     }
 
     // ===== Live clock =====
@@ -492,6 +531,8 @@
     renderLog();
     tickClock();
     setInterval(tickClock, 1000);
+    // 5초마다 새 로그 prepend (실시간 운영 느낌)
+    setInterval(appendLiveLog, 5000);
   </script>
 </body>
 </html>
