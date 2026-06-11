@@ -842,7 +842,54 @@
   function renderFeed(){
     const posts = OMT.DATA.FEED_POSTS;
     const el = document.getElementById('feedScroller');
-    el.innerHTML = posts.map((p, idx) => {
+
+    // 🔴 LIVE 카드 — 피드 최상단 prepend (스크롤 스냅 호환)
+    const liveCardHtml = `
+      <article class="short-slide" style="scroll-snap-align:start;" onclick="location.href='live.html'">
+        <div class="short-bg" style="background-image:url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80');animation:zoomKB 30s ease-in-out infinite alternate;"></div>
+        <div class="short-overlay" style="background:linear-gradient(180deg, rgba(0,0,0,.7) 0%, transparent 30%, transparent 60%, rgba(255,0,51,.4) 100%);"></div>
+
+        <div class="short-top">
+          <span class="s-chip" style="background:#FF0033;color:#fff;display:inline-flex;align-items:center;gap:5px;font-weight:900;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:livePulse 1s infinite;"></span>
+            🔴 LIVE
+          </span>
+          <span class="s-chip" style="background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(8px);">
+            👁️ <span id="mFeedLiveViewers">1,247</span>
+          </span>
+        </div>
+
+        <div class="short-bottom">
+          <div class="s-creator-row">
+            <div class="s-avatar">베</div>
+            <div>
+              <div class="s-cname">베트남살이 ✓</div>
+              <div class="s-csubs">진행 중 · 23만 구독</div>
+            </div>
+            <button class="s-follow" style="background:#FF0033;color:#fff;border-color:#FF0033;">시청 →</button>
+          </div>
+          <div class="s-title">
+            <span style="display:inline-block;padding:2px 8px;background:rgba(255,0,51,.95);color:#fff;border-radius:4px;font-size:10px;font-weight:900;letter-spacing:.06em;margin-bottom:6px;">🔥 라이브 특가</span><br>
+            다낭 바나힐스 직영 골프텔, 지금 -25%
+          </div>
+          <div class="s-product" onclick="event.stopPropagation();location.href='live.html'">
+            <div class="s-p-img" style="background-image:url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=300&q=80');position:relative;">
+              <span style="position:absolute;top:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:#FFD23F;color:#1A1A1A;display:grid;place-items:center;font-size:11px;font-weight:900;">⛳</span>
+            </div>
+            <div class="s-p-info">
+              <span class="s-p-tag" style="background:#FF0033;color:#fff;">LIVE 특가</span>
+              <div class="s-p-name">다낭 바나힐스 골프 4박5일 (라운딩 3회)</div>
+              <div class="s-p-price">1,260,000원<span class="strike">1,680,000원</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+    const styleTag = `<style>
+      @keyframes zoomKB{from{transform:scale(1.02);}to{transform:scale(1.12);}}
+    </style>`;
+
+    el.innerHTML = styleTag + liveCardHtml + posts.map((p, idx) => {
       const creator = OMT.getCreator(p.creatorId);
       const product = OMT.getProduct(p.productId);
       const isOrig = product?.originalFlag;
@@ -1530,6 +1577,17 @@
   renderNotifications();
   renderProfile();
   switchTab('home');
+
+  // 🔴 LIVE 시청자 카운터 실시간 변동 (홈 피드 LIVE 카드)
+  setInterval(() => {
+    const el = document.getElementById('mFeedLiveViewers');
+    if(!el) return;
+    let n = parseInt(el.textContent.replace(/,/g, '')) || 1247;
+    n += Math.floor(Math.random() * 17) - 6;
+    if(n < 1100) n = 1100;
+    if(n > 1800) n = 1800;
+    el.textContent = n.toLocaleString('ko-KR');
+  }, 2200);
 
   // PWA Service Worker 등록
   if('serviceWorker' in navigator && location.protocol !== 'file:'){

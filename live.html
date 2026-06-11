@@ -425,5 +425,26 @@
     setTimeout(() => addChat('user', '김프로**', '오! 진짜 1,260,000원?'), 1200);
     setTimeout(() => addChat('user', '이여행***', '한국 캐디 100% 인증 가능한가요?'), 2400);
   </script>
+
+  <!-- 라이브 시청 이력 자동 기록 (state.js 로드 후) -->
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    // 진입 후 10초 이상 시청한 경우만 이력 기록 (즉시 이탈 제외)
+    setTimeout(() => {
+      try {
+        OMT.State.addLiveHistory({
+          liveId: 'live-danang-banahills-1',
+          creatorName: '베트남살이',
+          creatorInitial: '베',
+          productName: '다낭 바나힐스 골프 4박5일',
+          productId: 'gt-vn-danang-ba-na-4n',
+          productImage: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80',
+          discountedPrice: 1260000,
+          originalPrice: 1680000
+        });
+      } catch(e){ console.warn('Live history failed:', e); }
+    }, 10000);
+  </script>
 </body>
 </html>

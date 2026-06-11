@@ -23,8 +23,27 @@
     user:          'omt_user_session',
     membership:    'omt_membership_v1',
     notifReadIds:  'omt_notif_read_v1',  // 읽은 알림 ID 목록
-    userNotifs:    'omt_user_notifs_v1'  // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
+    userNotifs:    'omt_user_notifs_v1', // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
+    liveHistory:   'omt_live_history_v1' // 라이브 시청 이력 (최대 20개)
   };
+
+  // ============================================================
+  // 🔴 라이브 시청 이력
+  // ============================================================
+  function getLiveHistory(){
+    return read(KEYS.liveHistory, []);
+  }
+  function addLiveHistory(entry){
+    // entry: { liveId, creatorName, productName, productId, productImage, viewedAt }
+    const list = getLiveHistory();
+    // 같은 liveId가 있으면 viewedAt만 갱신 + 맨 앞으로
+    const existing = list.findIndex(x => x.liveId === entry.liveId);
+    if(existing >= 0) list.splice(existing, 1);
+    list.unshift({ ...entry, viewedAt: new Date().toISOString() });
+    if(list.length > 20) list.length = 20;
+    write(KEYS.liveHistory, list);
+    return list;
+  }
 
   // ============================================================
   // 알림 (NOTIFICATIONS) — 정적 mock + 사용자 예약 기반 동적 생성 + localStorage 읽음
@@ -482,6 +501,8 @@
     // Notifications
     getNotifications, getUnreadNotifCount, markNotifRead, markAllNotifsRead,
     getUserNotifications, addUserNotification,
+    // Live history
+    getLiveHistory, addLiveHistory,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

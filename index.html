@@ -1430,9 +1430,14 @@
     e.preventDefault();
     const q = document.getElementById('aiQuery').value.trim();
     if(!q){ alert('여행지나 원하는 여행을 입력해주세요'); return; }
-    // TODO: API 연동 필요 - POST /api/ai/search { query }
     OMT.State.addSearchHistory(q);
-    location.href = 'ai-planner.html?q=' + encodeURIComponent(q);
+    // 자연어 의도 감지 — 키워드만 있으면 search.html, 문장형이면 AI 플래너
+    const isNaturalLang = q.length > 12 || /추천|찾아|어떤|골프|여행|가고/.test(q);
+    if(isNaturalLang){
+      location.href = 'ai-planner.html?q=' + encodeURIComponent(q);
+    } else {
+      location.href = 'search.html?q=' + encodeURIComponent(q);
+    }
   }
 
   /* =========================================

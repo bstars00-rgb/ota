@@ -310,6 +310,15 @@
           </div>
           <div id="recentPreview"></div>
         </div>
+
+        <!-- 🔴 최근 시청한 라이브 -->
+        <div class="panel-card" id="livePreviewBlock" style="display:none;">
+          <div class="panel-head">
+            <h2 class="panel-title">🔴 최근 시청한 라이브</h2>
+            <a href="live.html" class="sub-tab" style="background:#FF0033;color:#fff;font-weight:900;">진행 중 LIVE →</a>
+          </div>
+          <div id="livePreview"></div>
+        </div>
       </div>
 
       <div class="tab-panel" data-panel="bookings" hidden>
@@ -943,6 +952,35 @@
           </div>
         </a>`;
     }).join('');
+
+    // 🔴 최근 시청한 라이브 (있을 때만 표시)
+    const liveHistory = OMT.State.getLiveHistory ? OMT.State.getLiveHistory() : [];
+    const liveBlock = document.getElementById('livePreviewBlock');
+    const liveEl = document.getElementById('livePreview');
+    if(liveHistory.length > 0 && liveBlock && liveEl){
+      liveBlock.style.display = '';
+      liveEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(${Math.min(liveHistory.length, 3)},1fr);gap:10px;">
+        ${liveHistory.slice(0, 3).map(h => {
+          const ago = Math.floor((Date.now() - new Date(h.viewedAt).getTime()) / 60000);
+          const agoLabel = ago < 1 ? '방금' : (ago < 60 ? ago + '분 전' : (ago < 1440 ? Math.floor(ago/60) + '시간 전' : Math.floor(ago/1440) + '일 전'));
+          return `<a href="live.html" style="display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;background:#fff;">
+            <div style="aspect-ratio:4/3;background:url('${h.productImage}') center/cover;background-color:#eee;position:relative;">
+              <span style="position:absolute;top:6px;left:6px;padding:2px 7px;border-radius:4px;background:#FF0033;color:#fff;font-size:9px;font-weight:900;display:inline-flex;align-items:center;gap:3px;">
+                <span style="width:5px;height:5px;border-radius:50%;background:#fff;"></span>LIVE
+              </span>
+              <span style="position:absolute;bottom:6px;left:6px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:800;backdrop-filter:blur(4px);">${agoLabel}</span>
+            </div>
+            <div style="padding:8px;">
+              <div style="font-size:10px;color:var(--ink-3);font-weight:700;">🎬 ${h.creatorName}</div>
+              <div style="font-size:11px;font-weight:800;line-height:1.3;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:30px;">${h.productName}</div>
+              ${h.discountedPrice ? `<div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;"><span style="font-size:12px;font-weight:900;color:#FF0033;">${(h.discountedPrice/10000).toFixed(0)}만원</span><span style="font-size:10px;color:var(--ink-3);text-decoration:line-through;">${(h.originalPrice/10000).toFixed(0)}만</span></div>` : ''}
+            </div>
+          </a>`;
+        }).join('')}
+      </div>`;
+    } else if(liveBlock){
+      liveBlock.style.display = 'none';
+    }
 
     // 최근 본 상품 프리뷰 (가로 4개)
     const recent = OMT.State.getRecentlyViewed().slice(0, 4);
