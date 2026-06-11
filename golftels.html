@@ -65,7 +65,7 @@
     .search-wrap{position:relative;z-index:5;margin-top:-44px;margin-bottom:32px;}
     .search-form{
       background:#fff;border-radius:16px;box-shadow:var(--shadow-lg);
-      display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;
+      display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr auto;
       overflow:hidden;
     }
     .sf-field{
@@ -285,6 +285,10 @@
             <option value="1600000">~ 160만원</option>
           </select>
         </div>
+        <div class="sf-field">
+          <label for="fCheckin">📅 체크인 (선택)</label>
+          <input type="date" id="fCheckin" style="border:none;outline:none;font-size:14px;font-weight:800;color:var(--ink);background:transparent;width:100%;font-family:inherit;letter-spacing:-0.01em;" />
+        </div>
         <button type="submit" class="search-btn">🔍 검색</button>
       </form>
 
@@ -342,7 +346,21 @@
     let quick = 'all';
     let cartFilter = null;     // '1-1' or '2-1'
     let facFilters = new Set(); // 'korean-staff' etc.
+    let checkinDate = null;    // 선택 시 카드에 가산률 미리보기 표시
     let workingList = [...D.GOLFTELS];
+
+    // 체크인 → 라운딩별 주말 카운트 → 평균 가산률 계산
+    function _previewSurcharge(g){
+      if(!checkinDate) return null;
+      const N = g.rounds || 0;
+      if(!N) return null;
+      let weekendCount = 0;
+      for(let i=0;i<N;i++){
+        const d = new Date(checkinDate); d.setDate(d.getDate() + i);
+        if(d.getDay() === 0 || d.getDay() === 6) weekendCount++;
+      }
+      return { weekendCount, pct: Math.round((weekendCount * 10) / N) };  // 평균 +X%
+    }
 
     // City options bound to country
     function populateCities(){
@@ -354,6 +372,23 @@
         cities.map(c => `<option value="${c}">${c}</option>`).join('');
     }
     fCountry.addEventListener('change', populateCities);
+
+    // 체크인 날짜 바인딩
+    const fCheckin = document.getElementById('fCheckin');
+    if(fCheckin){
+      // 기본 min = 오늘
+      const today = new Date();
+      fCheckin.min = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      fCheckin.addEventListener('change', () => {
+        if(fCheckin.value){
+          const [y,m,d] = fCheckin.value.split('-').map(Number);
+          checkinDate = new Date(y, m-1, d);
+        } else {
+          checkinDate = null;
+        }
+        renderList();
+      });
+    }
 
     // Quick chips
     document.querySelectorAll('.chip[data-quick]').forEach(btn => {
@@ -528,6 +563,12 @@
                 ${g.oldPricePerPerson ? `<div class="price-old">${g.oldPricePerPerson.toLocaleString('ko-KR')}원</div>` : ''}
                 <div class="price-new">${g.pricePerPerson.toLocaleString('ko-KR')}<span class="unit">원~</span></div>
                 <div class="price-basis">1인 가격 · 항공 별도</div>
+                ${(() => {
+                  const pv = _previewSurcharge(g);
+                  if(!pv) return '';
+                  if(pv.pct === 0) return `<div style="margin-top:6px;padding:4px 8px;background:#E0F2FE;color:#0369A1;font-size:10px;font-weight:900;border-radius:5px;text-align:center;">✓ 전 라운딩 주중</div>`;
+                  return `<div style="margin-top:6px;padding:4px 8px;background:#FEE2E2;color:#B91C1C;font-size:10px;font-weight:900;border-radius:5px;text-align:center;">⚠️ 주말 ${pv.weekendCount}회 · +${pv.pct}% 예상</div>`;
+                })()}
               </div>
               <a href="golftel.html?id=${g.id}" class="btn-detail" onclick="event.stopPropagation();">자세히 보기</a>
             </div>

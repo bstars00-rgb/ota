@@ -690,10 +690,22 @@
             <div class="booking-mini-list" id="profBookings"></div>
             <div class="profile-section-h">여행 도구</div>
             <div class="profile-menu">
+              <div class="pm-item" onclick="location.href='golftels.html'"><div class="pm-ico">⛳</div><div class="pm-t">골프텔 찾기</div><span class="pm-arrow">›</span></div>
               <div class="pm-item" onclick="switchTab('explore')"><div class="pm-ico">🔍</div><div class="pm-t">호텔·항공 검색</div><span class="pm-arrow">›</span></div>
               <div class="pm-item" onclick="location.href='packages.html'"><div class="pm-ico">📦</div><div class="pm-t">다이나믹 패키지 만들기</div><span class="pm-arrow">›</span></div>
               <div class="pm-item" onclick="location.href='cart.html'"><div class="pm-ico">🛒</div><div class="pm-t">장바구니</div><span class="pm-badge" id="cartBadge">0</span><span class="pm-arrow">›</span></div>
               <div class="pm-item" onclick="location.href='ai-planner.html'"><div class="pm-ico">✦</div><div class="pm-t">AI 여행 플래너</div><span class="pm-arrow">›</span></div>
+            </div>
+
+            <!-- 💳 결제 게이트웨이 체험 (mock) -->
+            <div class="profile-section-h">💳 결제 게이트웨이 체험</div>
+            <div style="padding:0 16px;margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--ink-3);margin-bottom:8px;">시드 예약 데이터로 결제 흐름을 체험해보세요 (실제 결제 X)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+                <button onclick="tryPayment('kakao')" style="padding:12px 8px;border-radius:10px;background:#FEE500;color:#3C1E1E;font-weight:900;font-size:12px;border:none;cursor:pointer;font-family:inherit;">kakao pay</button>
+                <button onclick="tryPayment('naver')" style="padding:12px 8px;border-radius:10px;background:#03C75A;color:#fff;font-weight:900;font-size:12px;border:none;cursor:pointer;font-family:inherit;">N pay</button>
+                <button onclick="tryPayment('card')" style="padding:12px 8px;border-radius:10px;background:#0064FF;color:#fff;font-weight:900;font-size:12px;border:none;cursor:pointer;font-family:inherit;">Toss</button>
+              </div>
             </div>
             <div class="profile-section-h">내 활동</div>
             <div class="profile-menu">
@@ -1483,6 +1495,19 @@
     payload.source = 'mobile-feed';
     sessionStorage.setItem('omt_package', JSON.stringify(payload));
     location.href = 'checkout.html';
+  };
+
+  // 💳 결제 게이트웨이 체험 — 가장 가까운 활성 예약을 사용
+  window.tryPayment = (pay) => {
+    const bookings = OMT.State.getBookings()
+      .filter(b => b.status === 'confirmed' || b.status === 'pending');
+    if(!bookings.length){
+      alert('체험할 시드 예약이 없어요. mypage에서 예약을 만든 후 다시 시도해주세요.');
+      return;
+    }
+    // 가장 가까운 출발 (예약번호 OMT-3DK21A 또는 첫 활성 예약)
+    const target = bookings.find(b => b.bookingNumber === 'OMT-3DK21A') || bookings[0];
+    location.href = `payment.html?bn=${encodeURIComponent(target.bookingNumber)}&pay=${encodeURIComponent(pay)}`;
   };
 
   /* ========================================================================

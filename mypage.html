@@ -220,6 +220,13 @@
         <div class="profile-stats" id="profileStats"></div>
       </div>
     </div>
+
+    <!-- 🔍 통합 검색 -->
+    <div style="max-width:var(--max-w);margin:18px auto 0;padding:0 24px;position:relative;">
+      <input type="search" id="mySearchInput" placeholder="🔍 예약번호 / 상품명 / 리뷰 / 문의 검색"
+        style="width:100%;padding:14px 18px;border-radius:12px;border:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.95);box-shadow:0 4px 14px rgba(0,0,0,.15);" />
+      <div id="mySearchResults" style="display:none;position:absolute;left:24px;right:24px;top:calc(100% + 8px);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);max-height:420px;overflow-y:auto;z-index:80;padding:8px;"></div>
+    </div>
   </section>
 
   <main id="omt-main" class="my-layout">
@@ -1163,6 +1170,122 @@
       if(tab === 'profile')       renderProfileForm();
       if(tab === 'travelers')     renderTravelers();
     });
+  });
+
+  /* ===== 🔍 통합 검색 ===== */
+  function doSearch(query){
+    const q = (query || '').trim().toLowerCase();
+    const box = document.getElementById('mySearchResults');
+    if(!q){ box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    const results = [];
+
+    // 1) 예약 검색 (bookingNumber / productName / dates)
+    OMT.State.getBookings().forEach(b => {
+      const hay = `${b.bookingNumber} ${b.productName || ''} ${b.productId || ''} ${b.dates || ''} ${b.country || ''}`.toLowerCase();
+      if(hay.includes(q)){
+        const isGT = b.productType === 'golftel' || b.productType === 'golftel-air' || (b.productId && b.productId.startsWith('gt-'));
+        results.push({
+          type: 'booking',
+          icon: isGT ? '⛳' : '📦',
+          tag: isGT ? '예약 · 골프텔' : '예약 · 패키지',
+          title: b.productName || b.productId || '예약 상품',
+          sub: `${b.bookingNumber} · ${b.dates}`,
+          tab: 'bookings',
+          onclick: `goTab('bookings')`
+        });
+      }
+    });
+
+    // 2) 리뷰 검색 (text / productName)
+    OMT.State.getMyReviews().forEach(r => {
+      const isGT = r.productId?.startsWith('gt-');
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : OMT.getProduct(r.productId);
+      const hay = `${r.text || ''} ${item?.name || ''}`.toLowerCase();
+      if(hay.includes(q)){
+        results.push({
+          type: 'review',
+          icon: '✏️',
+          tag: '리뷰',
+          title: item?.name || '내가 쓴 리뷰',
+          sub: `★ ${r.score}/5 · "${(r.text || '').slice(0, 50)}${r.text?.length > 50 ? '...' : ''}"`,
+          tab: 'reviews',
+          onclick: `goTab('reviews')`
+        });
+      }
+    });
+
+    // 3) 문의 검색 (subject / messages)
+    getAllInquiries().forEach(q2 => {
+      const msgText = (q2.messages || []).map(m => m.body || '').join(' ');
+      const hay = `${q2.subject} ${msgText}`.toLowerCase();
+      if(hay.includes(q)){
+        results.push({
+          type: 'inquiry',
+          icon: '💬',
+          tag: '문의 · ' + (q2.status === 'answered' ? '답변 완료' : '답변 대기'),
+          title: q2.subject,
+          sub: `${q2.date} · ${(q2.messages?.[0]?.body || '').slice(0, 50)}...`,
+          tab: 'inquiries',
+          onclick: `goTab('inquiries')`
+        });
+      }
+    });
+
+    // 4) 찜 검색 (상품명)
+    OMT.State.getWishlist().forEach(pid => {
+      const isGT = pid.startsWith('gt-');
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+      if(item && item.name.toLowerCase().includes(q)){
+        results.push({
+          type: 'wish',
+          icon: '❤️',
+          tag: '찜한 상품',
+          title: item.name,
+          sub: isGT ? `⛳ 골프텔 · ${item.pricePerPerson?.toLocaleString('ko-KR')}원~/인` : `${item.price?.toLocaleString('ko-KR')}원`,
+          tab: 'wishlist',
+          onclick: `goTab('wishlist')`
+        });
+      }
+    });
+
+    if(results.length === 0){
+      box.innerHTML = `<div style="padding:24px;text-align:center;color:var(--ink-3);font-size:13px;">"${query}" 검색 결과가 없어요</div>`;
+    } else {
+      const grouped = {};
+      results.forEach(r => { (grouped[r.tag] = grouped[r.tag] || []).push(r); });
+      box.innerHTML = `<div style="font-size:11px;font-weight:800;color:var(--ink-3);padding:6px 10px;letter-spacing:.04em;text-transform:uppercase;">검색 결과 ${results.length}건</div>` + Object.entries(grouped).map(([tag, items]) => `
+        <div style="margin-bottom:6px;">
+          ${items.map(r => `
+            <div onclick="${r.onclick};document.getElementById('mySearchResults').style.display='none';" style="display:flex;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .15s;align-items:flex-start;" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+              <div style="width:32px;height:32px;border-radius:8px;background:var(--bg-soft);display:grid;place-items:center;font-size:16px;flex-shrink:0;">${r.icon}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.04em;">${r.tag}</div>
+                <div style="font-size:13px;font-weight:800;color:var(--ink);line-height:1.3;margin-top:2px;">${highlight(r.title, query)}</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;">${highlight(r.sub, query)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+    box.style.display = 'block';
+  }
+
+  function highlight(text, q){
+    if(!q || !text) return text || '';
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return String(text).replace(re, '<mark style="background:#FFD23F;padding:0 2px;border-radius:2px;font-weight:900;">$1</mark>');
+  }
+
+  // 입력 바인딩
+  document.getElementById('mySearchInput')?.addEventListener('input', (e) => doSearch(e.target.value));
+  // 바깥 클릭 시 결과 닫기
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('mySearchInput')?.parentElement;
+    if(wrap && !wrap.contains(e.target)){
+      document.getElementById('mySearchResults').style.display = 'none';
+    }
   });
 
   /* INIT */

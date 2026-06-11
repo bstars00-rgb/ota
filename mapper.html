@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data.js → ELLIS DDL 매퍼 | ELLIS Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0F1419;--bg-2:#161B22;--bg-3:#1F2630;
+      --line:#2A3340;--line-2:#3A4555;
+      --ink:#F0F6FC;--ink-2:#C9D1D9;--ink-3:#8B949E;--ink-4:#6E7681;
+      --primary:#FF6B35;--accent:#FFD23F;
+      --success:#39D353;--info:#58A6FF;--warning:#F59E0B;
+      --kw:#FF7B72;--str:#A5D6FF;--num:#79C0FF;--type:#FFA657;--comment:#8B949E;
+      --radius:10px;--radius-lg:14px;
+      --header-h:60px;--max-w:1440px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    .header{position:sticky;top:0;z-index:60;background:rgba(15,20,25,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:var(--header-h);display:flex;align-items:center;gap:16px;}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:900;font-size:16px;color:var(--ink);}
+    .logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+    .logo-mark::after{content:"E";}
+    .console-tag{padding:3px 9px;background:#2C1810;color:var(--primary);border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+    .gnb-mini{display:flex;gap:2px;margin-left:24px;}
+    .gnb-mini a{padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;color:var(--ink-3);}
+    .gnb-mini a.on{background:var(--bg-3);color:var(--ink);}
+    .gnb-mini a:hover{color:var(--ink);}
+
+    .page-head{padding:24px 0;border-bottom:1px solid var(--line);}
+    .page-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+    .page-title{font-size:26px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .page-sub{font-size:13px;color:var(--ink-3);margin:0;}
+
+    /* 2-column layout */
+    .mapper-grid{
+      display:grid;grid-template-columns:320px 1fr;gap:20px;
+      padding:24px 0;
+    }
+
+    /* Left: model selector */
+    .model-list{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:14px;position:sticky;top:calc(var(--header-h) + 20px);height:fit-content;}
+    .model-list-title{font-size:11px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;padding:0 6px;}
+    .model-item{
+      display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;
+      transition:background .15s;margin-bottom:2px;
+    }
+    .model-item:hover{background:var(--bg-3);}
+    .model-item.on{background:var(--bg-3);}
+    .model-item.on .name{color:var(--primary);}
+    .model-item .name{font-weight:800;font-size:13px;color:var(--ink);font-family:'JetBrains Mono',monospace;}
+    .model-item .count{margin-left:auto;font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-weight:700;}
+
+    /* Right: DDL output */
+    .ddl-panel{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+    .ddl-head{
+      padding:14px 18px;border-bottom:1px solid var(--line);background:var(--bg-3);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    }
+    .ddl-head-title{font-size:14px;font-weight:900;letter-spacing:-0.01em;}
+    .ddl-head-meta{font-size:11px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-weight:700;}
+    .ddl-actions{display:flex;gap:6px;}
+    .btn-mini{
+      padding:6px 12px;background:var(--bg);border:1px solid var(--line-2);border-radius:6px;
+      font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;
+    }
+    .btn-mini:hover{background:var(--bg-3);color:var(--ink);}
+    .btn-mini.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .btn-mini.primary:hover{background:#FF8A55;}
+
+    .ddl-body{padding:0;background:var(--bg);max-height:70vh;overflow:auto;}
+    pre.ddl-code{
+      margin:0;padding:18px 22px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:var(--ink-2);
+      white-space:pre;
+      tab-size:2;
+    }
+    .ddl-code .kw{color:var(--kw);font-weight:700;}
+    .ddl-code .type{color:var(--type);}
+    .ddl-code .str{color:var(--str);}
+    .ddl-code .num{color:var(--num);}
+    .ddl-code .comment{color:var(--comment);font-style:italic;}
+    .ddl-code .table{color:var(--accent);font-weight:700;}
+
+    /* Sample data preview */
+    .sample-table{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-top:20px;}
+    .sample-head{padding:14px 18px;border-bottom:1px solid var(--line);background:var(--bg-3);font-size:13px;font-weight:900;}
+    .sample-body{max-height:300px;overflow:auto;}
+    .sample-body table{width:100%;border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace;}
+    .sample-body th{padding:8px 14px;background:var(--bg-3);color:var(--ink-3);font-weight:800;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line);position:sticky;top:0;}
+    .sample-body td{padding:8px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);}
+    .sample-body td.null{color:var(--ink-4);font-style:italic;}
+    .sample-body td.json{color:var(--accent);font-size:10px;}
+
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--success);color:#fff;padding:10px 18px;border-radius:8px;font-weight:800;font-size:13px;z-index:100;transition:transform .3s;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media (max-width:980px){
+      .mapper-grid{grid-template-columns:1fr;}
+      .model-list{position:static;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark"></span>
+        <span>ELLIS</span>
+        <span class="console-tag">CONSOLE</span>
+      </a>
+      <nav class="gnb-mini">
+        <a href="admin-channels.html">채널 매니저</a>
+        <a href="admin-suppliers.html">공급사</a>
+        <a href="#" class="on">스키마 매퍼</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="page-eyebrow">🗄️ data.js → ELLIS PostgreSQL DDL</div>
+      <h1 class="page-title">스키마 매핑 도구</h1>
+      <p class="page-sub">data.js의 프론트엔드 모델을 ELLIS 백엔드 DDL로 자동 변환. <strong style="color:var(--accent);">ELLIS_SPEC.md</strong> 와 일관된 컬럼·타입 정의.</p>
+    </section>
+
+    <div class="mapper-grid">
+      <!-- 좌측: 모델 선택 -->
+      <aside class="model-list">
+        <div class="model-list-title">📦 도메인 모델</div>
+        <div id="modelItems"></div>
+      </aside>
+
+      <!-- 우측: DDL + 샘플 -->
+      <div>
+        <div class="ddl-panel">
+          <div class="ddl-head">
+            <div>
+              <div class="ddl-head-title" id="ddlTitle">-</div>
+              <div class="ddl-head-meta" id="ddlMeta"></div>
+            </div>
+            <div class="ddl-actions">
+              <button class="btn-mini" onclick="copyDDL()">📋 복사</button>
+              <button class="btn-mini primary" onclick="downloadDDL()">⬇ .sql 다운로드</button>
+            </div>
+          </div>
+          <div class="ddl-body">
+            <pre class="ddl-code" id="ddlOut">-- 좌측에서 모델을 선택하세요</pre>
+          </div>
+        </div>
+
+        <div class="sample-table">
+          <div class="sample-head">📊 샘플 데이터 (data.js 추출)</div>
+          <div class="sample-body" id="sampleBody">
+            <div style="padding:30px;text-align:center;color:var(--ink-3);font-size:12px;">모델 선택 시 첫 3건 미리보기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">복사됨</div>
+
+  <script src="data.js"></script>
+  <script>
+    const D = window.OMT.DATA;
+
+    // ===== 모델 → DDL 스키마 정의 =====
+    // ELLIS_SPEC.md의 스키마를 그대로 코드로 매핑
+    const MODELS = [
+      {
+        id:'golftels', label:'GOLFTELS', table:'golftels',
+        source: () => D.GOLFTELS,
+        ddl: () => `-- ========================================
+-- Table: golftels (메인 SKU)
+-- Source: data.js OMT.DATA.GOLFTELS
+-- ========================================
+CREATE TABLE golftels (
+  id                       VARCHAR(64)  PRIMARY KEY,
+  type                     VARCHAR(20)  NOT NULL,  -- 'golftel' | 'golftel-air'
+  country                  VARCHAR(20)  NOT NULL,
+  city                     VARCHAR(20)  NOT NULL,
+  name                     TEXT         NOT NULL,
+  tagline                  TEXT,
+  hotel_id                 VARCHAR(64)  REFERENCES hotels(id),
+  hotel_name               TEXT,
+  room_type                TEXT,
+  nights                   SMALLINT     NOT NULL,
+  rounds                   SMALLINT     NOT NULL,
+  price_per_person_krw     INT          NOT NULL,
+  old_price_per_person_krw INT,
+  price_basis              VARCHAR(30)  NOT NULL,  -- 'per-person-twin'
+  cart_policy              TEXT,
+  distance_city            TEXT,
+  distance_airport         TEXT,
+  rating                   NUMERIC(3,1),
+  reviews_count            INT          DEFAULT 0,
+  caddy_tip_included       BOOLEAN,
+  caddy_tip_amount         TEXT,
+  caddy_tip_note           TEXT,
+  address                  TEXT,
+  phone                    TEXT,
+  lat                      NUMERIC(9,6),
+  lng                      NUMERIC(9,6),
+  -- JSONB 필드 (PostgreSQL JSONB로 효율적 인덱싱)
+  inclusions               JSONB,
+  operating_info           JSONB,
+  facility_hours           JSONB,
+  dresscode                JSONB,
+  weather_policy           JSONB,
+  party_rules              JSONB,
+  cart_rules               JSONB,
+  room_options             JSONB,
+  facilities               JSONB,
+  images                   JSONB,
+  equipment_rental         JSONB,
+  pickup_zones             JSONB,
+  holidays                 JSONB,
+  highlights               JSONB,
+  includes                 JSONB,
+  excludes                 JSONB,
+  tee_time_windows         JSONB,
+  review_stats             JSONB,
+  created_at               TIMESTAMPTZ  DEFAULT NOW(),
+  updated_at               TIMESTAMPTZ  DEFAULT NOW()
+);
+CREATE INDEX idx_golftels_country  ON golftels(country);
+CREATE INDEX idx_golftels_city     ON golftels(city);
+CREATE INDEX idx_golftels_type     ON golftels(type);
+CREATE INDEX idx_golftels_price    ON golftels(price_per_person_krw);
+CREATE INDEX idx_golftels_rating   ON golftels(rating);
+CREATE INDEX idx_golftels_inc_gin  ON golftels USING GIN (inclusions);
+
+-- M:N 코스 매핑
+CREATE TABLE golftel_courses (
+  golftel_id  VARCHAR(64) REFERENCES golftels(id) ON DELETE CASCADE,
+  course_id   VARCHAR(64) REFERENCES golf_courses(id),
+  ord         SMALLINT DEFAULT 0,
+  PRIMARY KEY (golftel_id, course_id)
+);`
+      },
+      {
+        id:'golf_courses', label:'GOLF_COURSES', table:'golf_courses',
+        source: () => D.GOLF_COURSES,
+        ddl: () => `-- ========================================
+-- Table: golf_courses
+-- Source: data.js OMT.DATA.GOLF_COURSES
+-- ========================================
+CREATE TABLE golf_courses (
+  id                  VARCHAR(64)  PRIMARY KEY,
+  name                TEXT         NOT NULL,
+  country             VARCHAR(20),
+  city                VARCHAR(30),
+  holes               SMALLINT,
+  par                 SMALLINT,
+  yardage             INT,
+  designer            TEXT,
+  greens              TEXT,
+  channel_manager     VARCHAR(20)  NOT NULL,  -- 'direct' | 'gdo' | 'golfdigg' | 'partner' | ...
+  real_time_booking   BOOLEAN      DEFAULT TRUE,
+  created_at          TIMESTAMPTZ  DEFAULT NOW()
+);
+CREATE INDEX idx_courses_country ON golf_courses(country);
+CREATE INDEX idx_courses_channel ON golf_courses(channel_manager);`
+      },
+      {
+        id:'hotels', label:'HOTELS', table:'hotels',
+        source: () => D.HOTELS,
+        ddl: () => `-- ========================================
+-- Table: hotels
+-- Source: data.js OMT.DATA.HOTELS
+-- ========================================
+CREATE TABLE hotels (
+  id              VARCHAR(64)  PRIMARY KEY,
+  name            TEXT         NOT NULL,
+  city            VARCHAR(30)  NOT NULL,
+  country         VARCHAR(20)  NOT NULL,
+  area            TEXT,
+  area_id         VARCHAR(50),
+  stars           SMALLINT,
+  score           NUMERIC(3,1),
+  reviews         INT,
+  price_krw       INT,
+  old_price_krw   INT,
+  img             TEXT,
+  gallery         JSONB,        -- 추가 이미지 URL 배열
+  amenities       JSONB,        -- 시설 라벨 배열
+  description     TEXT,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_hotels_country ON hotels(country);
+CREATE INDEX idx_hotels_city    ON hotels(city);`
+      },
+      {
+        id:'channel_managers', label:'CHANNEL_MANAGERS', table:'channel_managers',
+        source: () => Object.values(D.CHANNEL_MANAGERS).map((v,i) => ({ id: Object.keys(D.CHANNEL_MANAGERS)[i], ...v })),
+        ddl: () => `-- ========================================
+-- Table: channel_managers
+-- Source: data.js OMT.DATA.CHANNEL_MANAGERS
+-- ========================================
+CREATE TABLE channel_managers (
+  id          VARCHAR(20)  PRIMARY KEY,   -- 'direct', 'gdo', 'golfdigg', ...
+  label       TEXT         NOT NULL,
+  short_name  TEXT         NOT NULL,
+  tier        VARCHAR(10)  NOT NULL,      -- 'tier-1' | 'tier-2' | 'tier-3'
+  config      JSONB,                      -- adapter-specific 설정
+  enabled     BOOLEAN      DEFAULT TRUE,
+  created_at  TIMESTAMPTZ  DEFAULT NOW()
+);`
+      },
+      {
+        id:'bookings', label:'BOOKINGS', table:'bookings',
+        source: () => D.INITIAL_BOOKINGS,
+        ddl: () => `-- ========================================
+-- Table: bookings
+-- Source: data.js OMT.DATA.INITIAL_BOOKINGS + State.createBooking()
+-- ========================================
+CREATE TABLE bookings (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  booking_number      VARCHAR(20)   UNIQUE NOT NULL,
+  user_id             VARCHAR(64)   REFERENCES users(id),
+  status              VARCHAR(20)   NOT NULL,    -- 'confirmed'|'pending'|'completed'|'cancelled'
+  product_id          VARCHAR(64),
+  product_type        VARCHAR(20),               -- 'golftel'|'golftel-air'|'package'
+  product_name        TEXT,
+  country             VARCHAR(20),
+  city                VARCHAR(20),
+  ownership           VARCHAR(20),
+  nights              SMALLINT,
+  rounds              SMALLINT,
+  dates_text          TEXT,                      -- "2026.06.14 - 2026.06.18"
+  date_start          DATE,
+  date_end            DATE,
+  pax_count           SMALLINT      NOT NULL,
+  total_krw           INT           NOT NULL,
+  payment_method      VARCHAR(20),
+  payment_id          TEXT,
+  lead_name           TEXT          NOT NULL,
+  phone               TEXT          NOT NULL,
+  package_snapshot    JSONB,                     -- selectedSlots, roomOption, ...
+  travelers           JSONB,
+  created_at          TIMESTAMPTZ   DEFAULT NOW(),
+  cancelled_at        TIMESTAMPTZ
+);
+CREATE INDEX idx_bookings_user    ON bookings(user_id);
+CREATE INDEX idx_bookings_status  ON bookings(status);
+CREATE INDEX idx_bookings_dates   ON bookings(date_start);
+
+-- 예약 슬롯 정규화 (admin/리포팅용)
+CREATE TABLE booking_slots (
+  booking_id              VARCHAR(64)  REFERENCES bookings(id) ON DELETE CASCADE,
+  slot_idx                SMALLINT,
+  course_id               VARCHAR(64)  REFERENCES golf_courses(id),
+  time_window             VARCHAR(20),
+  tee_time                TIME,
+  channel_booking_id      TEXT,
+  channel_confirmed_at    TIMESTAMPTZ,
+  PRIMARY KEY (booking_id, slot_idx)
+);`
+      },
+      {
+        id:'notifications', label:'NOTIFICATIONS', table:'notifications',
+        source: () => D.NOTIFICATIONS,
+        ddl: () => `-- ========================================
+-- Table: notifications
+-- Source: data.js OMT.DATA.NOTIFICATIONS + State.addUserNotification()
+-- ========================================
+CREATE TABLE notifications (
+  id                  VARCHAR(64)  PRIMARY KEY,
+  user_id             VARCHAR(64)  REFERENCES users(id),
+  type                VARCHAR(20)  NOT NULL,
+  icon                VARCHAR(4),
+  title               TEXT         NOT NULL,
+  body                TEXT         NOT NULL,
+  link                TEXT,
+  action_label        TEXT,
+  is_read             BOOLEAN      DEFAULT FALSE,
+  related_booking_id  VARCHAR(64),
+  created_at          TIMESTAMPTZ  DEFAULT NOW()
+);
+CREATE INDEX idx_notifs_user ON notifications(user_id, is_read);
+CREATE INDEX idx_notifs_type ON notifications(type);`
+      },
+      {
+        id:'inquiries', label:'INQUIRIES', table:'inquiries',
+        source: () => D.INQUIRIES,
+        ddl: () => `-- ========================================
+-- Table: inquiries (1:1 문의)
+-- Source: data.js OMT.DATA.INQUIRIES + localStorage.omt_user_inquiries
+-- ========================================
+CREATE TABLE inquiries (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  user_id             VARCHAR(64)   REFERENCES users(id),
+  subject             TEXT          NOT NULL,
+  status              VARCHAR(20)   NOT NULL,   -- 'pending' | 'answered'
+  category            VARCHAR(20),
+  booking_number      VARCHAR(20)   REFERENCES bookings(booking_number),
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+
+-- 메시지 (정규화)
+CREATE TABLE inquiry_messages (
+  id            BIGSERIAL    PRIMARY KEY,
+  inquiry_id    VARCHAR(64)  REFERENCES inquiries(id) ON DELETE CASCADE,
+  who           VARCHAR(10)  NOT NULL,    -- 'me' | 'omt'
+  body          TEXT         NOT NULL,
+  sent_at       TIMESTAMPTZ  DEFAULT NOW()
+);
+CREATE INDEX idx_inq_user ON inquiries(user_id, status);`
+      },
+      {
+        id:'reviews', label:'REVIEWS', table:'reviews',
+        source: () => D.REVIEWS,
+        ddl: () => `-- ========================================
+-- Table: reviews
+-- Source: data.js OMT.DATA.REVIEWS + State.addReview()
+-- ========================================
+CREATE TABLE reviews (
+  id              VARCHAR(64)   PRIMARY KEY,
+  user_id         VARCHAR(64)   REFERENCES users(id),
+  product_id      VARCHAR(64)   NOT NULL,
+  product_type    VARCHAR(20)   NOT NULL,
+  booking_id      VARCHAR(64)   REFERENCES bookings(id),
+  rating          SMALLINT      NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  text            TEXT,
+  positives       JSONB,
+  negatives       JSONB,
+  images          JSONB,         -- 사진 URL 배열
+  created_at      TIMESTAMPTZ   DEFAULT NOW()
+);
+
+CREATE TABLE review_replies (
+  review_id     VARCHAR(64)  PRIMARY KEY REFERENCES reviews(id),
+  reply_text    TEXT         NOT NULL,
+  replied_by    VARCHAR(64),
+  created_at    TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX idx_reviews_product ON reviews(product_id, product_type);
+CREATE INDEX idx_reviews_rating  ON reviews(rating);
+
+-- 후기 통계 materialized view (트리거로 새 후기 INSERT 시 REFRESH)
+CREATE MATERIALIZED VIEW review_stats AS
+SELECT product_id, COUNT(*) AS count, AVG(rating)::NUMERIC(3,1) AS rating
+FROM reviews GROUP BY product_id;`
+      }
+    ];
+
+    // ===== 모델 리스트 렌더 =====
+    function renderModels(){
+      const html = MODELS.map(m => {
+        let cnt = 0;
+        try { cnt = m.source().length; } catch(e){}
+        return `
+          <div class="model-item" data-id="${m.id}">
+            <span class="name">${m.label}</span>
+            <span class="count">${cnt}건</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('modelItems').innerHTML = html;
+      document.querySelectorAll('.model-item').forEach(el => {
+        el.addEventListener('click', () => selectModel(el.dataset.id));
+      });
+    }
+
+    // ===== DDL 색칠 =====
+    function highlightDDL(sql){
+      // 순서 중요 — 주석 → 키워드 → 타입 → 문자열 → 숫자
+      let s = sql
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      // 주석
+      s = s.replace(/(--[^\n]*)/g, '<span class="comment">$1</span>');
+      // 키워드
+      const kws = ['CREATE','TABLE','PRIMARY','KEY','REFERENCES','ON','DELETE','CASCADE','UNIQUE','NOT','NULL','DEFAULT','CHECK','BETWEEN','AND','OR','MATERIALIZED','VIEW','AS','SELECT','FROM','GROUP','BY','INDEX','USING','GIN'];
+      kws.forEach(kw => {
+        s = s.replace(new RegExp(`\\b${kw}\\b`, 'g'), `<span class="kw">${kw}</span>`);
+      });
+      // 타입
+      const types = ['VARCHAR','TEXT','INT','SMALLINT','BIGSERIAL','BOOLEAN','TIMESTAMPTZ','JSONB','NUMERIC','TIME','DATE'];
+      types.forEach(t => {
+        s = s.replace(new RegExp(`\\b${t}\\b`, 'g'), `<span class="type">${t}</span>`);
+      });
+      // 테이블명 강조 (CREATE TABLE 뒤)
+      s = s.replace(/<span class="kw">TABLE<\/span>\s+(\w+)/g, '<span class="kw">TABLE</span> <span class="table">$1</span>');
+      // 숫자
+      s = s.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      // 문자열
+      s = s.replace(/'([^']*)'/g, "<span class=\"str\">'$1'</span>");
+      return s;
+    }
+
+    // ===== 샘플 데이터 표 렌더 =====
+    function renderSample(source){
+      const items = source().slice(0, 3);
+      if(!items.length){
+        document.getElementById('sampleBody').innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-3);">데이터 없음</div>';
+        return;
+      }
+      // 모든 키 수집
+      const keys = [...new Set(items.flatMap(it => Object.keys(it)))].slice(0, 10);  // 최대 10개 컬럼
+      const tableHtml = `
+        <table>
+          <thead>
+            <tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${items.map(it => `
+              <tr>
+                ${keys.map(k => {
+                  const v = it[k];
+                  if(v === null || v === undefined) return '<td class="null">null</td>';
+                  if(typeof v === 'object') return `<td class="json">{...}</td>`;
+                  const str = String(v);
+                  return `<td title="${str.replace(/"/g,'&quot;')}">${str.length > 30 ? str.slice(0,30)+'…' : str}</td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('sampleBody').innerHTML = tableHtml;
+    }
+
+    // ===== 모델 선택 =====
+    let currentModel = null;
+    function selectModel(id){
+      const m = MODELS.find(x => x.id === id);
+      if(!m) return;
+      currentModel = m;
+      document.querySelectorAll('.model-item').forEach(el => el.classList.toggle('on', el.dataset.id === id));
+      document.getElementById('ddlTitle').textContent = m.label + ' → ' + m.table;
+      document.getElementById('ddlMeta').textContent = `샘플 ${m.source().length}건 · PostgreSQL DDL`;
+      document.getElementById('ddlOut').innerHTML = highlightDDL(m.ddl());
+      renderSample(m.source);
+    }
+
+    // ===== 복사 / 다운로드 =====
+    function copyDDL(){
+      if(!currentModel) return;
+      navigator.clipboard.writeText(currentModel.ddl()).then(() => {
+        const t = document.getElementById('toast');
+        t.textContent = '📋 DDL 복사 완료'; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 1800);
+      });
+    }
+    function downloadDDL(){
+      if(!currentModel) return;
+      const sql = currentModel.ddl();
+      const blob = new Blob([sql], { type:'text/sql' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentModel.table}.sql`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // INIT
+    renderModels();
+    selectModel('golftels');
+  </script>
+</body>
+</html>
