@@ -395,6 +395,25 @@
   } else {
     renderBooking();
     spawnConfetti();
+
+    // 💬 카톡 알림톡 자동 표시 (예약 진입 후 3초 — 사용자가 dismiss했으면 표시 안 함)
+    setTimeout(() => {
+      try {
+        const dismissedKey = 'omt_kakao_auto_dismissed_' + booking.bookingNumber;
+        if(localStorage.getItem(dismissedKey)) return;
+        // 모달 이미 열려 있으면 skip
+        if(document.getElementById('kakaoOverlay')) return;
+        showKakaoPreview();
+        // 모달이 열린 뒤 닫힐 때 dismiss 기록
+        const observer = new MutationObserver(() => {
+          if(!document.getElementById('kakaoOverlay')){
+            localStorage.setItem(dismissedKey, '1');
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.body, { childList:true });
+      } catch(e){ console.warn('[카톡 자동 표시 실패]', e); }
+    }, 3000);
     // 예약 확정 알림 + D-day 알림 자동 생성 (중복 방지)
     try {
       const isGT = booking.productType === 'golftel' || booking.productType === 'golftel-air' || (booking.productId && booking.productId.startsWith('gt-'));

@@ -288,6 +288,8 @@
     }
 
     let allMatches = [];
+    let pageSize = 12;
+    let visibleCount = pageSize;
 
     function search(query){
       currentQuery = query;
@@ -311,6 +313,7 @@
       // 검색 이력 저장
       try { OMT.State.addSearchHistory(query); } catch(e){}
 
+      visibleCount = pageSize;  // 새 검색마다 페이지 초기화
       updateCounts();
       renderResults();
     }
@@ -347,7 +350,10 @@
       }
       // relevance는 기본 순서 (이미 score 정렬됨)
 
-      document.getElementById('sortCount').textContent = `${list.length}건 표시 중`;
+      const totalCount = list.length;
+      const sliced = list.slice(0, visibleCount);
+      document.getElementById('sortCount').textContent = `${sliced.length} / ${totalCount}건 표시 중`;
+      list = sliced;
 
       const grid = document.getElementById('resultGrid');
 
@@ -387,6 +393,41 @@
         const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return String(text || '').replace(re, '<mark>$1</mark>');
       };
+
+      // 더보기 버튼 (전체 카운트가 visibleCount보다 클 때만)
+      const fullList = currentFilter === 'all' ? [...allMatches] : allMatches.filter(m => m.type === currentFilter);
+      const remaining = fullList.length - visibleCount;
+      if(remaining > 0){
+        // 그리드 다음에 버튼 컨테이너 추가
+        setTimeout(() => {
+          const existingBtn = document.getElementById('loadMoreWrap');
+          if(existingBtn) existingBtn.remove();
+          const wrap = document.createElement('div');
+          wrap.id = 'loadMoreWrap';
+          wrap.style.cssText = 'grid-column:1/-1;margin-top:14px;text-align:center;padding:20px 0 40px;';
+          wrap.innerHTML = `
+            <button onclick="loadMore()" style="padding:14px 32px;background:#fff;border:2px solid var(--ink);color:var(--ink);border-radius:12px;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.background='var(--ink)';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='var(--ink)'">
+              ⬇ ${Math.min(remaining, pageSize)}건 더보기 (남은 ${remaining.toLocaleString('ko-KR')}건)
+            </button>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:10px;font-weight:600;">${visibleCount} / ${fullList.length}건 표시 중</div>
+          `;
+          grid.appendChild(wrap);
+        }, 0);
+      } else if(fullList.length > pageSize){
+        // 마지막 페이지: "처음으로" 버튼
+        setTimeout(() => {
+          const existingBtn = document.getElementById('loadMoreWrap');
+          if(existingBtn) existingBtn.remove();
+          const wrap = document.createElement('div');
+          wrap.id = 'loadMoreWrap';
+          wrap.style.cssText = 'grid-column:1/-1;margin-top:14px;text-align:center;padding:14px 0 40px;color:var(--ink-3);font-size:12px;font-weight:600;';
+          wrap.innerHTML = `
+            ✓ 모든 결과를 확인하셨어요 (${fullList.length.toLocaleString('ko-KR')}건)
+            <button onclick="visibleCount=${pageSize};renderResults();window.scrollTo({top:0,behavior:'smooth'});" style="margin-left:8px;padding:6px 14px;background:var(--bg-soft);color:var(--ink-2);border:none;border-radius:6px;font-weight:800;font-size:11px;cursor:pointer;font-family:inherit;">↑ 처음으로</button>
+          `;
+          grid.appendChild(wrap);
+        }, 0);
+      }
 
       grid.innerHTML = list.map(item => {
         const badgeClass = item.type === 'golftel' ? 'golftel' : item.type;
@@ -436,9 +477,28 @@
         document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('on'));
         btn.classList.add('on');
         currentFilter = btn.dataset.f;
+        visibleCount = pageSize;   // 필터 변경 시 페이지 초기화
         renderResults();
       });
     });
+
+    // 정렬 변경 시도 페이지 초기화
+    document.getElementById('sortSel').addEventListener('change', () => { visibleCount = pageSize; });
+
+    // 🔁 더보기
+    window.loadMore = () => {
+      visibleCount += pageSize;
+      renderResults();
+      // 새로 추가된 카드까지 스크롤 (부드럽게)
+      setTimeout(() => {
+        const grid = document.getElementById('resultGrid');
+        if(!grid) return;
+        const cards = grid.querySelectorAll('.result-card');
+        // 직전 페이지 마지막 카드 위치로 스크롤
+        const targetIdx = Math.max(0, visibleCount - pageSize);
+        if(cards[targetIdx]) cards[targetIdx].scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 50);
+    };
 
     // INIT
     if(initialQuery) search(initialQuery);

@@ -311,9 +311,40 @@
       <span class="page-title">크리에이터 스튜디오</span>
       <div class="header-actions">
         <a href="feed.html" class="btn-ghost">피드 보기</a>
-        <a href="mypage.html" class="btn-ghost">일반 마이페이지</a>
+        <a href="live.html" class="btn-ghost" style="background:#FF0033;color:#fff;font-weight:900;display:inline-flex;align-items:center;gap:5px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:livePulseH 1s infinite;"></span>
+          LIVE 시작
+        </a>
+        <style>@keyframes livePulseH{0%,100%{opacity:1;}50%{opacity:.3;}}</style>
+        <a href="mypage.html" class="btn-ghost">마이페이지</a>
+        <button onclick="toggleAdminMenu(event)" class="btn-ghost" style="position:relative;" id="adminMenuBtn">
+          🛠️ ELLIS 콘솔 ▾
+          <div id="adminMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#161B22;border:1px solid #2A3340;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.5);padding:6px;min-width:200px;z-index:60;">
+            <a href="admin-channels.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;color:#C9D1D9;font-weight:700;font-size:12px;text-decoration:none;" onmouseover="this.style.background='#1F2630'" onmouseout="this.style.background='transparent'">📡 채널 매니저</a>
+            <a href="admin-suppliers.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;color:#C9D1D9;font-weight:700;font-size:12px;text-decoration:none;" onmouseover="this.style.background='#1F2630'" onmouseout="this.style.background='transparent'">🏢 공급사</a>
+            <a href="mapper.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;color:#C9D1D9;font-weight:700;font-size:12px;text-decoration:none;" onmouseover="this.style.background='#1F2630'" onmouseout="this.style.background='transparent'">🗄️ 스키마 매퍼</a>
+            <a href="admin-analytics.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;color:#C9D1D9;font-weight:700;font-size:12px;text-decoration:none;" onmouseover="this.style.background='#1F2630'" onmouseout="this.style.background='transparent'">📊 사용자 분석</a>
+          </div>
+        </button>
         <a href="mobile.html" class="btn-primary">+ 새 영상 올리기</a>
       </div>
+      <script>
+        function toggleAdminMenu(e){
+          e.stopPropagation();
+          const m = document.getElementById('adminMenu');
+          m.style.display = m.style.display === 'block' ? 'none' : 'block';
+          // 바깥 클릭 시 닫기
+          if(m.style.display === 'block'){
+            const close = (ev) => {
+              if(!ev.target.closest('#adminMenuBtn')){
+                m.style.display = 'none';
+                document.removeEventListener('click', close);
+              }
+            };
+            setTimeout(() => document.addEventListener('click', close), 50);
+          }
+        }
+      </script>
     </div>
   </header>
 

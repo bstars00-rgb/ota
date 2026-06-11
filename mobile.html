@@ -614,8 +614,23 @@
 
           <!-- EXPLORE -->
           <section id="tab-explore" class="tab-panel">
-            <div class="explore-head">
-              <div class="search-box"><input type="text" placeholder="도시·호텔·크리에이터 검색" /></div>
+            <div class="explore-head" style="position:relative;">
+              <div class="search-box" style="cursor:pointer;" onclick="openMobileSearch()">
+                <input type="text" id="mobileSearchInput" placeholder="도시·골프텔·상품 검색" readonly style="cursor:pointer;" />
+              </div>
+              <!-- 검색 오버레이 모달 -->
+              <div id="mobileSearchOverlay" style="display:none;position:fixed;inset:0;z-index:90;background:#fff;animation:msFadeIn .2s ease;">
+                <div style="padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--line);">
+                  <button onclick="closeMobileSearch()" style="font-size:22px;font-weight:900;color:var(--ink-2);background:none;border:none;padding:0 6px;cursor:pointer;">‹</button>
+                  <div style="flex:1;display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--bg-soft);border-radius:10px;">
+                    <span style="font-size:14px;">🔍</span>
+                    <input type="text" id="mobileSearchReal" placeholder="여행지, 상품, 도시 검색" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;font-weight:600;color:var(--ink);" autocomplete="off" />
+                    <button id="mobileSearchClear" onclick="document.getElementById('mobileSearchReal').value='';renderMobileSearch('');" style="background:none;border:none;color:var(--ink-3);font-size:14px;cursor:pointer;display:none;">✕</button>
+                  </div>
+                </div>
+                <div id="mobileSearchBody" style="overflow-y:auto;max-height:calc(100vh - 70px);padding:8px 12px 80px;"></div>
+              </div>
+              <style>@keyframes msFadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}</style>
             </div>
 
             <section class="section">
@@ -1588,6 +1603,139 @@
     if(n > 1800) n = 1800;
     el.textContent = n.toLocaleString('ko-KR');
   }, 2200);
+
+  // ============================================================
+  // 🔍 모바일 검색 (탐색 탭 — 풀스크린 오버레이)
+  // ============================================================
+  let mobileSearchIndex = null;
+  const MOBILE_TRENDING = [
+    { q:'다낭 골프텔', score:'+128%', icon:'🔥' },
+    { q:'오키나와 카누차', score:'+82%', icon:'🆕' },
+    { q:'골프텔', score:'1위', icon:'🏆' },
+    { q:'클락 미모사', score:'+54%', icon:'🔥' },
+    { q:'직영 골프텔', score:'추천', icon:'⭐' }
+  ];
+
+  window.openMobileSearch = () => {
+    const ov = document.getElementById('mobileSearchOverlay');
+    if(!ov) return;
+    ov.style.display = 'block';
+    setTimeout(() => document.getElementById('mobileSearchReal')?.focus(), 100);
+    renderMobileSearch('');
+  };
+  window.closeMobileSearch = () => {
+    const ov = document.getElementById('mobileSearchOverlay');
+    if(ov) ov.style.display = 'none';
+  };
+
+  function buildMobileSearchIndex(){
+    if(mobileSearchIndex) return mobileSearchIndex;
+    const items = [];
+    Object.values(OMT.DATA.COUNTRIES).forEach(c => {
+      items.push({ type:'country', icon:'🌏', tag:'국가', title:`${c.epithet} · ${c.name}`, sub:c.tagline, link:`country.html?c=${c.slug}`, keywords:[c.name, c.slug, c.epithet] });
+    });
+    (OMT.DATA.GOLFTELS || []).forEach(g => {
+      const own = OMT.DATA.OWNERSHIP[g.country] || {};
+      items.push({ type:'golftel', icon:'⛳', tag:`골프텔 · ${own.label || ''}`, title:g.name, sub:`${g.hotelName} · ${g.rounds}라운딩 · ${(g.pricePerPerson/10000).toFixed(0)}만원~`, link:`golftel.html?id=${g.id}`, keywords:[g.name, g.city, OMT.DATA.COUNTRIES[g.country]?.name || '', '골프', '골프텔'] });
+    });
+    (OMT.DATA.PRODUCTS || []).forEach(p => {
+      items.push({ type:'package', icon:'📦', tag:'패키지', title:p.name, sub:p.subtitle || '', link:`product.html?id=${p.id}`, keywords:[p.name, p.subtitle || '', p.city || '', OMT.DATA.COUNTRIES[p.country]?.name || ''] });
+    });
+    Object.values(OMT.DATA.CITIES).forEach(ct => {
+      if(ct.city && !ct.isOrigin){
+        const country = OMT.DATA.COUNTRIES[ct.country];
+        if(country) items.push({ type:'city', icon:'📍', tag:'도시', title:ct.name, sub:`${country.name} · ${country.epithet}`, link:`golftels.html?c=${country.slug}`, keywords:[ct.name, ct.code, ct.city, country.name] });
+      }
+    });
+    mobileSearchIndex = items;
+    return items;
+  }
+
+  function searchScoreMobile(item, q){
+    const ql = q.toLowerCase();
+    let s = 0;
+    if(item.title.toLowerCase() === ql) s += 100;
+    if(item.title.toLowerCase().startsWith(ql)) s += 50;
+    if(item.title.toLowerCase().includes(ql)) s += 30;
+    (item.keywords || []).forEach(k => { if(!k) return; const kl = k.toLowerCase(); if(kl === ql) s += 40; else if(kl.startsWith(ql)) s += 20; else if(kl.includes(ql)) s += 10; });
+    return s;
+  }
+
+  function renderMobileSearch(query){
+    const body = document.getElementById('mobileSearchBody');
+    const clearBtn = document.getElementById('mobileSearchClear');
+    if(clearBtn) clearBtn.style.display = query ? 'block' : 'none';
+
+    if(!query || query.trim().length === 0){
+      // 빈 상태 — 인기 검색어 + 최근 검색
+      const history = (OMT.State.getSearchHistory() || []).slice(0, 3);
+      const historyHtml = history.length > 0 ? `
+        <div style="font-size:10px;font-weight:900;color:var(--ink-3);padding:10px 4px 6px;letter-spacing:.04em;text-transform:uppercase;">🕐 최근 검색</div>
+        ${history.map(h => `
+          <div onclick="document.getElementById('mobileSearchReal').value='${h.replace(/'/g, "\\'")}';renderMobileSearch('${h.replace(/'/g, "\\'")}')" style="display:flex;gap:10px;padding:11px 8px;border-radius:8px;align-items:center;cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:700;" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+            <span>🕐</span><span>${h}</span>
+          </div>
+        `).join('')}` : '';
+      body.innerHTML = historyHtml + `
+        <div style="font-size:10px;font-weight:900;color:var(--ink-3);padding:14px 4px 6px;letter-spacing:.04em;text-transform:uppercase;">🔥 실시간 인기 검색어</div>
+        ${MOBILE_TRENDING.map((t, i) => `
+          <div onclick="document.getElementById('mobileSearchReal').value='${t.q}';renderMobileSearch('${t.q}')" style="display:flex;gap:10px;padding:11px 8px;border-radius:8px;align-items:center;cursor:pointer;" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+            <span style="width:24px;height:24px;border-radius:50%;background:${i<3?'#FF6B35':'var(--bg-soft)'};color:${i<3?'#fff':'var(--ink-3)'};display:grid;place-items:center;font-size:11px;font-weight:900;">${i+1}</span>
+            <span style="flex:1;font-size:13px;font-weight:800;color:var(--ink);">${t.q}</span>
+            <span style="font-size:11px;font-weight:900;color:var(--primary);">${t.icon} ${t.score}</span>
+          </div>
+        `).join('')}
+      `;
+      return;
+    }
+
+    const q = query.trim();
+    const idx = buildMobileSearchIndex();
+    const matches = idx.map(it => ({ it, score: searchScoreMobile(it, q) })).filter(r => r.score > 0).sort((a,b) => b.score - a.score).slice(0, 10).map(r => r.it);
+
+    const highlight = (text) => {
+      if(!text) return '';
+      const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return String(text).replace(re, '<mark style="background:var(--accent);color:var(--ink);padding:0 2px;border-radius:2px;font-weight:900;">$1</mark>');
+    };
+
+    const aiCard = `
+      <div onclick="OMT.State.addSearchHistory('${q.replace(/'/g, "\\'")}');location.href='ai-planner.html?q=${encodeURIComponent(q)}'" style="display:flex;gap:10px;padding:12px;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1.5px dashed #FF6B35;margin-bottom:8px;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7B68EE,#9F7AEA);color:#fff;display:grid;place-items:center;font-size:16px;flex-shrink:0;">✦</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:10px;font-weight:900;color:#FF6B35;letter-spacing:.04em;text-transform:uppercase;">AI 플래너로</div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-top:2px;">"${q}" 자연어 검색 →</div>
+        </div>
+      </div>
+    `;
+
+    if(matches.length === 0){
+      body.innerHTML = aiCard + `<div style="padding:24px;text-align:center;color:var(--ink-3);font-size:12px;">"${q}" 직접 매칭 결과 없음</div>`;
+      return;
+    }
+
+    const grouped = {};
+    matches.forEach(m => { (grouped[m.tag] = grouped[m.tag] || []).push(m); });
+    body.innerHTML = aiCard + Object.entries(grouped).map(([tag, items]) => `
+      <div style="font-size:10px;font-weight:900;color:var(--ink-3);padding:8px 4px 6px;letter-spacing:.04em;text-transform:uppercase;">${tag}</div>
+      ${items.map(item => `
+        <div onclick="OMT.State.addSearchHistory('${q.replace(/'/g, "\\'")}');location.href='${item.link}'" style="display:flex;gap:10px;padding:11px 8px;border-radius:8px;align-items:flex-start;cursor:pointer;" onmouseover="this.style.background='var(--bg-soft)'" onmouseout="this.style.background=''">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--bg-soft);display:grid;place-items:center;font-size:16px;flex-shrink:0;">${item.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:800;color:var(--ink);line-height:1.3;">${highlight(item.title)}</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${highlight(item.sub || '')}</div>
+          </div>
+        </div>
+      `).join('')}
+    `).join('');
+  }
+  window.renderMobileSearch = renderMobileSearch;
+
+  // 입력 바인딩
+  setTimeout(() => {
+    const real = document.getElementById('mobileSearchReal');
+    if(real) real.addEventListener('input', (e) => renderMobileSearch(e.target.value));
+  }, 200);
 
   // PWA Service Worker 등록
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
