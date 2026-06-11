@@ -375,7 +375,8 @@
       productType: first.productType || (isGT ? 'golftel' : 'package'),
       country: first.country || null,
       city: first.city || null,
-      ownership: first.orig ? 'direct' : null,
+      // ownership은 cart item에 명시된 값 우선, 없으면 orig 플래그로 추정
+      ownership: first.ownership || (first.orig ? 'direct' : null),
       nights: first.nights || null,
       rounds: first.rounds || null,
       dates: first.dates,
@@ -386,7 +387,10 @@
       phone: user.phone,
       travelers: [],
       source: 'cart-quick-pay',
-      packageSnapshot: { roomOption: first.roomOption || null, selectedSlots: first.selectedSlots || [] }
+      packageSnapshot: {
+        roomOption: first.roomOption || null,
+        selectedSlots: first.selectedSlots || []
+      }
     });
 
     // 결제한 상품을 카트에서 제거

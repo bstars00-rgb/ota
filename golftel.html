@@ -1729,11 +1729,13 @@
         pax: '성인 ' + pax + '명',
         paxCount: pax,
         price: total,
-        // 골프텔 메타 (cart.html에서 활용)
+        // 골프텔 메타 (cart.html · checkout · complete · voucher 에서 활용)
         country: g.country,
+        city: g.city,
         rounds: g.rounds,
         nights: g.nights,
         roomOption: room.type,
+        ownership: D.OWNERSHIP[g.country]?.model,
         selectedSlots: selectedSlots.map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price }))
       });
 

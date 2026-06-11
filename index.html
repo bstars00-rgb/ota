@@ -908,10 +908,12 @@
       <h1>오, 내가 찾는 <span>모든 여행</span></h1>
       <p class="hero-desc">AI가 추천하고, 크리에이터가 큐레이션하며, 단독 특가로 완성되는 스마트한 여행.</p>
 
-      <form class="ai-search" onsubmit="handleAISearch(event)" role="search">
+      <form class="ai-search" onsubmit="handleAISearch(event)" role="search" style="position:relative;" id="aiSearchForm">
         <span class="icon" aria-hidden="true">✦</span>
-        <input id="aiQuery" type="text" placeholder="어디로 떠나고 싶으세요? AI에게 물어보세요" aria-label="AI 검색" />
+        <input id="aiQuery" type="text" placeholder="어디로 떠나고 싶으세요? AI에게 물어보세요" aria-label="AI 검색" autocomplete="off" />
         <button type="submit">검색하기</button>
+        <!-- 검색 자동완성 드롭다운 -->
+        <div id="searchSuggest" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:80;max-height:480px;overflow-y:auto;padding:8px;text-align:left;color:#1A1A1A;"></div>
       </form>
 
       <div class="quick-tabs" role="tablist">
@@ -1431,6 +1433,133 @@
     // TODO: API 연동 필요 - POST /api/ai/search { query }
     OMT.State.addSearchHistory(q);
     location.href = 'ai-planner.html?q=' + encodeURIComponent(q);
+  }
+
+  /* =========================================
+     🔍 검색 자동완성 (국가/도시/골프텔/상품 통합)
+     ========================================= */
+  const aiQuery = document.getElementById('aiQuery');
+  const searchSuggest = document.getElementById('searchSuggest');
+
+  function buildSearchIndex(){
+    const items = [];
+    // 국가 4종
+    Object.values(OMT.DATA.COUNTRIES).forEach(c => {
+      items.push({ type:'country', icon:'🌏', tag:'국가', title:`${c.epithet} · ${c.name}`, sub:c.tagline, link:`country.html?c=${c.slug}`, keywords:[c.name, c.slug, c.epithet] });
+    });
+    // 골프텔 8종
+    (OMT.DATA.GOLFTELS || []).forEach(g => {
+      const own = OMT.DATA.OWNERSHIP[g.country] || {};
+      items.push({ type:'golftel', icon:'⛳', tag:'골프텔', title:g.name, sub:`${own.label || ''} · ${g.rounds}라운딩 · ${(g.pricePerPerson/10000).toFixed(0)}만원~/인`, link:`golftel.html?id=${g.id}`, keywords:[g.name, g.city, OMT.DATA.COUNTRIES[g.country]?.name || '', '골프', '골프텔'] });
+    });
+    // 일반 패키지
+    (OMT.DATA.PRODUCTS || []).forEach(p => {
+      items.push({ type:'package', icon:'📦', tag:'패키지', title:p.name, sub:`${p.subtitle || ''} · ${(p.price/10000).toFixed(0)}만원`, link:`product.html?id=${p.id}`, keywords:[p.name, p.subtitle || '', p.city || '', OMT.DATA.COUNTRIES[p.country]?.name || ''] });
+    });
+    // 도시 (CITIES)
+    Object.values(OMT.DATA.CITIES).forEach(ct => {
+      if(ct.city && !ct.isOrigin){
+        const country = OMT.DATA.COUNTRIES[ct.country];
+        if(country){
+          items.push({ type:'city', icon:'📍', tag:'도시', title:`${ct.name}`, sub:`${country.name} · ${country.epithet}`, link:`golftels.html?c=${country.slug}`, keywords:[ct.name, ct.code, ct.city, country.name] });
+        }
+      }
+    });
+    return items;
+  }
+
+  const SEARCH_INDEX = buildSearchIndex();
+  console.log('[검색 인덱스]', SEARCH_INDEX.length, '항목');
+
+  function searchScore(item, q){
+    const ql = q.toLowerCase();
+    let score = 0;
+    // 정확히 일치
+    if(item.title.toLowerCase() === ql) score += 100;
+    // 시작 일치
+    if(item.title.toLowerCase().startsWith(ql)) score += 50;
+    // 포함
+    if(item.title.toLowerCase().includes(ql)) score += 30;
+    // 키워드 매칭
+    (item.keywords || []).forEach(k => {
+      if(!k) return;
+      const kl = k.toLowerCase();
+      if(kl === ql) score += 40;
+      else if(kl.startsWith(ql)) score += 20;
+      else if(kl.includes(ql)) score += 10;
+    });
+    return score;
+  }
+
+  function renderSuggestions(query){
+    const q = (query || '').trim();
+    if(q.length < 1){ searchSuggest.style.display = 'none'; return; }
+
+    // 검색 점수로 필터
+    const matches = SEARCH_INDEX
+      .map(it => ({ it, score: searchScore(it, q) }))
+      .filter(r => r.score > 0)
+      .sort((a,b) => b.score - a.score)
+      .slice(0, 8)
+      .map(r => r.it);
+
+    // 검색 이력 (최대 3개)
+    const history = (OMT.State.getSearchHistory() || []).slice(0, 3);
+
+    const highlight = (text) => {
+      if(!text || !q) return text || '';
+      const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return String(text).replace(re, '<mark style="background:#FFD23F;color:#1A1A1A;padding:0 2px;border-radius:2px;font-weight:900;">$1</mark>');
+    };
+
+    const aiCard = `
+      <div onclick="aiQuery.value='${q.replace(/'/g, "\\'")}';handleAISearch({preventDefault:()=>{}})" style="display:flex;gap:10px;padding:12px;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1.5px dashed #FF6B35;margin-bottom:6px;align-items:center;" onmouseover="this.style.background='linear-gradient(135deg,#FFEDE0,#FFE0D0)'" onmouseout="this.style.background='linear-gradient(135deg,#FFF5F0,#FFEDE0)'">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7B68EE,#9F7AEA);color:#fff;display:grid;place-items:center;font-size:18px;flex-shrink:0;">✦</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;text-transform:uppercase;">AI 플래너로 검색</div>
+          <div style="font-size:13px;font-weight:800;color:#1A1A1A;margin-top:2px;">"${q}" 자연어 검색 →</div>
+        </div>
+      </div>
+    `;
+
+    if(matches.length === 0 && history.length === 0){
+      searchSuggest.innerHTML = aiCard + `<div style="padding:14px;text-align:center;color:#9CA3AF;font-size:12px;">"${q}" 직접 매칭 결과 없음. AI에게 물어보세요.</div>`;
+    } else {
+      const grouped = {};
+      matches.forEach(m => { (grouped[m.tag] = grouped[m.tag] || []).push(m); });
+
+      let html = aiCard;
+      // 검색 이력 (있고, q와 다를 때만)
+      if(history.length > 0){
+        html += `<div style="font-size:10px;font-weight:800;color:#9CA3AF;padding:8px 10px 4px;letter-spacing:.04em;text-transform:uppercase;">최근 검색</div>`;
+        html += history.map(h => `
+          <div onclick="aiQuery.value='${h.replace(/'/g, "\\'")}';renderSuggestions('${h.replace(/'/g, "\\'")}')" style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;align-items:center;color:#6B7280;font-size:12px;" onmouseover="this.style.background='#F7F7F9'" onmouseout="this.style.background=''">
+            <span>🕐</span><span>${h}</span>
+          </div>
+        `).join('');
+      }
+      Object.entries(grouped).forEach(([tag, items]) => {
+        html += `<div style="font-size:10px;font-weight:800;color:#9CA3AF;padding:8px 10px 4px;letter-spacing:.04em;text-transform:uppercase;">${tag}</div>`;
+        html += items.map(item => `
+          <div onclick="location.href='${item.link}'" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;align-items:flex-start;" onmouseover="this.style.background='#F7F7F9'" onmouseout="this.style.background=''">
+            <div style="width:36px;height:36px;border-radius:8px;background:#F7F7F9;display:grid;place-items:center;font-size:18px;flex-shrink:0;">${item.icon}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:800;color:#1A1A1A;line-height:1.3;">${highlight(item.title)}</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:2px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${highlight(item.sub || '')}</div>
+            </div>
+          </div>
+        `).join('');
+      });
+      searchSuggest.innerHTML = html;
+    }
+    searchSuggest.style.display = 'block';
+  }
+
+  // 입력 바인딩
+  if(aiQuery){
+    aiQuery.addEventListener('input', (e) => renderSuggestions(e.target.value));
+    aiQuery.addEventListener('focus', (e) => { if(e.target.value) renderSuggestions(e.target.value); else { searchSuggest.style.display = 'none'; } });
+    aiQuery.addEventListener('blur', () => { setTimeout(() => { searchSuggest.style.display = 'none'; }, 200); });
   }
   const QUICK_TAB_DESTINATIONS = {
     flight:   'flights.html',
