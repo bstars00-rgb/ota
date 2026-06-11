@@ -284,6 +284,16 @@
           </div>
         </div>
 
+        <!-- 📊 내 여행 통계 (누적) -->
+        <div class="panel-card" style="background:linear-gradient(135deg,#1A1A1A 0%,#2C1810 70%,#FF6B35 130%);color:#fff;margin-bottom:16px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-30px;right:-30px;font-size:160px;opacity:.06;pointer-events:none;">🌏</div>
+          <div class="panel-head" style="margin-bottom:12px;">
+            <h2 class="panel-title" style="color:#fff;">📊 내 여행 통계 (누적)</h2>
+            <span class="panel-sub" style="color:rgba(255,255,255,.65);font-size:11px;">2026년 누적 기준</span>
+          </div>
+          <div id="travelStatsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative;"></div>
+        </div>
+
         <!-- 알림 프리뷰 + 추천 골프텔 (2열) -->
         <div class="dash-row">
           <div class="panel-card">
@@ -917,6 +927,41 @@
     document.getElementById('dashPoints').textContent = OMT.State.getPointsBalance().toLocaleString('ko-KR') + ' P';
     document.getElementById('dashCoupons').textContent = OMT.State.getAvailableCoupons().length + '장';
     document.getElementById('dashTrips').textContent = OMT.State.getBookings().filter(b => b.status === 'completed').length + '회';
+
+    // 📊 내 여행 통계 (누적 — 모든 예약 기준)
+    const allBookings = OMT.State.getBookings();
+    const totalSpent = allBookings.filter(b => b.status !== 'cancelled').reduce((s, b) => s + (b.total || 0), 0);
+    const totalPoints = (OMT.DATA.POINTS_HISTORY || []).reduce((s, h) => s + Math.max(0, h.delta || 0), 0);
+    // 절감액 = oldPrice 합 - 실제 결제액 (mock — total의 약 18% 절감)
+    const totalSaved = Math.round(totalSpent * 0.18);
+    // 방문 국가 수 = 예약 country unique
+    const countries = new Set();
+    allBookings.filter(b => b.status !== 'cancelled' && b.country).forEach(b => countries.add(b.country));
+    // 누적 라운딩 수 (골프텔 rounds 합)
+    const totalRounds = allBookings.filter(b => b.status !== 'cancelled' && b.rounds).reduce((s, b) => s + (b.rounds || 0), 0);
+
+    document.getElementById('travelStatsGrid').innerHTML = `
+      <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
+        <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">💎 누적 적립</div>
+        <div style="font-size:22px;font-weight:900;color:var(--accent);margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${(totalPoints/1000).toFixed(1)}<span style="font-size:13px;opacity:.7;">K P</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">현재 잔액 ${OMT.State.getPointsBalance().toLocaleString('ko-KR')}P</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
+        <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">💰 총 절감액</div>
+        <div style="font-size:22px;font-weight:900;color:#10B981;margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${(totalSaved/10000).toFixed(0)}<span style="font-size:13px;opacity:.7;">만원</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">직영 + 쿠폰 + 번들 할인</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
+        <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">🌏 방문 국가</div>
+        <div style="font-size:22px;font-weight:900;color:#fff;margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${countries.size}<span style="font-size:13px;opacity:.7;">개국</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">${[...countries].map(c => ({japan:'🗻',vietnam:'🌊',thailand:'🛕',philippines:'🏖️'}[c] || '🌍')).join(' ') || '아직 없음'}</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
+        <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">⛳ 누적 라운딩</div>
+        <div style="font-size:22px;font-weight:900;color:#fff;margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${totalRounds}<span style="font-size:13px;opacity:.7;">회</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">${totalRounds === 0 ? '첫 골프 여행 기다리는 중!' : totalRounds < 10 ? '골프 시작 단계' : totalRounds < 30 ? '골프 즐기는 단계' : '골프 마스터!'}</div>
+      </div>
+    `;
 
     // 알림 프리뷰 (최근 3건) — 클릭 시 딥링크
     const notifs = OMT.State.getNotifications().slice(0, 3);

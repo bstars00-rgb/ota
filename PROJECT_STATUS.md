@@ -490,4 +490,75 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (8th) · **28 pages** · 2 JS modules · 8 docs · PWA 설치 가능 + **오프라인 폴백** · 골프텔 8 + 골프코스 10 + 채널매니저 9 + 공급사 9 + 오너십 + 40 리뷰 + 10 알림 + 동적 D-day + 사용자 알림 + 자동 답변 + 결제 게이트웨이 3종 + e-바우처 + 공급사 인벤토리 + 검색 자동완성 + FCM 푸시 + 카톡 알림톡 + 사용자 흐름 분석 + 인바운드 SEO + 라이브 commerce + 직영 우선 정렬 + LIVE 알림 + AI 혼합 + 크리에이터 LIVE 통계 + **인기 검색어 + 클립 캡쳐 + 상품 자동 추천 + 모바일 통합 검색 + 페이지네이션 + 카톡 자동 표시 + 콘솔 통합 nav** · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (final · 9th) · **28 pages** · 2 JS modules · 8 docs · PWA 설치 + 오프라인 폴백 · 97 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+
+---
+
+## 🎬 전 사이클 회고 (2026-05~06)
+
+### 작업 통계
+- **총 97 tasks 완료** — 9 사이클 × 평균 10 작업/사이클
+- **신규 페이지**: 14개 (기존 13 + admin 5 + golftels/golftel/builder/voucher/live/inbound/offline/search/mapper/payment)
+- **신규 문서**: 2개 (ELLIS_SPEC.md 1,000줄 · ALIMTALK_TEMPLATES.md 10 템플릿)
+- **메모리**: 3건 (골프텔 전환·국가 오너십·ELLIS 백엔드)
+
+### 사이클별 핵심 성과
+
+| 사이클 | 핵심 작업 | 결과 |
+|---|---|---|
+| 1-2 (#1~24) | **골프텔 모델 전환** | 골프텔 8 SKU + 채널매니저 9 + 오너십 매트릭스 + 상세 8탭 + 빌더 |
+| 3 (#25~32) | **상품 → 결제 풀파이프라인** | 시드 예약 3 + complete 골프텔 컨텍스트 + AI 골프 통합 + 동적 알림 + admin-channels |
+| 4 (#33~46) | **사용자 경험 깊이화** | 리뷰 40건 + ELLIS_SPEC + 날짜 picker + 문의 모달 + 사진 업로드 + payment 게이트웨이 |
+| 5 (#47~57) | **사용자 알림 시스템** | addUserNotification + D-day 트리거 + 모바일 통합 + 골프텔 카트 + voucher + admin-suppliers |
+| 6 (#58~73) | **검색 / 분석 / 인바운드** | 통합 검색 + 자동완성 + 매퍼 + 사용자 분석 + 인바운드 SEO + 라이브 + ALIMTALK |
+| 7-9 (#74~97) | **운영 폴리시·고급 UX** | 직영 우선 정렬 + 인기 검색어 + 클립 캡쳐 + 자동 추천 + 페이지네이션 + 통계 카드 + 라이브 메트릭 |
+
+### 데이터 인벤토리
+
+| 카테고리 | 수량 |
+|---|---|
+| 골프텔 SKU | 8개 (직영 4 · 프랜차이즈 4) |
+| 골프 코스 | 10개 (yardage 포함) |
+| 채널 매니저 | 9종 (Direct/GDO/GolfNow/Golfmanager/Kakao/XGOLF/Golfdigg/GORA/Partner) |
+| 공급사 | 9개 (Tier 1/2/3) |
+| 호텔 | 22개 (golftel 100% 정상 참조) |
+| 리뷰 mock | 40건 (8 골프텔 × 5건) |
+| 정적 알림 | 10건 + 동적 D-7/D-3/D-1 + 사용자 알림 무제한 |
+| 시드 예약 | 6건 (골프텔 3 + 패키지 3) |
+| 인기 검색어 | 6 키워드 (실시간 mock) |
+
+### 핵심 페이지 흐름 (E2E)
+
+```
+검색 (index.html 자동완성 + 인기 검색어)
+  → 결과 (search.html · 5 필터 + 직영 우선 + 페이지네이션)
+  → 상세 (golftel.html 8탭 + 슬롯 그리드 + 자동 추천)
+  → 결제 (checkout → payment 3종 + 10% 실패 시나리오)
+  → 완료 (complete.html + 자동 카톡 + e-바우처 + D-day 알림 예약)
+  → 마이페이지 (홈 대시보드 + 검색 + 통계 + 라이브 다시보기)
+```
+
+### 운영 콘솔 5 (admin)
+
+```
+admin-channels (실시간 로그) ↔ admin-suppliers (인벤토리) ↔
+mapper (DDL 생성) ↔ admin-analytics (퍼널+라이브 메트릭) ↔
+creator-dashboard (LIVE 통계 + ELLIS 콘솔 드롭다운)
+```
+
+### PWA 완성도
+
+- ✅ manifest.json (앱 이름·아이콘·shortcuts 3개)
+- ✅ sw.js v2 (stale-while-revalidate + 오프라인 폴백)
+- ✅ offline.html (자동 복귀 감지)
+- ✅ "홈 화면에 추가" 배너 (Android Chrome)
+- ✅ apple-mobile-web-app 메타 (iOS Safari)
+
+### 백엔드 준비도
+
+- ✅ **ELLIS_SPEC.md** — PostgreSQL DDL + 9 어댑터 인터페이스 + 4 환경별 엔드포인트
+- ✅ **ALIMTALK_TEMPLATES.md** — 10 템플릿 + 월 비용 시뮬 + 14단계 마이그레이션 체크리스트
+- ✅ **mapper.html** — data.js → DDL 자동 변환 (8 모델)
+- ✅ 모든 데이터 ID 참조 정규화 (FK 가능)
+- ⏳ 실제 API 연동 (백엔드 구현 단계에서)
+- ⏳ 다국어 (영/일/중) — 추후 결정 (inbound.html에 3개 언어 기반 코드 작업됨)

@@ -123,8 +123,41 @@
       display:grid;grid-template-columns:320px 1fr auto;gap:0;
       transition:transform .2s, box-shadow .2s;cursor:pointer;
       border:1px solid var(--line);
+      position:relative;
     }
     .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:transparent;}
+    .card:hover .slot-popover{display:block;}
+
+    /* 슬롯 미리보기 popover */
+    .slot-popover{
+      display:none;position:absolute;top:calc(100% - 6px);left:24px;right:24px;
+      background:#1A1A1A;color:#fff;border-radius:12px;padding:14px;
+      box-shadow:0 12px 36px rgba(0,0,0,.35);z-index:30;
+      animation:slotFadeIn .2s ease;
+    }
+    @keyframes slotFadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+    .slot-popover::before{
+      content:"";position:absolute;top:-8px;left:24px;
+      border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid #1A1A1A;
+    }
+    .slot-popover-head{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+      font-size:11px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
+    }
+    .slot-popover-head .live{color:var(--golf,#0B6E4F);background:#10B981;color:#fff;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;}
+    .slot-popover-head .live::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff;animation:slotPulse 1s infinite;}
+    @keyframes slotPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+    .slot-popover .slots{display:flex;gap:6px;flex-wrap:wrap;}
+    .slot-popover .slot{
+      padding:6px 12px;background:rgba(255,255,255,.08);border-radius:6px;
+      font-size:12px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;
+    }
+    .slot-popover .slot.full{background:rgba(239,68,68,.18);color:#FCA5A5;text-decoration:line-through;}
+    .slot-popover .meta{
+      margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.15);
+      font-size:11px;color:rgba(255,255,255,.7);display:flex;justify-content:space-between;
+    }
+    .slot-popover .meta strong{color:#FFD23F;}
 
     .card-img{
       background-size:cover;background-position:center;background-color:var(--bg-soft);
@@ -514,6 +547,16 @@
 
         const incChip = (label, on) => `<span class="incl ${on ? '' : 'off'}">${label}</span>`;
 
+        // 슬롯 미리보기 (mock — 시드 기반 결정적 가용/완판 분포)
+        const seed = g.id.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+        const SLOT_TIMES = ['06:00','06:30','07:00','07:30','08:00','08:30','11:00','11:30','14:00'];
+        const slotHtml = SLOT_TIMES.slice(0, 6).map((t, i) => {
+          const isFull = (seed + i) % 5 === 0;   // 약 20% 완판
+          return `<span class="slot${isFull ? ' full' : ''}">${t}</span>`;
+        }).join('');
+        const todayBookings = (seed % 7) + 12;   // 12~18건 mock
+        const realtime = courses[0]?.realTimeBooking !== false;
+
         return `
           <article class="card" onclick="location.href='golftel.html?id=${g.id}'">
             <div class="card-img" style="background-image:url('${g.images?.[0] || ''}')">
@@ -571,6 +614,18 @@
                 })()}
               </div>
               <a href="golftel.html?id=${g.id}" class="btn-detail" onclick="event.stopPropagation();">자세히 보기</a>
+            </div>
+            <!-- 슬롯 미리보기 (hover popover) -->
+            <div class="slot-popover">
+              <div class="slot-popover-head">
+                <span>🕐 오늘 가용 티오프</span>
+                ${realtime ? '<span class="live">⚡ 실시간</span>' : '<span class="live" style="background:#F59E0B;">⏱ 견적 24h</span>'}
+              </div>
+              <div class="slots">${slotHtml}</div>
+              <div class="meta">
+                <span>완판은 취소선</span>
+                <span><strong>${todayBookings}</strong>건 오늘 예약 중</span>
+              </div>
             </div>
           </article>
         `;
