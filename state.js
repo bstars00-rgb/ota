@@ -29,8 +29,89 @@
     preferences:   'omt_user_prefs_v1',    // 온보딩 답변 + 개인화 설정
     onboarded:     'omt_onboarded_v1',     // 온보딩 완료 여부 boolean
     notifSettings: 'omt_notif_settings_v1',// 카테고리별 알림 on/off + 방해 금지 시간
-    userLocation:  'omt_user_location_v1'  // 사용자 출발지 권역 (seoul/busan/daegu/gwangju/jeju)
+    userLocation:  'omt_user_location_v1', // 사용자 출발지 권역 (seoul/busan/daegu/gwangju/jeju)
+    groupBookings: 'omt_group_bookings_v1' // 그룹(단체) 예약 — 4인+ 단체 골프투어
   };
+
+  // ============================================================
+  // 👥 그룹(단체) 예약 — 4인+ 단체 골프투어
+  // ============================================================
+  function getGroups(){
+    return read(KEYS.groupBookings, []);
+  }
+  function getGroup(id){
+    return getGroups().find(g => g.id === id) || null;
+  }
+  function createGroup(group){
+    // group: { golftelId, leaderName, leaderPhone, dates, paymentMode, members? }
+    const list = getGroups();
+    const id = `grp-${Date.now().toString(36)}`;
+    const entry = {
+      id,
+      golftelId: group.golftelId,
+      leaderName: group.leaderName || '단체장',
+      leaderPhone: group.leaderPhone || '',
+      dates: group.dates || '',
+      paymentMode: group.paymentMode || 'leader_pays',  // leader_pays | each_pays | split
+      members: group.members || [{
+        userId: 'self',
+        name: group.leaderName || '단체장',
+        phone: group.leaderPhone || '',
+        airportCode: 'ICN',
+        paidAmount: 0,
+        roomMate: null,
+        isLeader: true,
+        confirmed: true
+      }],
+      totalAmount: group.totalAmount || 0,
+      status: 'draft',  // draft | confirmed | partial_paid | paid | cancelled
+      createdAt: new Date().toISOString()
+    };
+    list.unshift(entry);
+    write(KEYS.groupBookings, list);
+    return entry;
+  }
+  function updateGroup(id, patch){
+    const list = getGroups();
+    const idx = list.findIndex(g => g.id === id);
+    if(idx < 0) return null;
+    list[idx] = { ...list[idx], ...patch, updatedAt: new Date().toISOString() };
+    write(KEYS.groupBookings, list);
+    return list[idx];
+  }
+  function addGroupMember(groupId, member){
+    const g = getGroup(groupId);
+    if(!g) return null;
+    const newMember = {
+      userId: member.userId || `mem-${Date.now().toString(36)}`,
+      name: member.name || '',
+      phone: member.phone || '',
+      airportCode: member.airportCode || 'ICN',
+      paidAmount: 0,
+      roomMate: null,
+      isLeader: false,
+      confirmed: false,
+      ...member
+    };
+    g.members.push(newMember);
+    return updateGroup(groupId, { members: g.members });
+  }
+  function removeGroupMember(groupId, userId){
+    const g = getGroup(groupId);
+    if(!g) return null;
+    const filtered = g.members.filter(m => m.userId !== userId);
+    return updateGroup(groupId, { members: filtered });
+  }
+  function payGroupMember(groupId, userId, amount){
+    const g = getGroup(groupId);
+    if(!g) return null;
+    g.members = g.members.map(m =>
+      m.userId === userId ? { ...m, paidAmount: (m.paidAmount || 0) + amount, confirmed: true } : m
+    );
+    const fullyPaid = g.members.every(m => (m.paidAmount || 0) >= (g.totalAmount / g.members.length));
+    const newStatus = fullyPaid ? 'paid' : 'partial_paid';
+    return updateGroup(groupId, { members: g.members, status: newStatus });
+  }
 
   // ============================================================
   // 🔔 알림 설정 (카테고리별 + 방해 금지 시간)
@@ -610,6 +691,9 @@
     // Notification settings + User location
     getNotifSettings, setNotifSettings,
     getUserLocation, setUserLocation,
+    // Group bookings (단체)
+    getGroups, getGroup, createGroup, updateGroup,
+    addGroupMember, removeGroupMember, payGroupMember,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

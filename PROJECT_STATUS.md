@@ -1,5 +1,5 @@
 # 오마이트립 프로토타입 — 프로젝트 상태
-**마지막 업데이트**: 2026-06-11 (푸시 알림 센터 + 동선 기반 자동 추천 — 5 카테고리 필터·방해 금지·출발지 권역·D-1 풀 동선)
+**마지막 업데이트**: 2026-06-11 (그룹 예약 워크플로우 — 단체장 5스텝 빌더 + ELLIS groups DDL + 백오피스 그룹 필터)
 **리포지토리**: https://github.com/bstars00-rgb/ota
 **라이브**: https://bstars00-rgb.github.io/ota/
 **백엔드(예정)**: ELLIS — 프론트 데이터 모델은 ELLIS 마이그레이션 호환으로 설계
@@ -490,7 +490,7 @@ PROJECT_STATUS.md 참고해서 현재 상태 파악하고,
 
 **다음 세션 시작 시 이 문서 먼저 읽어주세요.** 첫 메시지에 링크 붙여서 공유하면 빠른 컨텍스트 로드 가능.
 
-_Status snapshot 2026-06-11 (17th · 알림 센터 + 동선 추천) · 36 pages · 2 JS modules (state.js +notifSettings +userLocation) · 11 docs · PWA + 운영 콘솔 5 + 백오피스 8 모듈 + AI 플래너 5종 + **모바일 6종 누적** · 124 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
+_Status snapshot 2026-06-11 (18th · 그룹 예약) · **37 pages** (group-booking +1) · 2 JS modules (state.js +groupBookings) · 11 docs · PWA + 운영 콘솔 5 + 백오피스 8 모듈 + AI 플래너 5종 + 모바일 6종 + **그룹 예약 워크플로우 신규** · 128 tasks completed · 기획 **100** 🎯 / QA **96** / 인터랙티브 **100**_
 
 ---
 
@@ -520,6 +520,7 @@ _Status snapshot 2026-06-11 (17th · 알림 센터 + 동선 추천) · 36 pages 
 | **15 (#115~117)** | **🤖 AI 골프 플래너 5종 고도화** | state.js savedTrips 키 + saveTrip/getSavedTrips/removeSavedTrip 헬퍼 · ai-planner.html 5종 신규: ① 음성 입력 mock (5초 자동 인식 + 마이크 애니메이션 + 7 샘플 음성) ② 자유 입력 골프 Q&A 데이터셋 15종 (캐디팁/복장/우천/초보/상급/항공/단체/렌탈/예산/포인트/취소/비자/혼자/가족/VIP) ③ 여행 저장 (state.saveTrip + localStorage 최대 10건) ④ 비교 모드 (3 추천 카드 표 비교 모달) ⑤ 사용자 프로필 자동 인식 (예약 이력 → 선호 국가 추출) + mypage 홈에 "저장한 여행" 카드 (?trip=tripId 딥링크) |
 | **16 (#118~120)** | **📱 모바일 4종 고도화** | state.js preferences + onboarded 키 + getPreferences/setPreferences/isOnboarded/markOnboarded 헬퍼 · mobile.html 4종 신규: ① 첫 진입 온보딩 4-step (실력·예산·동반자·국가 · 진행률 바 · 건너뛰기) → preferences 저장 ② 티오프 카운트다운 sticky 위젯 (D-3 이내 예약 자동 감지 + D-day 카운터) ③ For You 개인화 추천 5선 (점수 알고리즘: 선호+10/이력+5/예산+6/직영+2 · BEST 뱃지 + 추천 사유 칩) ④ AI 친구 FAB (우하단 floating 🤖 + 펄스 애니메이션 + 4 빠른 메뉴: 추천/캐디팁/초보/문의) |
 | **17 (#121~124)** | **🔔 푸시 알림 센터 + 🗺️ 동선 기반 자동 추천** | state.js notifSettings + userLocation 키 + 4 헬퍼 · mobile.html 2종 풀 고도화: **A) 푸시 알림 센터** — 5 카테고리 필터 (예약/결제/특가/시스템/소셜) + 카운트 칩 + 일괄 읽음 + 시간 그룹화 (오늘/이번주/이전) + 빈 상태 UI + 설정 모달 (카테고리별 토글 + 방해 금지 시간 22~7시 + 음소거 카테고리 흐리게 표시). **B) 동선 기반 추천** — 5 권역 (서울/부산/대구/광주/제주) × 6 공항 (ICN/PUS/TAE/KWJ/CJU) × 9 직항 도시 매트릭스 (대한항공·진에어·티웨이·베트남항공·세부퍼시픽·타이항공 등 실 노선) · D-1 이내 예약 → 4단계 풀 동선 카드 (공항→탑승→픽업→골프장) · 그 외 → 출발지 직항 추천 4선 + 출발지 선택 모달 |
+| **18 (#125~128)** | **👥 그룹(단체) 예약 워크플로우** | state.js groupBookings 키 + 7 헬퍼 (createGroup/getGroup/getGroups/updateGroup/addGroupMember/removeGroupMember/payGroupMember) · **group-booking.html 신규 페이지** — 단체장 5스텝 빌더: ① 골프텔·날짜 ② 멤버 초대 (4~16인, 카톡 공유 링크, 출발지) ③ 멤버별 항공편 (5 공항) ④ 객실 자동 배정 (2인 1실) ⑤ 결제 모드 3종 (단체장 일괄/각자 결제/N분의1) + 5인+ 자동 -5% · golftels.html에 "👥 단체 견적" CTA 추가 · ELLIS_SPEC.md §12.7 groups + group_members DDL + 8 API 엔드포인트 (사용자 6 + 백오피스 3) · admin-bookings.html 그룹 필터 탭 + partial_paid 상태 추가 |
 
 ### 데이터 인벤토리
 

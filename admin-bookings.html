@@ -125,6 +125,7 @@
     .status-completed{background:rgba(88,166,255,.15);color:var(--info);}
     .status-cancelled{background:rgba(110,118,129,.15);color:var(--ink-3);}
     .status-refunded{background:rgba(248,81,73,.15);color:var(--danger);}
+    .status-partial_paid{background:rgba(255,210,63,.18);color:var(--accent);}
 
     .sku-tag{
       display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:900;
@@ -256,6 +257,7 @@
       <div class="tab on" data-tab="all">전체 예약 <span class="badge">2,486</span></div>
       <div class="tab" data-tab="urgent">🔥 견적 확정 대기 <span class="badge danger">14</span></div>
       <div class="tab" data-tab="today">📅 오늘 출발 <span class="badge warn">7</span></div>
+      <div class="tab" data-tab="group">👥 그룹 예약 <span class="badge">38</span></div>
       <div class="tab" data-tab="issue">⚠️ 문제 예약 <span class="badge warn">5</span></div>
     </div>
 
@@ -456,6 +458,16 @@
         id:'OMT-JP3K7L', name:'후쿠오카 가라쓰 2박 1R', sku:'golftel',
         customer:'유○○ 010-XXXX-5555', depart:'2026-06-19', pax:'성인 4', amount:'2,420,000원',
         status:'confirmed', country:'일본 (직영)'
+      },
+      {
+        id:'GRP-2026-VN-8', name:'👥 푸꾸옥 빈펄 6박 5R · 그룹 8인', sku:'golftel',
+        customer:'단체장 박○○ 010-XXXX-1111', depart:'2026-07-14', pax:'성인 8 (그룹)', amount:'22,720,000원',
+        status:'partial_paid', country:'베트남 (직영)', groupMode:'each_pays', groupPaid:'5/8'
+      },
+      {
+        id:'GRP-2026-PH-12', name:'👥 클락 미모사 5박 4R · 그룹 12인', sku:'golftel',
+        customer:'단체장 김○○ 010-XXXX-9999', depart:'2026-08-22', pax:'성인 12 (그룹)', amount:'15,876,000원',
+        status:'confirmed', country:'필리핀 (FC)', groupMode:'leader_pays', groupPaid:'12/12'
       }
     ];
 
@@ -463,7 +475,7 @@
       golftel:'골프텔', 'golftel-air':'골프텔+항공', package:'패키지', hotel:'호텔', activity:'액티비티', flight:'항공'
     };
     const STATUS_LABELS = {
-      confirmed:'확정', pending:'대기', completed:'완료', cancelled:'취소', refunded:'환불'
+      confirmed:'확정', pending:'대기', completed:'완료', cancelled:'취소', refunded:'환불', partial_paid:'부분 결제'
     };
 
     function renderTable(){

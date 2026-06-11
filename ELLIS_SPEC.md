@@ -788,6 +788,85 @@ CREATE INDEX idx_supplier_settlement_status ON supplier_settlements(status);
 - 신규 페이지: `admin-dashboard.html` / `admin-bookings.html` / `admin-products.html`
 - 신규 테이블: `admins`, `audit_logs`, `cms_banners`, `cms_trending_keywords`, `cms_notices`, `pricing_rules`, `supplier_settlements`
 
+### 12.7 그룹(단체) 예약 — 4인+ 단체 골프투어 (v1.1)
+
+`group-booking.html` 페이지에서 단체장이 멤버 초대·항공편·객실·결제 모드까지 5스텝으로 설정.
+
+**`groups` 테이블 (신규)**:
+```sql
+CREATE TABLE groups (
+  id                  VARCHAR(64)   PRIMARY KEY,
+  leader_user_id      VARCHAR(64)   NOT NULL,         -- users.id FK
+  golftel_id          VARCHAR(64)   NOT NULL,         -- golftels.id FK
+  check_in            DATE          NOT NULL,
+  check_out           DATE          NOT NULL,
+  payment_mode        VARCHAR(20)   NOT NULL,         -- 'leader_pays' | 'each_pays' | 'split'
+  total_amount_krw    BIGINT        DEFAULT 0,
+  discount_pct        NUMERIC(5,2)  DEFAULT 0,         -- 5인+ 자동 -5%
+  status              VARCHAR(20)   NOT NULL,         -- 'draft' | 'confirmed' | 'partial_paid' | 'paid' | 'cancelled'
+  invite_token        VARCHAR(32)   UNIQUE,           -- 카톡 공유 링크용
+  manager_chat_url    TEXT,                            -- OMT 단체 매니저 카톡방 URL
+  created_at          TIMESTAMPTZ   DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_groups_leader ON groups(leader_user_id);
+CREATE INDEX idx_groups_status ON groups(status);
+CREATE INDEX idx_groups_dates ON groups(check_in, check_out);
+```
+
+**`group_members` 테이블 (신규)**:
+```sql
+CREATE TABLE group_members (
+  id                  BIGSERIAL     PRIMARY KEY,
+  group_id            VARCHAR(64)   NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id             VARCHAR(64),                     -- 회원이면 users.id, 비회원이면 NULL
+  name                TEXT          NOT NULL,
+  phone               TEXT          NOT NULL,
+  airport_code        VARCHAR(4),                      -- 'ICN' | 'PUS' | 'TAE' | 'KWJ' | 'CJU' | 출국공항
+  flight_id           VARCHAR(64),                     -- 향후 flights 테이블 FK
+  room_assignment     SMALLINT,                        -- 객실 번호 (1, 2, 3...)
+  room_mate_member_id BIGINT        REFERENCES group_members(id),
+  is_leader           BOOLEAN       DEFAULT FALSE,
+  paid_amount_krw     BIGINT        DEFAULT 0,
+  paid_at             TIMESTAMPTZ,
+  payment_link_token  VARCHAR(32),                     -- each_pays 모드에서 멤버별 결제 링크
+  confirmed           BOOLEAN       DEFAULT FALSE,     -- 멤버가 카톡 초대 수락 여부
+  created_at          TIMESTAMPTZ   DEFAULT NOW()
+);
+CREATE INDEX idx_group_members_group ON group_members(group_id);
+CREATE INDEX idx_group_members_user ON group_members(user_id);
+CREATE INDEX idx_group_members_leader ON group_members(group_id, is_leader);
+```
+
+**bookings 테이블 확장**: `bookings.group_id`(VARCHAR, nullable, FK to groups.id) 컬럼 추가 — 그룹 예약이 확정되면 멤버별 또는 일괄 booking 레코드가 생성되며 group_id로 묶임.
+
+**자동 트리거**:
+- 그룹 status `draft` → `confirmed`: 멤버 전원에게 알림톡 TPL-001 일괄 발송 + 단체 매니저 카톡방 URL 생성
+- 5인+ 자동 단체 할인 -5% 산정
+- 멤버별 payment_link_token 생성 (each_pays 모드)
+
+**API 엔드포인트 (사용자)**:
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| `POST` | `/api/groups` | 그룹 생성 |
+| `GET` | `/api/groups/:id` | 그룹 상세 (단체장 또는 멤버만) |
+| `PATCH` | `/api/groups/:id` | 멤버·날짜·결제 모드 수정 |
+| `POST` | `/api/groups/:id/members` | 멤버 추가 |
+| `DELETE` | `/api/groups/:id/members/:memberId` | 멤버 제외 |
+| `POST` | `/api/groups/:id/invite-link` | 카톡 공유 토큰 발급 |
+| `POST` | `/api/groups/:id/confirm` | 견적 확정 → 결제 진입 |
+| `POST` | `/api/groups/:id/pay-member` | 멤버별 결제 (each_pays/split) |
+
+**백오피스 API**:
+| 메서드 | 경로 | 권한 |
+|---|---|---|
+| `GET` | `/api/admin/groups` | OPERATOR+ |
+| `GET` | `/api/admin/groups/:id` | OPERATOR+ |
+| `POST` | `/api/admin/groups/:id/refund-member` | MANAGER+ (재인증) |
+
+신규 페이지: `group-booking.html` · admin-bookings.html에 그룹 필터 추가.
+
 ---
 
+_v1.1 — 2026-06-11 §12.7 그룹 예약 도메인 추가 (groups + group_members 테이블)_
 _v1.0 — 2026-06-11 백오피스 섹션 + 프론트 변경 반영 갱신_

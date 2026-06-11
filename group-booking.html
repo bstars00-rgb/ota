@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>단체 골프투어 견적 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--accent:#FFD23F;--success:#10B981;--warning:#F59E0B;--danger:#EF4444;
+      --ink:#1A1A1A;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+      --line:#E5E7EB;--bg:#FAFBFC;--bg-2:#fff;
+      --max-w:960px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 16px;}
+    .mono{font-family:'JetBrains Mono', monospace;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+    .header-inner{height:56px;display:flex;align-items:center;gap:12px;}
+    .header-inner .back{font-size:22px;color:var(--ink-2);width:36px;height:36px;border-radius:8px;display:grid;place-items:center;cursor:pointer;}
+    .header-inner .back:hover{background:var(--bg);}
+    .header-inner .title{font-size:15px;font-weight:900;flex:1;}
+    .header-inner .save{padding:7px 14px;background:#F3F4F6;border-radius:8px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;}
+
+    /* Stepper */
+    .stepper{display:flex;align-items:center;gap:8px;padding:14px 0;border-bottom:1px solid var(--line);background:#fff;overflow-x:auto;}
+    .step{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:18px;font-size:12px;font-weight:800;white-space:nowrap;background:#F3F4F6;color:var(--ink-3);}
+    .step.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;}
+    .step.done{background:rgba(16,185,129,.15);color:var(--success);}
+    .step .num{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.3);font-size:10px;font-weight:900;}
+    .step.done .num{background:var(--success);color:#fff;}
+    .step .arrow{color:var(--ink-4);font-size:14px;font-weight:700;}
+
+    /* Page head */
+    .page-head{padding:22px 0 12px;}
+    .eyebrow{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--primary);text-transform:uppercase;}
+    .page-title{font-size:24px;font-weight:900;margin:4px 0 4px;letter-spacing:-0.02em;}
+    .page-sub{font-size:12px;color:var(--ink-3);}
+
+    /* Card */
+    .card{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+    .card-h{font-size:14px;font-weight:900;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+
+    /* Step content */
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* Step 1: Golftel pick */
+    .gt-summary{display:flex;gap:14px;background:linear-gradient(135deg,#FFF5F0,#FFFAF0);border:1.5px solid var(--primary);border-radius:14px;padding:14px;margin-bottom:14px;}
+    .gt-summary .thumb{width:120px;height:90px;border-radius:10px;background:linear-gradient(135deg,#FFD23F,#FF6B35);display:grid;place-items:center;font-size:40px;flex-shrink:0;}
+    .gt-summary .info{flex:1;min-width:0;}
+    .gt-summary .info .name{font-size:15px;font-weight:900;line-height:1.3;}
+    .gt-summary .info .meta{font-size:11px;color:var(--ink-3);margin-top:4px;}
+    .gt-summary .info .price{font-size:18px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',monospace;margin-top:6px;}
+    .gt-summary .info .price .lb{font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;}
+
+    /* Date picker */
+    .date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .date-field label{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;}
+    .date-field input{width:100%;padding:11px 14px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:13px;font-weight:700;outline:none;}
+    .date-field input:focus{border-color:var(--primary);}
+
+    /* Step 2: Members */
+    .leader-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(135deg,#FFF5F0,#FFFAF0);border-radius:10px;margin-bottom:10px;}
+    .leader-row .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:grid;place-items:center;font-size:16px;font-weight:900;flex-shrink:0;}
+    .leader-row .info{flex:1;min-width:0;}
+    .leader-row .info .nm{font-size:14px;font-weight:900;}
+    .leader-row .info .role{font-size:10px;font-weight:900;color:var(--primary);letter-spacing:.04em;text-transform:uppercase;}
+    .leader-row .info .phone{font-size:11px;color:var(--ink-3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+    .member-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;}
+    .member-row .av{width:38px;height:38px;border-radius:50%;background:#F3F4F6;color:var(--ink-2);display:grid;place-items:center;font-size:14px;font-weight:900;flex-shrink:0;}
+    .member-row .info{flex:1;min-width:0;}
+    .member-row .info .nm{font-size:13px;font-weight:800;}
+    .member-row .info .meta{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .member-row .info .meta .status-confirmed{color:var(--success);font-weight:800;}
+    .member-row .info .meta .status-pending{color:var(--warning);font-weight:800;}
+    .member-row .remove{padding:5px 10px;background:#FEE2E2;color:var(--danger);border-radius:6px;font-size:11px;font-weight:800;}
+    .member-row .remove:hover{background:#FECACA;}
+
+    .add-member-form{display:grid;grid-template-columns:1fr 1.4fr 100px auto;gap:8px;align-items:end;}
+    .add-member-form input,.add-member-form select{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-weight:600;}
+    .add-member-form input:focus{border-color:var(--primary);}
+    .add-member-form .add-btn{padding:10px 16px;background:var(--primary);color:#fff;border-radius:8px;font-weight:800;font-size:12px;}
+
+    .invite-link{margin-top:14px;padding:12px 14px;background:#EFF6FF;border:1px dashed #3B82F6;border-radius:10px;display:flex;align-items:center;gap:10px;}
+    .invite-link .ic{font-size:20px;}
+    .invite-link .txt{flex:1;font-size:11px;color:var(--ink-2);}
+    .invite-link .txt strong{color:#3B82F6;font-weight:900;}
+    .invite-link .copy{padding:6px 12px;background:#3B82F6;color:#fff;border-radius:6px;font-size:11px;font-weight:800;}
+
+    /* Step 3: Flights */
+    .flight-grid{display:grid;gap:10px;}
+    .flight-row{display:grid;grid-template-columns:140px 1fr 140px;gap:12px;align-items:center;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;}
+    .flight-row .who{font-size:13px;font-weight:800;}
+    .flight-row .from-airport select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;outline:none;background:#fff;}
+    .flight-row .flight-pick{padding:8px 12px;background:#EFF6FF;color:#3B82F6;border-radius:6px;font-size:11px;font-weight:800;border:1px solid #DBEAFE;text-align:center;cursor:pointer;}
+
+    /* Step 4: Rooms */
+    .room-instructions{padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;margin-bottom:12px;font-size:12px;color:#92400E;}
+    .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .room-card{background:#fff;border:2px dashed var(--line);border-radius:12px;padding:14px;min-height:120px;}
+    .room-card .room-h{font-size:13px;font-weight:900;color:var(--ink);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+    .room-card .room-h .cap{font-size:10px;font-weight:800;color:var(--ink-3);}
+    .room-card .room-slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .room-slot{padding:8px 10px;background:#F9FAFB;border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:700;color:var(--ink-2);min-height:32px;display:flex;align-items:center;cursor:pointer;}
+    .room-slot.filled{background:#EFF6FF;border-color:#3B82F6;color:#1E40AF;font-weight:800;}
+    .room-slot.dropzone{border-color:var(--primary);background:#FFF5F0;color:var(--primary);}
+    .unassigned{background:#FEFCE8;border-color:#FCD34D;}
+    .unassigned .room-h{color:#92400E;}
+
+    /* Step 5: Payment */
+    .pay-options{display:grid;gap:10px;margin-bottom:14px;}
+    .pay-option{padding:14px 16px;background:#fff;border:2px solid var(--line);border-radius:12px;cursor:pointer;}
+    .pay-option.selected{border-color:var(--primary);background:#FFF5F0;}
+    .pay-option .h{font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px;}
+    .pay-option .desc{font-size:11px;color:var(--ink-3);margin-top:4px;line-height:1.5;}
+    .pay-option .pros{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
+    .pay-option .pros span{padding:2px 8px;border-radius:5px;background:#F3F4F6;color:var(--ink-2);font-size:10px;font-weight:700;}
+    .pay-option .pros span.good{background:#D1FAE5;color:#065F46;}
+
+    .summary-card{background:linear-gradient(135deg,#FFF5F0,#FFFAF0);border:1.5px solid var(--primary);border-radius:14px;padding:16px 18px;}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;}
+    .summary-row.total{border-top:1px solid var(--primary);margin-top:8px;padding-top:12px;font-size:16px;font-weight:900;}
+    .summary-row.total .v{color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:20px;}
+    .summary-row .per-person{font-size:11px;color:var(--ink-3);font-weight:700;}
+
+    /* Bottom action bar */
+    .action-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 16px;display:flex;gap:10px;align-items:center;}
+    .action-bar .step-info{flex:1;font-size:11px;color:var(--ink-3);font-weight:700;}
+    .action-bar .step-info strong{color:var(--ink);}
+    .action-bar button{padding:11px 20px;border-radius:10px;font-weight:900;font-size:13px;}
+    .action-bar .btn-prev{background:#F3F4F6;color:var(--ink-2);}
+    .action-bar .btn-next{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:11px 24px;}
+    .action-bar .btn-next:hover{filter:brightness(1.05);}
+
+    /* Toast */
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:800;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 12px 32px rgba(0,0,0,.2);}
+    .toast.show{opacity:1;}
+
+    @media (max-width:768px){
+      .add-member-form{grid-template-columns:1fr 1fr;}
+      .add-member-form .add-btn{grid-column:1/-1;}
+      .flight-row{grid-template-columns:1fr;}
+      .rooms-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <button class="back" onclick="history.back()">‹</button>
+      <div class="title">👥 단체 골프투어 견적</div>
+      <button class="save" onclick="saveGroupDraft()">💾 임시저장</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <div class="eyebrow">GROUP BOOKING · 4인+</div>
+      <h1 class="page-title">단체 견적 만들기</h1>
+      <p class="page-sub">단체장이 멤버를 초대하고 항공편·객실·결제까지 한 번에 설정해요</p>
+    </section>
+
+    <div class="stepper" id="stepper">
+      <div class="step active" data-step="1"><span class="num">1</span> 골프텔·날짜</div>
+      <span class="arrow">›</span>
+      <div class="step" data-step="2"><span class="num">2</span> 멤버 초대</div>
+      <span class="arrow">›</span>
+      <div class="step" data-step="3"><span class="num">3</span> 항공편</div>
+      <span class="arrow">›</span>
+      <div class="step" data-step="4"><span class="num">4</span> 객실 배정</div>
+      <span class="arrow">›</span>
+      <div class="step" data-step="5"><span class="num">5</span> 결제</div>
+    </div>
+
+    <!-- Step 1: 골프텔 + 날짜 -->
+    <div class="panel active" id="panel-1">
+      <div class="card">
+        <div class="card-h">⛳ 선택한 골프텔</div>
+        <div class="gt-summary" id="gtSummary">
+          <div class="thumb">⛳</div>
+          <div class="info">
+            <div class="name">로딩 중...</div>
+            <div class="meta">- 박 · - 라운딩</div>
+            <div class="price"><span class="lb">1인</span>0원~</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3);">
+          다른 골프텔로 변경하시려면 <a href="golftels.html" style="color:var(--primary);font-weight:800;">← 골프텔 목록으로 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">📅 여행 날짜</div>
+        <div class="date-grid">
+          <div class="date-field">
+            <label>체크인</label>
+            <input type="date" id="checkIn" value="2026-07-14" />
+          </div>
+          <div class="date-field">
+            <label>체크아웃 (자동)</label>
+            <input type="date" id="checkOut" value="2026-07-18" readonly style="background:#F9FAFB;color:var(--ink-3);" />
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;line-height:1.5;">
+          <strong>💡 단체 라운딩 팁</strong> · 5인 이상 자동 -5% 할인 + 4인 1팀 기준 티오프 슬롯 자동 매칭됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: 멤버 초대 -->
+    <div class="panel" id="panel-2">
+      <div class="card">
+        <div class="card-h">
+          👥 단체 멤버
+          <span style="font-size:11px;color:var(--ink-3);font-weight:700;"><span id="memberCount" style="color:var(--primary);font-weight:900;font-family:'JetBrains Mono',monospace;">1</span> / 16명 · 4인+ 단체 할인 자동 적용</span>
+        </div>
+
+        <!-- 단체장 (자동) -->
+        <div id="leaderBlock"></div>
+
+        <!-- 멤버 추가 폼 -->
+        <div style="margin:14px 0 8px;font-size:11px;font-weight:900;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;">+ 멤버 추가</div>
+        <div class="add-member-form">
+          <input type="text" id="newMemberName" placeholder="이름 (예: 김철수)" />
+          <input type="tel" id="newMemberPhone" placeholder="연락처 (010-XXXX-XXXX)" />
+          <select id="newMemberAirport">
+            <option value="ICN">서울 ICN</option>
+            <option value="PUS">부산 PUS</option>
+            <option value="TAE">대구 TAE</option>
+            <option value="KWJ">광주 KWJ</option>
+            <option value="CJU">제주 CJU</option>
+          </select>
+          <button class="add-btn" onclick="addMember()">+ 추가</button>
+        </div>
+
+        <!-- 멤버 리스트 -->
+        <div id="memberList" style="margin-top:14px;"></div>
+
+        <!-- 카톡 초대 링크 -->
+        <div class="invite-link">
+          <span class="ic">💬</span>
+          <div class="txt">
+            <strong>카톡으로 초대 링크 공유</strong><br>
+            멤버들이 직접 본인 정보 입력 가능 (이름/연락처/출발지/항공편 선호)
+          </div>
+          <button class="copy" onclick="copyInviteLink()">링크 복사</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: 항공편 -->
+    <div class="panel" id="panel-3">
+      <div class="card">
+        <div class="card-h">
+          ✈️ 멤버별 항공편
+          <span style="font-size:11px;color:var(--ink-3);font-weight:700;">출발지가 다를 수 있어요</span>
+        </div>
+        <div class="room-instructions" style="background:#EFF6FF;border-color:#BFDBFE;color:#1E40AF;">
+          <strong>💡 출발지가 같은 멤버끼리 자동 그룹핑</strong> · 추후 공항 픽업·환승 일정도 함께 안내됩니다.
+        </div>
+        <div class="flight-grid" id="flightGrid"></div>
+      </div>
+    </div>
+
+    <!-- Step 4: 객실 배정 -->
+    <div class="panel" id="panel-4">
+      <div class="card">
+        <div class="card-h">
+          🏨 객실 배정
+          <span style="font-size:11px;color:var(--ink-3);font-weight:700;">2인 1실 기준 · <span id="roomCount">2</span>개 객실</span>
+        </div>
+        <div class="room-instructions">
+          <strong>💡 멤버를 룸메이트끼리 자리 배정해주세요</strong> · 객실당 최대 2명, 미배정 멤버는 자동 배정됩니다.
+        </div>
+        <div class="rooms-grid" id="roomsGrid"></div>
+      </div>
+    </div>
+
+    <!-- Step 5: 결제 -->
+    <div class="panel" id="panel-5">
+      <div class="card">
+        <div class="card-h">💳 결제 방식</div>
+        <div class="pay-options" id="payOptions">
+          <div class="pay-option selected" data-mode="leader_pays" onclick="selectPayMode('leader_pays', this)">
+            <div class="h">🏆 단체장 일괄 결제 <span style="font-size:11px;font-weight:700;color:var(--ink-3);">(추천)</span></div>
+            <div class="desc">단체장이 전체 금액 결제 후 멤버들이 단체장 계좌로 각자 송금</div>
+            <div class="pros"><span class="good">✓ 가장 빠름</span><span>✓ 단체 할인 즉시 적용</span><span>단체장 부담</span></div>
+          </div>
+          <div class="pay-option" data-mode="each_pays" onclick="selectPayMode('each_pays', this)">
+            <div class="h">👥 각자 자기 몫 결제</div>
+            <div class="desc">멤버별 결제 링크 카톡 발송 → 각자 본인 몫만 카드/계좌 결제</div>
+            <div class="pros"><span class="good">✓ 부담 없음</span><span>⏱ D-7 전까지 완료 필요</span><span>송금 불필요</span></div>
+          </div>
+          <div class="pay-option" data-mode="split" onclick="selectPayMode('split', this)">
+            <div class="h">⚖️ N분의 1 균등 분담</div>
+            <div class="desc">전체 금액을 정확히 N등분 → 각 멤버 동일 금액 결제 링크</div>
+            <div class="pros"><span class="good">✓ 깔끔</span><span>⚠️ 객실 차등 무시</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">💰 결제 요약</div>
+        <div class="summary-card">
+          <div class="summary-row">
+            <span>1인 골프텔 (2인 1실)</span>
+            <span class="mono" id="sumPerPerson">0원</span>
+          </div>
+          <div class="summary-row">
+            <span>인원 수</span>
+            <span class="mono"><span id="sumPaxCount">1</span>명</span>
+          </div>
+          <div class="summary-row">
+            <span>소계</span>
+            <span class="mono" id="sumSubtotal">0원</span>
+          </div>
+          <div class="summary-row" id="discountRow" style="display:none;">
+            <span>5인+ 단체 할인 -5%</span>
+            <span class="mono" style="color:var(--success);" id="sumDiscount">-0원</span>
+          </div>
+          <div class="summary-row total">
+            <span>총 결제 금액</span>
+            <span class="v" id="sumTotal">0원</span>
+          </div>
+          <div class="summary-row per-person">
+            <span></span>
+            <span>1인당 <span class="mono" id="sumFinalPerPerson">0원</span></span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 14px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:12px;color:#1E40AF;line-height:1.5;">
+          <strong>📩 결제 완료 시 자동 발송</strong>
+          <ul style="margin:8px 0 0;padding-left:20px;">
+            <li>멤버 전원 카톡 알림톡 (TPL-001 · 예약 확정)</li>
+            <li>단체장 e-바우처 (마이페이지에서 PDF 다운로드)</li>
+            <li>D-7, D-3, D-1 자동 일정 알림</li>
+            <li>OMT 단체 매니저 1:1 카톡방 자동 개설</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="action-bar">
+    <div class="step-info">Step <strong id="curStep">1</strong> / 5 · <strong id="stepLabel">골프텔·날짜 선택</strong></div>
+    <button class="btn-prev" id="btnPrev" onclick="prevStep()" style="display:none;">← 이전</button>
+    <button class="btn-next" id="btnNext" onclick="nextStep()">다음 →</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const golftelId = params.get('golftelId') || 'gt-vn-phu-quoc-vinpearl-6n';
+    const golftel = (window.OMT?.DATA?.GOLFTELS || []).find(g => g.id === golftelId)
+      || (window.OMT?.DATA?.GOLFTELS || [])[0];
+
+    let currentStep = 1;
+    let group = {
+      golftelId,
+      leaderName: '홍길동',
+      leaderPhone: '010-1234-5678',
+      checkIn: '2026-07-14',
+      checkOut: '2026-07-18',
+      paymentMode: 'leader_pays',
+      members: [
+        { userId:'self', name:'홍길동', phone:'010-1234-5678', airportCode:'ICN', isLeader:true, confirmed:true, roomMate:null }
+      ]
+    };
+
+    const STEP_LABELS = ['', '골프텔·날짜 선택', '멤버 초대', '항공편 선택', '객실 배정', '결제 확인'];
+
+    function toast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
+
+    function showStep(n){
+      currentStep = n;
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + n).classList.add('active');
+      document.querySelectorAll('.step').forEach(s => {
+        const idx = +s.dataset.step;
+        s.classList.toggle('active', idx === n);
+        s.classList.toggle('done', idx < n);
+      });
+      document.getElementById('curStep').textContent = n;
+      document.getElementById('stepLabel').textContent = STEP_LABELS[n];
+      document.getElementById('btnPrev').style.display = n > 1 ? 'block' : 'none';
+      document.getElementById('btnNext').textContent = n < 5 ? '다음 →' : '✓ 견적 확정·결제 진행';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if(n === 3) renderFlights();
+      if(n === 4) renderRooms();
+      if(n === 5) renderSummary();
+    }
+
+    function nextStep(){
+      if(currentStep < 5){
+        if(currentStep === 2 && group.members.length < 4){
+          toast('⚠️ 단체는 최소 4인부터 가능해요');
+          return;
+        }
+        showStep(currentStep + 1);
+      } else {
+        // 최종 결제
+        finalizeGroup();
+      }
+    }
+    function prevStep(){
+      if(currentStep > 1) showStep(currentStep - 1);
+    }
+
+    /* ============ Step 1: 골프텔 요약 ============ */
+    function renderGolftelSummary(){
+      if(!golftel){ document.getElementById('gtSummary').querySelector('.name').textContent = '골프텔 정보 없음'; return; }
+      const html = `
+        <div class="thumb" style="background:url('${golftel.images?.[0] || ''}') center/cover;background-color:#FFD23F;">${golftel.images?.[0] ? '' : '⛳'}</div>
+        <div class="info">
+          <div class="name">${golftel.name}</div>
+          <div class="meta">${golftel.nights}박 · ${golftel.rounds}라운딩 · ${golftel.hotelName || ''}</div>
+          <div class="price"><span class="lb">1인 (2인1실)</span>${(golftel.pricePerPerson || 0).toLocaleString('ko-KR')}원~</div>
+        </div>
+      `;
+      document.getElementById('gtSummary').innerHTML = html;
+    }
+    renderGolftelSummary();
+
+    /* ============ Step 2: 멤버 관리 ============ */
+    function renderLeader(){
+      const m = group.members.find(x => x.isLeader);
+      document.getElementById('leaderBlock').innerHTML = `
+        <div class="leader-row">
+          <div class="av">${(m.name || '나').charAt(0)}</div>
+          <div class="info">
+            <div class="nm">${m.name || '단체장'}</div>
+            <div class="role">★ 단체장 (LEADER)</div>
+            <div class="phone">📞 ${m.phone || '-'} · ✈️ ${m.airportCode}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMembers(){
+      renderLeader();
+      const others = group.members.filter(x => !x.isLeader);
+      const list = document.getElementById('memberList');
+      list.innerHTML = others.map((m, idx) => `
+        <div class="member-row">
+          <div class="av">${(m.name || '?').charAt(0)}</div>
+          <div class="info">
+            <div class="nm">${m.name}</div>
+            <div class="meta">
+              📞 ${m.phone} · ✈️ ${m.airportCode}
+              · <span class="${m.confirmed ? 'status-confirmed' : 'status-pending'}">${m.confirmed ? '✓ 확인 완료' : '⏳ 초대 발송 대기'}</span>
+            </div>
+          </div>
+          <button class="remove" onclick="removeMember('${m.userId}')">× 제외</button>
+        </div>
+      `).join('') || '<div style="padding:16px;text-align:center;color:var(--ink-4);font-size:12px;background:#F9FAFB;border-radius:10px;">아직 멤버가 없어요. 위에서 추가해주세요.</div>';
+      document.getElementById('memberCount').textContent = group.members.length;
+      // 5인+ 할인 표시
+      if(group.members.length >= 5){
+        document.getElementById('discountRow').style.display = 'flex';
+      }
+    }
+
+    function addMember(){
+      const name = document.getElementById('newMemberName').value.trim();
+      const phone = document.getElementById('newMemberPhone').value.trim();
+      const airport = document.getElementById('newMemberAirport').value;
+      if(!name || !phone){ toast('⚠️ 이름과 연락처는 필수예요'); return; }
+      if(group.members.length >= 16){ toast('⚠️ 최대 16인까지 가능해요'); return; }
+      group.members.push({
+        userId: 'mem-' + Date.now().toString(36),
+        name, phone, airportCode: airport,
+        isLeader: false, confirmed: false, roomMate: null
+      });
+      document.getElementById('newMemberName').value = '';
+      document.getElementById('newMemberPhone').value = '';
+      renderMembers();
+      toast(`✓ ${name}님 추가됨`);
+    }
+    window.addMember = addMember;
+
+    window.removeMember = (userId) => {
+      if(!confirm('이 멤버를 단체에서 제외하시겠어요?')) return;
+      group.members = group.members.filter(m => m.userId !== userId);
+      renderMembers();
+      toast('✓ 멤버 제외');
+    };
+
+    window.copyInviteLink = () => {
+      const url = `${location.origin}${location.pathname}?invite=grp-${Date.now().toString(36)}`;
+      if(navigator.clipboard){
+        navigator.clipboard.writeText(url).then(() => toast('✓ 초대 링크 복사됨'));
+      } else {
+        prompt('아래 링크를 복사하세요:', url);
+      }
+    };
+
+    renderMembers();
+
+    /* ============ Step 3: 항공편 ============ */
+    function renderFlights(){
+      const grid = document.getElementById('flightGrid');
+      grid.innerHTML = group.members.map(m => `
+        <div class="flight-row">
+          <div class="who">${m.isLeader ? '★ ' : ''}${m.name}</div>
+          <div class="from-airport">
+            <select onchange="updateMemberAirport('${m.userId}', this.value)">
+              <option value="ICN" ${m.airportCode==='ICN'?'selected':''}>서울 인천 (ICN)</option>
+              <option value="PUS" ${m.airportCode==='PUS'?'selected':''}>부산 김해 (PUS)</option>
+              <option value="TAE" ${m.airportCode==='TAE'?'selected':''}>대구 (TAE)</option>
+              <option value="KWJ" ${m.airportCode==='KWJ'?'selected':''}>광주 (KWJ)</option>
+              <option value="CJU" ${m.airportCode==='CJU'?'selected':''}>제주 (CJU)</option>
+            </select>
+          </div>
+          <button class="flight-pick" onclick="alert('항공편 선택 — 추후 채널 매니저 연동')">항공편 선택 →</button>
+        </div>
+      `).join('');
+    }
+    window.updateMemberAirport = (userId, code) => {
+      group.members = group.members.map(m => m.userId === userId ? { ...m, airportCode: code } : m);
+    };
+
+    /* ============ Step 4: 객실 배정 ============ */
+    function renderRooms(){
+      const pax = group.members.length;
+      const roomCount = Math.ceil(pax / 2);
+      document.getElementById('roomCount').textContent = roomCount;
+      const grid = document.getElementById('roomsGrid');
+      let html = '';
+      for(let i = 0; i < roomCount; i++){
+        html += `
+          <div class="room-card">
+            <div class="room-h">🛏️ ${i + 1}호 객실 <span class="cap">2인 1실</span></div>
+            <div class="room-slots">
+              <div class="room-slot filled">${group.members[i*2]?.name || '미배정'}</div>
+              <div class="room-slot ${group.members[i*2+1] ? 'filled' : ''}">${group.members[i*2+1]?.name || '미배정'}</div>
+            </div>
+          </div>
+        `;
+      }
+      html += `
+        <div class="room-card unassigned">
+          <div class="room-h">🎯 배정 안내 <span class="cap">실 운영 시 드래그-드롭</span></div>
+          <div style="font-size:11px;color:#92400E;line-height:1.6;">현재는 입력 순서대로 자동 배정됐어요. 실 배포 시 멤버를 드래그하여 룸메이트를 자유롭게 변경하실 수 있어요.</div>
+        </div>
+      `;
+      grid.innerHTML = html;
+    }
+
+    /* ============ Step 5: 결제 요약 ============ */
+    function renderSummary(){
+      const pax = group.members.length;
+      const perPerson = golftel?.pricePerPerson || 0;
+      const subtotal = perPerson * pax;
+      let discount = 0;
+      if(pax >= 5){
+        discount = Math.floor(subtotal * 0.05);
+        document.getElementById('discountRow').style.display = 'flex';
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+      }
+      const total = subtotal - discount;
+      const final = Math.floor(total / pax);
+      document.getElementById('sumPerPerson').textContent = perPerson.toLocaleString('ko-KR') + '원';
+      document.getElementById('sumPaxCount').textContent = pax;
+      document.getElementById('sumSubtotal').textContent = subtotal.toLocaleString('ko-KR') + '원';
+      document.getElementById('sumDiscount').textContent = '-' + discount.toLocaleString('ko-KR') + '원';
+      document.getElementById('sumTotal').textContent = total.toLocaleString('ko-KR') + '원';
+      document.getElementById('sumFinalPerPerson').textContent = final.toLocaleString('ko-KR') + '원';
+    }
+
+    window.selectPayMode = (mode, el) => {
+      group.paymentMode = mode;
+      document.querySelectorAll('.pay-option').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    };
+
+    /* ============ 최종 처리 ============ */
+    function finalizeGroup(){
+      // state.js에 그룹 저장
+      const pax = group.members.length;
+      const perPerson = golftel?.pricePerPerson || 0;
+      const subtotal = perPerson * pax;
+      const discount = pax >= 5 ? Math.floor(subtotal * 0.05) : 0;
+      const total = subtotal - discount;
+
+      if(window.OMT?.State?.createGroup){
+        window.OMT.State.createGroup({
+          ...group,
+          dates: `${group.checkIn} ~ ${group.checkOut}`,
+          totalAmount: total,
+          members: group.members
+        });
+      }
+
+      const msg = `✅ 단체 견적 확정\n\n` +
+        `· 골프텔: ${golftel?.name}\n` +
+        `· 인원: ${pax}명\n` +
+        `· 결제 모드: ${group.paymentMode === 'leader_pays' ? '단체장 일괄' : group.paymentMode === 'each_pays' ? '각자 결제' : 'N분의1 균등'}\n` +
+        `· 총액: ${total.toLocaleString('ko-KR')}원\n\n` +
+        `→ 멤버 ${pax}명에게 카톡 알림 발송\n` +
+        `→ 단체 매니저 카톡방 개설\n` +
+        `→ 결제 화면으로 이동`;
+      alert(msg);
+      location.href = 'payment.html?type=group&pax=' + pax + '&total=' + total;
+    }
+
+    function saveGroupDraft(){
+      if(window.OMT?.State?.createGroup){
+        const draft = window.OMT.State.createGroup({
+          ...group,
+          dates: `${group.checkIn} ~ ${group.checkOut}`,
+          totalAmount: 0
+        });
+        toast('💾 임시저장 완료 · 마이페이지에서 이어하기');
+      } else {
+        toast('💾 임시저장 (프로토타입)');
+      }
+    }
+
+    showStep(1);
+  </script>
+</body>
+</html>
