@@ -122,6 +122,13 @@
       to{opacity:1;transform:translateY(0);}
     }
 
+    /* 카카오톡 알림톡 미리보기 모달 */
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @keyframes kakaoSlideUp{
+      from{opacity:0;transform:translateY(30px) scale(.96);}
+      to{opacity:1;transform:translateY(0) scale(1);}
+    }
+
     /* Booking card */
     .booking-card{
       background:#fff;border-radius:var(--radius-lg);
@@ -681,8 +688,103 @@
   function sendKakaoConfirm(){
     // TODO: API 연동 - POST /api/notifications/kakao-alimtalk
     //   { bookingId, templateCode: 'BOOKING_CONFIRMATION', phone, vars: {...} }
-    alert('카카오톡으로 예약 확인서를 전송했습니다 (프로토타입)\n\n입력하신 연락처로 약 1분 내 도착합니다.');
+    showKakaoPreview();
   }
+
+  // 💬 카카오톡 알림톡 미리보기 모달
+  function showKakaoPreview(){
+    const b = booking;
+    const isGT = isGolftelBooking(b);
+    const golftel = isGT && b.productId ? OMT.DATA.GOLFTELS.find(g => g.id === b.productId) : null;
+    const productName = b.productName || golftel?.name || '예약 상품';
+    const phone = b.phone || '010-XXXX-XXXX';
+    const stamp = new Date();
+    const time = `${stamp.getHours() < 12 ? '오전' : '오후'} ${(stamp.getHours() % 12) || 12}:${String(stamp.getMinutes()).padStart(2,'0')}`;
+
+    // 라운딩 일자 추출
+    const dm = String(b.dates || '').match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
+    const checkinDate = dm ? `${dm[1]}년 ${dm[2]}월 ${dm[3]}일` : '-';
+
+    // 모달 생성
+    const overlay = document.createElement('div');
+    overlay.id = 'kakaoOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease;';
+    overlay.innerHTML = `
+      <div style="max-width:380px;width:100%;background:#9DBED1;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:kakaoSlideUp .35s ease;">
+        <!-- 카톡 헤더 -->
+        <div style="background:#9DBED1;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <button onclick="closeKakaoPreview()" style="background:transparent;border:none;color:#fff;font-size:22px;font-weight:900;cursor:pointer;padding:0;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:900;color:#fff;">오마이트립 (알림톡)</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.85);">${phone} · 알림톡</div>
+          </div>
+          <div style="color:#fff;font-size:18px;font-weight:900;">≡</div>
+        </div>
+
+        <!-- 알림톡 본문 -->
+        <div style="background:#9DBED1;padding:16px;min-height:480px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.85);text-align:center;margin-bottom:10px;">${stamp.getFullYear()}년 ${stamp.getMonth()+1}월 ${stamp.getDate()}일 ${['일','월','화','수','목','금','토'][stamp.getDay()]}요일</div>
+
+          <!-- 알림톡 말풍선 (카카오 알림톡 톤) -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#FEE500;display:grid;place-items:center;font-weight:900;color:#3C1E1E;font-size:14px;flex-shrink:0;">OMT</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:11px;color:rgba(255,255,255,.9);margin-bottom:3px;">오마이트립</div>
+              <div style="background:#fff;border-radius:2px 14px 14px 14px;padding:14px;font-size:13px;color:#1A1A1A;line-height:1.6;">
+                <div style="font-size:11px;color:#FF6B35;font-weight:900;background:#FFF0E8;display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:8px;">✅ 예약 확정 알림</div>
+                <div style="font-weight:900;font-size:14px;margin-bottom:8px;">${b.leadName || '고객'}님, ${isGT ? '골프텔' : '예약'}이 확정되었어요! 🎉</div>
+                <div style="font-size:12px;color:#4B5563;margin-bottom:12px;line-height:1.6;">즐거운 여행을 위해 출발 전 안내사항을 꼭 확인해주세요.</div>
+
+                <div style="border-top:1px dashed #E5E7EB;padding-top:10px;font-size:11px;line-height:1.7;">
+                  <div style="display:flex;justify-content:space-between;"><span style="color:#9CA3AF;">예약번호</span><strong style="font-family:'JetBrains Mono',monospace;color:#1A1A1A;">${b.bookingNumber}</strong></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:#9CA3AF;">상품</span><strong style="color:#1A1A1A;text-align:right;max-width:200px;">${productName.length > 30 ? productName.slice(0,30)+'...' : productName}</strong></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:#9CA3AF;">체크인</span><strong style="color:#1A1A1A;">${checkinDate}</strong></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:#9CA3AF;">인원</span><strong style="color:#1A1A1A;">성인 ${b.paxCount}명</strong></div>
+                  ${isGT && b.rounds ? `<div style="display:flex;justify-content:space-between;"><span style="color:#9CA3AF;">라운딩</span><strong style="color:#0B6E4F;">⛳ ${b.rounds}회</strong></div>` : ''}
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid #F3F4F6;"><span style="color:#9CA3AF;">결제 금액</span><strong style="color:#FF6B35;font-size:13px;">${(b.total||0).toLocaleString('ko-KR')}원</strong></div>
+                </div>
+
+                ${isGT && golftel ? `
+                  <div style="margin-top:12px;padding:10px;background:#E6F4EE;border-radius:8px;font-size:11px;color:#075440;line-height:1.6;">
+                    <strong style="display:block;margin-bottom:4px;">⛳ 골프 라운딩 안내</strong>
+                    · 티오프 30분 전 골프장 도착 필수<br>
+                    · 캐디팁: ${golftel.caddyTip?.amount || '현지 안내'}<br>
+                    · ${golftel.dresscode?.[0] || '카라티 권장'}
+                  </div>
+                ` : ''}
+
+                <!-- 카톡 알림톡 액션 버튼 -->
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">
+                  <a href="complete.html?bk=${b.bookingNumber}" style="display:block;padding:11px;background:#FFEB00;color:#3C1E1E;text-align:center;border-radius:8px;font-weight:900;font-size:13px;text-decoration:none;">예약 확인서 보기 →</a>
+                  <a href="voucher.html?bk=${b.bookingNumber}" target="_blank" style="display:block;padding:11px;background:#fff;color:#1A1A1A;text-align:center;border-radius:8px;font-weight:900;font-size:13px;text-decoration:none;border:1px solid #E5E7EB;">📄 e-바우처 PDF</a>
+                </div>
+
+                <div style="margin-top:10px;font-size:10px;color:#9CA3AF;text-align:center;line-height:1.5;">
+                  24시간 카카오 상담: 1588-0000<br>
+                  본 메시지는 정보성 알림톡으로 광고가 아닙니다.
+                </div>
+              </div>
+              <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;">${time}</div>
+            </div>
+          </div>
+
+          <!-- 안내 메시지 -->
+          <div style="text-align:center;margin-top:20px;padding:10px 16px;background:rgba(255,255,255,.15);border-radius:12px;color:#fff;font-size:11px;line-height:1.6;backdrop-filter:blur(4px);">
+            🔔 실제 카카오톡 알림톡 미리보기 (mock)<br>
+            <span style="opacity:.85;">입력하신 ${phone} 으로 약 1분 내 도착합니다</span>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if(e.target === overlay) closeKakaoPreview(); });
+  }
+
+  function closeKakaoPreview(){
+    const el = document.getElementById('kakaoOverlay');
+    if(el) el.remove();
+  }
+  window.closeKakaoPreview = closeKakaoPreview;
   </script>
 </body>
 </html>
