@@ -559,7 +559,7 @@
       <!-- Input dock -->
       <div class="chat-input">
         <form class="chat-input-inner" id="chatForm">
-          <button type="button" class="mic-btn" aria-label="음성 입력 (곧 제공 예정)" onclick="handleMic()">
+          <button type="button" class="mic-btn" id="micBtn" aria-label="음성 입력" onclick="handleMic()" title="음성으로 질문하기">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="2" width="6" height="12" rx="3"/>
               <path d="M5 10a7 7 0 0014 0"/>
@@ -1007,11 +1007,15 @@
     const wrap = document.createElement('div');
     wrap.className = 'rec-more';
     wrap.innerHTML = `
+      <button data-a="compare">⚖️ 3 상품 비교</button>
       <button data-a="refine">🔧 조건 바꾸기</button>
-      <button data-a="restart">↻ 처음부터 다시</button>
       <button data-a="save">💾 여행 저장</button>
+      <button data-a="restart">↻ 처음부터</button>
     `;
     chatBody.appendChild(wrap);
+    wrap.querySelector('[data-a="compare"]').addEventListener('click', () => {
+      openCompareModal();
+    });
     wrap.querySelector('[data-a="refine"]').addEventListener('click', async () => {
       wrap.remove();
       await addBotMessage('어떤 조건을 바꿔볼까요? 아래 단계부터 다시 안내해드릴게요.');
@@ -1019,10 +1023,128 @@
     });
     wrap.querySelector('[data-a="restart"]').addEventListener('click', restart);
     wrap.querySelector('[data-a="save"]').addEventListener('click', () => {
-      // TODO: API 연동 - POST /api/ai-planner/save { state }
-      alert('로그인 후 마이페이지에서 다시 볼 수 있어요 (프로토타입)');
+      saveCurrentTrip();
     });
     scrollToBottom();
+  }
+
+  /* =========================================================================
+     여행 저장 — state.js의 saveTrip() 호출
+     ========================================================================= */
+  function saveCurrentTrip(){
+    const tripName = `${state.destination || ''} ${state.style || ''}`.trim() || '내 여행';
+    const trip = {
+      name: tripName,
+      destination: state.destination,
+      style: state.style,
+      duration: state.duration,
+      pax: state.pax,
+      budget: state.budget
+    };
+    if(window.OMT?.State?.saveTrip){
+      const saved = window.OMT.State.saveTrip(trip);
+      showToast(`💾 "${saved.name}" 저장 완료 · 마이페이지에서 다시 보실 수 있어요`);
+    } else {
+      alert('💾 여행 저장 (state.js 미로드 — 프로토타입)');
+    }
+  }
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:1000;box-shadow:0 12px 32px rgba(0,0,0,.3);max-width:88vw;text-align:center;animation:toast-in .3s ease-out;';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.style.opacity = '0', 2400);
+    setTimeout(() => t.remove(), 2800);
+  }
+
+  /* =========================================================================
+     비교 모드 — 3 추천 상품을 표로 한번에 비교
+     ========================================================================= */
+  function openCompareModal(){
+    if(!state.destination){ showToast('먼저 추천을 받아주세요'); return; }
+    const recs = recommendGolftels(state.destination);
+    if(!recs || recs.length < 2){ showToast('비교할 상품이 부족해요'); return; }
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:grid;place-items:center;backdrop-filter:blur(4px);padding:20px;';
+    overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+
+    const rows = [
+      { lb:'🏆 추천 등급', get:r=>r.tierLabel },
+      { lb:'🏨 호텔', get:r=>r.hotel },
+      { lb:'⛳ 라운딩', get:r=>r.rounds },
+      { lb:'🌐 운영', get:r=>r.ownership },
+      { lb:'💰 가격', get:r=>r.price.toLocaleString('ko-KR') + '원~' }
+    ];
+
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:20px;width:min(900px,92vw);max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+        <div style="padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;background:#FAFAFA;border-radius:20px 20px 0 0;">
+          <div>
+            <div style="font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#FF6B35;">⚖️ COMPARE</div>
+            <div style="font-size:18px;font-weight:900;margin-top:2px;color:#1A1A1A;">${state.destination} 추천 3종 비교</div>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="width:32px;height:32px;border-radius:8px;background:#F3F4F6;border:none;font-size:18px;cursor:pointer;color:#6B7280;">×</button>
+        </div>
+        <div style="padding:20px 24px;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:12px 10px;width:120px;color:#6B7280;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-bottom:2px solid #E5E7EB;">항목</th>
+                ${recs.map(r => `
+                  <th style="text-align:left;padding:12px 10px;border-bottom:2px solid #E5E7EB;">
+                    <div style="font-size:10px;font-weight:900;color:${r.tier==='t1'?'#10B981':r.tier==='t2'?'#3B82F6':'#A855F7'};text-transform:uppercase;letter-spacing:.04em;">${r.tierLabel}</div>
+                    <div style="font-size:13px;font-weight:900;color:#1A1A1A;margin-top:3px;line-height:1.3;">${r.title}</div>
+                  </th>
+                `).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td style="padding:14px 10px;color:#6B7280;font-weight:700;border-bottom:1px solid #F3F4F6;">${row.lb}</td>
+                  ${recs.map(r => {
+                    const v = row.get(r);
+                    const isPrice = row.lb.includes('가격');
+                    return `<td style="padding:14px 10px;color:#1A1A1A;font-weight:${isPrice?'900':'600'};border-bottom:1px solid #F3F4F6;${isPrice?'color:#FF6B35;font-family:\\'JetBrains Mono\\',monospace;':''}">${v}</td>`;
+                  }).join('')}
+                </tr>
+              `).join('')}
+              <tr>
+                <td style="padding:14px 10px;color:#6B7280;font-weight:700;">예약</td>
+                ${recs.map(r => `
+                  <td style="padding:14px 10px;">
+                    <a href="golftel.html?id=${r.id}" style="display:inline-block;padding:8px 14px;background:linear-gradient(135deg,#FF6B35,#FF9A6C);color:#fff;border-radius:8px;font-size:12px;font-weight:800;text-decoration:none;">상세 보기 →</a>
+                  </td>
+                `).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  /* =========================================================================
+     사용자 프로필 자동 인식 — 등급·선호 국가
+     ========================================================================= */
+  function loadUserProfile(){
+    if(!window.OMT?.State) return null;
+    const user = window.OMT.State.getUser?.() || null;
+    const bookings = window.OMT.State.getBookings?.() || [];
+    // 가장 많이 예약한 국가
+    const countryCounts = {};
+    bookings.forEach(b => {
+      const c = (b.dates || b.destination || '').toString();
+      if(c.includes('일본') || c.includes('japan')) countryCounts['일본'] = (countryCounts['일본']||0)+1;
+      if(c.includes('베트남') || c.includes('vietnam')) countryCounts['베트남'] = (countryCounts['베트남']||0)+1;
+      if(c.includes('태국') || c.includes('thailand')) countryCounts['태국'] = (countryCounts['태국']||0)+1;
+      if(c.includes('필리핀') || c.includes('philippines')) countryCounts['필리핀'] = (countryCounts['필리핀']||0)+1;
+    });
+    const favoriteCountry = Object.entries(countryCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || null;
+    return { user, bookings, favoriteCountry, bookingCount: bookings.length };
   }
 
   /* =========================================================================
@@ -1103,25 +1225,212 @@
       return;
     }
 
-    // Otherwise, free-form question.
-    // TODO: AI API 연동 - fetch('/api/ai-planner', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ message: text, context: state })
-    // })
-    // 위 엔드포인트는 OpenAI ChatCompletion 또는 Claude Messages API 프록시.
-    // 응답 스트리밍 시 typeInto() 대신 ReadableStream chunk를 그대로 bubble에 append.
-
+    // Otherwise, free-form question — 골프 Q&A 데이터셋 매칭
     await sleep(400);
-    await addBotMessage(
-      '좋은 질문이에요! 현재는 프로토타입이라 AI 응답 서버가 연결되지 않았어요.\n\n' +
-      '출시 버전에서는 여기서 실시간 맞춤 답변을 받을 수 있어요. 지금은 위 버튼으로 단계별 추천을 받아보세요 ✨'
-    );
+    const answer = answerGolfQuestion(text);
+    await addBotMessage(answer.text, { typingDelay: 800, speed: 18 });
+    if(answer.followUp){
+      renderQuickReplies(answer.followUp);
+    }
   });
 
+  /* =========================================================================
+     골프 Q&A 데이터셋 — 자유 입력 답변 매칭 (15+ 키워드)
+     ========================================================================= */
+  const GOLF_QA = [
+    {
+      keywords: ['캐디팁', '캐디 팁', '팁', 'tip'],
+      text: '💰 캐디 팁은 국가별로 차이가 있어요:\n\n🇻🇳 베트남: USD $5-10 / 1라운드\n🇹🇭 태국: 200-300바트 / 1라운드\n🇵🇭 필리핀: ₱200-300 / 1라운드\n🇯🇵 일본: 별도 팁 없음 (서비스 요금 포함)\n\n현금으로 준비하시는 게 좋아요.',
+      followUp: ['🌏 추천 받고 싶어요', '🎒 다른 질문 있어요']
+    },
+    {
+      keywords: ['복장', '드레스코드', 'dress'],
+      text: '👕 골프장 복장 규정:\n\n• 칼라 있는 셔츠 필수 (반팔도 OK)\n• 반바지 가능 (일부 명문 클럽은 슬랙스 권장)\n• 청바지·티셔츠·샌들 금지\n• 골프화 필수 (소프트 스파이크)\n\n호텔→골프장 픽업 시 골프복으로 갈아입을 락커룸 제공돼요.',
+      followUp: ['🌏 추천 받고 싶어요', '🎒 다른 질문 있어요']
+    },
+    {
+      keywords: ['우천', '비', '태풍', '악천후', '날씨'],
+      text: '🌧 악천후 시 골프장 정책:\n\n• 9홀 미만 플레이: 전액 환불 또는 일정 변경 (무료)\n• 9-12홀: 50% 환불 가능\n• 13홀+: 환불 불가 (정상 라운딩으로 인정)\n• 천둥·번개: 안전상 무조건 중단\n\n출발 D-1 기준 일기예보 60%+ 강수 시 사전 일정 조정 권장드려요.',
+      followUp: ['🌏 추천 받고 싶어요', '💸 예약 변경 가능한가요?']
+    },
+    {
+      keywords: ['초보', '초급', '입문', '처음', '실력'],
+      text: '⛳ 초보 골퍼분께 추천드려요:\n\n🌟 베트남 다낭 바나힐 (난이도 ★★)\n  └ 페어웨이 넓고 핸디캡 30+ OK\n\n🌟 태국 알파인 방콕 (난이도 ★★)\n  └ 한국어 가능 캐디 다수\n\n🌟 필리핀 클락 미모사 (난이도 ★)\n  └ 가장 쉬운 코스, 캐디 1:1 케어\n\n실력 향상에 좋은 코스로 골라드릴까요?',
+      followUp: ['🇻🇳 베트남 추천', '🇵🇭 필리핀 추천', '🌏 처음부터 다시']
+    },
+    {
+      keywords: ['고급', '상급', '챔피언', '난이도', '어려운', '도전'],
+      text: '🏆 상급자용 도전 코스:\n\n🌟 일본 카누차 (난이도 ★★★★★)\n  └ 챔피언 코스 7,200야드, PGA 투어 개최\n\n🌟 베트남 빈펄 다낭 (난이도 ★★★★)\n  └ 그렉 노먼 디자인, 바람 변화 심함\n\n🌟 베트남 푸꾸옥 빈펄 (난이도 ★★★★)\n  └ 잭 니클라우스 디자인\n\n어느 곳으로 추천드릴까요?',
+      followUp: ['🇯🇵 일본 추천', '🇻🇳 베트남 추천', '🌏 처음부터 다시']
+    },
+    {
+      keywords: ['항공', '비행기', '비행', '직항', '운항'],
+      text: '✈️ 골프텔과 항공권:\n\n• 골프텔(메인 SKU)은 호텔+라운딩만 포함\n• 항공권 추가 시 "골프텔+항공" 상품으로 별도 안내\n\n주요 직항편:\n🇻🇳 인천-다낭 4h / 인천-푸꾸옥 5h\n🇯🇵 인천-오키나와 2h30m\n🇹🇭 인천-방콕 5h30m\n🇵🇭 인천-클락 4h\n\n항공권 결합형 보고 싶으세요?',
+      followUp: ['✈️ 골프텔+항공 보기', '🌏 추천 받고 싶어요']
+    },
+    {
+      keywords: ['단체', '여러명', '4인', '8인', '동반자', '인원'],
+      text: '👥 단체 라운딩 안내:\n\n• 4인 1팀이 기본 (티오프 1슬롯 = 4명)\n• 5인 이상: 2팀 동시 예약 권장\n• 8인 이상: 단체 할인 -5% 자동 적용 ⭐\n• 12인 이상: 전세 라운딩 가능 문의\n\n클럽하우스 단체룸, 픽업 차량 업그레이드, 단체 사진 촬영 서비스도 제공돼요.',
+      followUp: ['🌏 단체 추천 받기', '🎒 다른 질문']
+    },
+    {
+      keywords: ['렌탈', '대여', '골프채', '클럽', '캐디백'],
+      text: '🏌️ 골프채 대여 가능:\n\n• 우타 / 좌타 모두 가능 (사전 예약 필수)\n• 14개 풀세트 대여: $20-30 / 1라운드\n• 캐디백·우산·골프화 별도\n\n🇯🇵 일본·🇻🇳 베트남: 캘러웨이/타이틀리스트 신모델\n🇹🇭 태국·🇵🇭 필리핀: 미즈노/투어스테이지\n\n예약 시 "골프채 렌탈" 옵션 선택하시면 돼요.',
+      followUp: ['🌏 추천 받고 싶어요', '🎒 다른 질문']
+    },
+    {
+      keywords: ['예산', '가격', '비용', '얼마', '저렴', '가성비'],
+      text: '💸 예산별 추천 (1인 2인1실 기준):\n\n💰 100만원대 (가성비)\n  └ 필리핀 클락 미모사 5박 4R\n  └ 베트남 다낭 바나힐 4박 3R\n\n💰 200만원대 (밸런스)\n  └ 베트남 푸꾸옥 빈펄 6박 5R\n  └ 태국 알파인 방콕 4박 3R\n\n💰 300만원+ (프리미엄)\n  └ 일본 카누차 오키나와 3박 2R\n  └ 베트남 나트랑 빈펄 7박 럭셔리\n\n예산 알려주시면 맞춤 추천드려요!',
+      followUp: ['💰 100만원대', '💰 200만원대', '💰 300만원+']
+    },
+    {
+      keywords: ['포인트', '적립', '쿠폰', '할인'],
+      text: '🎁 적립 및 할인 혜택:\n\n• 결제 시 1% 자동 적립 (예: 200만원 → 2만P)\n• 리뷰 작성 +500P (사진 첨부 시 +1,000P)\n• 친구 초대 +5,000P\n• 회원 등급 할인:\n  └ 골드 -3% / 플래티넘 -5% / VIP -7%\n• 단체 5인+ -5% 자동\n\n오늘 가입하시면 신규 환영 5,000P 즉시 적립돼요!',
+      followUp: ['🌏 추천 받고 싶어요', '🎒 다른 질문']
+    },
+    {
+      keywords: ['취소', '환불', '변경', '날짜 변경'],
+      text: '↩️ 예약 변경·취소 정책:\n\n• D-30+ 무료 변경 가능\n• D-15 ~ D-30: 변경 수수료 5%\n• D-7 ~ D-14: 변경 수수료 15%\n• D-3 ~ D-6: 변경 수수료 30%\n• D-2 이내: 환불 불가 (단, 우천·천재지변 예외)\n\n자세한 사항은 마이페이지 > 1:1 문의로 상담 가능해요.',
+      followUp: ['🌏 추천 받고 싶어요', '💬 1:1 문의']
+    },
+    {
+      keywords: ['비자', '입국', '여권', '체류'],
+      text: '🛂 입국 정보 (한국 여권 기준):\n\n🇻🇳 베트남: 45일 무비자 ⭐\n🇯🇵 일본: 90일 무비자\n🇹🇭 태국: 90일 무비자\n🇵🇭 필리핀: 30일 무비자\n\n공통 준비물:\n• 여권 유효기간 6개월+\n• 출국 항공권\n• 호텔 예약 확인서\n\n베트남·태국은 e-Arrival(전자입국신고서) 작성 권장!',
+      followUp: ['🌏 추천 받고 싶어요', '🎒 다른 질문']
+    },
+    {
+      keywords: ['혼자', '솔로', '1인', '나홀로'],
+      text: '🚶 1인 라운딩도 환영해요!\n\n• 1인 예약 시: 현지에서 다른 팀과 매칭 (조인)\n• 1인실 옵션 추가 시 +30% 객실 요금\n• 솔로 골퍼 전용 패키지 있음:\n  └ 베트남 다낭 5박 + 3R 자유시간\n  └ 일본 카누차 3박 2R (조인 보장)\n\n혼자 가도 부담 없게 1:1 캐디 케어로 즐기실 수 있어요.',
+      followUp: ['🌏 1인 추천', '🎒 다른 질문']
+    },
+    {
+      keywords: ['가족', '아이', '어린이', '아내', '부모'],
+      text: '👨‍👩‍👧 가족 여행 추천:\n\n🌟 푸꾸옥 빈펄 (베트남)\n  └ 워터파크·아쿠아리움 포함, 키즈클럽\n\n🌟 카누차 오키나와 (일본)\n  └ 프라이빗 비치, 가족실 4인룸\n\n🌟 나트랑 빈펄 럭셔리 (베트남)\n  └ VIP 매니저 1:1 케어, 키즈 메뉴\n\n어린이는 라운딩 불가지만 캐디 매칭 서비스로 부모님만 골프 가능해요!',
+      followUp: ['🇻🇳 푸꾸옥 보기', '🇯🇵 오키나와 보기', '🌏 처음부터 다시']
+    },
+    {
+      keywords: ['vip', '럭셔리', '프리미엄', '5성'],
+      text: '⭐ VIP·럭셔리 추천:\n\n🏆 나트랑 빈펄 7박 럭셔리 (베트남)\n  └ 980만원~ · VIP 매니저 전담 · 프라이빗 빌라\n\n🏆 카누차 오키나와 풀스위트 (일본)\n  └ 540만원~ · 챔피언 코스 라운딩 + 미슐랭 셰프\n\n🏆 푸꾸옥 빈펄 럭셔리 (베트남)\n  └ 720만원~ · 헬리 픽업 + 골프 PRO 1:1 레슨\n\n전담 컨시어지로 카톡 24시간 상담 가능해요.',
+      followUp: ['🇻🇳 베트남 VIP', '🇯🇵 일본 VIP', '🌏 처음부터 다시']
+    }
+  ];
+
+  function answerGolfQuestion(text){
+    const q = text.toLowerCase();
+    for(const item of GOLF_QA){
+      if(item.keywords.some(k => q.includes(k.toLowerCase()))){
+        return item;
+      }
+    }
+    // 매칭 실패 — 기본 응답
+    return {
+      text: '💭 "' + text + '" 관련 답변을 찾고 있어요...\n\n해당 키워드로는 정확한 답변이 어렵네요. 아래 자주 묻는 질문 중에서 선택하시거나 단계별 추천을 받아보세요!',
+      followUp: ['💰 캐디 팁은?', '👕 복장 규정', '🌧 우천 시 환불', '🌏 추천 받고 싶어요']
+    };
+  }
+
+  /* =========================================================================
+     음성 입력 mock — 마이크 애니메이션 + 5초 자동 인식
+     ========================================================================= */
+  let micActive = false;
+  const VOICE_SAMPLES = [
+    '베트남 다낭으로 4박 5일 골프 여행 가고 싶어요',
+    '캐디 팁은 얼마 정도 드려야 하나요',
+    '초보인데 어디가 좋을까요',
+    '8명 단체로 갈만한 곳 추천해주세요',
+    '예산 200만원으로 갈 수 있는 곳',
+    '가족여행으로 추천해주세요',
+    '필리핀 클락 갈만한가요'
+  ];
+
   function handleMic(){
-    // TODO: Web Speech API 또는 /api/ai-planner/transcribe (Whisper) 연동
-    alert('🎙 음성 입력은 곧 제공됩니다 (프로토타입)');
+    if(micActive){
+      stopMicListening();
+      return;
+    }
+    startMicListening();
+  }
+
+  function startMicListening(){
+    micActive = true;
+    const micBtn = document.getElementById('micBtn');
+    if(micBtn){
+      micBtn.style.background = '#FF3366';
+      micBtn.style.color = '#fff';
+      micBtn.classList.add('mic-active');
+      micBtn.innerHTML = '⏺';
+    }
+    // 오버레이 표시
+    const overlay = document.createElement('div');
+    overlay.id = 'micOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:grid;place-items:center;backdrop-filter:blur(4px);';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:24px;padding:32px 28px;width:min(360px,86vw);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+        <div style="width:80px;height:80px;margin:0 auto 16px;border-radius:50%;background:radial-gradient(circle,#FF6B35,#FF3366);display:grid;place-items:center;animation:pulse-mic 1.2s ease-in-out infinite;">
+          <span style="font-size:36px;">🎙</span>
+        </div>
+        <div style="font-size:16px;font-weight:900;color:#1A1A1A;margin-bottom:6px;">듣고 있어요...</div>
+        <div style="font-size:12px;color:#6B7280;margin-bottom:18px;" id="micTimer">5초 후 자동 인식</div>
+        <div style="display:flex;gap:8px;justify-content:center;align-items:end;height:32px;margin-bottom:18px;" id="micWaves">
+          ${Array.from({length:7}, (_,i)=>`<div style="width:4px;background:linear-gradient(180deg,#FF6B35,#FF3366);border-radius:2px;animation:wave .8s ease-in-out infinite;animation-delay:${i*0.1}s;"></div>`).join('')}
+        </div>
+        <button onclick="window.__cancelMic()" style="padding:10px 20px;background:#F3F4F6;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#6B7280;cursor:pointer;font-family:inherit;">취소</button>
+      </div>
+      <style>
+        @keyframes pulse-mic{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,51,102,.6);}50%{transform:scale(1.08);box-shadow:0 0 0 20px rgba(255,51,102,0);}}
+        @keyframes wave{0%,100%{height:8px;}50%{height:32px;}}
+      </style>
+    `;
+    document.body.appendChild(overlay);
+
+    // 카운트다운
+    let remaining = 5;
+    const timerEl = document.getElementById('micTimer');
+    const countdown = setInterval(() => {
+      remaining--;
+      if(timerEl) timerEl.textContent = `${remaining}초 후 자동 인식`;
+      if(remaining <= 0){
+        clearInterval(countdown);
+      }
+    }, 1000);
+
+    // 취소 함수 노출
+    window.__cancelMic = () => {
+      clearInterval(countdown);
+      stopMicListening();
+    };
+
+    // 5초 후 자동 인식
+    state.micTimeout = setTimeout(() => {
+      clearInterval(countdown);
+      const recognizedText = VOICE_SAMPLES[Math.floor(Math.random() * VOICE_SAMPLES.length)];
+      stopMicListening();
+      userInput.value = recognizedText;
+      autoGrow();
+      // 0.3초 후 자동 발송
+      setTimeout(() => {
+        if(userInput.value === recognizedText){
+          chatForm.requestSubmit();
+        }
+      }, 300);
+    }, 5000);
+  }
+
+  function stopMicListening(){
+    micActive = false;
+    const micBtn = document.getElementById('micBtn');
+    if(micBtn){
+      micBtn.style.background = '';
+      micBtn.style.color = '';
+      micBtn.classList.remove('mic-active');
+      micBtn.innerHTML = '🎙';
+    }
+    const overlay = document.getElementById('micOverlay');
+    if(overlay) overlay.remove();
+    if(state.micTimeout){
+      clearTimeout(state.micTimeout);
+      state.micTimeout = null;
+    }
   }
 
   /* Restart button */
@@ -1145,13 +1454,37 @@
      INIT
      ========================================================================= */
   window.addEventListener('load', async () => {
+    // 저장된 여행 재진입 (?trip=tripId)
+    const tripId = new URLSearchParams(location.search).get('trip');
+    if(tripId && window.OMT?.State?.getSavedTrips){
+      const saved = window.OMT.State.getSavedTrips().find(t => t.id === tripId);
+      if(saved){
+        await addBotMessage(`💾 저장하신 "${saved.name}" 여행을 다시 불러왔어요!`);
+        await addBotMessage('동일 조건으로 다시 추천을 받아볼게요...');
+        Object.assign(state, saved);
+        await sleep(600);
+        goTo('loading');
+        return;
+      }
+    }
+
     if(urlQuery){
-      // User arrived via AI search; greet & acknowledge
       await addBotMessage(`안녕하세요! "${urlQuery}" 관련해서 도와드릴게요 ✦`);
       await addBotMessage('먼저 몇 가지만 확인할게요. 어디로 여행 가고 싶으세요?');
       renderQuickReplies(FLOW.greeting.quickReplies);
     } else {
-      goTo('greeting');
+      // 사용자 프로필 자동 인식 — 회원이면 맞춤 인사
+      const profile = loadUserProfile();
+      if(profile && profile.bookingCount > 0 && profile.favoriteCountry){
+        await addBotMessage(`안녕하세요! 이전에 ${profile.bookingCount}번 예약하셨네요 ✦`);
+        await addBotMessage(`${profile.favoriteCountry}을(를) 즐겨 가시는 것 같은데, 이번에도 비슷한 곳으로 추천드릴까요?`);
+        renderQuickReplies([
+          { label:`✨ ${profile.favoriteCountry} 또 가기`, value: profile.favoriteCountry, then: state => { state.destination = profile.favoriteCountry; goTo('style'); } },
+          ...FLOW.greeting.quickReplies
+        ]);
+      } else {
+        goTo('greeting');
+      }
     }
   });
   </script>

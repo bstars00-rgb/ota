@@ -24,8 +24,43 @@
     membership:    'omt_membership_v1',
     notifReadIds:  'omt_notif_read_v1',  // 읽은 알림 ID 목록
     userNotifs:    'omt_user_notifs_v1', // 사용자 발생 알림 (예약 확정/문의 답변/결제 실패 등)
-    liveHistory:   'omt_live_history_v1' // 라이브 시청 이력 (최대 20개)
+    liveHistory:   'omt_live_history_v1', // 라이브 시청 이력 (최대 20개)
+    savedTrips:    'omt_saved_trips_v1'   // AI 플래너 저장된 여행 (최대 10개)
   };
+
+  // ============================================================
+  // 💾 저장된 여행 (AI 플래너) — 회원이 짠 여행 계획을 저장하고 마이페이지에서 재진입
+  // ============================================================
+  function getSavedTrips(){
+    return read(KEYS.savedTrips, []);
+  }
+  function saveTrip(trip){
+    // trip: { id?, name, destination, style, duration, pax, budget, savedAt }
+    const list = getSavedTrips();
+    const id = trip.id || `trip-${Date.now().toString(36)}`;
+    const entry = {
+      id,
+      name: trip.name || `${trip.destination || ''} ${trip.style || ''}`.trim() || '내 여행',
+      destination: trip.destination || null,
+      style: trip.style || null,
+      duration: trip.duration || null,
+      pax: trip.pax || null,
+      budget: trip.budget || null,
+      savedAt: new Date().toISOString()
+    };
+    // 같은 id가 있으면 업데이트 (맨 앞으로)
+    const existing = list.findIndex(x => x.id === id);
+    if(existing >= 0) list.splice(existing, 1);
+    list.unshift(entry);
+    if(list.length > 10) list.length = 10;
+    write(KEYS.savedTrips, list);
+    return entry;
+  }
+  function removeSavedTrip(id){
+    const list = getSavedTrips().filter(x => x.id !== id);
+    write(KEYS.savedTrips, list);
+    return list;
+  }
 
   // ============================================================
   // 🔴 라이브 시청 이력
@@ -503,6 +538,8 @@
     getUserNotifications, addUserNotification,
     // Live history
     getLiveHistory, addLiveHistory,
+    // Saved trips (AI planner)
+    getSavedTrips, saveTrip, removeSavedTrip,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

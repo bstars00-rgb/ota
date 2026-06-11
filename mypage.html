@@ -329,6 +329,15 @@
           </div>
           <div id="livePreview"></div>
         </div>
+
+        <!-- 💾 저장한 여행 (AI 플래너) -->
+        <div class="panel-card" id="savedTripsBlock" style="display:none;">
+          <div class="panel-head">
+            <h2 class="panel-title">💾 저장한 여행 (AI 플래너)</h2>
+            <a href="ai-planner.html" class="sub-tab">새 여행 짜기 →</a>
+          </div>
+          <div id="savedTripsList"></div>
+        </div>
       </div>
 
       <div class="tab-panel" data-panel="bookings" hidden>
@@ -1050,6 +1059,37 @@
       </div>`;
     } else if(liveBlock){
       liveBlock.style.display = 'none';
+    }
+
+    // 💾 저장한 여행 (AI 플래너)
+    const savedTrips = OMT.State.getSavedTrips ? OMT.State.getSavedTrips() : [];
+    const tripsBlock = document.getElementById('savedTripsBlock');
+    const tripsList = document.getElementById('savedTripsList');
+    if(savedTrips.length > 0 && tripsBlock && tripsList){
+      tripsBlock.style.display = '';
+      const flagEmoji = c => ({ '일본':'🇯🇵','베트남':'🇻🇳','태국':'🇹🇭','필리핀':'🇵🇭' }[c] || '🌏');
+      tripsList.innerHTML = `<div style="display:grid;grid-template-columns:repeat(${Math.min(savedTrips.length, 3)},1fr);gap:10px;">
+        ${savedTrips.slice(0, 3).map(t => {
+          const ago = Math.floor((Date.now() - new Date(t.savedAt).getTime()) / 60000);
+          const agoLabel = ago < 1 ? '방금' : (ago < 60 ? ago + '분 전' : (ago < 1440 ? Math.floor(ago/60) + '시간 전' : Math.floor(ago/1440) + '일 전'));
+          return `<a href="ai-planner.html?trip=${t.id}" style="display:block;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;background:linear-gradient(135deg,#FFF5F0,#FFFAF0);text-decoration:none;color:inherit;position:relative;transition:transform .15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <span style="font-size:24px;">${flagEmoji(t.destination)}</span>
+              <span style="font-size:10px;color:var(--ink-3);font-weight:700;">${agoLabel}</span>
+            </div>
+            <div style="font-size:13px;font-weight:900;color:var(--ink);line-height:1.3;margin-bottom:4px;">${t.name}</div>
+            <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">
+              ${t.style ? `<div>✦ ${t.style}</div>` : ''}
+              ${t.duration ? `<div>📅 ${t.duration}</div>` : ''}
+              ${t.pax ? `<div>👥 ${t.pax}</div>` : ''}
+              ${t.budget ? `<div>💰 ${t.budget}</div>` : ''}
+            </div>
+            <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--primary);font-weight:800;">다시 추천 받기 →</div>
+          </a>`;
+        }).join('')}
+      </div>`;
+    } else if(tripsBlock){
+      tripsBlock.style.display = 'none';
     }
 
     // 최근 본 상품 프리뷰 (가로 4개)
