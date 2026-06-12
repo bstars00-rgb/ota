@@ -456,10 +456,55 @@
       <div id="sumItems"></div>
       <div class="sum-divider"></div>
       <div id="sumRows"></div>
+
+      <!-- 🆕 사이클 27: 회원 등급 자동 할인 + 마일리지 + 트립코인 -->
+      <div id="tierBenefitBlock" style="display:none;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:10px;padding:12px 14px;margin:10px 0;">
+        <div id="tierLabel" style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;"></div>
+        <div id="tierBenefitList" style="font-size:11px;color:#374151;margin-top:6px;line-height:1.5;"></div>
+      </div>
+
+      <div id="milesCoinBlock" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin:8px 0;">
+        <div style="font-size:11px;font-weight:900;color:#6B7280;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;">🎁 추가 할인</div>
+
+        <div style="margin-bottom:8px;">
+          <label style="font-size:11px;font-weight:800;color:#374151;display:flex;justify-content:space-between;">
+            <span>✈️ 마일리지 입력</span>
+            <span style="font-size:10px;color:#9CA3AF;font-weight:700;">100마일 = 1,000원</span>
+          </label>
+          <div style="display:flex;gap:4px;margin-top:4px;">
+            <input type="number" id="milesInput" placeholder="0" min="0" step="100" oninput="recalcDiscounts()" style="flex:1;padding:6px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;font-weight:700;outline:none;font-family:'JetBrains Mono',monospace;" />
+            <span style="font-size:11px;font-weight:800;color:#6B7280;align-self:center;">마일</span>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px;font-weight:800;color:#374151;display:flex;justify-content:space-between;">
+            <span>🪙 트립코인 사용</span>
+            <span style="font-size:10px;color:#10B981;font-weight:900;font-family:'JetBrains Mono',monospace;">보유 <span id="coinBalance">0</span>P</span>
+          </label>
+          <div style="display:flex;gap:4px;margin-top:4px;align-items:center;">
+            <input type="range" id="coinSlider" min="0" max="0" step="500" value="0" oninput="document.getElementById('coinValue').textContent=this.value;recalcDiscounts()" style="flex:1;accent-color:#FF6B35;" />
+            <span style="font-size:11px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;min-width:50px;text-align:right;"><span id="coinValue">0</span>P</span>
+          </div>
+        </div>
+      </div>
+
       <div class="sum-grand">
         <div class="label">총 결제 금액</div>
         <div class="total" id="sumTotal">0원</div>
       </div>
+
+      <!-- 🆕 사이클 27: 신용카드 할부 안내 -->
+      <div id="installmentBlock" style="display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:11px;color:#1E40AF;">
+        <div style="font-weight:900;margin-bottom:4px;">💳 카드 무이자 할부 가능</div>
+        <div id="installmentOptions" style="font-family:'JetBrains Mono',monospace;font-weight:700;"></div>
+      </div>
+
+      <!-- 🆕 사이클 27: 빠른 예약 (회원 1-click) -->
+      <button onclick="useExpressBooking()" id="expressBtn" style="display:none;width:100%;padding:11px;background:#fff;border:2px dashed #FF6B35;color:#FF6B35;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;margin:8px 0;">
+        🚀 빠른 예약 · 저장된 정보로 1-click 결제
+      </button>
+
       <button class="pay-cta" id="payBtnDesktop" onclick="submitPayment()" disabled>결제하기</button>
       <p class="pay-guard">안전한 SSL 암호화 결제 · 오마이트립 안심 보장</p>
     </aside>
@@ -1035,12 +1080,71 @@
   }
 
   function computeTotal(){
-    if(isGolftel) return pkg._explicitTotal || (pkg.pricePerPerson * pkg.paxCount);
-    if(isFlightOnly) return pkg._explicitTotal || (pkg.flight.price * pkg.paxCount);
-    let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
-    (pkg.activities||[]).forEach(a => sub += a.price);
-    return sub - Math.round(sub * 0.07);
+    let base;
+    if(isGolftel) base = pkg._explicitTotal || (pkg.pricePerPerson * pkg.paxCount);
+    else if(isFlightOnly) base = pkg._explicitTotal || (pkg.flight.price * pkg.paxCount);
+    else {
+      let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
+      (pkg.activities||[]).forEach(a => sub += a.price);
+      base = sub - Math.round(sub * 0.07);
+    }
+    // 🆕 사이클 27: 등급·마일리지·트립코인 차감
+    const tier = OMT.State.getUserTier?.() || 'bronze';
+    const benefit = OMT.State.getTierBenefit?.(tier) || { discount: 0 };
+    const tierDiscount = Math.round(base * (benefit.discount || 0));
+    const milesInput = parseInt(document.getElementById('milesInput')?.value || '0') || 0;
+    const milesDiscount = Math.floor(milesInput / 100) * 1000;
+    const coinUse = parseInt(document.getElementById('coinSlider')?.value || '0') || 0;
+    const total = Math.max(0, base - tierDiscount - milesDiscount - coinUse);
+    return total;
   }
+
+  /* 🆕 사이클 27: 추가 할인 갱신 */
+  window.recalcDiscounts = () => {
+    const total = computeTotal();
+    const totalKrw = total.toLocaleString('ko-KR') + '원';
+    const sumEl = document.getElementById('sumTotal');
+    const mEl = document.getElementById('mTotal');
+    if(sumEl) sumEl.textContent = totalKrw;
+    if(mEl) mEl.textContent = totalKrw;
+    // 할부 옵션 표시 (10만원 이상일 때)
+    const ib = document.getElementById('installmentBlock');
+    if(ib && total >= 100000){
+      ib.style.display = 'block';
+      document.getElementById('installmentOptions').innerHTML = `3개월 ${Math.round(total/3).toLocaleString('ko-KR')}원 · 6개월 ${Math.round(total/6).toLocaleString('ko-KR')}원 · 12개월 ${Math.round(total/12).toLocaleString('ko-KR')}원`;
+    }
+    // 등급 자동 할인 라인 추가 표시
+    renderTierBlock(total);
+    updatePayButton();
+  };
+
+  function renderTierBlock(total){
+    const tier = OMT.State.getUserTier?.() || 'bronze';
+    const benefit = OMT.State.getTierBenefit?.(tier) || { label:'🥉 브론즈', discount:0, benefits:['기본 예약'] };
+    const block = document.getElementById('tierBenefitBlock');
+    if(!block) return;
+    block.style.display = 'block';
+    document.getElementById('tierLabel').innerHTML = `${benefit.label} 회원 · 자동 할인 <strong style="color:#10B981;font-family:'JetBrains Mono',monospace;">-${(benefit.discount*100).toFixed(0)}%</strong>`;
+    document.getElementById('tierBenefitList').innerHTML = '✓ ' + (benefit.benefits || []).join(' · ');
+  }
+
+  /* 🆕 사이클 27: 빠른 예약 (Express) */
+  window.useExpressBooking = () => {
+    const profile = OMT.State.getExpressBookingProfile?.() || {};
+    if(!profile.hasProfile){ alert('로그인 후 사용 가능해요'); return; }
+    // 저장된 정보로 자동 입력
+    if(paxData[0]){
+      paxData[0].nameKo = profile.paxName || paxData[0].nameKo;
+      paxData[0].phone = profile.paxPhone || paxData[0].phone;
+      renderPaxForm();
+    }
+    payMethod = profile.defaultPaymentMethod || 'kakao';
+    // 약관 자동 동의
+    Object.keys(agreements).forEach(k => agreements[k] = true);
+    document.querySelectorAll('input[type="checkbox"][data-agree]').forEach(cb => cb.checked = true);
+    alert('🚀 저장된 정보 자동 입력됨\n\n· 여행자: ' + (profile.paxName||'') + '\n· 결제수단: ' + payMethod + '\n· 약관 동의 완료');
+    updatePayButton();
+  };
 
   /* =========================================================================
      INIT
@@ -1048,6 +1152,26 @@
   renderPaxTabs();
   renderPaxForm();
   renderSummary();
+
+  // 🆕 사이클 27: 트립코인 슬라이더 초기화 + 등급 블록 + 빠른 예약 표시
+  setTimeout(() => {
+    const coins = OMT.State.getTripCoins?.() || { balance: 0 };
+    const balanceEl = document.getElementById('coinBalance');
+    const slider = document.getElementById('coinSlider');
+    if(balanceEl) balanceEl.textContent = coins.balance.toLocaleString('ko-KR');
+    if(slider){
+      slider.max = Math.min(coins.balance, 50000);
+      slider.step = 500;
+    }
+    renderTierBlock(computeTotal());
+    recalcDiscounts();
+    // 회원 시 빠른 예약 버튼 노출
+    const profile = OMT.State.getExpressBookingProfile?.();
+    if(profile?.hasProfile){
+      const btn = document.getElementById('expressBtn');
+      if(btn) btn.style.display = 'block';
+    }
+  }, 100);
   updatePayButton();
   </script>
 </body>

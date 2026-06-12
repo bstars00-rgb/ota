@@ -31,8 +31,98 @@
     notifSettings: 'omt_notif_settings_v1',// 카테고리별 알림 on/off + 방해 금지 시간
     userLocation:  'omt_user_location_v1', // 사용자 출발지 권역 (seoul/busan/daegu/gwangju/jeju)
     groupBookings: 'omt_group_bookings_v1', // 그룹(단체) 예약 — 4인+ 단체 골프투어
-    priceAlerts:   'omt_price_alerts_v1'   // 항공 가격 알리미 (Trip.com 스타일)
+    priceAlerts:   'omt_price_alerts_v1',  // 항공 가격 알리미 (Trip.com 스타일)
+    visitCount:    'omt_visit_count_v1',   // 재방문 카운터 (사이클 27)
+    miles:         'omt_miles_v1',         // 마일리지 적립 이력
+    tripCoins:     'omt_trip_coins_v1'     // 트립 코인 잔액 + 이력
   };
+
+  // ============================================================
+  // 🏆 회원 등급 자동 산정 (시트립 트립코인 스타일)
+  // ============================================================
+  function getUserTier(){
+    // 누적 결제액 기준
+    const bookings = read(KEYS.bookings, []) || [];
+    const total = bookings.reduce((s, b) => s + (b.total || 0), 0);
+    if(total >= 100000000) return 'vip';      // 1억+
+    if(total >= 5000000)   return 'platinum';  // 500만+
+    if(total >= 2000000)   return 'gold';      // 200만+
+    if(total >= 500000)    return 'silver';    // 50만+
+    return 'bronze';
+  }
+  function getTierBenefit(tier){
+    const t = tier || getUserTier();
+    const tiers = {
+      bronze:   { label:'🥉 브론즈', discount:0,  benefits:['기본 예약'], color:'#CD7F32' },
+      silver:   { label:'🥈 실버',   discount:0.02, benefits:['1박 무료 와이파이 업그레이드','리뷰 보너스 +500P'], color:'#B0B7C3' },
+      gold:     { label:'🥇 골드',   discount:0.03, benefits:['조식 무료 (1박 1인)','우선 체크인','늦은 체크아웃 14:00'], color:'#FFD23F' },
+      platinum: { label:'💎 플래티넘', discount:0.05, benefits:['룸 업그레이드 (가용 시)','조식 무료 (전 인원)','VIP 라운지','늦은 체크아웃 16:00'], color:'#58A6FF' },
+      vip:      { label:'⭐ VIP',     discount:0.07, benefits:['1:1 전담 매니저','전 객실 업그레이드','전 메뉴 무료','얼리 체크인','전 일정 카톡 동행'], color:'#DA70D6' }
+    };
+    return tiers[t] || tiers.bronze;
+  }
+
+  // ============================================================
+  // ✈️ 마일리지·트립코인 (시트립 트립코인 패턴)
+  // ============================================================
+  function getMiles(){
+    return read(KEYS.miles, { balance: 0, history: [] });
+  }
+  function getTripCoins(){
+    // 트립코인 잔액은 초기에 일부 부여 (mock)
+    return read(KEYS.tripCoins, { balance: 12500, history: [] });
+  }
+  function useTripCoins(amount, reason){
+    const c = getTripCoins();
+    if(c.balance < amount) return false;
+    c.balance -= amount;
+    c.history = c.history || [];
+    c.history.unshift({ amount: -amount, reason, when: new Date().toISOString() });
+    if(c.history.length > 50) c.history.length = 50;
+    write(KEYS.tripCoins, c);
+    return true;
+  }
+  function earnTripCoins(amount, reason){
+    const c = getTripCoins();
+    c.balance += amount;
+    c.history = c.history || [];
+    c.history.unshift({ amount, reason, when: new Date().toISOString() });
+    if(c.history.length > 50) c.history.length = 50;
+    write(KEYS.tripCoins, c);
+    return c;
+  }
+
+  // ============================================================
+  // 🏠 재방문 감지 (시트립 패턴)
+  // ============================================================
+  function getReturningVisit(){
+    const v = read(KEYS.visitCount, { count: 0, firstAt: null, lastAt: null });
+    return v;
+  }
+  function incrementVisit(){
+    const v = getReturningVisit();
+    v.count = (v.count || 0) + 1;
+    if(!v.firstAt) v.firstAt = new Date().toISOString();
+    v.lastAt = new Date().toISOString();
+    write(KEYS.visitCount, v);
+    return v;
+  }
+
+  // ============================================================
+  // 🚀 빠른 예약 프로필 (Express Booking)
+  // ============================================================
+  function getExpressBookingProfile(){
+    // 저장된 결제수단 + 여행자 정보
+    const user = read(KEYS.user, null);
+    return {
+      hasProfile: !!user,
+      paxName: user?.name || '',
+      paxPhone: user?.phone || '',
+      paxEmail: user?.email || '',
+      defaultPaymentMethod: 'kakaopay',
+      lastUsed: read('omt_last_payment', null)
+    };
+  }
 
   // ============================================================
   // 🔔 가격 알리미 (Price Alert) — 시트립 스타일
@@ -729,6 +819,11 @@
     addGroupMember, removeGroupMember, payGroupMember,
     // Price alerts (시트립 스타일)
     getPriceAlerts, addPriceAlert, removePriceAlert,
+    // 🆕 사이클 27 — 시트립 추가 패턴
+    getUserTier, getTierBenefit,
+    getMiles, getTripCoins, useTripCoins, earnTripCoins,
+    getReturningVisit, incrementVisit,
+    getExpressBookingProfile,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

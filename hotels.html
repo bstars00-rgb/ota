@@ -559,6 +559,21 @@
     </div>
   </section>
 
+  <!-- 🆕 시트립 그 외 패턴: 보기 모드 토글 + Urgency -->
+  <section style="background:#fff;border-bottom:1px solid #E5E7EB;padding:14px 0;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;background:#F3F4F6;border-radius:10px;padding:4px;">
+        <button id="viewModeList" onclick="setViewMode('list')" style="padding:8px 16px;border:none;border-radius:8px;background:#fff;color:#1A1A1A;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,.1);">📋 목록 보기</button>
+        <button id="viewModeMap" onclick="setViewMode('map')" style="padding:8px 16px;border:none;border-radius:8px;background:transparent;color:#6B7280;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">🗺️ 지도 보기</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:#6B7280;font-weight:700;">
+        <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#10B981;animation:livePulseHot 1.5s infinite;"></span>지난 24시간 동안 <strong style="color:#1A1A1A;">847건</strong> 예약</span>
+        <span>·</span>
+        <span>⏰ 가격은 <strong style="color:#EF4444;">2시간 후</strong> 변동 예정</span>
+      </div>
+    </div>
+  </section>
+
   <!-- RESULTS -->
   <main id="omt-main" class="results-layout">
     <aside class="filter-side">
@@ -1822,6 +1837,135 @@
   renderFilterUI();
   render();
   refreshSearchButton();
+
+  /* =============================================================
+     🆕 사이클 27 - 시트립 그 외 패턴
+     ============================================================= */
+
+  // 보기 모드 토글 (목록 ↔ 지도)
+  let _viewMode = 'list';
+  window.setViewMode = (mode) => {
+    _viewMode = mode;
+    const listBtn = document.getElementById('viewModeList');
+    const mapBtn = document.getElementById('viewModeMap');
+    const main = document.getElementById('omt-main');
+    if(mode === 'map'){
+      mapBtn.style.cssText = 'padding:8px 16px;border:none;border-radius:8px;background:#fff;color:#1A1A1A;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,.1);';
+      listBtn.style.cssText = 'padding:8px 16px;border:none;border-radius:8px;background:transparent;color:#6B7280;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;';
+      renderMapView();
+    } else {
+      listBtn.style.cssText = 'padding:8px 16px;border:none;border-radius:8px;background:#fff;color:#1A1A1A;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,.1);';
+      mapBtn.style.cssText = 'padding:8px 16px;border:none;border-radius:8px;background:transparent;color:#6B7280;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;';
+      const mapEl = document.getElementById('hotelMapView');
+      if(mapEl) mapEl.remove();
+      main.style.display = '';
+    }
+  };
+
+  function renderMapView(){
+    const main = document.getElementById('omt-main');
+    main.style.display = 'none';
+    let mapEl = document.getElementById('hotelMapView');
+    if(!mapEl){
+      mapEl = document.createElement('div');
+      mapEl.id = 'hotelMapView';
+      mapEl.style.cssText = 'max-width:1280px;margin:0 auto;padding:20px;display:grid;grid-template-columns:360px 1fr;gap:16px;';
+      main.parentNode.insertBefore(mapEl, main.nextSibling);
+    }
+    const results = applyFilters();
+    const visible = results.slice(0, 12);
+    // 좌측 미니 카드 리스트 + 우측 지도
+    mapEl.innerHTML = `
+      <div style="height:calc(100vh - 280px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+        ${visible.map(h => `
+          <div onclick="location.href='hotel.html?id=${h.id}'" style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px;cursor:pointer;display:flex;gap:10px;transition:all .15s;" onmouseover="this.style.borderColor='#FF6B35'" onmouseout="this.style.borderColor='#E5E7EB'">
+            <div style="width:64px;height:64px;border-radius:8px;background:url('${h.images?.[0]||''}') center/cover;background-color:#E5E7EB;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:900;color:#1A1A1A;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${h.name}</div>
+              <div style="font-size:10px;color:#6B7280;font-weight:700;margin-top:2px;">${h.area} · ★${h.stars} · 평점 ${h.rating}</div>
+              <div style="font-size:14px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;margin-top:4px;">${(h.price/10000).toFixed(0)}만~</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="height:calc(100vh - 280px);border-radius:14px;overflow:hidden;border:1px solid #E5E7EB;position:relative;">
+        <iframe id="cityMapFrame" style="width:100%;height:100%;border:none;" loading="lazy"></iframe>
+        <div style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,.95);padding:8px 14px;border-radius:8px;font-size:11px;font-weight:800;color:#1A1A1A;box-shadow:0 4px 14px rgba(0,0,0,.08);">📍 ${visible.length}개 호텔 표시 (마커 클릭 시 상세)</div>
+      </div>
+    `;
+    // 도시 중심 좌표 (mock)
+    const cityCoords = {
+      osaka:[34.6937,135.5023], tokyo:[35.6895,139.6917], okinawa:[26.3344,127.8056],
+      hanoi:[21.0285,105.8542], danang:[16.0544,108.2022], hcmc:[10.8231,106.6297], bangkok:[13.7563,100.5018],
+      manila:[14.5995,120.9842], cebu:[10.3157,123.8854]
+    };
+    const c = cityCoords[visible[0]?.city || ''] || cityCoords.osaka;
+    const bbox = `${c[1]-0.06},${c[0]-0.06},${c[1]+0.06},${c[0]+0.06}`;
+    document.getElementById('cityMapFrame').src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${c[0]},${c[1]}`;
+  }
+
+  // 카드 hover 시 가격 캘린더 미리보기 (시트립 패턴)
+  function attachPriceCalendarHover(){
+    document.querySelectorAll('.hotel-card').forEach(card => {
+      if(card._hoverAttached) return;
+      card._hoverAttached = true;
+      card.addEventListener('mouseenter', () => {
+        if(card.querySelector('.price-calendar-pop')) return;
+        const id = card.dataset.id;
+        const h = HOTELS.find(x => x.id === id);
+        if(!h) return;
+        const pop = document.createElement('div');
+        pop.className = 'price-calendar-pop';
+        pop.style.cssText = 'position:absolute;top:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;box-shadow:0 12px 28px rgba(0,0,0,.12);z-index:10;width:280px;animation:pcFade .2s ease;';
+        const base = h.price;
+        const today = new Date();
+        const days = Array.from({length:7}, (_,i) => {
+          const d = new Date(today); d.setDate(d.getDate() + i);
+          const dow = d.getDay();
+          const isWeekend = dow === 0 || dow === 6;
+          const wave = Math.sin(i * 0.7) * (base * 0.08);
+          const price = Math.round(base + wave + (isWeekend ? base * 0.1 : 0));
+          return { d, price, isWeekend };
+        });
+        const minP = Math.min(...days.map(x=>x.price));
+        pop.innerHTML = `
+          <div style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">📅 향후 7일 가격</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+            ${days.map(x => {
+              const dow = ['일','월','화','수','목','금','토'][x.d.getDay()];
+              const isLow = x.price === minP;
+              return `<div style="text-align:center;padding:6px 2px;border-radius:6px;background:${isLow?'rgba(16,185,129,.12)':'transparent'};">
+                <div style="font-size:9px;color:${x.isWeekend?'#EF4444':'#9CA3AF'};font-weight:700;">${dow}</div>
+                <div style="font-size:9px;color:#9CA3AF;font-weight:600;">${x.d.getDate()}</div>
+                <div style="font-size:10px;font-weight:900;color:${isLow?'#10B981':'#1A1A1A'};font-family:'JetBrains Mono',monospace;margin-top:2px;">${Math.round(x.price/10000)}만</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="font-size:10px;color:#6B7280;margin-top:6px;font-weight:700;">📉 <strong style="color:#10B981;">+${days.findIndex(x=>x.price===minP)}일 후</strong>가 가장 저렴 (${Math.round(minP/10000)}만원)</div>
+        `;
+        card.style.position = 'relative';
+        card.appendChild(pop);
+      });
+      card.addEventListener('mouseleave', () => {
+        const pop = card.querySelector('.price-calendar-pop');
+        if(pop) pop.remove();
+      });
+    });
+  }
+
+  // render() 호출 직후마다 부착
+  const _origRender = render;
+  window._mainRender = () => {
+    _origRender();
+    setTimeout(() => attachPriceCalendarHover(), 50);
+  };
+  // 첫 render 후에도 부착
+  setTimeout(() => attachPriceCalendarHover(), 100);
+
+  // CSS animation 등록
+  const _hoverStyle = document.createElement('style');
+  _hoverStyle.textContent = '@keyframes pcFade{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}.hotel-card{position:relative;}';
+  document.head.appendChild(_hoverStyle);
 
   /* =============================================================
      🆕 호텔 비교 모드 (Trip.com 스타일) — 최대 4개 비교
