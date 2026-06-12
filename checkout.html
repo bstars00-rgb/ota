@@ -484,8 +484,71 @@
      ========================================================================= */
   let pkg = null;
   let isGolftel = false;
+  let isFlightOnly = false;
 
-  const pending = JSON.parse(sessionStorage.getItem('omt_pending_booking') || 'null');
+  // 🆕 URL 파라미터 — 항공 단독 결제 (?type=flight&id=f-XXX)
+  const urlParams = new URLSearchParams(location.search);
+  const urlType = urlParams.get('type');
+  const urlId = urlParams.get('id');
+
+  if(urlType === 'flight' && urlId){
+    const flight = (OMT.DATA.FLIGHTS || []).find(f => f.id === urlId);
+    if(flight){
+      isFlightOnly = true;
+      const airlines = OMT.DATA.AIRLINES || {};
+      const cities = OMT.DATA.CITIES || {};
+      const airline = airlines[flight.code] || { name: flight.code };
+      const fromCity = cities[flight.from] || { name: flight.from };
+      const toCity = cities[flight.to] || { name: flight.to };
+      const adult = parseInt(urlParams.get('adult') || '1');
+      const child = parseInt(urlParams.get('child') || '0');
+      const infant = parseInt(urlParams.get('infant') || '0');
+      const paxCount = adult + child;
+      const dep = urlParams.get('dep') || '';
+      const ret = urlParams.get('ret') || '';
+      const fmt = key => {
+        if(!key) return '';
+        const [y, m, d] = key.split('-');
+        const date = new Date(+y, +m-1, +d);
+        const dow = ['일','월','화','수','목','금','토'][date.getDay()];
+        return `${y}.${m}.${d}(${dow})`;
+      };
+      pkg = {
+        source: 'flight-only',
+        productType: 'flight',
+        productId: flight.id,
+        productName: `${fromCity.name} → ${toCity.name} 항공권`,
+        country: toCity.country || 'flight',
+        paxCount,
+        adult, child, infant,
+        nights: 0,
+        dates: ret ? `${fmt(dep)} ~ ${fmt(ret)}` : fmt(dep),
+        flight: {
+          id: flight.id,
+          airline: airline.name,
+          airlineCode: flight.code,
+          number: flight.number,
+          out: {
+            depAp: flight.from, arrAp: flight.to,
+            depCity: fromCity.name, arrCity: toCity.name,
+            depTime: flight.outDep, arrTime: flight.outArr,
+            duration: flight.outDur, stops: flight.stops
+          },
+          ret: ret ? {
+            depAp: flight.to, arrAp: flight.from,
+            depTime: flight.retDep, arrTime: flight.retArr,
+            duration: flight.retDur
+          } : null,
+          price: flight.price,
+          seatClass: urlParams.get('cls') || 'economy'
+        },
+        hotel: null,
+        _explicitTotal: flight.price * paxCount
+      };
+    }
+  }
+
+  const pending = !pkg && JSON.parse(sessionStorage.getItem('omt_pending_booking') || 'null');
   if(pending && pending.source === 'golftel'){
     isGolftel = true;
     const g = OMT.DATA.GOLFTELS.find(x => x.id === pending.productId);
@@ -517,11 +580,11 @@
       golftel: g,
       _explicitTotal: pending.total
     };
-  } else {
+  } else if(!pkg){
     pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
   }
 
-  if(!pkg || (!isGolftel && (!pkg.flight || !pkg.hotel))){
+  if(!pkg || (!isGolftel && !isFlightOnly && (!pkg.flight || !pkg.hotel))){
     document.getElementById('emptyState').hidden = false;
     document.getElementById('checkoutMain').style.display = 'none';
     document.querySelector('.m-pay-bar').style.display = 'none';
@@ -698,6 +761,7 @@
      ========================================================================= */
   function renderSummary(){
     if(isGolftel) return renderGolftelSummary();
+    if(isFlightOnly) return renderFlightOnlySummary();
 
     const items = [];
     items.push({
@@ -735,6 +799,59 @@
       <div class="sum-row"><span>소계</span><span>${krw(sub)}</span></div>
       <div class="sum-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
       <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>
+    `;
+    document.getElementById('sumTotal').textContent = krw(total);
+    document.getElementById('mTotal').textContent = krw(total);
+
+    return total;
+  }
+
+  /* =========================================================================
+     🆕 항공 단독 결제 요약
+     ========================================================================= */
+  function renderFlightOnlySummary(){
+    const f = pkg.flight;
+    const SEAT_LABEL = { economy:'일반석', premium:'프리미엄 일반석', business:'비즈니스석', first:'일등석' };
+    const tripType = f.ret ? '왕복' : '편도';
+    const items = [];
+
+    items.push({
+      type: `✈️ ${tripType} 항공`, icon: '✈️',
+      title: `${f.airline} ${f.number}`,
+      sub: `${f.out.depCity} (${f.out.depAp}) ${f.out.depTime} → ${f.out.arrCity} (${f.out.arrAp}) ${f.out.arrTime} · ${f.out.duration} ${f.out.stops === 0 ? '직항' : f.out.stops + '회 경유'}`,
+      price: f.price
+    });
+    if(f.ret){
+      items.push({
+        type: '🛬 돌아오는 항공편', icon: '🛬',
+        title: `${f.airline} (귀국편)`,
+        sub: `${f.out.arrCity} ${f.ret.depTime} → ${f.out.depCity} ${f.ret.arrTime} · ${f.ret.duration}`,
+        price: 0
+      });
+    }
+
+    document.getElementById('sumItems').innerHTML = items.map(i => `
+      <div class="sum-item">
+        <div class="sum-icon">${i.icon}</div>
+        <div>
+          <div class="sum-t">${i.type}</div>
+          <div class="sum-n">${i.title}</div>
+          <div class="sum-s">${i.sub}</div>
+        </div>
+        <div class="sum-p">${i.price > 0 ? krw(i.price) : '왕복가에 포함'}</div>
+      </div>
+    `).join('');
+
+    const sub = f.price * pkg.paxCount;
+    const tax = Math.round(sub * 0.08);
+    const subTotal = sub;
+    const total = pkg._explicitTotal || subTotal;
+
+    document.getElementById('sumRows').innerHTML = `
+      <div class="sum-row"><span>좌석등급</span><span>${SEAT_LABEL[f.seatClass] || '일반석'}</span></div>
+      <div class="sum-row"><span>여행자 수</span><span>${pkg.adult > 0 ? `성인 ${pkg.adult}명` : ''}${pkg.child > 0 ? ` / 아동 ${pkg.child}명` : ''}${pkg.infant > 0 ? ` / 유아 ${pkg.infant}명` : ''}</span></div>
+      <div class="sum-row"><span>1인 운임</span><span>${krw(f.price)}</span></div>
+      <div class="sum-row" style="color:#9CA3AF;font-size:12px;"><span>· 세금·유류할증료 포함</span><span></span></div>
     `;
     document.getElementById('sumTotal').textContent = krw(total);
     document.getElementById('mTotal').textContent = krw(total);
@@ -919,6 +1036,7 @@
 
   function computeTotal(){
     if(isGolftel) return pkg._explicitTotal || (pkg.pricePerPerson * pkg.paxCount);
+    if(isFlightOnly) return pkg._explicitTotal || (pkg.flight.price * pkg.paxCount);
     let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
     (pkg.activities||[]).forEach(a => sub += a.price);
     return sub - Math.round(sub * 0.07);

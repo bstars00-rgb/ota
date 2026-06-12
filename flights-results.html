@@ -606,7 +606,7 @@
               </label>
             </div>
             <div class="flight-cta">
-              <a href="checkout.html?type=flight&id=${f.id}" class="select-btn">선택</a>
+              <a href="checkout.html?type=flight&id=${f.id}&adult=${SQ.adult}&child=${SQ.child}&infant=${SQ.infant}&cls=${SQ.cls}&dep=${SQ.dep}${SQ.ret ? '&ret=' + SQ.ret : ''}" class="select-btn">선택</a>
               <div class="seats-left ${seats <= 3 ? 'seats-low' : ''}">잔여 ${seats}석</div>
             </div>
           </div>
