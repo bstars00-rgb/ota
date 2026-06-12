@@ -30,8 +30,41 @@
     onboarded:     'omt_onboarded_v1',     // 온보딩 완료 여부 boolean
     notifSettings: 'omt_notif_settings_v1',// 카테고리별 알림 on/off + 방해 금지 시간
     userLocation:  'omt_user_location_v1', // 사용자 출발지 권역 (seoul/busan/daegu/gwangju/jeju)
-    groupBookings: 'omt_group_bookings_v1' // 그룹(단체) 예약 — 4인+ 단체 골프투어
+    groupBookings: 'omt_group_bookings_v1', // 그룹(단체) 예약 — 4인+ 단체 골프투어
+    priceAlerts:   'omt_price_alerts_v1'   // 항공 가격 알리미 (Trip.com 스타일)
   };
+
+  // ============================================================
+  // 🔔 가격 알리미 (Price Alert) — 시트립 스타일
+  // ============================================================
+  function getPriceAlerts(){
+    return read(KEYS.priceAlerts, []);
+  }
+  function addPriceAlert(alert){
+    // alert: { from, to, targetPrice, currentPrice, depMonth, channel, ... }
+    const list = getPriceAlerts();
+    const id = `pa-${Date.now().toString(36)}`;
+    const entry = {
+      id,
+      from: alert.from,
+      to: alert.to,
+      targetPrice: alert.targetPrice || 0,
+      currentPrice: alert.currentPrice || 0,
+      depMonth: alert.depMonth || null,
+      channel: alert.channel || 'kakao',  // 'kakao' | 'email' | 'push'
+      active: true,
+      createdAt: new Date().toISOString()
+    };
+    list.unshift(entry);
+    if(list.length > 20) list.length = 20;
+    write(KEYS.priceAlerts, list);
+    return entry;
+  }
+  function removePriceAlert(id){
+    const list = getPriceAlerts().filter(x => x.id !== id);
+    write(KEYS.priceAlerts, list);
+    return list;
+  }
 
   // ============================================================
   // 👥 그룹(단체) 예약 — 4인+ 단체 골프투어
@@ -694,6 +727,8 @@
     // Group bookings (단체)
     getGroups, getGroup, createGroup, updateGroup,
     addGroupMember, removeGroupMember, payGroupMember,
+    // Price alerts (시트립 스타일)
+    getPriceAlerts, addPriceAlert, removePriceAlert,
     // User
     getUser, setUser, logout,
     // Membership (Subscription)

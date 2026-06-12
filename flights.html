@@ -212,6 +212,105 @@
           편도/왕복/다구간 모두 지원합니다.
         </div>
       </div>
+
+      <!-- 🆕 트러스트 시그널 + 가격 보장 -->
+      <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#FFF5F0;color:var(--primary);display:grid;place-items:center;font-size:18px;">✈️</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:var(--ink);">17 항공사</div>
+            <div style="font-size:10px;color:var(--ink-3);font-weight:700;">FSC·LCC 통합</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#EFF6FF;color:#3B82F6;display:grid;place-items:center;font-size:18px;">💰</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:var(--ink);">총액 표시</div>
+            <div style="font-size:10px;color:var(--ink-3);font-weight:700;">세금·유류할증료 포함</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#F0FDF4;color:var(--success);display:grid;place-items:center;font-size:18px;">🛡️</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:var(--ink);">최저가 보장</div>
+            <div style="font-size:10px;color:var(--ink-3);font-weight:700;">차액 100% 환급</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#FEF3C7;color:#92400E;display:grid;place-items:center;font-size:18px;">📞</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:var(--ink);">24/7 카톡</div>
+            <div style="font-size:10px;color:var(--ink-3);font-weight:700;">한국어 상담</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🆕 가격 추이 미니 그래프 + 가격 알리미 -->
+  <section style="background:#fff;border-bottom:1px solid var(--line);padding:24px 0;">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;gap:14px;flex-wrap:wrap;">
+        <div>
+          <h2 class="block-h" style="margin:0;">📈 향후 30일 최저가 추이 <span style="font-size:13px;color:var(--ink-3);font-weight:700;">— 서울 → 나고야 기준</span></h2>
+          <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">매일 자정 자동 갱신 · 카톡 알리미로 목표가 도달 시 즉시 알림</div>
+        </div>
+        <button onclick="openPriceAlertModal()" style="padding:10px 18px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:10px;font-weight:900;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          🔔 가격 알리미 설정
+        </button>
+      </div>
+      <div id="priceTrendBars" style="display:grid;grid-template-columns:repeat(15,1fr);gap:4px;align-items:end;height:120px;padding:0 0 24px;position:relative;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);font-weight:700;">
+        <span>오늘</span>
+        <span>+10일</span>
+        <span>+20일</span>
+        <span>+30일</span>
+      </div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="padding:10px 14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">📉</span>
+          <div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:700;">최저가 일자</div>
+            <div style="font-size:14px;font-weight:900;color:var(--success);" id="cheapestDateText">+18일 (화) · 289,000원</div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">⚖️</span>
+          <div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:700;">평균가</div>
+            <div style="font-size:14px;font-weight:900;color:#92400E;">412,000원</div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">📈</span>
+          <div>
+            <div style="font-size:11px;color:var(--ink-3);font-weight:700;">최고가 (피크)</div>
+            <div style="font-size:14px;font-weight:900;color:var(--danger);">582,000원</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🆕 항공+골프텔 번들 CTA (시트립 패턴 + 우리 모델 활용) -->
+  <section style="background:linear-gradient(135deg,#FFF5F0,#FFFAF0);border-bottom:1px solid var(--line);padding:32px 0;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;">
+        <div>
+          <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--primary);text-transform:uppercase;">🎁 OMT 번들 특가</div>
+          <h2 style="font-size:24px;font-weight:900;margin:6px 0 4px;letter-spacing:-0.02em;">항공권 + 골프텔 함께 예약하면<br>최대 <span style="color:var(--primary);">25% 더 저렴해요</span></h2>
+          <div style="font-size:13px;color:var(--ink-3);">호텔·라운딩·픽업·항공 모두 포함 · 일본/베트남 직영 골프텔과 자동 매칭</div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <a href="golftels.html?type=golftel-air" style="padding:11px 20px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:13px;text-decoration:none;">⛳ 항공 결합 골프텔 보기 →</a>
+            <a href="group-booking.html" style="padding:11px 20px;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;font-weight:900;font-size:13px;text-decoration:none;">👥 단체 견적 (4인+)</a>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="width:140px;height:90px;border-radius:14px;background:linear-gradient(135deg,#3B82F6,#60A5FA);display:grid;place-items:center;font-size:48px;color:#fff;">✈️</div>
+          <div style="width:24px;align-self:center;font-size:24px;font-weight:900;color:var(--primary);text-align:center;">+</div>
+          <div style="width:140px;height:90px;border-radius:14px;background:linear-gradient(135deg,#075440,#0B6E4F);display:grid;place-items:center;font-size:48px;color:#fff;">⛳</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -648,6 +747,194 @@
       state.retDate = ret.toISOString().slice(0, 10);
       goSearch();
     };
+
+    /* ========================================================================
+       🆕 가격 추이 미니 그래프 (시트립 스타일)
+       ======================================================================== */
+    function renderPriceTrend(){
+      const container = document.getElementById('priceTrendBars');
+      if(!container) return;
+      // 30일치 가격 mock — sine wave + 주말 가산
+      const today = new Date();
+      const base = 380000;
+      const data = Array.from({length: 30}, (_, i) => {
+        const d = new Date(today);
+        d.setDate(d.getDate() + i);
+        const dow = d.getDay();
+        const isWeekend = dow === 0 || dow === 6;
+        const wave = Math.sin(i * 0.5) * 60000;
+        const noise = (i % 7 === 0 ? -90000 : 0) + (i % 11 === 0 ? 60000 : 0);
+        const price = Math.round(base + wave + noise + (isWeekend ? 50000 : 0));
+        return { date: d, price: Math.max(price, 289000) };
+      });
+      // 15일까지만 시각화
+      const visible = data.slice(0, 15);
+      const max = Math.max(...visible.map(d => d.price));
+      const min = Math.min(...visible.map(d => d.price));
+      const cheapestIdx = visible.findIndex(d => d.price === min);
+
+      container.innerHTML = visible.map((d, i) => {
+        const heightPct = ((d.price - 200000) / (max - 200000)) * 100;
+        const isCheapest = i === cheapestIdx;
+        const dow = ['일','월','화','수','목','금','토'][d.date.getDay()];
+        const isWeekend = d.date.getDay() === 0 || d.date.getDay() === 6;
+        const color = isCheapest ? 'var(--success)' : isWeekend ? 'var(--danger)' : 'var(--primary)';
+        return `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;" onclick="pickTrendDate('${d.date.toISOString().slice(0,10)}')">
+            <div style="font-size:10px;font-weight:800;color:${isCheapest?'var(--success)':'var(--ink-3)'};font-family:'JetBrains Mono',monospace;">${Math.round(d.price/1000)}K</div>
+            <div style="width:100%;height:${heightPct}%;min-height:6px;background:${color};border-radius:4px 4px 0 0;transition:all .2s;opacity:${isCheapest?1:.7};"></div>
+            <div style="font-size:10px;color:${isCheapest?'var(--success)':'var(--ink-4)'};font-weight:${isCheapest?900:700};">${d.date.getMonth()+1}/${d.date.getDate()}<br><span style="font-size:9px;">${dow}</span></div>
+          </div>
+        `;
+      }).join('');
+
+      // 최저가 일자 텍스트 갱신
+      const cheapestDate = visible[cheapestIdx].date;
+      const dow = ['일','월','화','수','목','금','토'][cheapestDate.getDay()];
+      const diff = Math.round((cheapestDate - today) / 86400000);
+      document.getElementById('cheapestDateText').textContent = `+${diff}일 (${dow}) · ${min.toLocaleString('ko-KR')}원`;
+    }
+
+    window.pickTrendDate = (dateKey) => {
+      state.depDate = dateKey;
+      const d = new Date(dateKey);
+      const ret = new Date(d); ret.setDate(ret.getDate() + 3);
+      state.retDate = ret.toISOString().slice(0, 10);
+      // 도착지 기본값 NGO
+      const cities = window.OMT?.DATA?.CITIES || {};
+      if(!state.from) state.from = cities['ICN'];
+      if(!state.to) state.to = cities['NGO'];
+      // 출발지/도착지/날짜 label 갱신
+      ['from','to'].forEach(k => {
+        if(state[k]){
+          document.getElementById(k + 'Label').textContent = state[k].name;
+          document.getElementById(k + 'Label').classList.remove('placeholder');
+          document.getElementById(k + 'Sub').textContent = state[k].code;
+        }
+      });
+      const fmt = key => {
+        const [y, m, d] = key.split('-');
+        const date = new Date(+y, +m-1, +d);
+        const dow = ['일','월','화','수','목','금','토'][date.getDay()];
+        return `${y.slice(2)}.${m}.${d}(${dow})`;
+      };
+      document.getElementById('dateLabel').textContent = `${fmt(state.depDate)} ~ ${fmt(state.retDate)}`;
+      document.getElementById('dateSub').textContent = '왕복';
+      // 스크롤하여 검색 폼 강조
+      document.querySelector('.search-form').scrollIntoView({behavior:'smooth', block:'center'});
+      // 그래프 클릭 안내
+      setTimeout(() => alert(`📅 ${fmt(dateKey)} 출발로 자동 설정됐어요. 검색 버튼을 눌러주세요!`), 600);
+    };
+
+    /* ========================================================================
+       🆕 가격 알리미 모달 (Price Alert · 시트립 스타일)
+       ======================================================================== */
+    window.openPriceAlertModal = () => {
+      const fromCity = state.from?.name || '서울';
+      const toCity = state.to?.name || '나고야';
+      const overlay = document.createElement('div');
+      overlay.id = 'priceAlertOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5);display:grid;place-items:center;padding:20px;backdrop-filter:blur(4px);';
+      overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+      overlay.innerHTML = `
+        <div style="background:#fff;border-radius:18px;width:min(440px,100%);overflow:hidden;animation:paSlide .3s cubic-bezier(.34,1.56,.64,1);">
+          <style>@keyframes paSlide{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>
+          <div style="padding:20px 24px;background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:11px;font-weight:900;opacity:.85;letter-spacing:.08em;text-transform:uppercase;">🔔 PRICE ALERT</div>
+              <div style="font-size:18px;font-weight:900;margin-top:2px;">가격 알리미 설정</div>
+            </div>
+            <button onclick="document.getElementById('priceAlertOverlay').remove()" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.25);border:none;font-size:18px;cursor:pointer;color:#fff;">×</button>
+          </div>
+          <div style="padding:24px;">
+            <div style="background:#FFF5F0;border:1px solid #FECACA;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+              <div style="font-size:12px;color:var(--ink-3);font-weight:700;">노선</div>
+              <div style="font-size:16px;font-weight:900;color:var(--ink);margin-top:2px;display:flex;align-items:center;gap:8px;">
+                ${fromCity} <span style="color:var(--primary);">→</span> ${toCity}
+                <span style="font-size:11px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;margin-left:auto;">${state.from?.code || 'ICN'}-${state.to?.code || 'NGO'}</span>
+              </div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">현재 최저가 <span style="color:var(--primary);font-weight:900;font-family:'JetBrains Mono',monospace;">289,000원</span> · 평균 412,000원</div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:12px;font-weight:900;color:var(--ink-2);display:block;margin-bottom:6px;">💸 목표 가격</label>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="number" id="paTarget" value="350000" min="100000" step="10000" style="flex:1;padding:12px 14px;border:2px solid var(--line);border-radius:10px;font-size:16px;font-weight:800;outline:none;font-family:'JetBrains Mono',monospace;" />
+                <span style="font-size:14px;font-weight:900;color:var(--ink-3);">원 이하</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <button onclick="document.getElementById('paTarget').value='300000'" style="flex:1;padding:6px;background:var(--bg-soft);border:none;border-radius:6px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;">30만</button>
+                <button onclick="document.getElementById('paTarget').value='350000'" style="flex:1;padding:6px;background:var(--bg-soft);border:none;border-radius:6px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;">35만</button>
+                <button onclick="document.getElementById('paTarget').value='400000'" style="flex:1;padding:6px;background:var(--bg-soft);border:none;border-radius:6px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;">40만</button>
+                <button onclick="document.getElementById('paTarget').value='500000'" style="flex:1;padding:6px;background:var(--bg-soft);border:none;border-radius:6px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;">50만</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:12px;font-weight:900;color:var(--ink-2);display:block;margin-bottom:6px;">📅 출발 월</label>
+              <select id="paMonth" style="width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;outline:none;font-family:inherit;cursor:pointer;">
+                <option value="2026-06">2026년 6월</option>
+                <option value="2026-07" selected>2026년 7월</option>
+                <option value="2026-08">2026년 8월</option>
+                <option value="2026-09">2026년 9월</option>
+                <option value="2026-10">2026년 10월</option>
+                <option value="any">언제든 (목표가 도달 시)</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <label style="font-size:12px;font-weight:900;color:var(--ink-2);display:block;margin-bottom:6px;">📩 알림 채널</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+                <label style="padding:10px;background:#FFF5F0;border:2px solid var(--primary);border-radius:8px;font-size:12px;font-weight:800;color:var(--primary);text-align:center;cursor:pointer;">
+                  <input type="radio" name="paChannel" value="kakao" checked style="display:none;">💬 카톡
+                </label>
+                <label style="padding:10px;background:#fff;border:2px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);text-align:center;cursor:pointer;">
+                  <input type="radio" name="paChannel" value="email" style="display:none;">📧 이메일
+                </label>
+                <label style="padding:10px;background:#fff;border:2px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);text-align:center;cursor:pointer;">
+                  <input type="radio" name="paChannel" value="push" style="display:none;">🔔 푸시
+                </label>
+              </div>
+            </div>
+
+            <div style="padding:12px 14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;font-size:11px;color:#065F46;line-height:1.5;margin-bottom:18px;">
+              💡 매일 자정 가격을 모니터링하고 목표가 이하 항공권이 발견되면 즉시 알림 발송. 최대 20개 알리미 등록 가능.
+            </div>
+
+            <button onclick="savePriceAlert()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit;letter-spacing:.04em;">
+              🔔 알리미 등록하기
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    };
+
+    window.savePriceAlert = () => {
+      const target = parseInt(document.getElementById('paTarget').value || '0');
+      const month = document.getElementById('paMonth').value;
+      const channel = document.querySelector('input[name="paChannel"]:checked')?.value || 'kakao';
+      if(target < 100000){
+        alert('⚠️ 목표가는 10만원 이상으로 설정해주세요');
+        return;
+      }
+      const alert_data = {
+        from: state.from?.code || 'ICN',
+        to: state.to?.code || 'NGO',
+        targetPrice: target,
+        currentPrice: 289000,
+        depMonth: month,
+        channel
+      };
+      if(window.OMT?.State?.addPriceAlert){
+        window.OMT.State.addPriceAlert(alert_data);
+      }
+      document.getElementById('priceAlertOverlay').remove();
+      alert(`✅ 가격 알리미 등록 완료!\n\n· 노선: ${state.from?.name || '서울'} → ${state.to?.name || '나고야'}\n· 목표가: ${target.toLocaleString('ko-KR')}원\n· 알림: ${channel === 'kakao' ? '카톡' : channel === 'email' ? '이메일' : '푸시'}\n\n매일 자정 가격 변동을 확인하고 목표가 도달 시 즉시 알려드려요.`);
+    };
+
+    // 초기화
+    renderPriceTrend();
   </script>
 </body>
 </html>

@@ -282,8 +282,20 @@
 
       <!-- Results -->
       <section>
+        <!-- 🆕 7일 가격 추이 + 가장 저렴한 날짜 추천 (시트립 스타일) -->
+        <div style="background:linear-gradient(135deg,#fff,#FFFAF0);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;gap:14px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--primary);text-transform:uppercase;">📈 7일 가격 비교</div>
+              <div style="font-size:14px;font-weight:900;color:var(--ink);margin-top:2px;">출발일 변경하면 더 저렴할 수도 있어요</div>
+            </div>
+            <button onclick="openPriceAlertFromResults()" style="padding:8px 14px;background:#fff;border:1.5px solid var(--primary);color:var(--primary);border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;">🔔 가격 알리미</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;" id="weekTrendBars"></div>
+        </div>
+
         <div class="results-head">
-          <div class="note">표시된 금액은 항공권 + 유류할증료 + 제세공과금 + 발권 수수료가 포함된 금액입니다.</div>
+          <div class="note">표시된 금액은 항공권 + 유류할증료 + 제세공과금 + 발권 수수료가 포함된 금액입니다. <span style="display:inline-block;margin-left:6px;padding:2px 8px;background:rgba(16,185,129,.15);color:var(--success);border-radius:5px;font-weight:900;font-size:11px;">✓ 총액 표시</span></div>
           <div class="actions">
             <button class="compare-btn">⚖️ 비교하기</button>
             <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
@@ -558,6 +570,7 @@
         const a = airlines[f.code] || { name: f.code, color: 'linear-gradient(135deg,#6B7280,#9CA3AF)' };
         const seats = remainingSeats(f);
         const isBusiness = f.class === 'business' || f.class === 'first';
+        const cancelPrice = Math.round(f.price * 0.05 / 1000) * 1000;  // 5% 취소보장
         return `
           <div class="flight-card">
             <div class="airline">
@@ -584,8 +597,13 @@
               </div>
             </div>
             <div class="flight-extras">
-              <div class="baggage">무료 수하물 15KG</div>
+              <div class="baggage">무료 수하물 15KG · 기내식 포함</div>
               <div class="price ${isBusiness ? 'business' : ''}">${f.price.toLocaleString('ko-KR')}원</div>
+              <div style="font-size:10px;color:var(--ink-3);font-weight:700;margin-top:2px;">세금·유류할증료 포함</div>
+              <label style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:6px;cursor:pointer;font-size:11px;color:var(--ink-2);font-weight:700;">
+                <input type="checkbox" onchange="toggleCancelGuard(this, '${f.id}', ${cancelPrice})" style="accent-color:var(--success);" />
+                🛡️ 취소 보장 +${cancelPrice.toLocaleString('ko-KR')}원
+              </label>
             </div>
             <div class="flight-cta">
               <a href="checkout.html?type=flight&id=${f.id}" class="select-btn">선택</a>
@@ -599,7 +617,67 @@
       renderSortChips();
     }
 
+    /* 🆕 7일 가격 추이 (시트립 스타일) */
+    function renderWeekTrend(){
+      const container = document.getElementById('weekTrendBars');
+      if(!container) return;
+      const baseDate = SQ.dep ? new Date(SQ.dep + 'T00:00:00') : new Date();
+      const flights = window._allFlights || [];
+      const basePrice = flights.length > 0 ? Math.min(...flights.map(f => f.price)) : 375400;
+      const days = [];
+      for(let offset = -3; offset <= 3; offset++){
+        const d = new Date(baseDate);
+        d.setDate(d.getDate() + offset);
+        const dow = d.getDay();
+        const isWeekend = dow === 0 || dow === 6;
+        const noise = Math.sin(offset * 0.7) * 60000 + (offset === 0 ? 0 : Math.random() * 40000 - 20000);
+        const price = Math.max(Math.round(basePrice + noise + (isWeekend ? 50000 : 0)), 289000);
+        days.push({ date: d, price, isSelected: offset === 0 });
+      }
+      const minPrice = Math.min(...days.map(d => d.price));
+      container.innerHTML = days.map(d => {
+        const isLowest = d.price === minPrice;
+        const dow = ['일','월','화','수','목','금','토'][d.date.getDay()];
+        const isWeekend = d.date.getDay() === 0 || d.date.getDay() === 6;
+        const bg = d.isSelected ? 'linear-gradient(135deg,#FF6B35,#FFD23F)' :
+                   isLowest ? 'linear-gradient(135deg,#10B981,#34D399)' :
+                   '#fff';
+        const color = (d.isSelected || isLowest) ? '#fff' : 'var(--ink)';
+        const subColor = (d.isSelected || isLowest) ? 'rgba(255,255,255,.85)' : (isWeekend ? 'var(--danger)' : 'var(--ink-3)');
+        return `
+          <button onclick="reroute('${d.date.toISOString().slice(0,10)}')" style="padding:12px 8px;background:${bg};border:${d.isSelected||isLowest?'none':'1px solid var(--line)'};border-radius:10px;cursor:pointer;font-family:inherit;text-align:center;transition:all .15s;${d.isSelected?'transform:scale(1.05);box-shadow:0 6px 16px rgba(255,107,53,.3);':''}">
+            <div style="font-size:10px;font-weight:800;color:${subColor};">${d.date.getMonth()+1}/${d.date.getDate()} (${dow})</div>
+            <div style="font-size:14px;font-weight:900;color:${color};font-family:'JetBrains Mono',monospace;margin-top:4px;">${Math.round(d.price/1000)}K</div>
+            ${isLowest && !d.isSelected ? '<div style="font-size:9px;color:#fff;font-weight:900;margin-top:2px;letter-spacing:.04em;">📉 최저가</div>' : ''}
+            ${d.isSelected ? '<div style="font-size:9px;color:#fff;font-weight:900;margin-top:2px;letter-spacing:.04em;">현재 선택</div>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    window.reroute = (newDep) => {
+      const params = new URLSearchParams(location.search);
+      params.set('dep', newDep);
+      location.href = 'flights-results.html?' + params.toString();
+    };
+
+    window.toggleCancelGuard = (cb, fid, price) => {
+      if(cb.checked){
+        // 토스트 알림 (실 구현 시 checkout payload에 반영)
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:800;z-index:200;box-shadow:0 12px 32px rgba(16,185,129,.4);';
+        t.textContent = `✓ 취소 보장 추가됨 (+${price.toLocaleString('ko-KR')}원)`;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2200);
+      }
+    };
+
+    window.openPriceAlertFromResults = () => {
+      alert(`🔔 가격 알리미 등록\n\n노선: ${SQ.from} → ${SQ.to}\n현재 최저가: 현재 표시된 항공권 기준\n\n실 사용 시 flights.html의 가격 알리미 모달과 연동됩니다.`);
+    };
+
     init();
+    renderWeekTrend();
   </script>
 </body>
 </html>
