@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>호텔 상세 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-d:#E85826;--accent:#FFD23F;
+      --ink:#1A1A1A;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+      --line:#E5E7EB;--bg:#FAFBFC;--bg-2:#fff;--bg-soft:#F9FAFB;
+      --success:#10B981;--warning:#F59E0B;--danger:#EF4444;--info:#3B82F6;
+      --max-w:1180px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 20px;}
+    .mono{font-family:'JetBrains Mono',monospace;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
+    .header-inner{height:60px;display:flex;align-items:center;gap:14px;}
+    .header-inner .back{font-size:22px;color:var(--ink-2);width:36px;height:36px;border-radius:8px;display:grid;place-items:center;}
+    .header-inner .back:hover{background:var(--bg-soft);}
+    .header-inner .title{font-size:14px;font-weight:800;flex:1;color:var(--ink-2);}
+    .header-inner .fav,.header-inner .share{padding:8px 14px;background:#F3F4F6;border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);}
+
+    /* Hero gallery */
+    .gallery{
+      display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;
+      max-width:var(--max-w);margin:14px auto 0;padding:0 20px;height:380px;
+    }
+    .gallery .g{background-size:cover;background-position:center;border-radius:14px;cursor:pointer;position:relative;overflow:hidden;}
+    .gallery .g:hover::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.1);}
+    .gallery .g-main{grid-row:span 2;}
+    .gallery .g-more{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.7);color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;}
+
+    /* Title block */
+    .titleblock{padding:24px 0 16px;display:grid;grid-template-columns:1fr 220px;gap:24px;align-items:flex-start;}
+    .titleblock h1{font-size:28px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .titleblock .english{font-size:13px;color:var(--ink-3);font-weight:700;margin-bottom:8px;}
+    .stars{color:var(--accent);font-size:16px;margin-bottom:8px;}
+    .meta-line{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink-2);align-items:center;}
+    .meta-line .pill{padding:3px 9px;border-radius:6px;font-weight:800;font-size:11px;}
+    .pill.green{background:rgba(16,185,129,.12);color:#065F46;}
+    .pill.blue{background:rgba(59,130,246,.12);color:#1E40AF;}
+    .pill.orange{background:rgba(255,107,53,.12);color:var(--primary);}
+
+    .score-card{
+      background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:18px 20px;border-radius:14px;text-align:center;
+    }
+    .score-card .num{font-size:36px;font-weight:900;font-family:'JetBrains Mono',monospace;line-height:1;}
+    .score-card .label{font-size:13px;font-weight:900;margin-top:4px;}
+    .score-card .sub{font-size:11px;opacity:.9;margin-top:2px;}
+
+    /* Tabs */
+    .tabs-bar{
+      position:sticky;top:60px;background:#fff;border-bottom:1px solid var(--line);z-index:40;
+      display:flex;gap:0;overflow-x:auto;padding:0 20px;max-width:var(--max-w);margin:0 auto;
+    }
+    .tab-btn{padding:14px 16px;font-size:13px;font-weight:800;color:var(--ink-3);border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;}
+    .tab-btn:hover{color:var(--ink-2);}
+    .tab-btn.on{color:var(--ink);border-bottom-color:var(--primary);}
+
+    .section{padding:32px 0 16px;}
+    .section-h{font-size:20px;font-weight:900;margin:0 0 14px;letter-spacing:-0.02em;}
+
+    /* Rooms */
+    .room-card{
+      background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+      display:grid;grid-template-columns:200px 1fr 220px;gap:0;margin-bottom:14px;
+    }
+    .room-card .room-img{background-size:cover;background-position:center;min-height:160px;}
+    .room-card .room-body{padding:16px 20px;}
+    .room-card .room-name{font-size:16px;font-weight:900;margin-bottom:4px;}
+    .room-card .room-info{font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:10px;}
+    .room-card .room-amen{display:flex;gap:6px;flex-wrap:wrap;}
+    .room-card .room-amen span{padding:3px 8px;background:#F3F4F6;border-radius:5px;font-size:11px;font-weight:700;color:var(--ink-2);}
+    .room-card .room-amen span.highlight{background:rgba(16,185,129,.15);color:#065F46;}
+    .room-card .room-policies{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--ink-2);}
+    .room-card .room-policies span{display:inline-flex;align-items:center;gap:3px;}
+    .room-card .room-price{background:var(--bg-soft);padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;text-align:right;}
+    .room-card .room-price .lb{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .room-card .room-price .pr-old{font-size:11px;color:var(--ink-4);text-decoration:line-through;font-family:'JetBrains Mono',monospace;}
+    .room-card .room-price .pr{font-size:22px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',monospace;margin:2px 0;}
+    .room-card .room-price .per{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .room-card .room-price .pick-btn{margin-top:8px;padding:10px 18px;background:var(--primary);color:#fff;border-radius:8px;font-weight:900;font-size:13px;width:100%;}
+    .room-card .room-price .pick-btn:hover{background:var(--primary-d);}
+    .room-card .room-price .left-seats{font-size:10px;color:var(--danger);font-weight:800;margin-top:6px;}
+
+    /* Amenities grid */
+    .amen-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+    .amen-cell{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 10px;text-align:center;}
+    .amen-cell .ic{font-size:22px;margin-bottom:4px;}
+    .amen-cell .nm{font-size:11px;font-weight:700;color:var(--ink-2);}
+
+    /* Reviews */
+    .review-summary{
+      display:grid;grid-template-columns:200px 1fr;gap:24px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;
+    }
+    .review-summary .left{text-align:center;display:flex;flex-direction:column;justify-content:center;}
+    .review-summary .big-score{font-size:48px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',monospace;line-height:1;}
+    .review-summary .big-label{font-size:14px;font-weight:900;margin-top:6px;}
+    .review-summary .big-sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .review-bars{display:grid;gap:8px;}
+    .bar-row{display:grid;grid-template-columns:90px 1fr 60px;gap:10px;align-items:center;font-size:12px;}
+    .bar-row .name{font-weight:700;color:var(--ink-2);}
+    .bar-row .track{height:6px;background:#F3F4F6;border-radius:3px;overflow:hidden;}
+    .bar-row .fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;}
+    .bar-row .score{text-align:right;font-weight:900;font-family:'JetBrains Mono',monospace;}
+
+    .review-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px;}
+    .review-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .review-card .author{display:flex;align-items:center;gap:8px;}
+    .review-card .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;}
+    .review-card .nm{font-size:13px;font-weight:800;}
+    .review-card .when{font-size:11px;color:var(--ink-3);}
+    .review-card .score-chip{padding:3px 8px;background:var(--primary);color:#fff;border-radius:6px;font-size:11px;font-weight:900;}
+    .review-card .body{font-size:13px;color:var(--ink-2);line-height:1.6;}
+
+    /* Layout */
+    .twocol{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:flex-start;}
+    .booking-side{position:sticky;top:130px;background:#fff;border:1.5px solid var(--primary);border-radius:14px;padding:20px;box-shadow:0 8px 28px rgba(255,107,53,.15);}
+    .booking-side .b-h{font-size:11px;font-weight:900;color:var(--primary);letter-spacing:.08em;text-transform:uppercase;}
+    .booking-side .b-name{font-size:15px;font-weight:900;margin-top:4px;line-height:1.3;}
+    .booking-side .b-price-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;}
+    .booking-side .b-old{font-size:13px;color:var(--ink-4);text-decoration:line-through;font-family:'JetBrains Mono',monospace;}
+    .booking-side .b-price{font-size:26px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',monospace;}
+    .booking-side .b-tax{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .booking-side .b-dates{margin-top:14px;padding:10px 12px;background:var(--bg-soft);border-radius:8px;font-size:12px;}
+    .booking-side .b-dates strong{font-family:'JetBrains Mono',monospace;}
+    .booking-side .b-cta{margin-top:14px;width:100%;padding:14px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:14px;}
+    .booking-side .b-cta:hover{background:var(--primary-d);}
+    .booking-side .b-trust{margin-top:10px;display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--ink-2);font-weight:700;}
+    .booking-side .b-trust span{display:inline-flex;align-items:center;gap:5px;}
+
+    /* Map */
+    .map-wrap{background:var(--bg-soft);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+    .map-wrap iframe{display:block;width:100%;height:340px;border:none;}
+
+    /* Policy */
+    .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .policy-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
+    .policy-card .h{font-size:13px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .policy-card ul{margin:0;padding:0 0 0 18px;font-size:12px;color:var(--ink-2);line-height:1.7;}
+
+    /* FAQ */
+    .faq-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:8px;}
+    .faq-item .q{font-size:13px;font-weight:800;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+    .faq-item .a{font-size:12px;color:var(--ink-2);line-height:1.6;margin-top:8px;display:none;}
+    .faq-item.open .a{display:block;}
+    .faq-item.open .q .chev{transform:rotate(180deg);}
+    .faq-item .chev{font-size:14px;color:var(--ink-3);transition:transform .15s;}
+
+    @media (max-width:900px){
+      .gallery{grid-template-columns:1fr;height:auto;}
+      .gallery .g{height:200px;}
+      .titleblock{grid-template-columns:1fr;}
+      .room-card{grid-template-columns:1fr;}
+      .twocol{grid-template-columns:1fr;}
+      .amen-grid{grid-template-columns:repeat(3,1fr);}
+      .policy-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <button class="back" onclick="history.back()">‹</button>
+      <div class="title">🏨 호텔 상세</div>
+      <button class="fav">♡ 찜</button>
+      <button class="share">⤴ 공유</button>
+    </div>
+  </header>
+
+  <div class="gallery" id="gallery"></div>
+
+  <div class="container">
+    <section class="titleblock">
+      <div>
+        <h1 id="hotelName">로딩 중...</h1>
+        <div class="english" id="hotelEnglish"></div>
+        <div class="stars" id="hotelStars"></div>
+        <div class="meta-line">
+          <span id="hotelArea"></span>
+          <span id="hotelChain"></span>
+          <span class="pill green">✓ 즉시 확정</span>
+          <span class="pill blue">✓ 무료 취소 (체크인 7일 전까지)</span>
+          <span class="pill orange">⭐ 멤버 -7%</span>
+        </div>
+      </div>
+      <div class="score-card">
+        <div class="num" id="bigScore">-</div>
+        <div class="label" id="bigLabel">매우 좋음</div>
+        <div class="sub" id="bigSub">리뷰 - 건</div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs-bar" id="tabsBar">
+    <button class="tab-btn on" data-anchor="overview" onclick="goTab('overview',this)">개요</button>
+    <button class="tab-btn" data-anchor="rooms" onclick="goTab('rooms',this)">객실 선택</button>
+    <button class="tab-btn" data-anchor="amenities" onclick="goTab('amenities',this)">시설</button>
+    <button class="tab-btn" data-anchor="reviews" onclick="goTab('reviews',this)">리뷰</button>
+    <button class="tab-btn" data-anchor="location" onclick="goTab('location',this)">위치</button>
+    <button class="tab-btn" data-anchor="policies" onclick="goTab('policies',this)">정책</button>
+    <button class="tab-btn" data-anchor="faq" onclick="goTab('faq',this)">FAQ</button>
+  </nav>
+
+  <main class="container">
+    <div class="twocol">
+      <div>
+        <!-- 개요 -->
+        <section class="section" id="overview">
+          <h2 class="section-h">📍 개요</h2>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;">
+            <p id="hotelDesc" style="margin:0;color:var(--ink-2);font-size:14px;line-height:1.7;">로딩 중...</p>
+            <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="padding:10px;background:var(--bg-soft);border-radius:8px;">
+                <div style="font-size:10px;color:var(--ink-3);font-weight:700;">체크인</div>
+                <div style="font-size:13px;font-weight:900;margin-top:2px;">15:00 부터</div>
+              </div>
+              <div style="padding:10px;background:var(--bg-soft);border-radius:8px;">
+                <div style="font-size:10px;color:var(--ink-3);font-weight:700;">체크아웃</div>
+                <div style="font-size:13px;font-weight:900;margin-top:2px;">11:00 까지</div>
+              </div>
+              <div style="padding:10px;background:var(--bg-soft);border-radius:8px;">
+                <div style="font-size:10px;color:var(--ink-3);font-weight:700;">개관일</div>
+                <div style="font-size:13px;font-weight:900;margin-top:2px;">2015년</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 객실 선택 -->
+        <section class="section" id="rooms">
+          <h2 class="section-h">🛏️ 객실 선택</h2>
+          <div id="roomList"></div>
+        </section>
+
+        <!-- 시설 -->
+        <section class="section" id="amenities">
+          <h2 class="section-h">🏊 시설</h2>
+          <div class="amen-grid" id="amenGrid"></div>
+        </section>
+
+        <!-- 리뷰 -->
+        <section class="section" id="reviews">
+          <h2 class="section-h">⭐ 리뷰 <span id="reviewCount" style="font-size:13px;color:var(--ink-3);font-weight:700;margin-left:6px;"></span></h2>
+          <div class="review-summary">
+            <div class="left">
+              <div class="big-score" id="rsScore">-</div>
+              <div class="big-label" id="rsLabel">매우 좋음</div>
+              <div class="big-sub" id="rsSub">- 건</div>
+            </div>
+            <div class="review-bars" id="reviewBars"></div>
+          </div>
+          <div id="reviewList"></div>
+          <button style="width:100%;padding:14px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:800;color:var(--ink-2);margin-top:8px;cursor:pointer;font-family:inherit;">리뷰 전체 보기 (<span id="totalReviews">-</span>건) →</button>
+        </section>
+
+        <!-- 위치 -->
+        <section class="section" id="location">
+          <h2 class="section-h">📍 위치</h2>
+          <div class="map-wrap">
+            <iframe id="hotelMap" loading="lazy"></iframe>
+          </div>
+          <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div style="padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:11px;color:var(--ink-3);font-weight:700;">🚆 가장 가까운 역</div>
+              <div style="font-size:13px;font-weight:800;margin-top:3px;" id="nearestStation">도보 3분</div>
+            </div>
+            <div style="padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:11px;color:var(--ink-3);font-weight:700;">✈️ 공항까지</div>
+              <div style="font-size:13px;font-weight:800;margin-top:3px;">택시 45분</div>
+            </div>
+            <div style="padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:11px;color:var(--ink-3);font-weight:700;">🛍️ 도심 거리</div>
+              <div style="font-size:13px;font-weight:800;margin-top:3px;" id="distCenter">2km</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 정책 -->
+        <section class="section" id="policies">
+          <h2 class="section-h">📋 호텔 정책</h2>
+          <div class="policy-grid">
+            <div class="policy-card">
+              <div class="h">↩️ 취소·환불 정책</div>
+              <ul>
+                <li>체크인 7일 전까지: <strong style="color:var(--success);">무료 취소</strong></li>
+                <li>체크인 3~6일 전: 1박 요금 차감</li>
+                <li>체크인 2일 이내: 전액 환불 불가</li>
+                <li>천재지변 시 별도 안내 (OMT CS 카톡 상담)</li>
+              </ul>
+            </div>
+            <div class="policy-card">
+              <div class="h">👶 어린이·유아 정책</div>
+              <ul>
+                <li>0-5세 무료 투숙 (1실 1명)</li>
+                <li>6-11세 추가 베드 +30%</li>
+                <li>12세 이상 성인 요금 적용</li>
+                <li>가족실 별도 예약 권장</li>
+              </ul>
+            </div>
+            <div class="policy-card">
+              <div class="h">💳 결제·세금</div>
+              <ul>
+                <li>현지 시설 사용료 별도 (€2-5/박)</li>
+                <li>관광세 별도 (도시별 상이)</li>
+                <li>표시 가격에 부가가치세 포함</li>
+                <li>카드 결제 시 보증금 사전 승인</li>
+              </ul>
+            </div>
+            <div class="policy-card">
+              <div class="h">🐾 반려동물·흡연</div>
+              <ul>
+                <li>반려동물 입실 불가 (안내견 예외)</li>
+                <li>전 객실 금연</li>
+                <li>흡연 적발 시 청소비 부과</li>
+                <li>로비/지정 구역 흡연 가능</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="section" id="faq">
+          <h2 class="section-h">❓ FAQ</h2>
+          <div class="faq-item" onclick="this.classList.toggle('open')">
+            <div class="q">조식은 어떻게 진행되나요? <span class="chev">▾</span></div>
+            <div class="a">조식 포함 객실 예약 시 호텔 1층 레스토랑에서 06:30~10:00 뷔페 형식으로 제공됩니다. 한국인 입맛에 맞춘 코너도 일부 있어요.</div>
+          </div>
+          <div class="faq-item" onclick="this.classList.toggle('open')">
+            <div class="q">늦은 체크인 가능한가요? <span class="chev">▾</span></div>
+            <div class="a">24시간 프론트 운영으로 늦은 시간(자정 이후)에도 체크인 가능합니다. 단, 예약 시 도착 시간 안내 권장.</div>
+          </div>
+          <div class="faq-item" onclick="this.classList.toggle('open')">
+            <div class="q">공항 픽업 서비스가 있나요? <span class="chev">▾</span></div>
+            <div class="a">유료 픽업 서비스(편도 약 5만원~) 또는 무료 공항 셔틀(시간 고정) 이용 가능. 예약 시 OMT CS로 사전 신청.</div>
+          </div>
+          <div class="faq-item" onclick="this.classList.toggle('open')">
+            <div class="q">한국어 가능한 직원이 있나요? <span class="chev">▾</span></div>
+            <div class="a">프론트 데스크에 한국어 가능 직원 1-2명 상시 근무. 24/7 OMT 카톡 통역 지원 별도 제공.</div>
+          </div>
+          <div class="faq-item" onclick="this.classList.toggle('open')">
+            <div class="q">와이파이는 무료인가요? <span class="chev">▾</span></div>
+            <div class="a">전 객실·공용 공간 무료 와이파이 제공. 고속 와이파이 패키지(스트리밍 가능)는 1박 1,000원 별도.</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 우측 sticky 예약 카드 -->
+      <aside class="booking-side" id="bookingSide">
+        <div class="b-h">📅 1박 기준</div>
+        <div class="b-name" id="sideName">로딩 중...</div>
+        <div class="b-price-row">
+          <span class="b-old" id="sideOld"></span>
+          <span class="b-price" id="sidePrice"></span>
+        </div>
+        <div class="b-tax">세금·수수료 포함 · 1인 (2인 1실)</div>
+        <div class="b-dates">
+          <strong id="sideCheckin">-</strong> ~ <strong id="sideCheckout">-</strong> · <span id="sideNights">2</span>박
+        </div>
+        <button class="b-cta" onclick="bookNow()">💳 객실 선택하기</button>
+        <div class="b-trust" style="margin-top:12px;">
+          <span>✓ 즉시 확정</span>
+          <span>✓ 체크인 7일 전 무료 취소</span>
+          <span>✓ 멤버 시 -7% 할인</span>
+          <span>✓ 최저가 보장 (차액 100% 환급)</span>
+        </div>
+      </aside>
+    </div>
+
+    <div style="text-align:center;padding:40px 0;color:var(--ink-4);font-size:11px;">
+      🏨 호텔 상세 · 시트립 베스트 프랙티스 적용
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+    const hotelId = new URLSearchParams(location.search).get('id') || 'h-granvia-osaka';
+    const hotel = (window.OMT?.DATA?.HOTELS || []).find(h => h.id === hotelId)
+                || (window.OMT?.DATA?.HOTELS || [])[0];
+
+    const AMEN_MAP = {
+      '조식 포함': { icon:'🥐' }, '와이파이': { icon:'📶' }, '수영장': { icon:'🏊' },
+      '피트니스': { icon:'💪' }, '스파': { icon:'💆' }, '비즈니스 센터': { icon:'💼' },
+      '바/라운지': { icon:'🍸' }, '24시간 프론트': { icon:'🕐' }, '역 직결': { icon:'🚆' },
+      '역 인근': { icon:'🚆' }, '역 도보 3분': { icon:'🚆' }, '역 도보 5분': { icon:'🚆' },
+      '주차장': { icon:'🅿️' }, '레스토랑': { icon:'🍽️' }, '컨시어지': { icon:'🛎️' }
+    };
+
+    function init(){
+      if(!hotel){ document.body.innerHTML = '<div style="padding:80px;text-align:center;">호텔 정보를 찾을 수 없어요.</div>'; return; }
+
+      // 갤러리 — 풀에서 추출
+      const imgs = hotel.gallery && hotel.gallery.length ? hotel.gallery : [hotel.img];
+      const gal = document.getElementById('gallery');
+      const visible = imgs.length >= 5 ? imgs.slice(0, 5) : [...imgs, ...Array(5 - imgs.length).fill(imgs[0])];
+      gal.innerHTML = `
+        <div class="g g-main" style="background-image:url('${visible[0]}')"></div>
+        <div class="g" style="background-image:url('${visible[1]}')"></div>
+        <div class="g" style="background-image:url('${visible[2]}')"></div>
+        <div class="g" style="background-image:url('${visible[3]}')"></div>
+        <div class="g" style="background-image:url('${visible[4]}');position:relative;">
+          ${imgs.length > 5 ? `<div class="g-more">+${imgs.length - 5}장 더보기</div>` : ''}
+        </div>
+      `;
+
+      // 타이틀
+      document.getElementById('hotelName').textContent = hotel.name;
+      document.getElementById('hotelEnglish').textContent = (hotel.englishName || hotel.name) + ' · ' + (hotel.area || '');
+      document.getElementById('hotelStars').textContent = '★'.repeat(hotel.stars || 4);
+      document.getElementById('hotelArea').textContent = '📍 ' + hotel.area;
+      document.getElementById('hotelChain').textContent = hotel.chain ? '🏨 ' + hotel.chain : '';
+      document.getElementById('hotelDesc').textContent = hotel.description || '';
+
+      // 평점
+      const score = hotel.score || 8.5;
+      const scoreLabel = score >= 9 ? '매우 좋음' : score >= 8 ? '좋음' : '괜찮음';
+      document.getElementById('bigScore').textContent = score;
+      document.getElementById('bigLabel').textContent = scoreLabel;
+      document.getElementById('bigSub').textContent = `리뷰 ${(hotel.reviews||0).toLocaleString('ko-KR')}건`;
+      document.getElementById('rsScore').textContent = score;
+      document.getElementById('rsLabel').textContent = scoreLabel;
+      document.getElementById('rsSub').textContent = `${(hotel.reviews||0).toLocaleString('ko-KR')}건`;
+      document.getElementById('reviewCount').textContent = `(${(hotel.reviews||0).toLocaleString('ko-KR')})`;
+      document.getElementById('totalReviews').textContent = (hotel.reviews||0).toLocaleString('ko-KR');
+
+      // 평점 분포 차트
+      const cats = [
+        { name:'청결도', score:9.4 }, { name:'시설', score:9.0 }, { name:'위치', score:9.5 },
+        { name:'직원', score:9.2 }, { name:'편안함', score:9.1 }, { name:'가성비', score:8.4 }
+      ];
+      document.getElementById('reviewBars').innerHTML = cats.map(c => `
+        <div class="bar-row">
+          <div class="name">${c.name}</div>
+          <div class="track"><div class="fill" style="width:${c.score * 10}%"></div></div>
+          <div class="score">${c.score}</div>
+        </div>
+      `).join('');
+
+      // 리뷰 5건 mock
+      const reviews = [
+        { name:'박○○', initial:'박', score:9.6, when:'1주 전', body:'위치가 정말 좋아요. 역에서 가깝고 주변에 식당도 많아서 만족스러웠습니다. 객실도 깨끗하고 직원도 친절했어요.' },
+        { name:'김○○', initial:'김', score:9.2, when:'2주 전', body:'한국어 가능한 직원이 있어서 의사소통이 편했고, 조식이 정말 맛있었습니다. 다시 방문하고 싶어요.' },
+        { name:'이○○', initial:'이', score:8.8, when:'3주 전', body:'가격 대비 깔끔하고 좋아요. 다만 객실 방음이 조금 아쉬웠고 일부 시설이 약간 노후화된 느낌은 있었어요.' },
+        { name:'정○○', initial:'정', score:9.4, when:'1개월 전', body:'야경이 환상적이었어요. 룸 서비스도 빠르고 친절해서 만족합니다. 가족 여행으로 추천!' },
+        { name:'최○○', initial:'최', score:9.0, when:'1개월 전', body:'역 직결이라 비 오는 날에도 편하게 이동했어요. 조식 뷔페 품질이 매우 높았습니다.' }
+      ];
+      document.getElementById('reviewList').innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="top">
+            <div class="author">
+              <div class="av">${r.initial}</div>
+              <div>
+                <div class="nm">${r.name}</div>
+                <div class="when">${r.when}</div>
+              </div>
+            </div>
+            <div class="score-chip">${r.score}</div>
+          </div>
+          <div class="body">${r.body}</div>
+        </div>
+      `).join('');
+
+      // 시설
+      const amen = hotel.amenities || [];
+      document.getElementById('amenGrid').innerHTML = amen.map(a => {
+        const m = AMEN_MAP[a] || { icon:'✓' };
+        return `<div class="amen-cell"><div class="ic">${m.icon}</div><div class="nm">${a}</div></div>`;
+      }).join('') + ['주차장','레스토랑','컨시어지'].map(a => {
+        const m = AMEN_MAP[a];
+        return `<div class="amen-cell"><div class="ic">${m.icon}</div><div class="nm">${a}</div></div>`;
+      }).join('');
+
+      // 객실 4종 mock
+      const basePrice = hotel.price || 200000;
+      const oldPrice = hotel.oldPrice || basePrice + 50000;
+      const rooms = [
+        { name:'스탠다드 트윈', size:'22㎡', bed:'싱글 2', view:'시티뷰', breakfast:false, cancel:true, price:basePrice, seats:3, image:hotel.gallery?.[0] || hotel.img },
+        { name:'슈페리어 트윈', size:'26㎡', bed:'싱글 2 + 작업데스크', view:'시티뷰', breakfast:true, cancel:true, price:basePrice + 40000, seats:5, image:hotel.gallery?.[1] || hotel.img },
+        { name:'디럭스 트윈', size:'32㎡', bed:'싱글 2 + 거실 코너', view:'전망층', breakfast:true, cancel:true, price:basePrice + 80000, seats:2, image:hotel.gallery?.[2] || hotel.img },
+        { name:'스위트 (1 베드룸)', size:'48㎡', bed:'킹 1 + 거실', view:'스카이라인', breakfast:true, cancel:true, price:basePrice + 180000, seats:1, image:hotel.gallery?.[0] || hotel.img }
+      ];
+      document.getElementById('roomList').innerHTML = rooms.map(r => `
+        <div class="room-card">
+          <div class="room-img" style="background-image:url('${r.image}')"></div>
+          <div class="room-body">
+            <div class="room-name">${r.name}</div>
+            <div class="room-info">${r.size} · ${r.bed} · ${r.view}</div>
+            <div class="room-amen">
+              ${r.breakfast ? '<span class="highlight">🥐 조식 포함</span>' : '<span>조식 별도</span>'}
+              ${r.cancel ? '<span class="highlight">✓ 무료 취소</span>' : '<span>환불 불가</span>'}
+              <span>📶 와이파이</span>
+              <span>🚿 욕실</span>
+            </div>
+            <div class="room-policies">
+              <span>⚡ 즉시 확정</span>
+              ${r.cancel ? '<span style="color:var(--success);font-weight:800;">· 체크인 7일 전 무료 취소</span>' : ''}
+            </div>
+          </div>
+          <div class="room-price">
+            <div>
+              <div class="lb">1박 1인 (2인1실)</div>
+              <div class="pr-old">${(r.price + 30000).toLocaleString('ko-KR')}원</div>
+              <div class="pr">${r.price.toLocaleString('ko-KR')}원</div>
+              <div class="per">세금·수수료 포함</div>
+              <button class="pick-btn" onclick="pickRoom('${hotel.id}', '${r.name}', ${r.price})">선택 →</button>
+              <div class="left-seats">잔여 ${r.seats}실</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // 사이드 카드
+      document.getElementById('sideName').textContent = hotel.name;
+      document.getElementById('sideOld').textContent = oldPrice.toLocaleString('ko-KR') + '원';
+      document.getElementById('sidePrice').textContent = basePrice.toLocaleString('ko-KR') + '원';
+      const today = new Date();
+      const checkin = new Date(today); checkin.setDate(checkin.getDate() + 14);
+      const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 2);
+      const fmt = d => `${d.getMonth()+1}.${d.getDate()}`;
+      document.getElementById('sideCheckin').textContent = fmt(checkin);
+      document.getElementById('sideCheckout').textContent = fmt(checkout);
+
+      // 지도
+      const cityCoords = {
+        osaka:[34.6937,135.5023], tokyo:[35.6895,139.6917], okinawa:[26.3344,127.8056],
+        hanoi:[21.0285,105.8542], danang:[16.0544,108.2022], hcmc:[10.8231,106.6297], bangkok:[13.7563,100.5018],
+        manila:[14.5995,120.9842], cebu:[10.3157,123.8854]
+      };
+      const c = cityCoords[hotel.city] || cityCoords.osaka;
+      const bbox = `${c[1]-0.02},${c[0]-0.02},${c[1]+0.02},${c[0]+0.02}`;
+      document.getElementById('hotelMap').src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${c[0]},${c[1]}`;
+      document.getElementById('nearestStation').textContent = hotel.amenities?.find(a => a.includes('역')) || '도보 5분';
+      document.getElementById('distCenter').textContent = (hotel.distance || 2) + 'km';
+    }
+
+    window.goTab = (anchor, el) => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+      el.classList.add('on');
+      const target = document.getElementById(anchor);
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    };
+
+    window.pickRoom = (hid, name, price) => {
+      // checkout으로 hotel 단독 결제 진입 (sessionStorage 활용)
+      if(window.OMT?.State){
+        window.OMT.State.addRecentlyViewed?.(hid);
+      }
+      sessionStorage.setItem('omt_pending_booking', JSON.stringify({
+        source: 'hotel',
+        productId: hid,
+        productName: hotel.name + ' · ' + name,
+        productImage: hotel.gallery?.[0] || hotel.img,
+        city: hotel.area,
+        country: hotel.country,
+        nights: 2,
+        pax: 2,
+        pricePerPerson: price,
+        total: price * 2
+      }));
+      alert(`✅ "${name}" 객실 선택됨\n\n다음 단계로 이동합니다 (결제·고객 정보 입력)`);
+      location.href = 'cart.html';
+    };
+
+    window.bookNow = () => {
+      document.getElementById('rooms').scrollIntoView({behavior:'smooth', block:'start'});
+    };
+
+    init();
+
+    // 스크롤 시 탭 자동 활성화
+    const tabs = document.querySelectorAll('.tab-btn');
+    const sections = ['overview','rooms','amenities','reviews','location','policies','faq'];
+    window.addEventListener('scroll', () => {
+      let active = sections[0];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        const top = el.getBoundingClientRect().top;
+        if(top < 200) active = id;
+      });
+      tabs.forEach(t => t.classList.toggle('on', t.dataset.anchor === active));
+    });
+  </script>
+</body>
+</html>
