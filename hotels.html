@@ -486,6 +486,79 @@
 
   <div class="popup-backdrop" id="popupBackdrop" onclick="closePopups()"></div>
 
+  <!-- 🆕 시트립 스타일 트러스트 시그널 (전체 width) -->
+  <section style="background:#fff;border-bottom:1px solid #E5E7EB;padding:16px 0;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+      <div style="text-align:center;padding:8px;">
+        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">1,624,549</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">전 세계 숙소</div>
+      </div>
+      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
+        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">164M+</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">실 리뷰 데이터</div>
+      </div>
+      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
+        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">⭐ 4.7</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">평균 평점</div>
+      </div>
+      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
+        <div style="font-size:20px;font-weight:900;color:#10B981;font-family:'JetBrains Mono',monospace;">💰 최저가</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">차액 100% 환급</div>
+      </div>
+      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
+        <div style="font-size:20px;font-weight:900;color:#3B82F6;font-family:'JetBrains Mono',monospace;">📞 24/7</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">카톡 한국어 상담</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🆕 인기 도시 그리드 (시트립 스타일 9 권역) -->
+  <section style="background:linear-gradient(180deg,#FAFBFC,#fff);border-bottom:1px solid #E5E7EB;padding:28px 0;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:20px;font-weight:900;letter-spacing:-0.02em;">🌍 인기 호텔 도시</h2>
+          <div style="font-size:12px;color:#6B7280;margin-top:4px;">예약 횟수 기준 · 매일 자정 자동 갱신</div>
+        </div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;">📈 평균가 변화는 최근 30일 기준</div>
+      </div>
+
+      <!-- 권역 탭 -->
+      <div id="cityRegionTabs" style="display:flex;gap:4px;border-bottom:2px solid #E5E7EB;margin-bottom:16px;overflow-x:auto;">
+        <button data-region="all" class="city-region-tab on" onclick="selectRegion('all', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid #FF6B35;color:#1A1A1A;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🌏 전체</button>
+        <button data-region="국내" class="city-region-tab" onclick="selectRegion('국내', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇰🇷 국내</button>
+        <button data-region="일본" class="city-region-tab" onclick="selectRegion('일본', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇯🇵 일본</button>
+        <button data-region="중국" class="city-region-tab" onclick="selectRegion('중국', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇨🇳 중국</button>
+        <button data-region="아시아" class="city-region-tab" onclick="selectRegion('아시아', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🌏 아시아</button>
+        <button data-region="미주" class="city-region-tab" onclick="selectRegion('미주', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇺🇸 미주</button>
+        <button data-region="유럽" class="city-region-tab" onclick="selectRegion('유럽', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇪🇺 유럽</button>
+        <button data-region="대양주" class="city-region-tab" onclick="selectRegion('대양주', this)" style="padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:#6B7280;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-2px;white-space:nowrap;">🇦🇺 대양주</button>
+      </div>
+
+      <div id="hotelCityGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;"></div>
+    </div>
+  </section>
+
+  <!-- 🆕 호텔+골프텔 번들 CTA -->
+  <section style="background:linear-gradient(135deg,#075440,#0B6E4F);color:#fff;padding:28px 0;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;">
+      <div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:.12em;opacity:.85;text-transform:uppercase;">🎁 OMT 호텔 + 골프 번들</div>
+        <h2 style="font-size:22px;font-weight:900;margin:6px 0 4px;letter-spacing:-0.02em;line-height:1.3;">호텔에 라운딩 추가하면 <span style="color:#FFD23F;">평균 18% 더 저렴</span><br>골프 안 가도, 같이 가는 일행이 골프 좋아한다면?</h2>
+        <div style="font-size:13px;opacity:.9;margin-top:4px;">호텔 + 골프장 + 픽업 + 캐디 매칭 풀패키지 · 일본·베트남 직영 우선</div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <a href="golftels.html" style="padding:11px 20px;background:#FFD23F;color:#1A1A1A;border-radius:10px;font-weight:900;font-size:13px;text-decoration:none;">⛳ 골프텔 8선 보기 →</a>
+          <a href="ai-planner.html" style="padding:11px 20px;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:10px;font-weight:900;font-size:13px;text-decoration:none;">🤖 AI 추천 받기</a>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="width:120px;height:80px;border-radius:12px;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:40px;">🏨</div>
+        <div style="width:24px;align-self:center;font-size:24px;font-weight:900;color:#FFD23F;text-align:center;">+</div>
+        <div style="width:120px;height:80px;border-radius:12px;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:40px;">⛳</div>
+      </div>
+    </div>
+  </section>
+
   <!-- RESULTS -->
   <main id="omt-main" class="results-layout">
     <aside class="filter-side">
@@ -1619,7 +1692,15 @@
               ${h.memberPrice ? `<div class="hc-member-price">⭐ 멤버가 ${krw(h.memberPrice)}</div>` : ''}
             </div>
             <button class="hc-btn" onclick="selectHotel('${h.id}')">선택 →</button>
-            <div class="hc-trust-line">${h.deals?.includes('free-cancel')?'✓ 무료 취소':''}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;justify-content:flex-end;">
+              <span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,.12);color:#065F46;">⚡ 즉시 확정</span>
+              ${h.deals?.includes('free-cancel') ? '<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;background:rgba(59,130,246,.12);color:#1E40AF;">✓ 무료 취소</span>' : ''}
+              ${h.memberPrice ? '<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;background:rgba(218,112,214,.12);color:#86198F;">⭐ 멤버 -7%</span>' : ''}
+            </div>
+            ${(() => {
+              const hot = (h.id.charCodeAt(0) + h.id.length) % 5 < 2;
+              return hot ? `<div style="margin-top:6px;text-align:right;font-size:10px;font-weight:800;color:#DC2626;display:inline-flex;align-items:center;gap:3px;justify-content:flex-end;width:100%;"><span style="width:5px;height:5px;border-radius:50%;background:#DC2626;animation:livePulseHot 1s infinite;"></span>🔥 지금 ${(h.id.charCodeAt(1) % 12) + 3}명이 보는 중</div>` : '';
+            })()}
           </div>
         </article>
       `;
@@ -1729,6 +1810,132 @@
   renderFilterUI();
   render();
   refreshSearchButton();
+
+  /* =============================================================
+     🆕 시트립 스타일 인기 도시 그리드 (호텔)
+     ============================================================= */
+  const POPULAR_HOTEL_CITIES = {
+    '국내': [
+      { name:'서울', code:'SEL', emoji:'🏙️', from:89000, trend:'-12%', hotelsCount:1842 },
+      { name:'부산', code:'PUS', emoji:'🌊', from:78000, trend:'+5%', hotelsCount:524 },
+      { name:'제주', code:'CJU', emoji:'🌴', from:95000, trend:'-8%', hotelsCount:892 },
+      { name:'강릉', code:'KAG', emoji:'⛰️', from:120000, trend:'+18%', hotelsCount:184 },
+      { name:'전주', code:'JNU', emoji:'🏯', from:74000, trend:'-3%', hotelsCount:142 },
+      { name:'경주', code:'KYO', emoji:'🏛️', from:82000, trend:'+2%', hotelsCount:218 }
+    ],
+    '일본': [
+      { name:'도쿄', code:'TYO', emoji:'🗼', from:142000, trend:'-15%', hotelsCount:3284 },
+      { name:'오사카', code:'OSA', emoji:'🏯', from:118000, trend:'-9%', hotelsCount:2104 },
+      { name:'후쿠오카', code:'FUK', emoji:'🍜', from:98000, trend:'-7%', hotelsCount:842 },
+      { name:'삿포로', code:'CTS', emoji:'❄️', from:128000, trend:'+12%', hotelsCount:584 },
+      { name:'나고야', code:'NGO', emoji:'🏯', from:108000, trend:'-4%', hotelsCount:482 },
+      { name:'오키나와', code:'OKA', emoji:'🏖️', from:185000, trend:'+22%', hotelsCount:284 }
+    ],
+    '중국': [
+      { name:'베이징', code:'PEK', emoji:'🏯', from:92000, trend:'-18%', hotelsCount:1842 },
+      { name:'상해', code:'SHA', emoji:'🌃', from:108000, trend:'-12%', hotelsCount:2284 },
+      { name:'홍콩', code:'HKG', emoji:'🌆', from:198000, trend:'-5%', hotelsCount:684 },
+      { name:'청도', code:'TAO', emoji:'🌊', from:78000, trend:'+8%', hotelsCount:284 },
+      { name:'심양', code:'SHE', emoji:'🏛️', from:65000, trend:'+3%', hotelsCount:184 },
+      { name:'대련', code:'DLC', emoji:'🌊', from:72000, trend:'+12%', hotelsCount:142 }
+    ],
+    '아시아': [
+      { name:'방콕', code:'BKK', emoji:'🛕', from:42000, trend:'-22%', hotelsCount:3842 },
+      { name:'다낭', code:'DAD', emoji:'🏖️', from:58000, trend:'-15%', hotelsCount:842 },
+      { name:'세부', code:'CEB', emoji:'🌴', from:88000, trend:'-10%', hotelsCount:484 },
+      { name:'싱가포르', code:'SIN', emoji:'🌃', from:228000, trend:'+5%', hotelsCount:484 },
+      { name:'타이페이', code:'TPE', emoji:'🏙️', from:98000, trend:'-8%', hotelsCount:842 },
+      { name:'발리', code:'DPS', emoji:'🌺', from:128000, trend:'+18%', hotelsCount:1284 }
+    ],
+    '미주': [
+      { name:'로스앤젤레스', code:'LAX', emoji:'🌴', from:248000, trend:'-3%', hotelsCount:1842 },
+      { name:'뉴욕', code:'NYC', emoji:'🗽', from:328000, trend:'+8%', hotelsCount:2484 },
+      { name:'샌프란시스코', code:'SFO', emoji:'🌉', from:298000, trend:'+5%', hotelsCount:684 },
+      { name:'호놀룰루', code:'HNL', emoji:'🏖️', from:328000, trend:'+22%', hotelsCount:284 },
+      { name:'라스베이거스', code:'LAS', emoji:'🎰', from:198000, trend:'-12%', hotelsCount:584 },
+      { name:'밴쿠버', code:'YVR', emoji:'⛰️', from:218000, trend:'+8%', hotelsCount:384 }
+    ],
+    '유럽': [
+      { name:'파리', code:'CDG', emoji:'🗼', from:218000, trend:'+5%', hotelsCount:2842 },
+      { name:'런던', code:'LHR', emoji:'🇬🇧', from:288000, trend:'+12%', hotelsCount:3284 },
+      { name:'로마', code:'FCO', emoji:'🏛️', from:198000, trend:'+8%', hotelsCount:1842 },
+      { name:'바르셀로나', code:'BCN', emoji:'🏖️', from:178000, trend:'-3%', hotelsCount:1284 },
+      { name:'프라하', code:'PRG', emoji:'🏰', from:128000, trend:'-8%', hotelsCount:584 },
+      { name:'이스탄불', code:'IST', emoji:'🕌', from:88000, trend:'-18%', hotelsCount:842 }
+    ],
+    '대양주': [
+      { name:'시드니', code:'SYD', emoji:'🌉', from:228000, trend:'+5%', hotelsCount:842 },
+      { name:'멜번', code:'MEL', emoji:'🦘', from:198000, trend:'+2%', hotelsCount:684 },
+      { name:'괌', code:'GUM', emoji:'🏖️', from:248000, trend:'+15%', hotelsCount:284 },
+      { name:'사이판', code:'SPN', emoji:'🌊', from:228000, trend:'+18%', hotelsCount:142 },
+      { name:'오클랜드', code:'AKL', emoji:'🌿', from:178000, trend:'-2%', hotelsCount:184 }
+    ]
+  };
+
+  let _currentRegion = 'all';
+  window.selectRegion = (region, btn) => {
+    _currentRegion = region;
+    document.querySelectorAll('.city-region-tab').forEach(t => {
+      t.style.borderBottomColor = 'transparent';
+      t.style.color = '#6B7280';
+    });
+    btn.style.borderBottomColor = '#FF6B35';
+    btn.style.color = '#1A1A1A';
+    renderHotelCityGrid();
+  };
+
+  function renderHotelCityGrid(){
+    const container = document.getElementById('hotelCityGrid');
+    if(!container) return;
+    let cities = [];
+    if(_currentRegion === 'all'){
+      // 각 권역 2개씩 추출
+      Object.values(POPULAR_HOTEL_CITIES).forEach(arr => cities.push(...arr.slice(0, 2)));
+    } else {
+      cities = POPULAR_HOTEL_CITIES[_currentRegion] || [];
+    }
+    container.innerHTML = cities.map(c => {
+      const isDown = c.trend.startsWith('-');
+      return `
+        <button onclick="searchHotelCity('${c.name}', '${c.code}')" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='#FF6B35';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,.06)';" onmouseout="this.style.borderColor='#E5E7EB';this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:18px;">${c.emoji}</span>
+              <span style="font-size:13px;font-weight:900;color:#1A1A1A;">${c.name}</span>
+            </div>
+            <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;font-weight:700;">${c.code}</span>
+          </div>
+          <div style="font-size:11px;color:#6B7280;font-weight:700;">호텔 ${c.hotelsCount.toLocaleString('ko-KR')}개</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px;">
+            <div>
+              <div style="font-size:10px;color:#9CA3AF;font-weight:700;">1박~</div>
+              <div style="font-size:14px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">${(c.from/1000).toFixed(0)}K원</div>
+            </div>
+            <span style="font-size:11px;font-weight:900;padding:2px 8px;border-radius:5px;background:${isDown?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)'};color:${isDown?'#065F46':'#991B1B'};font-family:'JetBrains Mono',monospace;">${isDown?'📉':'📈'} ${c.trend}</span>
+          </div>
+        </button>
+      `;
+    }).join('');
+  }
+
+  window.searchHotelCity = (cityName, code) => {
+    // 검색 strip의 목적지 input에 값 설정 + scroll
+    const destInput = document.querySelector('input[name="dest"]') || document.querySelector('#destInput');
+    if(destInput){
+      destInput.value = cityName;
+      destInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    // 검색 strip으로 스크롤
+    document.querySelector('.search-strip')?.scrollIntoView({behavior:'smooth', block:'start'});
+    setTimeout(() => alert(`📍 ${cityName} (${code})으로 검색 설정됐어요. 날짜를 확인하고 검색 버튼을 눌러주세요!`), 600);
+  };
+
+  // 펄스 애니메이션 정의 (호텔 카드 "지금 N명이 보는 중" 인디케이터용)
+  const styleEl = document.createElement('style');
+  styleEl.textContent = '@keyframes livePulseHot{0%,100%{opacity:1;}50%{opacity:.3;}}';
+  document.head.appendChild(styleEl);
+
+  renderHotelCityGrid();
   </script>
 </body>
 </html>
