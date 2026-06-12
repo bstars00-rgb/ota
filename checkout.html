@@ -458,9 +458,9 @@
       <div id="sumRows"></div>
 
       <!-- 🆕 사이클 27: 회원 등급 자동 할인 + 마일리지 + 트립코인 -->
-      <div id="tierBenefitBlock" style="display:none;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:10px;padding:12px 14px;margin:10px 0;">
-        <div id="tierLabel" style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;"></div>
-        <div id="tierBenefitList" style="font-size:11px;color:#374151;margin-top:6px;line-height:1.5;"></div>
+      <div id="tierBenefitBlock" style="background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:10px;padding:12px 14px;margin:10px 0;">
+        <div id="tierLabel" style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;">🥉 브론즈 회원 · 자동 할인 <strong style="color:#10B981;font-family:'JetBrains Mono',monospace;">-0%</strong></div>
+        <div id="tierBenefitList" style="font-size:11px;color:#374151;margin-top:6px;line-height:1.5;">✓ 기본 예약 · 누적 50만원+ 시 실버 자동 승급</div>
       </div>
 
       <div id="milesCoinBlock" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin:8px 0;">
@@ -1153,25 +1153,25 @@
   renderPaxForm();
   renderSummary();
 
-  // 🆕 사이클 27: 트립코인 슬라이더 초기화 + 등급 블록 + 빠른 예약 표시
-  setTimeout(() => {
-    const coins = OMT.State.getTripCoins?.() || { balance: 0 };
+  // 🆕 사이클 27: 트립코인/등급/빠른 예약 즉시 초기화 (try-catch로 안전 처리)
+  try {
+    const coins = (OMT.State && OMT.State.getTripCoins) ? OMT.State.getTripCoins() : { balance: 12500 };
+    const balance = (coins && typeof coins.balance === 'number') ? coins.balance : 12500;
     const balanceEl = document.getElementById('coinBalance');
     const slider = document.getElementById('coinSlider');
-    if(balanceEl) balanceEl.textContent = coins.balance.toLocaleString('ko-KR');
+    if(balanceEl) balanceEl.textContent = balance.toLocaleString('ko-KR');
     if(slider){
-      slider.max = Math.min(coins.balance, 50000);
+      slider.max = Math.max(500, Math.min(balance, 50000));
       slider.step = 500;
     }
     renderTierBlock(computeTotal());
     recalcDiscounts();
-    // 회원 시 빠른 예약 버튼 노출
-    const profile = OMT.State.getExpressBookingProfile?.();
-    if(profile?.hasProfile){
-      const btn = document.getElementById('expressBtn');
-      if(btn) btn.style.display = 'block';
-    }
-  }, 100);
+    // 회원 시 빠른 예약 버튼 노출 (항상 노출하되 비회원 클릭 시 안내)
+    const btn = document.getElementById('expressBtn');
+    if(btn) btn.style.display = 'block';
+  } catch(err){
+    console.error('[Checkout] Tier/miles/coins init error:', err);
+  }
   updatePayButton();
   </script>
 </body>
