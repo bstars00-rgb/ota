@@ -1429,15 +1429,15 @@
   function handleAISearch(e){
     e.preventDefault();
     const q = document.getElementById('aiQuery').value.trim();
-    if(!q){ alert('여행지나 원하는 여행을 입력해주세요'); return; }
-    OMT.State.addSearchHistory(q);
-    // 자연어 의도 감지 — 키워드만 있으면 search.html, 문장형이면 AI 플래너
-    const isNaturalLang = q.length > 12 || /추천|찾아|어떤|골프|여행|가고/.test(q);
-    if(isNaturalLang){
-      location.href = 'ai-planner.html?q=' + encodeURIComponent(q);
-    } else {
-      location.href = 'search.html?q=' + encodeURIComponent(q);
+    if(!q){
+      // 빈 입력일 때도 AI 플래너로 진입 (placeholder가 "AI에게 물어보세요")
+      location.href = 'ai-planner.html';
+      return;
     }
+    OMT.State.addSearchHistory(q);
+    // placeholder가 "AI에게 물어보세요"이므로 검색하기 버튼은 항상 AI 플래너로 진입
+    // (직접 매칭 검색은 자동완성 드롭다운에서 카테고리 클릭으로 가능)
+    location.href = 'ai-planner.html?q=' + encodeURIComponent(q);
   }
 
   /* =========================================
