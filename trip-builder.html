@@ -189,7 +189,8 @@
       max-height:calc(100vh - 80px); overflow:hidden;
       display:flex; flex-direction:column;
     }
-    .pkg-detail-img{ aspect-ratio:16/9; background-size:cover; background-position:center; background-color:#F3F4F6; position:relative; }
+    .pkg-detail-img{ height:200px; background-size:cover; background-position:center; background-color:#F3F4F6; position:relative; flex-shrink:0; }
+    @media (max-width:600px){ .pkg-detail-img{ height:160px; } }
     .pkg-detail-close{
       position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:50%;
       background:rgba(255,255,255,.96); border:none; font-size:18px; font-weight:900;
