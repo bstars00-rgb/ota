@@ -444,6 +444,32 @@
       border: 1px solid var(--line);
       display:flex; align-items:center; gap:16px;
     }
+    /* 🆕 사이클 29: 액티비티 다중선택 체크박스 */
+    .act-chip{
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px; background:#FAFBFC; border:1.5px solid var(--line);
+      border-radius:10px; cursor:pointer; transition:all .15s;
+      font-size:12px; font-weight:700; color:#374151;
+      user-select:none;
+    }
+    .act-chip:hover{ border-color:var(--primary); background:#FFF5F0; }
+    .act-chip input[type="checkbox"]{
+      width:16px; height:16px; accent-color:var(--primary); flex-shrink:0; cursor:pointer;
+    }
+    .act-chip span:nth-of-type(1){ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .act-chip .act-price{
+      font-size:11px; font-weight:900; color:var(--primary);
+      font-family:'JetBrains Mono', monospace; flex-shrink:0;
+    }
+    .act-chip:has(input:checked){
+      background:linear-gradient(135deg,#FFF5F0,#FFEDE0);
+      border-color:var(--primary);
+      box-shadow:0 2px 8px rgba(255,107,53,.15);
+    }
+    .act-chip:has(input:checked) span:nth-of-type(1){ color:var(--primary); font-weight:900; }
+    @media (max-width:600px){
+      #pkgActivities{ grid-template-columns:1fr !important; }
+    }
     .pkg-slot .icon{
       width:44px; height:44px; border-radius:12px;
       background: var(--primary-soft); color: var(--primary);
@@ -1028,16 +1054,45 @@
                 </select>
               </div>
             </div>
-            <div class="pkg-slot">
+            <div class="pkg-slot" style="align-items:flex-start;">
               <div class="icon" aria-hidden="true">🌸</div>
-              <div class="info">
-                <div class="label">액티비티 (선택)</div>
-                <select id="pkgActivity" onchange="recalcPackage()">
-                  <option value="0" data-label="선택 안 함">선택 안 함 · 0원</option>
-                  <option value="89000" data-label="유니버설 스튜디오">유니버설 스튜디오 1일권 · 89,000원</option>
-                  <option value="65000" data-label="벚꽃 크루즈">오사카 성 벚꽃 크루즈 · 65,000원</option>
-                  <option value="120000" data-label="골프라운딩">오사카 골프라운딩 1회 · 120,000원</option>
-                </select>
+              <div class="info" style="width:100%;">
+                <div class="label" style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>액티비티 <span style="font-size:11px;color:#9CA3AF;font-weight:600;">(다중선택 가능)</span></span>
+                  <span id="actCount" style="font-size:11px;color:#FF6B35;font-weight:900;font-family:'JetBrains Mono',monospace;">0개 선택</span>
+                </div>
+                <div id="pkgActivities" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+                  <label class="act-chip" data-value="89000" data-label="유니버설 스튜디오">
+                    <input type="checkbox" value="89000" data-label="유니버설 스튜디오" onchange="recalcPackage()" />
+                    <span>🎢 유니버설 스튜디오</span>
+                    <span class="act-price">89,000원</span>
+                  </label>
+                  <label class="act-chip" data-value="65000" data-label="벚꽃 크루즈">
+                    <input type="checkbox" value="65000" data-label="벚꽃 크루즈" onchange="recalcPackage()" />
+                    <span>🌸 오사카 성 벚꽃 크루즈</span>
+                    <span class="act-price">65,000원</span>
+                  </label>
+                  <label class="act-chip" data-value="120000" data-label="골프라운딩">
+                    <input type="checkbox" value="120000" data-label="골프라운딩" onchange="recalcPackage()" />
+                    <span>⛳ 오사카 골프라운딩 1회</span>
+                    <span class="act-price">120,000원</span>
+                  </label>
+                  <label class="act-chip" data-value="48000" data-label="도톤보리 야시장 투어">
+                    <input type="checkbox" value="48000" data-label="도톤보리 야시장 투어" onchange="recalcPackage()" />
+                    <span>🍜 도톤보리 야시장 투어</span>
+                    <span class="act-price">48,000원</span>
+                  </label>
+                  <label class="act-chip" data-value="78000" data-label="기모노 체험">
+                    <input type="checkbox" value="78000" data-label="기모노 체험" onchange="recalcPackage()" />
+                    <span>👘 기모노 체험 + 사진</span>
+                    <span class="act-price">78,000원</span>
+                  </label>
+                  <label class="act-chip" data-value="32000" data-label="공항 픽업 (편도)">
+                    <input type="checkbox" value="32000" data-label="공항 픽업 (편도)" onchange="recalcPackage()" />
+                    <span>🚐 공항 픽업 (편도)</span>
+                    <span class="act-price">32,000원</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -1669,24 +1724,38 @@
      Dynamic Package Builder
      ========================================= */
   function recalcPackage(){
-    const flight   = document.getElementById('pkgFlight');
-    const hotel    = document.getElementById('pkgHotel');
-    const activity = document.getElementById('pkgActivity');
+    const flight = document.getElementById('pkgFlight');
+    const hotel  = document.getElementById('pkgHotel');
 
     const parts = [
-      { label: flight.selectedOptions[0].dataset.label,   value: +flight.value },
-      { label: hotel.selectedOptions[0].dataset.label,    value: +hotel.value },
-      { label: activity.selectedOptions[0].dataset.label, value: +activity.value }
+      { label: flight.selectedOptions[0].dataset.label, value: +flight.value },
+      { label: hotel.selectedOptions[0].dataset.label,  value: +hotel.value }
     ];
+
+    // 🆕 사이클 29: 액티비티 다중선택 (체크박스 합산)
+    const actCheckboxes = document.querySelectorAll('#pkgActivities input[type="checkbox"]:checked');
+    actCheckboxes.forEach(cb => {
+      parts.push({ label: '🌸 ' + cb.dataset.label, value: +cb.value, isActivity: true });
+    });
+    // 카운트 표시 갱신
+    const cnt = actCheckboxes.length;
+    const cntEl = document.getElementById('actCount');
+    if(cntEl){
+      cntEl.textContent = cnt > 0 ? `${cnt}개 선택 · +${(Array.from(actCheckboxes).reduce((s,cb)=>s+ +cb.value, 0)).toLocaleString('ko-KR')}원` : '0개 선택';
+      cntEl.style.color = cnt > 0 ? '#FF6B35' : '#9CA3AF';
+    }
+
     const total = parts.reduce((s, p) => s + p.value, 0);
-    const bundleDiscount = Math.round(total * 0.07); // 번들 7% 할인 (더미)
+    // 액티비티 2개+ 추가 시 번들 10%, 1개면 8%, 0개면 7%
+    const bundleRate = cnt >= 2 ? 0.10 : cnt === 1 ? 0.08 : 0.07;
+    const bundleDiscount = Math.round(total * bundleRate);
     const finalTotal = total - bundleDiscount;
 
     const lines = parts
       .filter(p => p.value > 0)
       .map(p => `<div class="pkg-line"><span>${p.label}</span><span>${krw(p.value)}</span></div>`)
       .join('');
-    const discountLine = `<div class="pkg-line" style="color:#FFD23F;"><span>번들 할인 (7%)</span><span>- ${krw(bundleDiscount)}</span></div>`;
+    const discountLine = `<div class="pkg-line" style="color:#FFD23F;"><span>번들 할인 (${(bundleRate*100).toFixed(0)}%)${cnt>=2?' · 액티비티 2+ 보너스':''}</span><span>- ${krw(bundleDiscount)}</span></div>`;
 
     document.getElementById('pkgLines').innerHTML = lines + discountLine;
     document.getElementById('pkgTotal').textContent = krw(finalTotal);
