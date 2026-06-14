@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>나만의 여행 조합 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-d:#E85826;--accent:#FFD23F;
+      --primary-soft:#FFF5F0;
+      --ink:#1A1A1A;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+      --line:#E5E7EB;--bg:#FAFBFC;--bg-soft:#F9FAFB;
+      --success:#10B981;--warning:#F59E0B;--danger:#EF4444;
+      --radius:14px;
+      --max-w:1280px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    input,select{font-family:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 20px;}
+    .mono{font-family:'JetBrains Mono',monospace;}
+
+    /* Header */
+    .header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
+    .header-inner{height:60px;display:flex;align-items:center;gap:14px;}
+    .back-btn{font-size:22px;color:var(--ink-2);width:36px;height:36px;border-radius:8px;display:grid;place-items:center;}
+    .back-btn:hover{background:var(--bg-soft);}
+    .logo{font-size:20px;font-weight:900;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:8px;}
+    .logo .mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;}
+    .gnb-mini{display:flex;gap:6px;margin-left:14px;}
+    .gnb-mini a{padding:7px 12px;border-radius:7px;font-size:12px;font-weight:800;color:var(--ink-3);}
+    .gnb-mini a:hover{color:var(--ink);background:var(--bg-soft);}
+
+    /* Hero */
+    .hero{padding:32px 0 18px;background:linear-gradient(135deg,#FFF5F0 0%,#fff 80%);border-bottom:1px solid var(--line);}
+    .hero h1{font-size:30px;font-weight:900;letter-spacing:-0.02em;margin:0 0 6px;}
+    .hero p{font-size:14px;color:var(--ink-3);margin:0;}
+    .hero .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:24px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;}
+
+    /* Layout */
+    .layout{display:grid;grid-template-columns:1fr 340px;gap:24px;padding:28px 0 60px;}
+
+    /* Package builder card sections — copied from cycle 30 */
+    .pkg-stage-list{ display:flex; flex-direction:column; gap:24px; }
+    .pkg-stage{ background:#fff; border-radius:14px; padding:20px 22px; border:1px solid var(--line); }
+    .pkg-stage-h{ display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+    .pkg-stage-h h3{ margin:0; font-size:17px; font-weight:900; letter-spacing:-0.01em; }
+    .pkg-stage-num{
+      width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent));
+      color:#fff; display:grid; place-items:center; font-size:13px; font-weight:900;
+      font-family:'JetBrains Mono',monospace; flex-shrink:0;
+    }
+    .pkg-stage-hint{ margin-left:auto; font-size:12px; color:var(--ink-3); font-weight:700; }
+
+    .pkg-cat-tabs{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--line); }
+    .pkg-cat-tab{
+      padding:7px 13px; background:#F3F4F6; border:none; border-radius:18px;
+      font-size:12px; font-weight:800; color:var(--ink-3); cursor:pointer; font-family:inherit;
+      transition:all .15s;
+    }
+    .pkg-cat-tab:hover{ background:#FFF5F0; color:var(--primary); }
+    .pkg-cat-tab.on{ background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; }
+
+    .pkg-card-grid{ display:grid; gap:12px; }
+    .pkg-card-grid-3{ grid-template-columns:repeat(3,1fr); }
+
+    .pkg-pick-card{
+      background:#fff; border:1.5px solid var(--line); border-radius:12px;
+      overflow:hidden; cursor:pointer; transition:all .15s; position:relative;
+      display:flex; flex-direction:column;
+    }
+    .pkg-pick-card:hover{ border-color:var(--primary); transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.06); }
+    .pkg-pick-card.selected{
+      border-color:var(--primary); border-width:2px;
+      background:linear-gradient(135deg,#FFFAF7,#fff);
+      box-shadow:0 4px 14px rgba(255,107,53,.18);
+    }
+    .pkg-pick-card.selected::after{
+      content:'✓'; position:absolute; top:10px; right:10px; z-index:2;
+      width:26px; height:26px; border-radius:50%; background:var(--primary); color:#fff;
+      display:grid; place-items:center; font-size:14px; font-weight:900;
+      box-shadow:0 2px 8px rgba(255,107,53,.4);
+    }
+    .pkg-pick-card .pp-img{
+      aspect-ratio:16/10; background-size:cover; background-position:center; background-color:#F3F4F6;
+      position:relative;
+    }
+    .pkg-pick-card .pp-cat{
+      position:absolute; top:8px; left:8px; padding:3px 8px;
+      background:rgba(0,0,0,.6); color:#fff; border-radius:5px;
+      font-size:10px; font-weight:900; letter-spacing:.04em;
+    }
+    .pkg-pick-card .pp-body{ padding:12px 14px; flex:1; display:flex; flex-direction:column; gap:6px; }
+    .pkg-pick-card .pp-name{ font-size:14px; font-weight:900; color:var(--ink); line-height:1.3; }
+    .pkg-pick-card .pp-sub{ font-size:11px; color:var(--ink-3); font-weight:600; }
+    .pkg-pick-card .pp-tags{ display:flex; gap:4px; flex-wrap:wrap; margin-top:2px; }
+    .pkg-pick-card .pp-tag{
+      padding:1px 7px; background:#F3F4F6; border-radius:4px;
+      font-size:10px; font-weight:800; color:#374151;
+    }
+    .pkg-pick-card .pp-tag.hot{ background:#FEE2E2; color:#991B1B; }
+    .pkg-pick-card .pp-tag.green{ background:#D1FAE5; color:#065F46; }
+    .pkg-pick-card .pp-meta{ display:flex; gap:10px; font-size:11px; color:var(--ink-3); font-weight:700; margin-top:auto; padding-top:6px; }
+    .pkg-pick-card .pp-meta span{ display:inline-flex; align-items:center; gap:3px; }
+    .pkg-pick-card .pp-foot{
+      padding:10px 14px; background:#FAFBFC; border-top:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .pkg-pick-card .pp-price{ font-size:15px; font-weight:900; color:var(--primary); font-family:'JetBrains Mono',monospace; }
+    .pkg-pick-card .pp-detail{
+      padding:5px 10px; background:#fff; border:1px solid var(--line); border-radius:6px;
+      font-size:10px; font-weight:800; color:var(--ink-2); cursor:pointer; font-family:inherit;
+    }
+    .pkg-pick-card .pp-detail:hover{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+    /* 항공 카드 */
+    .pkg-pick-card.flight-card{ padding:14px 16px; }
+    .pkg-pick-card.flight-card .fc-top{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .pkg-pick-card.flight-card .fc-logo{
+      width:32px; height:32px; border-radius:8px; color:#fff;
+      display:grid; place-items:center; font-size:11px; font-weight:900;
+    }
+    .pkg-pick-card.flight-card .fc-airline{ font-size:12px; font-weight:900; color:var(--ink); }
+    .pkg-pick-card.flight-card .fc-number{ font-size:10px; color:var(--ink-3); font-weight:700; font-family:'JetBrains Mono',monospace; }
+    .pkg-pick-card.flight-card .fc-route{ display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:8px; }
+    .pkg-pick-card.flight-card .fc-route .col{ text-align:center; }
+    .pkg-pick-card.flight-card .fc-time{ font-size:18px; font-weight:900; font-family:'JetBrains Mono',monospace; color:var(--ink); }
+    .pkg-pick-card.flight-card .fc-airport{ font-size:10px; font-weight:800; color:var(--ink-3); margin-top:2px; }
+    .pkg-pick-card.flight-card .fc-mid{ font-size:10px; color:var(--ink-3); font-weight:800; }
+    .pkg-pick-card.flight-card .fc-mid::before, .pkg-pick-card.flight-card .fc-mid::after{
+      content:''; display:inline-block; width:20px; height:1px; background:var(--line); vertical-align:middle; margin:0 4px;
+    }
+    .pkg-pick-card.flight-card .fc-foot{ display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed var(--line); }
+    .pkg-pick-card.flight-card .fc-price{ font-size:16px; font-weight:900; color:var(--primary); font-family:'JetBrains Mono',monospace; }
+    .pkg-pick-card.flight-card .fc-stops{ font-size:10px; color:var(--ink-3); font-weight:800; }
+
+    /* Sticky summary */
+    .pkg-summary{
+      position:sticky; top:80px; background:#fff; border:1.5px solid var(--primary);
+      border-radius:14px; padding:20px 22px; box-shadow:0 8px 24px rgba(255,107,53,.12);
+      align-self:flex-start;
+    }
+    .pkg-summary h4{ margin:0 0 12px; font-size:15px; font-weight:900; }
+    .pkg-lines{ display:flex; flex-direction:column; gap:8px; min-height:80px; }
+    .pkg-line{ display:flex; justify-content:space-between; font-size:13px; color:var(--ink-2); font-weight:700; }
+    .pkg-line span:last-child{ font-family:'JetBrains Mono',monospace; font-weight:900; color:var(--ink); }
+    .pkg-divider{ height:1px; background:var(--line); margin:14px 0; }
+    .pkg-total{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+    .pkg-total .label{ font-size:13px; font-weight:900; color:var(--ink-2); }
+    .pkg-total .price{ font-size:24px; font-weight:900; color:var(--primary); font-family:'JetBrains Mono',monospace; }
+    .pkg-cta{ width:100%; padding:14px; background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:15px; cursor:pointer; font-family:inherit; }
+    .pkg-cta:hover{ filter:brightness(1.08); }
+
+    /* 자세히 모달 */
+    .pkg-detail-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200;
+      display:none; align-items:flex-start; justify-content:center; padding:40px 20px;
+      overflow-y:auto; backdrop-filter:blur(4px);
+    }
+    .pkg-detail-overlay.on{ display:flex; }
+    .pkg-detail-modal{
+      background:#fff; border-radius:18px; width:min(720px,100%);
+      max-height:calc(100vh - 80px); overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    .pkg-detail-img{ aspect-ratio:16/9; background-size:cover; background-position:center; background-color:#F3F4F6; position:relative; }
+    .pkg-detail-close{
+      position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.96); border:none; font-size:18px; font-weight:900;
+      color:var(--ink); cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.15);
+      font-family:inherit;
+    }
+    .pkg-detail-body{ padding:24px 26px; overflow-y:auto; flex:1; }
+    .pkg-detail-body h2{ margin:0 0 6px; font-size:22px; font-weight:900; letter-spacing:-0.01em; }
+    .pkg-detail-body .pd-sub{ font-size:13px; color:var(--ink-3); font-weight:700; margin-bottom:12px; }
+    .pkg-detail-body .pd-meta-row{ display:flex; gap:14px; flex-wrap:wrap; padding:10px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin-bottom:14px; font-size:12px; }
+    .pkg-detail-body .pd-meta-row .pd-mt{ display:inline-flex; align-items:center; gap:5px; font-weight:700; color:var(--ink-2); }
+    .pkg-detail-body .pd-meta-row .pd-mt strong{ color:var(--ink); }
+    .pkg-detail-body .pd-desc{ font-size:13px; color:var(--ink-2); line-height:1.7; margin-bottom:18px; }
+    .pkg-detail-body .pd-section{ margin-bottom:18px; }
+    .pkg-detail-body .pd-section h4{ margin:0 0 8px; font-size:13px; font-weight:900; color:var(--ink); }
+    .pkg-detail-body .pd-bullets{ margin:0; padding:0 0 0 18px; font-size:12px; color:var(--ink-2); line-height:1.7; }
+    .pkg-detail-body .pd-amenity-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .pkg-detail-body .pd-amenity{
+      background:#FAFBFC; border:1px solid var(--line); border-radius:8px;
+      padding:10px 8px; text-align:center; font-size:11px; font-weight:700; color:var(--ink-2);
+    }
+    .pkg-detail-foot{
+      padding:14px 26px; border-top:1px solid var(--line); background:#FAFBFC;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .pkg-detail-foot .pd-price{ font-size:20px; font-weight:900; color:var(--primary); font-family:'JetBrains Mono',monospace; }
+    .pkg-detail-foot .pd-price-lb{ font-size:11px; color:var(--ink-3); font-weight:700; }
+    .pkg-detail-foot .pd-cta{
+      padding:11px 22px; background:linear-gradient(135deg,var(--primary),var(--accent));
+      color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:900;
+      cursor:pointer; font-family:inherit;
+    }
+
+    @media (max-width:1024px){
+      .layout{grid-template-columns:1fr;}
+      .pkg-summary{position:static;}
+    }
+    @media (max-width:768px){
+      .pkg-card-grid-3{grid-template-columns:1fr 1fr;}
+      .pkg-detail-body .pd-amenity-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:480px){
+      .pkg-card-grid-3{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <button class="back-btn" onclick="history.back()" aria-label="뒤로">‹</button>
+      <a href="index.html" class="logo">
+        <span class="mark">O</span>오마이트립
+      </a>
+      <nav class="gnb-mini">
+        <a href="flights.html">✈️ 항공</a>
+        <a href="hotels.html">🏨 호텔</a>
+        <a href="golftels.html">⛳ 골프텔</a>
+        <a href="ai-planner.html">🤖 AI 플래너</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <span class="pill">✦ Dynamic Package Builder</span>
+      <h1>나만의 여행을 조합하세요</h1>
+      <p>항공·호텔·액티비티를 자유롭게 조합하면 자동 번들 할인 (최대 -10%) · 카드 클릭 후 자세히 보기로 충분한 정보를 먼저 확인하세요</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="layout">
+      <div class="pkg-stage-list">
+
+        <!-- STAGE 1: 항공 -->
+        <div class="pkg-stage">
+          <div class="pkg-stage-h">
+            <span class="pkg-stage-num">1</span>
+            <h3>✈️ 항공편 선택</h3>
+            <span class="pkg-stage-hint">왕복 · 1인 기준</span>
+          </div>
+          <div class="pkg-card-grid pkg-card-grid-3" id="pkgFlightGrid"></div>
+        </div>
+
+        <!-- STAGE 2: 호텔 -->
+        <div class="pkg-stage">
+          <div class="pkg-stage-h">
+            <span class="pkg-stage-num">2</span>
+            <h3>🏨 호텔 선택</h3>
+            <span class="pkg-stage-hint">3박 기준 · 카드 클릭 시 상세</span>
+          </div>
+          <div class="pkg-card-grid pkg-card-grid-3" id="pkgHotelGrid"></div>
+        </div>
+
+        <!-- STAGE 3: 액티비티 -->
+        <div class="pkg-stage">
+          <div class="pkg-stage-h">
+            <span class="pkg-stage-num">3</span>
+            <h3>🎫 액티비티 추가 <span style="font-size:12px;color:#9CA3AF;font-weight:700;">(다중선택)</span></h3>
+            <span class="pkg-stage-hint"><span id="actCount" style="color:#FF6B35;font-weight:900;font-family:'JetBrains Mono',monospace;">0개 선택</span></span>
+          </div>
+          <div class="pkg-cat-tabs" id="pkgActCats">
+            <button class="pkg-cat-tab on" data-cat="all" onclick="filterActCat('all',this)">🌏 전체</button>
+            <button class="pkg-cat-tab" data-cat="theme" onclick="filterActCat('theme',this)">🎢 테마파크</button>
+            <button class="pkg-cat-tab" data-cat="culture" onclick="filterActCat('culture',this)">👘 문화체험</button>
+            <button class="pkg-cat-tab" data-cat="tour" onclick="filterActCat('tour',this)">🚌 시티투어</button>
+            <button class="pkg-cat-tab" data-cat="food" onclick="filterActCat('food',this)">🍜 미식</button>
+            <button class="pkg-cat-tab" data-cat="sport" onclick="filterActCat('sport',this)">⛳ 스포츠</button>
+            <button class="pkg-cat-tab" data-cat="transfer" onclick="filterActCat('transfer',this)">🚐 픽업</button>
+          </div>
+          <div class="pkg-card-grid pkg-card-grid-3" id="pkgActivityGrid"></div>
+        </div>
+      </div>
+
+      <aside class="pkg-summary" aria-live="polite">
+        <h4>💰 예상 비용</h4>
+        <div class="pkg-lines" id="pkgLines"></div>
+        <div class="pkg-divider"></div>
+        <div class="pkg-total">
+          <span class="label">총 예상 가격</span>
+          <span class="price" id="pkgTotal">0원</span>
+        </div>
+        <button class="pkg-cta" onclick="bookPackage()">✓ 이 조합으로 예약하기</button>
+        <div style="margin-top:10px;font-size:11px;color:#6B7280;text-align:center;line-height:1.5;font-weight:700;">
+          🎁 액티비티 2개+ 추가 시 번들 할인 10%<br>
+          💳 회원 등급별 추가 할인 (-3 ~ -7%)
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- 자세히 모달 -->
+  <div class="pkg-detail-overlay" id="pkgDetailOverlay" onclick="if(event.target===this)closePkgDetail()">
+    <div class="pkg-detail-modal" id="pkgDetailModal"></div>
+  </div>
+
+  <script>
+    const krw = n => n.toLocaleString('ko-KR') + '원';
+
+    // 데이터 (사이클 30에서 만든 풍부한 정보 유지)
+    const PKG_FLIGHTS = [
+      { id:'pf-tw', airline:'티웨이항공', code:'TW', number:'TW283', color:'linear-gradient(135deg,#EC1C24,#FF4949)',
+        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카',
+        depTime:'08:30', arrTime:'10:15', duration:'1h 45m', stops:0,
+        price:380000, fuel:38000, tax:24000,
+        baggage:'무료 수하물 15KG', meal:'간식 제공', popular:true,
+        desc:'아침 출발로 첫째 날 알찬 일정 구성 가능. 1박 추가 효과.',
+        includes:['기내 캐리어 7KG','위탁 수하물 15KG','간식 1회'] },
+      { id:'pf-ke', airline:'대한항공', code:'KE', number:'KE721', color:'linear-gradient(135deg,#00256C,#1E4A8A)',
+        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카',
+        depTime:'13:00', arrTime:'14:45', duration:'1h 45m', stops:0,
+        price:520000, fuel:52000, tax:24000,
+        baggage:'무료 수하물 23KG', meal:'기내식 제공', deluxe:true,
+        desc:'스카이팀 마일리지 적립 가능. 좌석 간격 넓고 기내식 한식.',
+        includes:['기내 캐리어 10KG','위탁 수하물 23KG','한식 기내식','마일리지 적립'] },
+      { id:'pf-7c', airline:'제주항공', code:'7C', number:'7C1156', color:'linear-gradient(135deg,#F47721,#FF9744)',
+        from:'PUS', to:'FUK', fromCity:'부산', toCity:'후쿠오카',
+        depTime:'09:30', arrTime:'10:25', duration:'55m', stops:0,
+        price:298000, fuel:30000, tax:18000,
+        baggage:'무료 수하물 15KG', meal:'유료 간식', cheapest:true,
+        desc:'부산 김해 직항 최단 거리. 가성비 1위 노선.',
+        includes:['기내 캐리어 7KG','위탁 수하물 15KG'] }
+    ];
+    const PKG_HOTELS = [
+      { id:'ph-granvia', name:'호텔 그란비아 오사카', english:'Hotel Granvia Osaka',
+        img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
+        city:'오사카', area:'우메다', stars:5, score:9.2, reviews:4127,
+        price:240000, oldPrice:289000, nights:3,
+        tags:['역 직결','조식 포함','수영장'],
+        amenities:['🚆 JR 오사카역 직결','🥐 조식 포함','🏊 수영장','💪 피트니스','📶 무료 와이파이','💼 비즈니스 센터'],
+        roomTypes:['스탠다드 트윈 (22㎡)','슈페리어 (28㎡)','디럭스 트윈 (34㎡)','스위트 (52㎡)'],
+        checkIn:'15:00', checkOut:'11:00',
+        desc:'JR 오사카역과 직결된 특급 호텔. 우메다 쇼핑·교통의 최적 거점. 우메다 스카이빌딩 도보 10분.',
+        reasons:['역 직결 (도보 0분)','조식 한국인 입맛 맞춤','일본어 못해도 OK · 한국어 직원 상시'] },
+      { id:'ph-rigaroyal', name:'리가로얄 호텔 오사카', english:'Rihga Royal Hotel Osaka',
+        img:'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80',
+        city:'오사카', area:'나카노시마', stars:5, score:9.0, reviews:3528,
+        price:390000, oldPrice:459000, nights:3,
+        tags:['리버뷰','스파','조식 포함','VIP 라운지'],
+        amenities:['🌊 강변 리버뷰','🥐 조식 포함','💆 럭셔리 스파','🏊 수영장','🍷 VIP 라운지','💼 비즈니스 센터'],
+        roomTypes:['스탠다드 (28㎡)','클럽 플로어 (32㎡)','이그제큐티브 스위트 (62㎡)','로얄 스위트 (92㎡)'],
+        checkIn:'15:00', checkOut:'12:00',
+        desc:'나카노시마 강변의 클래식 5성 호텔. 일본 황실 방문지. 럭셔리 스파·미슐랭 레스토랑 보유.',
+        reasons:['황실급 5성 럭셔리','일본 미슐랭 셰프','VIP 라운지 24시간 이용'] },
+      { id:'ph-apa', name:'APA 호텔 난바', english:'APA Hotel Namba',
+        img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+        city:'오사카', area:'난바', stars:4, score:8.5, reviews:5284,
+        price:180000, oldPrice:219000, nights:3,
+        tags:['가성비 1위','역 도보 3분','24시간 프론트'],
+        amenities:['🚆 난바역 도보 3분','📶 무료 와이파이','🕐 24시간 프론트','🍱 편의점 1F','♨️ 대욕장','🚖 택시 대기'],
+        roomTypes:['스탠다드 싱글 (12㎡)','스탠다드 트윈 (18㎡)','패밀리룸 (24㎡)'],
+        checkIn:'15:00', checkOut:'10:00',
+        desc:'난바 쇼핑·먹거리 중심지 위치. 작지만 깔끔한 일본식 비즈니스 호텔. 도톤보리 도보 5분.',
+        reasons:['도톤보리·신사이바시 도보권','대욕장 무료 이용','24시간 편의점 1층'] }
+    ];
+    const PKG_ACTIVITIES = [
+      { id:'pa-usj', cat:'theme', name:'유니버설 스튜디오 재팬', subtitle:'1일 자유이용권 (스튜디오 패스)',
+        img:'https://images.unsplash.com/photo-1503424886307-b090341d25d1?auto=format&fit=crop&w=600&q=80',
+        price:89000, oldPrice:108000, duration:'8-10시간', rating:4.8, reviews:8420,
+        catLabel:'🎢 테마파크', hot:true,
+        includes:['모든 어트랙션 입장','쇼·퍼레이드 관람','파크 내 시설 이용'],
+        excludes:['익스프레스 패스 (별도)','파크 내 식사','캐릭터 굿즈'],
+        desc:'슈퍼 닌텐도 월드 · 해리포터 · 미니언즈 등 인기 어트랙션 모두 즐기는 1일 자유이용권. QR 티켓 카톡 발송.',
+        tip:'평일 방문 추천 · 익스프레스 패스 별도 구매 시 대기 30분 → 10분' },
+      { id:'pa-cruise', cat:'tour', name:'오사카 성 + 벚꽃 크루즈', subtitle:'오사카 성 + 강 크루즈 콤보',
+        img:'https://images.unsplash.com/photo-1574870111867-089730e5a72b?auto=format&fit=crop&w=600&q=80',
+        price:65000, oldPrice:79000, duration:'3-4시간', rating:4.7, reviews:2840,
+        catLabel:'🚌 시티투어', recommended:true,
+        includes:['오사카 성 입장권','강 크루즈 (왕복)','한국어 가이드 (음성)'],
+        excludes:['교통편','식사'],
+        desc:'오사카 상징 오사카 성과 강 위에서 보는 벚꽃 명소. 3-4월 벚꽃철 강력 추천. 가이드 음성 한국어.',
+        tip:'벚꽃 시즌 (3월 말~4월 초) 최고 · 사전 예약 필수' },
+      { id:'pa-golf', cat:'sport', name:'오사카 골프라운딩 1회', subtitle:'명문 코스 18홀 · 카트 포함',
+        img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80',
+        price:120000, oldPrice:148000, duration:'5-6시간', rating:4.9, reviews:1542,
+        catLabel:'⛳ 스포츠',
+        includes:['그린피','카트 1대','캐디 1인','호텔 픽업 (왕복)'],
+        excludes:['골프채 렌탈 (+30,000원)','캐디 팁'],
+        desc:'오사카 근교 명문 코스 18홀 라운딩. 호텔 픽업·드롭 포함. 한국어 가능 캐디 매칭.',
+        tip:'오전 티오프 선호 시 D-3 사전 예약' },
+      { id:'pa-dotonbori', cat:'food', name:'도톤보리 야시장 투어', subtitle:'전문 가이드와 함께하는 미식 투어',
+        img:'https://images.unsplash.com/photo-1554797589-7241bb691973?auto=format&fit=crop&w=600&q=80',
+        price:48000, oldPrice:58000, duration:'3시간', rating:4.6, reviews:3120,
+        catLabel:'🍜 미식',
+        includes:['한국어 가이드','5종 음식 시식 (타코야끼·오코노미야끼 등)','시그니처 사진 촬영'],
+        excludes:['추가 음료','기념품'],
+        desc:'야간 도톤보리 가장 핫한 길거리 음식 5종 시식. 글리코맨 사진 명소에서 인생 사진 촬영.',
+        tip:'저녁 시간대 (18시 출발) 가장 활기찬 분위기' },
+      { id:'pa-kimono', cat:'culture', name:'기모노 체험 + 사진', subtitle:'전통 료칸 사진관 + 인생샷',
+        img:'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=600&q=80',
+        price:78000, oldPrice:95000, duration:'2-3시간', rating:4.8, reviews:1890,
+        catLabel:'👘 문화체험', recommended:true,
+        includes:['기모노 1벌 대여','헤어 스타일링','전문 사진사 30컷','액자 사진 1매'],
+        excludes:['실외 촬영 (+20,000원)','메이크업'],
+        desc:'전통 료칸에서 기모노 입고 전문 사진사 촬영. 메이크업·헤어까지 완비. 30컷 디지털 + 액자 1매 기념품.',
+        tip:'커플·자매 가족 사진 인기 · 사전 예약 권장' },
+      { id:'pa-pickup', cat:'transfer', name:'공항 픽업 (편도)', subtitle:'간사이공항 ↔ 시내 호텔',
+        img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=600&q=80',
+        price:32000, oldPrice:42000, duration:'편도 50분', rating:4.7, reviews:6240,
+        catLabel:'🚐 픽업',
+        includes:['전용 세단 (4인 이하)','운전기사 1명','짐 적재 (캐리어 4개)','한국어 메신저 안내'],
+        excludes:['고속도로 통행료 (현지 결제)','대기 시간 1h 초과 시 추가'],
+        desc:'간사이 공항 도착 즉시 전용 차량 픽업. 도착 게이트에서 한국어 안내 메신저 보유 기사 대기.',
+        tip:'늦은 밤 도착 시 강력 추천 (대중교통 끊김)' },
+      { id:'pa-nara', cat:'tour', name:'나라 사슴 공원 1일 투어', subtitle:'나라 + 도다이지 + 사슴 공원',
+        img:'https://images.unsplash.com/photo-1545569310-31e3f01a4257?auto=format&fit=crop&w=600&q=80',
+        price:72000, oldPrice:89000, duration:'8시간', rating:4.7, reviews:2580,
+        catLabel:'🚌 시티투어',
+        includes:['왕복 교통','한국어 가이드','사슴 먹이','도다이지 입장권'],
+        excludes:['점심 식사','기념품'],
+        desc:'오사카 → 나라 당일치기. 사슴 1,200마리와 자연스러운 교감. 도다이지 거대 불상 견학.',
+        tip:'사슴 먹이 (200엔) 호텔에서 미리 환전' },
+      { id:'pa-sushi', cat:'food', name:'스시 마스터 클래스', subtitle:'전문 셰프와 함께 스시 만들기',
+        img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
+        price:95000, oldPrice:118000, duration:'2시간', rating:4.9, reviews:1240,
+        catLabel:'🍜 미식', recommended:true,
+        includes:['스시 8피스 직접 제작','셰프 1:1 지도','앞치마 기념품','시식 + 사케 1잔'],
+        excludes:['추가 사케','테이크아웃'],
+        desc:'10년 경력 스시 셰프와 1:1 클래스. 직접 만든 스시 8피스 + 사케 1잔 시식. 앞치마 기념품 증정.',
+        tip:'커플·친구 동반 인기 · 한국어 통역 포함' },
+      { id:'pa-onsen', cat:'culture', name:'프라이빗 온천 욕탕', subtitle:'료칸 전세 1.5시간',
+        img:'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=600&q=80',
+        price:88000, oldPrice:108000, duration:'1.5시간', rating:4.8, reviews:980,
+        catLabel:'👘 문화체험',
+        includes:['프라이빗 온천 욕탕 전세','유카타 대여','음료 1잔','수건 세트'],
+        excludes:['식사','마사지'],
+        desc:'전통 료칸에서 다른 손님 없는 프라이빗 온천. 커플·가족 단위 추천. 유카타 무료 대여.',
+        tip:'커플 추천 (전세실 = 일본 가족탕 개념)' },
+      { id:'pa-kyoto', cat:'tour', name:'교토 1일 투어', subtitle:'금각사 + 청수사 + 기온',
+        img:'https://images.unsplash.com/photo-1494522358652-f30e61a60313?auto=format&fit=crop&w=600&q=80',
+        price:88000, oldPrice:108000, duration:'10시간', rating:4.8, reviews:3420,
+        catLabel:'🚌 시티투어', hot:true,
+        includes:['왕복 교통 (밴)','한국어 가이드','3 사찰 입장권','교토 전통 도시락'],
+        excludes:['추가 사찰 입장료'],
+        desc:'오사카 출발 교토 핵심 3 명소. 금각사·청수사·기온 거리 도보 투어. 점심 도시락 포함.',
+        tip:'벚꽃·단풍 시즌 강력 추천' },
+      { id:'pa-batting', cat:'sport', name:'야구 배팅 케이지 1시간', subtitle:'프로 구장식 시뮬레이션',
+        img:'https://images.unsplash.com/photo-1508344928-26d4fd6c3cb1?auto=format&fit=crop&w=600&q=80',
+        price:42000, oldPrice:52000, duration:'1시간', rating:4.5, reviews:580,
+        catLabel:'⛳ 스포츠',
+        includes:['배팅 무제한 1시간','배트·헬멧 대여','음료 1잔'],
+        excludes:['글러브','촬영 서비스'],
+        desc:'프로 야구단 출신 코치 1:1 지도 (옵션). 구속 80~140km 시뮬레이션. 자녀와 즐기기 좋음.',
+        tip:'10-15세 자녀 동반 시 인기' },
+      { id:'pa-shopping', cat:'tour', name:'신사이바시 쇼핑 가이드', subtitle:'면세 가이드 + 환전 서비스',
+        img:'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=600&q=80',
+        price:35000, oldPrice:48000, duration:'4시간', rating:4.6, reviews:1820,
+        catLabel:'🚌 시티투어',
+        includes:['한국어 쇼핑 가이드','면세 환급 안내','우대 환율 환전','짐 보관'],
+        excludes:['상품 구매 비용'],
+        desc:'신사이바시·다이마루 면세 쇼핑 풀 가이드. 면세 환급 서식 작성 도움 + 우대 환율 환전.',
+        tip:'주말 오전 출발 (혼잡 회피)' }
+    ];
+
+    const pkgState = { flight:null, hotel:null, activities:new Set(), actCatFilter:'all' };
+
+    function renderFlightCards(){
+      const grid = document.getElementById('pkgFlightGrid');
+      grid.innerHTML = PKG_FLIGHTS.map(f => `
+        <div class="pkg-pick-card flight-card ${pkgState.flight?.id===f.id?'selected':''}" data-id="${f.id}" onclick="selectPkgFlight('${f.id}')">
+          <div class="fc-top">
+            <div class="fc-logo" style="background:${f.color};">${f.code}</div>
+            <div>
+              <div class="fc-airline">${f.airline}</div>
+              <div class="fc-number">${f.number}</div>
+            </div>
+            <button class="pp-detail" style="margin-left:auto;" onclick="event.stopPropagation();openPkgDetail('flight','${f.id}')">ⓘ 자세히</button>
+          </div>
+          <div class="fc-route">
+            <div class="col">
+              <div class="fc-time">${f.depTime}</div>
+              <div class="fc-airport">${f.fromCity} (${f.from})</div>
+            </div>
+            <div class="fc-mid">${f.duration}</div>
+            <div class="col">
+              <div class="fc-time">${f.arrTime}</div>
+              <div class="fc-airport">${f.toCity} (${f.to})</div>
+            </div>
+          </div>
+          <div class="pp-tags" style="margin-bottom:8px;">
+            ${f.stops===0?'<span class="pp-tag green">✓ 직항</span>':'<span class="pp-tag">'+f.stops+'회 경유</span>'}
+            ${f.cheapest?'<span class="pp-tag hot">💰 가성비 1위</span>':''}
+            ${f.popular?'<span class="pp-tag hot">🔥 인기 노선</span>':''}
+            ${f.deluxe?'<span class="pp-tag">⭐ 한식 기내식</span>':''}
+          </div>
+          <div class="fc-foot">
+            <div>
+              <div style="font-size:10px;color:#9CA3AF;font-weight:700;">왕복 1인 (세금 포함)</div>
+              <div class="fc-price">${f.price.toLocaleString('ko-KR')}원</div>
+            </div>
+            <div class="fc-stops">${f.baggage}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderHotelCards(){
+      const grid = document.getElementById('pkgHotelGrid');
+      grid.innerHTML = PKG_HOTELS.map(h => {
+        const discountPct = Math.round((1 - h.price/h.oldPrice) * 100);
+        return `
+          <div class="pkg-pick-card ${pkgState.hotel?.id===h.id?'selected':''}" data-id="${h.id}" onclick="selectPkgHotel('${h.id}')">
+            <div class="pp-img" style="background-image:url('${h.img}');">
+              <span class="pp-cat">★${h.stars} · ${h.area}</span>
+              ${discountPct>=15?`<span style="position:absolute;top:8px;right:8px;padding:3px 8px;background:#EF4444;color:#fff;border-radius:5px;font-size:10px;font-weight:900;">-${discountPct}%</span>`:''}
+            </div>
+            <div class="pp-body">
+              <div class="pp-name">${h.name}</div>
+              <div class="pp-sub">${h.english}</div>
+              <div class="pp-tags">${h.tags.slice(0,3).map(t => `<span class="pp-tag">${t}</span>`).join('')}</div>
+              <div class="pp-meta">
+                <span>⭐ ${h.score}</span>
+                <span>💬 ${h.reviews.toLocaleString('ko-KR')}</span>
+                <span>🏨 ${h.nights}박</span>
+              </div>
+            </div>
+            <div class="pp-foot">
+              <div>
+                <div style="font-size:9px;color:#9CA3AF;font-weight:700;">3박 1인 (세금 포함)</div>
+                <div style="display:flex;gap:5px;align-items:baseline;">
+                  <span style="font-size:10px;color:#9CA3AF;text-decoration:line-through;font-family:'JetBrains Mono',monospace;">${h.oldPrice.toLocaleString('ko-KR')}원</span>
+                  <span class="pp-price">${h.price.toLocaleString('ko-KR')}원</span>
+                </div>
+              </div>
+              <button class="pp-detail" onclick="event.stopPropagation();openPkgDetail('hotel','${h.id}')">ⓘ 자세히</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderActivityCards(){
+      const grid = document.getElementById('pkgActivityGrid');
+      const filtered = pkgState.actCatFilter === 'all' ? PKG_ACTIVITIES : PKG_ACTIVITIES.filter(a => a.cat === pkgState.actCatFilter);
+      grid.innerHTML = filtered.map(a => {
+        const isSel = pkgState.activities.has(a.id);
+        const discountPct = Math.round((1 - a.price/a.oldPrice) * 100);
+        return `
+          <div class="pkg-pick-card ${isSel?'selected':''}" data-id="${a.id}" onclick="togglePkgActivity('${a.id}')">
+            <div class="pp-img" style="background-image:url('${a.img}');">
+              <span class="pp-cat">${a.catLabel}</span>
+              ${a.hot?'<span style="position:absolute;top:8px;right:8px;padding:3px 8px;background:#EF4444;color:#fff;border-radius:5px;font-size:10px;font-weight:900;">🔥 HOT</span>':''}
+              ${a.recommended?'<span style="position:absolute;top:8px;right:8px;padding:3px 8px;background:#10B981;color:#fff;border-radius:5px;font-size:10px;font-weight:900;">⭐ 추천</span>':''}
+            </div>
+            <div class="pp-body">
+              <div class="pp-name">${a.name}</div>
+              <div class="pp-sub">${a.subtitle}</div>
+              <div class="pp-meta">
+                <span>⏱️ ${a.duration}</span>
+                <span>⭐ ${a.rating}</span>
+                <span>💬 ${a.reviews.toLocaleString('ko-KR')}</span>
+              </div>
+            </div>
+            <div class="pp-foot">
+              <div>
+                <div style="font-size:9px;color:#9CA3AF;font-weight:700;">1인 (세금 포함) -${discountPct}%</div>
+                <div style="display:flex;gap:5px;align-items:baseline;">
+                  <span style="font-size:10px;color:#9CA3AF;text-decoration:line-through;font-family:'JetBrains Mono',monospace;">${a.oldPrice.toLocaleString('ko-KR')}</span>
+                  <span class="pp-price">${a.price.toLocaleString('ko-KR')}원</span>
+                </div>
+              </div>
+              <button class="pp-detail" onclick="event.stopPropagation();openPkgDetail('activity','${a.id}')">ⓘ 자세히</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.selectPkgFlight = (id) => { pkgState.flight = PKG_FLIGHTS.find(f => f.id === id); renderFlightCards(); recalcPackage(); };
+    window.selectPkgHotel = (id) => { pkgState.hotel = PKG_HOTELS.find(h => h.id === id); renderHotelCards(); recalcPackage(); };
+    window.togglePkgActivity = (id) => {
+      if(pkgState.activities.has(id)) pkgState.activities.delete(id); else pkgState.activities.add(id);
+      renderActivityCards(); recalcPackage();
+    };
+    window.filterActCat = (cat, btn) => {
+      pkgState.actCatFilter = cat;
+      document.querySelectorAll('.pkg-cat-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderActivityCards();
+    };
+
+    window.openPkgDetail = (type, id) => {
+      let item, body;
+      if(type === 'flight'){
+        item = PKG_FLIGHTS.find(f => f.id === id);
+        body = `
+          <div class="pkg-detail-img" style="background:${item.color};display:grid;place-items:center;">
+            <div style="text-align:center;color:#fff;">
+              <div style="font-size:48px;font-weight:900;font-family:'JetBrains Mono',monospace;">${item.code}</div>
+              <div style="font-size:18px;font-weight:900;margin-top:4px;">${item.airline}</div>
+            </div>
+            <button class="pkg-detail-close" onclick="closePkgDetail()">×</button>
+          </div>
+          <div class="pkg-detail-body">
+            <h2>${item.airline} · ${item.number}</h2>
+            <div class="pd-sub">${item.fromCity} (${item.from}) → ${item.toCity} (${item.to})</div>
+            <div class="pd-meta-row">
+              <span class="pd-mt">🕐 출발 <strong>${item.depTime}</strong></span>
+              <span class="pd-mt">🛬 도착 <strong>${item.arrTime}</strong></span>
+              <span class="pd-mt">⏱️ 소요 <strong>${item.duration}</strong></span>
+              <span class="pd-mt">${item.stops===0?'✈️ <strong>직항</strong>':'🔄 '+item.stops+'회 경유'}</span>
+            </div>
+            <div class="pd-desc">${item.desc}</div>
+            <div class="pd-section">
+              <h4>포함 사항</h4>
+              <ul class="pd-bullets">${item.includes.map(i=>`<li>${i}</li>`).join('')}</ul>
+            </div>
+            <div class="pd-section">
+              <h4>요금 구성</h4>
+              <ul class="pd-bullets">
+                <li>항공권 ${(item.price - item.fuel - item.tax).toLocaleString('ko-KR')}원</li>
+                <li>유류할증료 ${item.fuel.toLocaleString('ko-KR')}원</li>
+                <li>세금·수수료 ${item.tax.toLocaleString('ko-KR')}원</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pkg-detail-foot">
+            <div>
+              <div class="pd-price-lb">왕복 1인 (세금 포함)</div>
+              <div class="pd-price">${item.price.toLocaleString('ko-KR')}원</div>
+            </div>
+            <button class="pd-cta" onclick="selectPkgFlight('${item.id}');closePkgDetail();">이 항공편 선택 →</button>
+          </div>
+        `;
+      } else if(type === 'hotel'){
+        item = PKG_HOTELS.find(h => h.id === id);
+        body = `
+          <div class="pkg-detail-img" style="background-image:url('${item.img}');background-size:cover;background-position:center;">
+            <button class="pkg-detail-close" onclick="closePkgDetail()">×</button>
+          </div>
+          <div class="pkg-detail-body">
+            <h2>${item.name}</h2>
+            <div class="pd-sub">${item.english} · ★${item.stars} · ${item.area}</div>
+            <div class="pd-meta-row">
+              <span class="pd-mt">⭐ <strong>${item.score}</strong> (${item.reviews.toLocaleString('ko-KR')})</span>
+              <span class="pd-mt">🏨 <strong>${item.nights}박</strong></span>
+              <span class="pd-mt">🕐 체크인 <strong>${item.checkIn}</strong></span>
+              <span class="pd-mt">🕗 체크아웃 <strong>${item.checkOut}</strong></span>
+            </div>
+            <div class="pd-desc">${item.desc}</div>
+            <div class="pd-section">
+              <h4>🏊 시설 · 어메니티</h4>
+              <div class="pd-amenity-grid">${item.amenities.map(a=>`<div class="pd-amenity">${a}</div>`).join('')}</div>
+            </div>
+            <div class="pd-section">
+              <h4>🛏️ 객실 타입</h4>
+              <ul class="pd-bullets">${item.roomTypes.map(r=>`<li>${r}</li>`).join('')}</ul>
+            </div>
+            <div class="pd-section">
+              <h4>✨ 추천 이유</h4>
+              <ul class="pd-bullets">${item.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+            </div>
+          </div>
+          <div class="pkg-detail-foot">
+            <div>
+              <div class="pd-price-lb">3박 1인 · 세금·수수료 포함</div>
+              <div class="pd-price">${item.price.toLocaleString('ko-KR')}원 <span style="font-size:13px;color:#9CA3AF;text-decoration:line-through;">${item.oldPrice.toLocaleString('ko-KR')}</span></div>
+            </div>
+            <button class="pd-cta" onclick="selectPkgHotel('${item.id}');closePkgDetail();">이 호텔 선택 →</button>
+          </div>
+        `;
+      } else {
+        item = PKG_ACTIVITIES.find(a => a.id === id);
+        const isSel = pkgState.activities.has(item.id);
+        body = `
+          <div class="pkg-detail-img" style="background-image:url('${item.img}');background-size:cover;background-position:center;">
+            <button class="pkg-detail-close" onclick="closePkgDetail()">×</button>
+          </div>
+          <div class="pkg-detail-body">
+            <h2>${item.name}</h2>
+            <div class="pd-sub">${item.subtitle}</div>
+            <div class="pd-meta-row">
+              <span class="pd-mt">${item.catLabel}</span>
+              <span class="pd-mt">⏱️ 소요 <strong>${item.duration}</strong></span>
+              <span class="pd-mt">⭐ <strong>${item.rating}</strong></span>
+              <span class="pd-mt">💬 리뷰 <strong>${item.reviews.toLocaleString('ko-KR')}</strong></span>
+            </div>
+            <div class="pd-desc">${item.desc}</div>
+            <div class="pd-section">
+              <h4>✅ 포함 사항</h4>
+              <ul class="pd-bullets">${item.includes.map(i=>`<li>${i}</li>`).join('')}</ul>
+            </div>
+            <div class="pd-section">
+              <h4>❌ 불포함</h4>
+              <ul class="pd-bullets">${item.excludes.map(i=>`<li>${i}</li>`).join('')}</ul>
+            </div>
+            <div class="pd-section" style="background:#FFF5F0;padding:12px 16px;border-radius:10px;">
+              <h4>💡 OMT 팁</h4>
+              <div style="font-size:12px;color:#374151;line-height:1.6;">${item.tip}</div>
+            </div>
+          </div>
+          <div class="pkg-detail-foot">
+            <div>
+              <div class="pd-price-lb">1인 (세금 포함)</div>
+              <div class="pd-price">${item.price.toLocaleString('ko-KR')}원 <span style="font-size:13px;color:#9CA3AF;text-decoration:line-through;">${item.oldPrice.toLocaleString('ko-KR')}</span></div>
+            </div>
+            <button class="pd-cta" onclick="togglePkgActivity('${item.id}');closePkgDetail();">${isSel?'✓ 선택 해제':'+ 액티비티 추가'}</button>
+          </div>
+        `;
+      }
+      document.getElementById('pkgDetailModal').innerHTML = body;
+      document.getElementById('pkgDetailOverlay').classList.add('on');
+    };
+    window.closePkgDetail = () => document.getElementById('pkgDetailOverlay').classList.remove('on');
+
+    function recalcPackage(){
+      const parts = [];
+      if(pkgState.flight) parts.push({ label: `✈️ ${pkgState.flight.airline} (${pkgState.flight.fromCity}→${pkgState.flight.toCity})`, value: pkgState.flight.price });
+      if(pkgState.hotel) parts.push({ label: `🏨 ${pkgState.hotel.name} · ${pkgState.hotel.nights}박`, value: pkgState.hotel.price });
+      pkgState.activities.forEach(id => {
+        const a = PKG_ACTIVITIES.find(x => x.id === id);
+        if(a) parts.push({ label: `${a.catLabel.split(' ')[0]} ${a.name}`, value: a.price });
+      });
+
+      const actCount = pkgState.activities.size;
+      const cntEl = document.getElementById('actCount');
+      if(cntEl){
+        const sumAct = Array.from(pkgState.activities).reduce((s,id)=>{const a=PKG_ACTIVITIES.find(x=>x.id===id);return s+(a?a.price:0);},0);
+        cntEl.innerHTML = actCount > 0 ? `${actCount}개 선택 · +${sumAct.toLocaleString('ko-KR')}원` : '0개 선택';
+        cntEl.style.color = actCount > 0 ? '#FF6B35' : '#9CA3AF';
+      }
+
+      const sumEl = document.getElementById('pkgLines');
+      const totalEl = document.getElementById('pkgTotal');
+      if(parts.length === 0){
+        sumEl.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#9CA3AF;font-size:12px;">위에서 항공·호텔·액티비티를<br>선택해주세요</div>';
+        totalEl.textContent = '0원';
+        return;
+      }
+      const total = parts.reduce((s, p) => s + p.value, 0);
+      const bundleRate = actCount >= 2 ? 0.10 : actCount === 1 ? 0.08 : 0.07;
+      const bundleDiscount = Math.round(total * bundleRate);
+      const finalTotal = total - bundleDiscount;
+      const lines = parts.map(p => `<div class="pkg-line"><span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.label}</span><span>${krw(p.value)}</span></div>`).join('');
+      const discountLine = `<div class="pkg-line" style="color:#FFD23F;"><span>번들 할인 (${(bundleRate*100).toFixed(0)}%)${actCount>=2?' · 액티비티 2+ 보너스':''}</span><span>- ${krw(bundleDiscount)}</span></div>`;
+      sumEl.innerHTML = lines + discountLine;
+      totalEl.textContent = krw(finalTotal);
+    }
+
+    window.bookPackage = () => {
+      if(!pkgState.flight || !pkgState.hotel){
+        alert('⚠️ 항공편과 호텔은 필수로 선택해주세요');
+        return;
+      }
+      alert(`✅ 패키지 예약 진행\n\n· 항공: ${pkgState.flight.airline}\n· 호텔: ${pkgState.hotel.name}\n· 액티비티: ${pkgState.activities.size}개\n\n결제 페이지로 이동합니다.`);
+      location.href = 'checkout.html';
+    };
+
+    renderFlightCards();
+    renderHotelCards();
+    renderActivityCards();
+    recalcPackage();
+  </script>
+</body>
+</html>
