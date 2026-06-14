@@ -310,27 +310,33 @@
 
     // 데이터 (사이클 30에서 만든 풍부한 정보 유지)
     const PKG_FLIGHTS = [
-      { id:'pf-tw', airline:'티웨이항공', code:'TW', number:'TW283', color:'linear-gradient(135deg,#EC1C24,#FF4949)',
-        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카',
+      { id:'pf-tw', airline:'티웨이항공', code:'TW', number:'TW283/TW284', color:'linear-gradient(135deg,#EC1C24,#FF4949)',
+        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카', tripType:'왕복',
         depTime:'08:30', arrTime:'10:15', duration:'1h 45m', stops:0,
+        retDepTime:'19:20', retArrTime:'21:10', retDuration:'2h 50m', retStops:0,
+        outDate:'6/16(월)', retDate:'6/19(목)',
         price:380000, fuel:38000, tax:24000,
         baggage:'무료 수하물 15KG', meal:'간식 제공', popular:true,
-        desc:'아침 출발로 첫째 날 알찬 일정 구성 가능. 1박 추가 효과.',
-        includes:['기내 캐리어 7KG','위탁 수하물 15KG','간식 1회'] },
-      { id:'pf-ke', airline:'대한항공', code:'KE', number:'KE721', color:'linear-gradient(135deg,#00256C,#1E4A8A)',
-        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카',
+        desc:'아침 출발로 첫째 날 알찬 일정 구성 가능. 오는편 저녁 출발로 마지막 날 풀 활용.',
+        includes:['왕복 항공권','기내 캐리어 7KG','위탁 수하물 15KG','간식 1회'] },
+      { id:'pf-ke', airline:'대한항공', code:'KE', number:'KE721/KE722', color:'linear-gradient(135deg,#00256C,#1E4A8A)',
+        from:'ICN', to:'KIX', fromCity:'인천', toCity:'오사카', tripType:'왕복',
         depTime:'13:00', arrTime:'14:45', duration:'1h 45m', stops:0,
+        retDepTime:'16:30', retArrTime:'18:25', retDuration:'2h 55m', retStops:0,
+        outDate:'6/16(월)', retDate:'6/19(목)',
         price:520000, fuel:52000, tax:24000,
         baggage:'무료 수하물 23KG', meal:'기내식 제공', deluxe:true,
-        desc:'스카이팀 마일리지 적립 가능. 좌석 간격 넓고 기내식 한식.',
-        includes:['기내 캐리어 10KG','위탁 수하물 23KG','한식 기내식','마일리지 적립'] },
-      { id:'pf-7c', airline:'제주항공', code:'7C', number:'7C1156', color:'linear-gradient(135deg,#F47721,#FF9744)',
-        from:'PUS', to:'FUK', fromCity:'부산', toCity:'후쿠오카',
+        desc:'스카이팀 마일리지 적립 가능. 좌석 간격 넓고 왕복 기내식 한식 제공.',
+        includes:['왕복 항공권','기내 캐리어 10KG','위탁 수하물 23KG','한식 기내식 (왕복)','마일리지 적립'] },
+      { id:'pf-7c', airline:'제주항공', code:'7C', number:'7C1156/7C1157', color:'linear-gradient(135deg,#F47721,#FF9744)',
+        from:'PUS', to:'FUK', fromCity:'부산', toCity:'후쿠오카', tripType:'왕복',
         depTime:'09:30', arrTime:'10:25', duration:'55m', stops:0,
+        retDepTime:'18:40', retArrTime:'19:40', retDuration:'1h 00m', retStops:0,
+        outDate:'6/16(월)', retDate:'6/19(목)',
         price:298000, fuel:30000, tax:18000,
         baggage:'무료 수하물 15KG', meal:'유료 간식', cheapest:true,
-        desc:'부산 김해 직항 최단 거리. 가성비 1위 노선.',
-        includes:['기내 캐리어 7KG','위탁 수하물 15KG'] }
+        desc:'부산 김해 직항 최단 거리 왕복. 가성비 1위 노선.',
+        includes:['왕복 항공권','기내 캐리어 7KG','위탁 수하물 15KG'] }
     ];
     const PKG_HOTELS = [
       { id:'ph-granvia', name:'호텔 그란비아 오사카', english:'Hotel Granvia Osaka',
@@ -477,19 +483,41 @@
             </div>
             <button class="pp-detail" style="margin-left:auto;" onclick="event.stopPropagation();openPkgDetail('flight','${f.id}')">ⓘ 자세히</button>
           </div>
+          <!-- 가는편 -->
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="font-size:10px;font-weight:900;color:#FF6B35;background:#FFF5F0;padding:2px 7px;border-radius:4px;">가는편</span>
+            <span style="font-size:10px;color:#9CA3AF;font-weight:700;">${f.outDate||''}</span>
+          </div>
           <div class="fc-route">
             <div class="col">
               <div class="fc-time">${f.depTime}</div>
               <div class="fc-airport">${f.fromCity} (${f.from})</div>
             </div>
-            <div class="fc-mid">${f.duration}</div>
+            <div class="fc-mid">${f.duration}${f.stops===0?' 직항':' '+f.stops+'경유'}</div>
             <div class="col">
               <div class="fc-time">${f.arrTime}</div>
               <div class="fc-airport">${f.toCity} (${f.to})</div>
             </div>
           </div>
-          <div class="pp-tags" style="margin-bottom:8px;">
-            ${f.stops===0?'<span class="pp-tag green">✓ 직항</span>':'<span class="pp-tag">'+f.stops+'회 경유</span>'}
+          <!-- 오는편 -->
+          <div style="display:flex;align-items:center;gap:6px;margin:8px 0 4px;padding-top:8px;border-top:1px dashed var(--line);">
+            <span style="font-size:10px;font-weight:900;color:#3B82F6;background:#EFF6FF;padding:2px 7px;border-radius:4px;">오는편</span>
+            <span style="font-size:10px;color:#9CA3AF;font-weight:700;">${f.retDate||''}</span>
+          </div>
+          <div class="fc-route">
+            <div class="col">
+              <div class="fc-time">${f.retDepTime}</div>
+              <div class="fc-airport">${f.toCity} (${f.to})</div>
+            </div>
+            <div class="fc-mid">${f.retDuration}${f.retStops===0?' 직항':' '+f.retStops+'경유'}</div>
+            <div class="col">
+              <div class="fc-time">${f.retArrTime}</div>
+              <div class="fc-airport">${f.fromCity} (${f.from})</div>
+            </div>
+          </div>
+          <div class="pp-tags" style="margin:8px 0;">
+            <span class="pp-tag green">✓ 왕복</span>
+            ${f.stops===0&&f.retStops===0?'<span class="pp-tag green">✓ 전구간 직항</span>':''}
             ${f.cheapest?'<span class="pp-tag hot">💰 가성비 1위</span>':''}
             ${f.popular?'<span class="pp-tag hot">🔥 인기 노선</span>':''}
             ${f.deluxe?'<span class="pp-tag">⭐ 한식 기내식</span>':''}
@@ -604,14 +632,26 @@
           </div>
           <div class="pkg-detail-body">
             <h2>${item.airline} · ${item.number}</h2>
-            <div class="pd-sub">${item.fromCity} (${item.from}) → ${item.toCity} (${item.to})</div>
-            <div class="pd-meta-row">
-              <span class="pd-mt">🕐 출발 <strong>${item.depTime}</strong></span>
-              <span class="pd-mt">🛬 도착 <strong>${item.arrTime}</strong></span>
-              <span class="pd-mt">⏱️ 소요 <strong>${item.duration}</strong></span>
-              <span class="pd-mt">${item.stops===0?'✈️ <strong>직항</strong>':'🔄 '+item.stops+'회 경유'}</span>
+            <div class="pd-sub">🔄 왕복 · ${item.fromCity} (${item.from}) ⇄ ${item.toCity} (${item.to})</div>
+            <div class="pd-section" style="background:#FFF5F0;padding:14px 16px;border-radius:10px;margin-top:8px;">
+              <h4 style="color:#FF6B35;">✈️ 가는편 · ${item.outDate||''}</h4>
+              <div class="pd-meta-row" style="border:none;padding:0;margin:0;">
+                <span class="pd-mt">🕐 출발 <strong>${item.depTime}</strong> (${item.from})</span>
+                <span class="pd-mt">🛬 도착 <strong>${item.arrTime}</strong> (${item.to})</span>
+                <span class="pd-mt">⏱️ <strong>${item.duration}</strong></span>
+                <span class="pd-mt">${item.stops===0?'✈️ <strong>직항</strong>':'🔄 '+item.stops+'회 경유'}</span>
+              </div>
             </div>
-            <div class="pd-desc">${item.desc}</div>
+            <div class="pd-section" style="background:#EFF6FF;padding:14px 16px;border-radius:10px;margin-top:8px;">
+              <h4 style="color:#3B82F6;">🛬 오는편 · ${item.retDate||''}</h4>
+              <div class="pd-meta-row" style="border:none;padding:0;margin:0;">
+                <span class="pd-mt">🕐 출발 <strong>${item.retDepTime}</strong> (${item.to})</span>
+                <span class="pd-mt">🛬 도착 <strong>${item.retArrTime}</strong> (${item.from})</span>
+                <span class="pd-mt">⏱️ <strong>${item.retDuration}</strong></span>
+                <span class="pd-mt">${item.retStops===0?'✈️ <strong>직항</strong>':'🔄 '+item.retStops+'회 경유'}</span>
+              </div>
+            </div>
+            <div class="pd-desc" style="margin-top:14px;">${item.desc}</div>
             <div class="pd-section">
               <h4>포함 사항</h4>
               <ul class="pd-bullets">${item.includes.map(i=>`<li>${i}</li>`).join('')}</ul>
@@ -716,7 +756,7 @@
 
     function recalcPackage(){
       const parts = [];
-      if(pkgState.flight) parts.push({ label: `✈️ ${pkgState.flight.airline} (${pkgState.flight.fromCity}→${pkgState.flight.toCity})`, value: pkgState.flight.price });
+      if(pkgState.flight) parts.push({ label: `✈️ ${pkgState.flight.airline} 왕복 (${pkgState.flight.fromCity}⇄${pkgState.flight.toCity})`, value: pkgState.flight.price });
       if(pkgState.hotel) parts.push({ label: `🏨 ${pkgState.hotel.name} · ${pkgState.hotel.nights}박`, value: pkgState.hotel.price });
       pkgState.activities.forEach(id => {
         const a = PKG_ACTIVITIES.find(x => x.id === id);
