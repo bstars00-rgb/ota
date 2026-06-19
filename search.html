@@ -103,9 +103,15 @@
     }
     .rc-badge.golftel{background:linear-gradient(135deg,var(--golf-dark),var(--golf));color:#fff;}
     .rc-badge.golftel-air{background:linear-gradient(135deg,#E85826,#FF6B35);color:#fff;}
+    .rc-badge.hotel{background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;}
+    .rc-badge.flight{background:rgba(255,255,255,.92);color:var(--ink);}
     .rc-badge.package{background:rgba(0,0,0,.65);color:#fff;}
     .rc-badge.city{background:#fff;color:var(--ink);}
     .rc-badge.country{background:rgba(255,255,255,.9);color:var(--ink);}
+    /* 항공 썸네일 — 이미지 없이 항공사 컬러 그라데이션 */
+    .rc-thumb.flight{display:grid;place-items:center;}
+    .rc-thumb.flight .rc-flight-ic{font-size:38px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    .rc-thumb.flight .rc-flight-route{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.4);}
     .rc-body{padding:14px;}
     .rc-tag{
       font-size:10px;font-weight:900;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;
@@ -194,6 +200,8 @@
       <div class="filter-row" id="filterRow">
         <button class="filter-pill on" data-f="all">전체 <span class="cnt" id="cntAll">0</span></button>
         <button class="filter-pill" data-f="golftel">⛳ 골프텔 <span class="cnt" id="cntGolftel">0</span></button>
+        <button class="filter-pill" data-f="hotel">🏨 호텔 <span class="cnt" id="cntHotel">0</span></button>
+        <button class="filter-pill" data-f="flight">✈️ 항공 <span class="cnt" id="cntFlight">0</span></button>
         <button class="filter-pill" data-f="package">📦 패키지 <span class="cnt" id="cntPackage">0</span></button>
         <button class="filter-pill" data-f="country">🌏 국가 <span class="cnt" id="cntCountry">0</span></button>
         <button class="filter-pill" data-f="city">📍 도시 <span class="cnt" id="cntCity">0</span></button>
@@ -280,6 +288,44 @@
           }
         }
       });
+      // 🆕 호텔 (HOTELS) — 통합 검색 대상 추가
+      (OMT.DATA.HOTELS || []).forEach(h => {
+        const country = OMT.DATA.COUNTRIES[h.country];
+        items.push({
+          type:'hotel', icon:'🏨',
+          tag:`호텔 · ★${h.stars}`, title:h.name,
+          sub:`${h.area || ''} · ${country ? country.name : ''} · ⭐ ${h.score || ''}`,
+          link:`hotel.html?id=${h.id}`,
+          keywords:[h.name, h.englishName || '', h.area || '', h.chain || '', country?.name || '', '호텔'],
+          image:h.gallery?.[0] || h.img,
+          price:h.price,
+          rating:h.score ? h.score / 2 : null
+        });
+      });
+      // 🆕 항공 (FLIGHTS) — 노선별 최저가 1건만 대표로 통합 검색에 노출
+      const flightByRoute = {};
+      (OMT.DATA.FLIGHTS || []).forEach(f => {
+        const fromC = OMT.DATA.CITIES[f.from], toC = OMT.DATA.CITIES[f.to];
+        if(!fromC || !toC) return;
+        const key = `${f.from}-${f.to}`;
+        if(!flightByRoute[key] || f.price < flightByRoute[key].price) flightByRoute[key] = f;
+      });
+      Object.values(flightByRoute).forEach(f => {
+        const airline = OMT.DATA.AIRLINES?.[f.code] || {};
+        const fromC = OMT.DATA.CITIES[f.from], toC = OMT.DATA.CITIES[f.to];
+        items.push({
+          type:'flight', icon:'✈️',
+          tag:`항공 · 최저가`, title:`${fromC.name} → ${toC.name}`,
+          sub:`${airline.name || ''} ${f.outDur ? '· '+f.outDur : ''} · ${f.stops === 0 ? '직항' : (f.stops||0)+'회 경유'} · 왕복`,
+          link:`flights-results.html?from=${f.from}&to=${f.to}`,
+          keywords:[fromC.name, toC.name, f.from, f.to, airline.name || '', '항공', '항공권', '비행기', '왕복'],
+          image:null,
+          price:f.price,
+          rating:null,
+          _flightColor:airline.color || 'linear-gradient(135deg,#6B7280,#9CA3AF)',
+          _flightCode:f.code
+        });
+      });
       return items;
     }
 
@@ -333,10 +379,12 @@
     }
 
     function updateCounts(){
-      const counts = { all: allMatches.length, golftel: 0, package: 0, country: 0, city: 0 };
+      const counts = { all: allMatches.length, golftel: 0, hotel: 0, flight: 0, package: 0, country: 0, city: 0 };
       allMatches.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
       document.getElementById('cntAll').textContent = counts.all;
       document.getElementById('cntGolftel').textContent = counts.golftel;
+      document.getElementById('cntHotel').textContent = counts.hotel;
+      document.getElementById('cntFlight').textContent = counts.flight;
       document.getElementById('cntPackage').textContent = counts.package;
       document.getElementById('cntCountry').textContent = counts.country;
       document.getElementById('cntCity').textContent = counts.city;
@@ -447,6 +495,7 @@
         const badgeClass = item.type === 'golftel' ? 'golftel' : item.type;
         const badgeLabel = {
           golftel:'⛳ 골프텔', 'golftel-air':'✈️ 골프투어',
+          hotel:'🏨 호텔', flight:'✈️ 항공',
           package:'📦 패키지', country:'🌏 국가', city:'📍 도시'
         }[item.type] || item.type;
 
@@ -457,11 +506,20 @@
           ? `<span class="rc-rating">★ ${item.rating.toFixed(1)}</span>`
           : `<span></span>`;
 
+        // 항공: 이미지 대신 항공사 컬러 그라데이션 + 노선 표기
+        const thumbHtml = item.type === 'flight'
+          ? `<div class="rc-thumb flight" style="background:${item._flightColor || 'linear-gradient(135deg,#6B7280,#9CA3AF)'}">
+               <span class="rc-badge flight">${badgeLabel}</span>
+               <span class="rc-flight-ic">✈️</span>
+               <span class="rc-flight-route">${item.title}</span>
+             </div>`
+          : `<div class="rc-thumb" style="background-image:url('${item.image || ''}')">
+               <span class="rc-badge ${badgeClass}">${badgeLabel}</span>
+             </div>`;
+
         return `
           <article class="result-card" onclick="location.href='${item.link}'">
-            <div class="rc-thumb" style="background-image:url('${item.image || ''}')">
-              <span class="rc-badge ${badgeClass}">${badgeLabel}</span>
-            </div>
+            ${thumbHtml}
             <div class="rc-body">
               <div class="rc-tag">${highlight(item.tag, currentQuery)}</div>
               <h3 class="rc-name">${highlight(item.title, currentQuery)}</h3>
