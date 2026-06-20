@@ -10,15 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF1EA;
       --secondary:#1E88E5;--accent:#FFD23F;
       --golf:#0B6E4F;--golf-dark:#075440;--golf-soft:#E6F4EE;
       --success:#10B981;--danger:#EF4444;
-      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
-      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
-      --radius:14px;--radius-lg:20px;
-      --shadow:0 6px 20px rgba(0,0,0,.08);
-      --shadow-lg:0 20px 40px rgba(0,0,0,.15);
+      --ink:#15161B;--ink-2:#52565F;--ink-3:#9AA0A8;
+      --line:#ECEAE3;--bg:#FFFFFF;--bg-soft:#F7F5F1;
+      --radius-sm:10px;--radius:16px;--radius-lg:24px;--radius-pill:999px;
+      --shadow-sm:0 1px 2px rgba(20,21,26,.04), 0 2px 8px rgba(20,21,26,.05);
+      --shadow:0 10px 30px rgba(20,21,26,.08);
+      --shadow-lg:0 24px 60px rgba(20,21,26,.13);
+      --ease:cubic-bezier(.4,.14,.2,1);
       --header-h:64px;--max-w:1280px;
     }
     *,*::before,*::after{box-sizing:border-box;}
@@ -38,7 +40,7 @@
     .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;}
     .logo-mark::after{content:"O";}
     .gnb{display:flex;gap:4px;margin-left:12px;}
-    .gnb a{padding:8px 12px;border-radius:10px;font-weight:700;font-size:14px;color:var(--ink-2);transition:all .15s;}
+    .gnb a{padding:8px 12px;border-radius:var(--radius-sm);font-weight:700;font-size:14px;color:var(--ink-2);transition:background .3s var(--ease), color .3s var(--ease);}
     .gnb a:hover{background:var(--bg-soft);color:var(--ink);}
     .gnb a.active{background:var(--golf-soft);color:var(--golf);}
     .header-actions{margin-left:auto;display:flex;gap:6px;align-items:center;}
@@ -49,7 +51,7 @@
     /* Hero */
     .hero{
       background:linear-gradient(135deg, var(--golf-dark) 0%, var(--golf) 60%, #11876A 100%);
-      color:#fff;padding:40px 0 80px;position:relative;overflow:hidden;
+      color:#fff;padding:50px 0 100px;position:relative;overflow:hidden;
     }
     .hero::before{
       content:"⛳";position:absolute;top:-20px;right:-20px;font-size:280px;opacity:.07;
@@ -57,7 +59,7 @@
     }
     .hero-inner{position:relative;z-index:1;}
     .hero-eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:14px;}
-    .hero-title{font-size:42px;font-weight:900;line-height:1.15;margin:0 0 14px;letter-spacing:-0.02em;}
+    .hero-title{font-size:clamp(42px,5vw,50px);font-weight:900;line-height:1.15;margin:0 0 14px;letter-spacing:-0.035em;word-break:keep-all;}
     .hero-title strong{color:var(--accent);}
     .hero-sub{font-size:16px;font-weight:500;opacity:.92;max-width:560px;margin:0;}
 
@@ -81,6 +83,7 @@
     .search-btn{
       padding:0 32px;background:linear-gradient(135deg,var(--primary),#FF9A6C);color:#fff;
       font-weight:900;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+      transition:background .3s var(--ease), box-shadow .3s var(--ease);
     }
     .search-btn:hover{background:var(--primary-dark);}
 
@@ -91,8 +94,8 @@
     }
     .filters .label{font-size:12px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-right:4px;}
     .chip{
-      padding:8px 14px;border-radius:999px;background:#fff;border:1.5px solid var(--line);
-      font-weight:700;font-size:13px;color:var(--ink-2);transition:all .15s;cursor:pointer;
+      padding:8px 14px;border-radius:var(--radius-pill);background:#fff;border:1.5px solid var(--line);
+      font-weight:700;font-size:13px;color:var(--ink-2);transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease), color .3s var(--ease);cursor:pointer;
       display:inline-flex;align-items:center;gap:6px;
     }
     .chip:hover{border-color:var(--golf);color:var(--golf);}
@@ -116,16 +119,16 @@
     .sort-select:focus{outline:none;border-color:var(--golf);}
 
     /* Card grid */
-    .grid{display:grid;grid-template-columns:1fr;gap:18px;padding-bottom:60px;}
+    .grid{display:grid;grid-template-columns:1fr;gap:22px;padding-bottom:72px;}
 
     .card{
-      background:#fff;border-radius:18px;overflow:hidden;
+      background:#fff;border-radius:var(--radius-lg);overflow:hidden;
       display:grid;grid-template-columns:320px 1fr auto;gap:0;
-      transition:transform .2s, box-shadow .2s;cursor:pointer;
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);cursor:pointer;
       border:1px solid var(--line);
       position:relative;
     }
-    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:transparent;}
+    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:transparent;}
     .card:hover .slot-popover{display:block;}
 
     /* 슬롯 미리보기 popover */
@@ -179,7 +182,7 @@
       font-size:11px;font-weight:800;color:var(--golf);letter-spacing:.06em;text-transform:uppercase;
       display:inline-flex;align-items:center;gap:4px;
     }
-    .card-title{font-size:18px;font-weight:900;color:var(--ink);letter-spacing:-0.02em;margin:0;line-height:1.3;}
+    .card-title{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.035em;margin:0;line-height:1.2;word-break:keep-all;}
     .card-tagline{font-size:13px;color:var(--ink-2);font-weight:500;margin:0 0 4px;}
 
     .card-specs{
@@ -218,8 +221,9 @@
     .price-new .unit{font-size:13px;color:var(--ink-2);font-weight:700;margin-left:2px;}
     .price-basis{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:2px;}
     .btn-detail{
-      padding:11px 22px;border-radius:10px;background:var(--golf);color:#fff;
+      padding:11px 22px;border-radius:var(--radius-sm);background:var(--golf);color:#fff;
       font-weight:900;font-size:14px;width:100%;text-align:center;
+      transition:background .3s var(--ease), box-shadow .3s var(--ease);
     }
     .btn-detail:hover{background:var(--golf-dark);}
 

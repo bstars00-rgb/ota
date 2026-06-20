@@ -9,15 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF0E8;
+      --primary:#FF6B35;--primary-dark:#E85826;--primary-soft:#FFF1EA;
       --secondary:#1E88E5;--accent:#FFD23F;
       --golf:#0B6E4F;--golf-dark:#075440;--golf-soft:#E6F4EE;
       --success:#10B981;--danger:#EF4444;
-      --ink:#1A1A1A;--ink-2:#4B5563;--ink-3:#9CA3AF;
-      --line:#E5E7EB;--bg:#fff;--bg-soft:#F7F7F9;
-      --radius:14px;--radius-lg:20px;
-      --shadow:0 6px 20px rgba(0,0,0,.08);
-      --shadow-lg:0 20px 40px rgba(0,0,0,.15);
+      --ink:#15161B;--ink-2:#52565F;--ink-3:#9AA0A8;
+      --line:#ECEAE3;--bg:#FFFFFF;--bg-soft:#F7F5F1;
+      --radius-sm:10px;--radius:16px;--radius-lg:24px;--radius-pill:999px;
+      --shadow-sm:0 1px 2px rgba(20,21,26,.04), 0 2px 8px rgba(20,21,26,.05);
+      --shadow:0 10px 30px rgba(20,21,26,.08);
+      --shadow-lg:0 24px 60px rgba(20,21,26,.13);
+      --ease:cubic-bezier(.4,.14,.2,1);
       --header-h:64px;--max-w:1280px;
     }
     *,*::before,*::after{box-sizing:border-box;}
@@ -49,10 +51,10 @@
     }
     .gallery > div{
       background-size:cover;background-position:center;background-color:var(--bg-soft);
-      transition:filter .15s;border-radius:8px;position:relative;
+      transition:filter .3s var(--ease), transform .3s var(--ease);border-radius:var(--radius-sm);position:relative;
     }
-    .gallery > div:not(.g-main):hover{filter:brightness(.95);}
-    .gallery .g-main{grid-row:1/span 2;border-radius:14px;}
+    .gallery > div:not(.g-main):hover{filter:brightness(.95);transform:translateY(-4px);}
+    .gallery .g-main{grid-row:1/span 2;border-radius:var(--radius);}
 
     /* 마지막 슬롯 "+N장 더보기" 오버레이 */
     .gallery .g-more{
@@ -63,8 +65,8 @@
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.55);color:#fff;font-weight:900;font-size:18px;
-      border-radius:8px;letter-spacing:-0.01em;
-      transition:background .15s;
+      border-radius:var(--radius-sm);letter-spacing:-0.01em;
+      transition:background .3s var(--ease);
     }
     .gallery .g-more:hover::after{background:rgba(0,0,0,.7);}
 
@@ -101,13 +103,13 @@
 
     /* Layout */
     .main-wrap{
-      display:grid;grid-template-columns:1fr 380px;gap:32px;
-      padding:32px 24px 80px;max-width:var(--max-w);margin:0 auto;
+      display:grid;grid-template-columns:1fr 380px;gap:40px;
+      padding:40px 24px 96px;max-width:var(--max-w);margin:0 auto;
     }
     .main-col{min-width:0;}
 
     /* Title block */
-    .title-block{margin-bottom:24px;}
+    .title-block{margin-bottom:30px;}
     .badge{
       display:inline-flex;align-items:center;gap:5px;
       padding:5px 11px;border-radius:999px;font-size:11px;font-weight:900;
@@ -117,8 +119,8 @@
     .badge-direct::before{content:"⭐";}
     .badge-franchise{background:#fff;color:var(--ink);border:1px solid var(--line);}
     .badge-franchise::before{content:"🤝";}
-    .title{font-size:30px;font-weight:900;letter-spacing:-0.02em;line-height:1.2;margin:6px 0 8px;}
-    .subtitle{font-size:15px;color:var(--ink-2);font-weight:500;margin:0;}
+    .title{font-size:clamp(34px, 4vw, 36px);font-weight:900;letter-spacing:-0.035em;line-height:1.15;margin:6px 0 8px;word-break:keep-all;}
+    .subtitle{font-size:15px;color:var(--ink-2);font-weight:500;margin:0;word-break:keep-all;}
     .quick-meta{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
     .rating{
       display:inline-flex;align-items:center;gap:4px;background:var(--primary-soft);color:var(--primary-dark);
@@ -128,8 +130,8 @@
     /* Quick facts strip */
     .facts{
       display:grid;grid-template-columns:repeat(4, 1fr);gap:1px;
-      background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;
-      margin-bottom:28px;
+      background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+      margin-bottom:34px;box-shadow:var(--shadow-sm);
     }
     .fact{background:#fff;padding:16px 18px;text-align:center;}
     .fact .lb{font-size:11px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
@@ -137,11 +139,11 @@
     .fact .vl .unit{font-size:12px;color:var(--ink-2);font-weight:700;margin-left:2px;}
 
     /* Tabs */
-    .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+    .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:30px;overflow-x:auto;}
     .tabs::-webkit-scrollbar{display:none;}
     .tab{
-      padding:14px 20px;font-weight:800;font-size:15px;color:var(--ink-3);position:relative;
-      white-space:nowrap;transition:color .15s;
+      padding:14px 20px;font-weight:900;font-size:15px;color:var(--ink-3);position:relative;
+      white-space:nowrap;letter-spacing:-0.02em;transition:color .3s var(--ease);
     }
     .tab.active{color:var(--golf);}
     .tab.active::after{content:"";position:absolute;left:12px;right:12px;bottom:-2px;height:3px;background:var(--golf);border-radius:3px 3px 0 0;}
@@ -149,17 +151,20 @@
     .panel{display:none;}
     .panel.active{display:block;}
 
-    .panel h3{font-size:18px;font-weight:900;margin:0 0 12px;letter-spacing:-0.01em;}
-    .panel p{color:var(--ink-2);margin:0 0 12px;}
+    .panel h3{font-size:20px;font-weight:900;margin:0 0 14px;letter-spacing:-0.035em;line-height:1.15;word-break:keep-all;}
+    .panel p{color:var(--ink-2);margin:0 0 12px;word-break:keep-all;}
 
     /* Hotel panel */
     .hotel-row{
       display:grid;grid-template-columns:160px 1fr;gap:18px;
-      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;
+      padding:22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;
+      box-shadow:var(--shadow-sm);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
+    .hotel-row:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
     .hotel-thumb{
       background-size:cover;background-position:center;background-color:var(--bg-soft);
-      border-radius:10px;min-height:120px;
+      border-radius:var(--radius-sm);min-height:120px;
     }
     .hotel-info .name{font-size:16px;font-weight:900;margin:0 0 4px;}
     .hotel-info .area{font-size:13px;color:var(--ink-2);margin:0 0 8px;}
@@ -170,8 +175,11 @@
 
     /* Course panel */
     .course-card{
-      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;
+      padding:22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;
+      box-shadow:var(--shadow-sm);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
+    .course-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
     .course-card .name{font-size:16px;font-weight:900;margin:0 0 6px;color:var(--golf-dark);}
     .course-card .meta{display:flex;gap:14px;font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
     .course-card .meta strong{color:var(--ink);font-weight:800;}
@@ -179,9 +187,11 @@
     /* Inclusions */
     .incl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .incl-row{
-      display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;
+      display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:var(--radius-sm);
       background:#fff;border:1px solid var(--line);font-size:14px;font-weight:600;
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
+    .incl-row.on:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
     .incl-row.on{background:var(--golf-soft);border-color:var(--golf);color:var(--golf-dark);}
     .incl-row.off{color:var(--ink-3);text-decoration:line-through;background:var(--bg-soft);}
     .incl-row .check{font-size:18px;}
@@ -191,8 +201,8 @@
 
     /* Book panel (sticky) */
     .book-panel{
-      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;
-      position:sticky;top:calc(var(--header-h) + 16px);box-shadow:var(--shadow);
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:26px;
+      position:sticky;top:calc(var(--header-h) + 16px);box-shadow:var(--shadow-lg);
     }
     .bp-price-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
     .bp-lb{font-size:12px;color:var(--ink-3);font-weight:700;}
@@ -203,9 +213,9 @@
 
     /* Air toggle */
     .air-toggle{
-      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:12px;
+      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:var(--radius-sm);
       display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;
-      transition:all .15s;
+      transition:background .3s var(--ease), border-color .3s var(--ease);
     }
     .air-toggle:hover{background:var(--primary-soft);}
     .air-toggle.on{background:var(--primary-soft);border-color:var(--primary);}
@@ -227,13 +237,14 @@
     /* Pax row */
     .pax-row{
       display:flex;align-items:center;justify-content:space-between;
-      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:12px;
+      margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:var(--radius-sm);
     }
     .pax-row .lb{font-size:13px;font-weight:700;color:var(--ink-2);}
     .pax-ctrl{display:flex;align-items:center;gap:12px;}
     .pax-ctrl button{
-      width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);
+      width:32px;height:32px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
       background:#fff;font-weight:900;font-size:16px;color:var(--ink);
+      transition:border-color .3s var(--ease), color .3s var(--ease);
     }
     .pax-ctrl button:hover{border-color:var(--golf);color:var(--golf);}
     .pax-ctrl .num{min-width:24px;text-align:center;font-weight:900;font-size:16px;}
@@ -253,11 +264,12 @@
     .product-label.air{background:var(--primary-soft);color:var(--primary-dark);}
 
     .bp-cta{
-      width:100%;padding:15px;border-radius:12px;background:var(--golf);color:#fff;
-      font-weight:900;font-size:15px;margin-top:14px;
-      box-shadow:0 6px 20px rgba(11,110,79,.35);transition:background .15s;
+      width:100%;padding:16px;border-radius:var(--radius-sm);background:var(--golf);color:#fff;
+      font-weight:900;font-size:15px;margin-top:14px;letter-spacing:-0.01em;
+      box-shadow:0 6px 20px rgba(11,110,79,.35);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), background .3s var(--ease);
     }
-    .bp-cta:hover{background:var(--golf-dark);}
+    .bp-cta:hover{background:var(--golf-dark);transform:translateY(-2px);box-shadow:0 12px 28px rgba(11,110,79,.4);}
     .bp-cta.air{background:var(--primary);box-shadow:0 6px 20px rgba(255,107,53,.35);}
     .bp-cta.air:hover{background:var(--primary-dark);}
 
@@ -265,9 +277,9 @@
 
     /* ★ 1박=1라운드 매칭 배너 (몽키 표준) */
     .match-banner{
-      display:flex;align-items:center;gap:14px;padding:14px 18px;
+      display:flex;align-items:center;gap:14px;padding:16px 20px;
       background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);
-      border:1px solid var(--golf);border-radius:12px;margin-bottom:18px;
+      border:1px solid var(--golf);border-radius:var(--radius);margin-bottom:22px;box-shadow:var(--shadow-sm);
     }
     .match-banner .ic{font-size:32px;line-height:1;flex-shrink:0;}
     .match-banner .text{flex:1;}
@@ -285,8 +297,8 @@
     /* 운영 정보 시간표 */
     .op-table{
       display:grid;grid-template-columns:120px 1fr;gap:0;
-      background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;
-      font-size:13px;
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+      font-size:13px;box-shadow:var(--shadow-sm);
     }
     .op-table > div{padding:11px 14px;border-bottom:1px solid var(--line);}
     .op-table > div:nth-last-child(-n+2){border-bottom:none;}
@@ -306,7 +318,7 @@
     /* 체크인 날짜 picker */
     .date-picker-block{
       margin-top:14px;padding:14px;background:linear-gradient(135deg, var(--golf-soft), #F0FAF5);
-      border-radius:10px;border:1.5px solid var(--golf);
+      border-radius:var(--radius-sm);border:1.5px solid var(--golf);
     }
     .dp-label{font-size:11px;font-weight:800;color:var(--golf-dark);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
     .dp-input{
@@ -325,16 +337,17 @@
 
     /* book-panel — 객실 옵션 / 티타임 */
     .opt-block{
-      margin-top:14px;padding:12px;background:var(--bg-soft);border-radius:10px;
+      margin-top:14px;padding:14px;background:var(--bg-soft);border-radius:var(--radius-sm);
     }
     .opt-block .lb{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
     .room-list, .tee-list{display:flex;flex-direction:column;gap:6px;}
     .room-item, .tee-item{
       display:flex;align-items:center;justify-content:space-between;
-      padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;
-      cursor:pointer;font-size:13px;transition:all .15s;
+      padding:11px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:#fff;
+      cursor:pointer;font-size:13px;
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
-    .room-item:hover, .tee-item:hover{border-color:var(--golf);}
+    .room-item:hover, .tee-item:hover{border-color:var(--golf);transform:translateY(-4px);box-shadow:var(--shadow);}
     .room-item.on, .tee-item.on{border-color:var(--golf);background:var(--golf-soft);}
     .room-item .nm, .tee-item .nm{font-weight:700;color:var(--ink);}
     .room-item .pr{font-weight:800;color:var(--golf-dark);font-size:12px;}
@@ -346,13 +359,13 @@
     /* ★ 티오프 선택 섹션 (몽키 스타일 카드 그리드) */
     .tee-section{
       background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
-      padding:22px;margin-bottom:24px;
+      padding:26px;margin-bottom:30px;box-shadow:var(--shadow-sm);
     }
     .tee-section-head{
       display:flex;align-items:center;justify-content:space-between;
       flex-wrap:wrap;gap:12px;margin-bottom:14px;
     }
-    .tee-section-head h3{margin:0;font-size:18px;font-weight:900;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;}
+    .tee-section-head h3{margin:0;font-size:20px;font-weight:900;letter-spacing:-0.035em;line-height:1.15;display:flex;align-items:center;gap:8px;word-break:keep-all;}
     .tee-required{
       display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;
       background:var(--golf-soft);color:var(--golf-dark);margin-left:4px;
@@ -366,8 +379,9 @@
     /* 필터 칩 */
     .tee-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
     .tw{
-      padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
-      font-size:13px;font-weight:800;color:var(--ink-2);transition:all .15s;cursor:pointer;
+      padding:8px 16px;border-radius:var(--radius-pill);border:1.5px solid var(--line);background:#fff;
+      font-size:13px;font-weight:800;color:var(--ink-2);cursor:pointer;
+      transition:background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease);
     }
     .tw:hover{border-color:var(--golf);color:var(--golf);}
     .tw.on{background:#000;border-color:#000;color:#fff;}
@@ -383,11 +397,12 @@
 
     /* 슬롯 카드 — 몽키 스타일 */
     .ts-card{
-      padding:14px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
-      cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px;
+      padding:14px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);background:#fff;
+      cursor:pointer;display:flex;flex-direction:column;gap:8px;
       text-align:left;width:100%;
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
     }
-    .ts-card:hover:not(:disabled){border-color:var(--golf);background:var(--golf-soft);}
+    .ts-card:hover:not(:disabled){border-color:var(--golf);background:var(--golf-soft);transform:translateY(-4px);box-shadow:var(--shadow);}
     .ts-card.on{border-color:var(--golf);border-width:2px;background:var(--golf-soft);}
     .ts-card:disabled{opacity:.4;cursor:not-allowed;}
 
@@ -459,13 +474,16 @@
 
     /* ====== 이용 안내 / 위치 / 리뷰 / FAQ 공통 ====== */
     .info-card{
-      background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:14px;
+      box-shadow:var(--shadow-sm);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
+    .info-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
     .info-card h4{
-      margin:0 0 10px;font-size:14px;font-weight:900;color:var(--ink);
-      display:flex;align-items:center;gap:6px;letter-spacing:-0.01em;
+      margin:0 0 10px;font-size:15px;font-weight:900;color:var(--ink);
+      display:flex;align-items:center;gap:6px;letter-spacing:-0.025em;word-break:keep-all;
     }
-    .info-card .body{font-size:13px;color:var(--ink-2);line-height:1.6;}
+    .info-card .body{font-size:13px;color:var(--ink-2);line-height:1.6;word-break:keep-all;}
     .info-card ul{margin:0;padding-left:18px;}
     .info-card li{margin:4px 0;}
     .info-card .kv{
@@ -506,8 +524,8 @@
 
     /* 위치 — OpenStreetMap iframe 임베드 */
     .map-box{
-      border:1px solid var(--line);border-radius:12px;overflow:hidden;
-      position:relative;background:var(--bg-soft);
+      border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+      position:relative;background:var(--bg-soft);box-shadow:var(--shadow-sm);
     }
     .map-box iframe{
       width:100%;height:320px;border:none;display:block;
@@ -525,7 +543,7 @@
       box-shadow:0 2px 8px rgba(0,0,0,.15);
       font-weight:800;font-size:12px;color:var(--ink);
       display:flex;align-items:center;gap:4px;text-decoration:none;
-      transition:background .15s;
+      transition:background .3s var(--ease), color .3s var(--ease);
     }
     .map-box .map-link:hover{background:var(--golf-soft);color:var(--golf-dark);}
 
@@ -541,7 +559,8 @@
     /* 리뷰 — 별점 분포 */
     .rev-head{
       display:grid;grid-template-columns:200px 1fr;gap:24px;
-      padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:14px;
+      padding:22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;
+      box-shadow:var(--shadow-sm);
     }
     .rev-score{
       text-align:center;padding:14px;background:linear-gradient(135deg,var(--golf-soft),#fff);
@@ -564,8 +583,11 @@
     /* 리뷰 카드 */
     .rev-list{display:flex;flex-direction:column;gap:12px;}
     .rev-card{
-      padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px;
+      padding:18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow-sm);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
     }
+    .rev-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
     .rev-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
     .rev-avatar{
       width:36px;height:36px;border-radius:50%;background:var(--golf-soft);
@@ -590,16 +612,18 @@
     /* FAQ — 아코디언 */
     .faq-list{display:flex;flex-direction:column;gap:8px;}
     .faq-item{
-      background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+      background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;
+      box-shadow:var(--shadow-sm);
     }
     .faq-q{
       padding:14px 16px;font-weight:800;font-size:14px;color:var(--ink);cursor:pointer;
       display:flex;justify-content:space-between;align-items:center;gap:10px;
       width:100%;text-align:left;background:#fff;
     }
+    .faq-q{transition:background .3s var(--ease);}
     .faq-q:hover{background:var(--bg-soft);}
     .faq-q::after{
-      content:"+";font-size:20px;font-weight:900;color:var(--ink-3);transition:transform .15s;
+      content:"+";font-size:20px;font-weight:900;color:var(--ink-3);transition:transform .3s var(--ease), color .3s var(--ease);
     }
     .faq-item.open .faq-q::after{transform:rotate(45deg);color:var(--golf);}
     .faq-a{

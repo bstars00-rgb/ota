@@ -21,24 +21,27 @@
     :root{
       --primary: #FF6B35;
       --primary-dark: #E85826;
-      --primary-soft: #FFF0E8;
+      --primary-soft: #FFF1EA;
       --secondary: #1E88E5;
       --secondary-dark: #1565C0;
       --accent: #FFD23F;
-      --ink: #1A1A1A;
-      --ink-2: #4B5563;
-      --ink-3: #9CA3AF;
-      --line: #E5E7EB;
+      --ink: #15161B;
+      --ink-2: #52565F;
+      --ink-3: #9AA0A8;
+      --line: #ECEAE3;
       --bg: #FFFFFF;
-      --bg-soft: #F7F7F9;
+      --bg-soft: #F7F5F1;
       --success: #10B981;
       --danger: #EF4444;
-      --radius-sm: 8px;
-      --radius: 14px;
-      --radius-lg: 20px;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
-      --shadow: 0 6px 20px rgba(0,0,0,.08);
-      --shadow-lg: 0 20px 40px rgba(0,0,0,.12);
+      --radius-sm: 10px;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+      /* craftwork-style 프리미엄 소프트 섀도 (낮은 불투명도·다층) */
+      --shadow-sm: 0 1px 2px rgba(20,21,26,.04), 0 2px 8px rgba(20,21,26,.05);
+      --shadow: 0 10px 30px rgba(20,21,26,.08);
+      --shadow-lg: 0 24px 60px rgba(20,21,26,.13);
+      --ease: cubic-bezier(.4,.14,.2,1);
       --header-h: 72px;
       --max-w: 1280px;
     }
@@ -67,17 +70,19 @@
       padding: 0 24px;
     }
 
-    .section{padding: 64px 0;}
+    .section{padding: 84px 0;}
     .section-title{
-      font-size: 28px;
+      font-size: clamp(26px, 3vw, 34px);
       font-weight: 900;
-      margin: 0 0 6px;
-      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
     }
     .section-sub{
       color: var(--ink-2);
-      margin: 0 0 28px;
-      font-size: 15px;
+      margin: 0 0 32px;
+      font-size: 16px;
+      letter-spacing: -0.01em;
     }
     .section-head-row{
       display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
@@ -198,10 +203,11 @@
       border: 1px solid rgba(255,255,255,.25);
     }
     .hero h1{
-      font-size: clamp(30px, 5vw, 52px);
+      font-size: clamp(32px, 5.5vw, 58px);
       font-weight: 900;
-      letter-spacing:-0.03em;
-      margin: 0 0 8px;
+      letter-spacing:-0.045em;
+      line-height: 1.08;
+      margin: 0 0 10px;
       text-shadow: 0 4px 24px rgba(0,0,0,.35);
     }
     .hero h1 span{color: var(--accent);}
@@ -284,7 +290,7 @@
       background: var(--bg-soft);
       padding: 22px 18px;
       border: 1px solid var(--line);
-      transition: transform .2s, box-shadow .2s, border-color .2s;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
       position:relative;
       overflow:hidden;
     }
@@ -294,7 +300,7 @@
       background: linear-gradient(135deg, transparent 40%, var(--primary-soft) 100%);
       opacity:0; transition: opacity .2s;
     }
-    .country-card:hover{transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary);}
+    .country-card:hover{transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--primary);}
     .country-card:hover::before{opacity:1;}
     .country-card > *{position:relative;}
     .country-landmark{
@@ -323,10 +329,10 @@
       overflow:hidden;
       background:#fff;
       border:1px solid var(--line);
-      transition: transform .2s, box-shadow .2s;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
       display:flex; flex-direction:column;
     }
-    .product-card:hover{transform:translateY(-4px); box-shadow: var(--shadow-lg);}
+    .product-card:hover{transform:translateY(-6px); box-shadow: var(--shadow-lg);}
     .product-thumb{
       position:relative;
       aspect-ratio: 4/3;
@@ -518,9 +524,9 @@
       border:1px solid var(--line);
       border-radius: var(--radius);
       padding: 18px;
-      transition: border-color .15s, transform .15s, box-shadow .15s;
+      transition: border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
     }
-    .flight-card:hover{border-color: var(--primary); transform:translateY(-2px); box-shadow: var(--shadow);}
+    .flight-card:hover{border-color: var(--primary); transform:translateY(-4px); box-shadow: var(--shadow);}
     .flight-airline{
       font-size:12px; color: var(--ink-3); font-weight:600;
       display:flex; align-items:center; gap:6px;
