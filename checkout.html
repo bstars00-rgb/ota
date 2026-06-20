@@ -541,6 +541,9 @@
       const paxCount = adult + child;
       const dep = urlParams.get('dep') || '';
       const ret = urlParams.get('ret') || '';
+      // 야놀자식 요금 선택 — 카드별 가격(fare)·카드명(card) 반영
+      const farePerPerson = parseInt(urlParams.get('fare') || '') || flight.price;
+      const cardName = urlParams.get('card') || '';
       const fmt = key => {
         if(!key) return '';
         const [y, m, d] = key.split('-');
@@ -574,11 +577,12 @@
             depTime: flight.retDep, arrTime: flight.retArr,
             duration: flight.retDur
           } : null,
-          price: flight.price,
-          seatClass: urlParams.get('cls') || 'economy'
+          price: farePerPerson,
+          seatClass: urlParams.get('cls') || 'economy',
+          paymentCard: cardName
         },
         hotel: null,
-        _explicitTotal: flight.price * paxCount
+        _explicitTotal: farePerPerson * paxCount
       };
     }
   }
@@ -886,7 +890,8 @@
       <div class="sum-row"><span>좌석등급</span><span>${SEAT_LABEL[f.seatClass] || '일반석'}</span></div>
       <div class="sum-row"><span>여행자 수</span><span>${pkg.adult > 0 ? `성인 ${pkg.adult}명` : ''}${pkg.child > 0 ? ` / 아동 ${pkg.child}명` : ''}${pkg.infant > 0 ? ` / 유아 ${pkg.infant}명` : ''}</span></div>
       <div class="sum-row"><span>1인 운임</span><span>${krw(f.price)}</span></div>
-      <div class="sum-row" style="color:#9CA3AF;font-size:12px;"><span>· 세금·유류할증료 포함</span><span></span></div>
+      ${f.paymentCard ? `<div class="sum-row"><span>적용 카드</span><span style="font-weight:800;">💳 ${f.paymentCard}</span></div>` : ''}
+      <div class="sum-row" style="color:#9CA3AF;font-size:12px;"><span>· 세금·유류할증료·발권대행수수료 포함</span><span></span></div>
     `;
     document.getElementById('sumTotal').textContent = krw(total);
     document.getElementById('mTotal').textContent = krw(total);

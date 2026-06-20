@@ -161,6 +161,52 @@
     .empty .nm{font-size:16px;font-weight:900;color:var(--ink);margin-bottom:6px;}
     .empty .desc{font-size:13px;color:var(--ink-3);}
 
+    /* 즉시할인 프로모 배너 (야놀자 패턴) */
+    .promo-strip{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:12px;padding:12px 18px;margin-bottom:12px;}
+    .promo-strip .badge{background:var(--primary);color:#fff;font-weight:900;font-size:13px;padding:6px 12px;border-radius:8px;flex-shrink:0;font-family:'JetBrains Mono',monospace;}
+    .promo-strip .txt{flex:1;font-size:13px;font-weight:800;color:var(--ink);}
+    .promo-strip .txt small{display:block;font-size:11px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+
+    /* 운임규정 링크 + 카드요금 힌트 */
+    .fare-link{font-size:11px;font-weight:800;color:var(--ink-3);text-decoration:underline;text-underline-offset:2px;cursor:pointer;margin-top:6px;display:inline-block;}
+    .fare-link:hover{color:var(--primary);}
+    .card-hint{font-size:10px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+
+    /* 요금 선택 / 운임규정 모달 (야놀자 패턴) */
+    .fr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;display:none;align-items:center;justify-content:center;padding:24px;}
+    .fr-overlay.on{display:flex;}
+    .fr-modal{background:#fff;border-radius:18px;width:min(520px,100%);max-height:calc(100vh - 60px);display:flex;flex-direction:column;overflow:hidden;}
+    .fr-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;}
+    .fr-head .h{font-size:18px;font-weight:900;}
+    .fr-head .sub{font-size:11px;color:var(--ink-3);font-weight:700;margin-top:3px;}
+    .fr-head .close{font-size:24px;color:var(--ink-3);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;}
+    .fr-head .close:hover{background:var(--bg);color:var(--ink);}
+    .fr-body{padding:8px 22px;overflow-y:auto;flex:1;}
+    .fr-foot{padding:14px 22px;border-top:1px solid var(--line);}
+    .fr-foot .done{width:100%;padding:14px;background:var(--primary);color:#fff;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;}
+    .fr-foot .done:hover{background:var(--primary-d);}
+    .card-row{display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--bg-soft);cursor:pointer;}
+    .card-row:last-child{border-bottom:none;}
+    .card-row .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center;}
+    .card-row.on .radio{border-color:var(--primary);}
+    .card-row.on .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--primary);}
+    .card-row .nm{flex:1;font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;}
+    .card-row .pr{font-size:15px;font-weight:900;color:var(--ink);font-family:'JetBrains Mono',monospace;}
+    .card-row.on .pr{color:var(--primary);}
+    .card-row .best{font-size:10px;font-weight:900;color:var(--success);background:#F0FDF4;padding:1px 6px;border-radius:4px;margin-left:6px;}
+    .fare-tabs{display:flex;gap:6px;margin:4px 0 16px;}
+    .fare-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:800;background:var(--bg-soft);color:var(--ink-3);cursor:pointer;}
+    .fare-tab.on{background:var(--ink);color:#fff;}
+    .fare-sec{margin-bottom:18px;}
+    .fare-sec h4{font-size:13px;font-weight:900;color:var(--ink);margin:0 0 8px;}
+    .fare-sec p{font-size:12px;color:var(--ink-2);line-height:1.6;margin:0;}
+    .fare-sec ul{margin:6px 0 0;padding-left:16px;}
+    .fare-sec li{font-size:12px;color:var(--ink-2);line-height:1.6;}
+    .fare-note{background:var(--bg-soft);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--ink-2);line-height:1.7;margin-bottom:16px;}
+    .fee-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .fee-table td{padding:7px 4px;border-bottom:1px solid var(--bg-soft);color:var(--ink-2);}
+    .fee-table td:last-child{text-align:right;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--ink);}
+
     @media (max-width:900px){
       .layout{grid-template-columns:1fr;}
       .filters{position:static;}
@@ -282,6 +328,15 @@
 
       <!-- Results -->
       <section>
+        <!-- 즉시할인 프로모 배너 (야놀자 패턴) -->
+        <div class="promo-strip" id="promoStrip">
+          <span class="badge" id="promoBadge">10만원</span>
+          <div class="txt" id="promoText">
+            이 노선 인당 <b>10만원 즉시할인</b> 단독 혜택!
+            <small>항공권 구매 시 해외숙소·투어·액티비티 추가 할인 쿠폰을 드려요</small>
+          </div>
+        </div>
+
         <!-- 🆕 7일 가격 추이 + 가장 저렴한 날짜 추천 (시트립 스타일) -->
         <div style="background:linear-gradient(135deg,#fff,#FFFAF0);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:12px;">
           <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;gap:14px;flex-wrap:wrap;">
@@ -335,6 +390,29 @@
       </section>
     </div>
   </main>
+
+  <!-- 요금 선택 모달 (야놀자 패턴 — 카드별 가격) -->
+  <div class="fr-overlay" id="fareModal" onclick="if(event.target===this)closeFare()">
+    <div class="fr-modal">
+      <div class="fr-head">
+        <div><div class="h">요금 선택</div><div class="sub" id="fareSub">성인 1인 기준, 발권대행수수료 포함</div></div>
+        <button class="close" onclick="closeFare()">×</button>
+      </div>
+      <div class="fr-body" id="fareCardList"></div>
+      <div class="fr-foot"><button class="done" onclick="confirmFare()">선택 완료</button></div>
+    </div>
+  </div>
+
+  <!-- 운임규정 모달 (야놀자 패턴) -->
+  <div class="fr-overlay" id="ruleModal" onclick="if(event.target===this)closeRule()">
+    <div class="fr-modal">
+      <div class="fr-head">
+        <div><div class="h">운임규정</div><div class="sub">예약 전 변경·취소·수하물 규정을 확인하세요</div></div>
+        <button class="close" onclick="closeRule()">×</button>
+      </div>
+      <div class="fr-body" id="ruleBody"></div>
+    </div>
+  </div>
 
   <script src="data.js"></script>
   <script src="state.js"></script>
@@ -402,6 +480,21 @@
       renderAirlineFilters();
       renderSortChips();
       applyFilters();
+      updatePromo(flights, toCity);
+    }
+
+    /* 즉시할인 프로모 배너 — 노선 최저가 기준 (야놀자 패턴) */
+    function updatePromo(flights, toCity){
+      const strip = document.getElementById('promoStrip');
+      if(!strip) return;
+      const minP = flights.length ? Math.min(...flights.map(f => f.price)) : 0;
+      // 장거리(40만+)면 10만원, 중거리(25만+)면 5만원, 그 외 3만원 즉시할인
+      const cut = minP >= 400000 ? 100000 : minP >= 250000 ? 50000 : 30000;
+      const cutLabel = (cut / 10000) + '만원';
+      document.getElementById('promoBadge').textContent = cutLabel;
+      document.getElementById('promoText').innerHTML =
+        `${toCity.name} 항공권 인당 <b>${cutLabel} 즉시할인</b> 단독 혜택!` +
+        `<small>항공권 구매 시 해외숙소·투어·액티비티 추가 할인 쿠폰을 드려요</small>`;
     }
 
     function renderAirlineFilters(){
@@ -547,9 +640,17 @@
       if(flights.length === 0){
         list.innerHTML = `
           <div class="empty">
-            <div class="ic">✈️</div>
-            <div class="nm">조건에 맞는 항공편이 없어요</div>
-            <div class="desc">필터를 초기화하거나 다른 날짜·노선으로 검색해보세요</div>
+            <div style="font-size:56px;margin-bottom:12px;">🛫</div>
+            <div class="nm" style="font-size:18px;">조건에 맞는 항공편이 없어요</div>
+            <div class="desc" style="margin-bottom:18px;">필터를 초기화하거나 다른 날짜·노선으로 검색해보세요</div>
+            <div style="max-width:440px;margin:0 auto 18px;background:linear-gradient(135deg,#FFF5F0,#FFFAF0);border:1px solid #FECACA;border-radius:14px;padding:18px 20px;text-align:left;">
+              <div style="font-size:14px;font-weight:900;color:var(--ink);">🎫 항공권 구매 시 최대 15% 할인</div>
+              <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-top:4px;line-height:1.5;">항공권 구매 시 해외숙소와 투어·액티비티 추가 할인 쿠폰을 드려요. 골프텔 결합 시 최대 25%까지 절약하세요.</div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+              <button onclick="resetFilters()" style="padding:11px 20px;background:var(--ink);color:#fff;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">↺ 필터 초기화</button>
+              <a href="golftels.html?type=golftel-air" style="padding:11px 20px;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:900;font-family:inherit;">⛳ 항공 결합 골프텔 보기</a>
+            </div>
           </div>
         `;
         return;
@@ -599,14 +700,15 @@
             <div class="flight-extras">
               <div class="baggage">무료 수하물 15KG · 기내식 포함</div>
               <div class="price ${isBusiness ? 'business' : ''}">${f.price.toLocaleString('ko-KR')}원</div>
-              <div style="font-size:10px;color:var(--ink-3);font-weight:700;margin-top:2px;">세금·유류할증료 포함</div>
+              <div class="card-hint">${CARD_FARES[0].name} 외 ${CARD_FARES.length - 1}종 · 세금·유류할증료 포함</div>
+              <button class="fare-link" onclick="openRuleModal('${f.id}')">운임규정 ›</button>
               <label style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:6px;cursor:pointer;font-size:11px;color:var(--ink-2);font-weight:700;">
                 <input type="checkbox" onchange="toggleCancelGuard(this, '${f.id}', ${cancelPrice})" style="accent-color:var(--success);" />
                 🛡️ 취소 보장 +${cancelPrice.toLocaleString('ko-KR')}원
               </label>
             </div>
             <div class="flight-cta">
-              <a href="checkout.html?type=flight&id=${f.id}&adult=${SQ.adult}&child=${SQ.child}&infant=${SQ.infant}&cls=${SQ.cls}&dep=${SQ.dep}${SQ.ret ? '&ret=' + SQ.ret : ''}" class="select-btn">선택</a>
+              <button class="select-btn" onclick="openFareModal('${f.id}')">선택</button>
               <div class="seats-left ${seats <= 3 ? 'seats-low' : ''}">잔여 ${seats}석</div>
             </div>
           </div>
@@ -675,6 +777,146 @@
     window.openPriceAlertFromResults = () => {
       alert(`🔔 가격 알리미 등록\n\n노선: ${SQ.from} → ${SQ.to}\n현재 최저가: 현재 표시된 항공권 기준\n\n실 사용 시 flights.html의 가격 알리미 모달과 연동됩니다.`);
     };
+
+    /* ========================================================================
+       💳 요금 선택 모달 (야놀자 패턴 — 카드별 가격)
+       ======================================================================== */
+    // 카드별 추가금 (KB·삼성 최저, 그 외 카드사 수수료 차등)
+    const CARD_FARES = [
+      { name:'KB국민카드',          delta:0 },
+      { name:'삼성카드',            delta:0 },
+      { name:'롯데카드',            delta:1900 },
+      { name:'NH농협카드',          delta:3700 },
+      { name:'삼성 iD GLOBAL 카드', delta:5600 },
+      { name:'IBK기업은행 카드',    delta:6300 },
+      { name:'신한카드',            delta:6300 },
+      { name:'우리카드',            delta:6300 },
+      { name:'하나카드',            delta:6300 },
+      { name:'현대카드',            delta:6300 },
+      { name:'네이버페이 머니',     delta:12000 },
+      { name:'카카오페이',          delta:12000 },
+      { name:'일반 결제 (무이자 할부)', delta:14000 }
+    ];
+    let fareCtx = null;
+
+    window.openFareModal = (fid) => {
+      const f = (window._allFlights || []).find(x => x.id === fid);
+      if(!f) return;
+      fareCtx = { flight: f, selectedIdx: 0 };
+      const paxTotal = SQ.adult + SQ.child + SQ.infant;
+      document.getElementById('fareSub').textContent = `성인 ${SQ.adult}명${SQ.child?` · 아동 ${SQ.child}명`:''}${SQ.infant?` · 유아 ${SQ.infant}명`:''} 기준 1인 요금, 발권대행수수료 포함`;
+      renderFareCards();
+      document.getElementById('fareModal').classList.add('on');
+    };
+    function renderFareCards(){
+      const f = fareCtx.flight;
+      const minPrice = Math.min(...CARD_FARES.map(c => f.price + c.delta));
+      document.getElementById('fareCardList').innerHTML = CARD_FARES.map((c, i) => {
+        const price = f.price + c.delta;
+        const isBest = price === minPrice;
+        return `
+          <div class="card-row ${i === fareCtx.selectedIdx ? 'on' : ''}" onclick="selectFare(${i})">
+            <span class="radio"></span>
+            <span class="nm">${c.name}${isBest ? '<span class="best">최저가</span>' : ''}</span>
+            <span class="pr">${price.toLocaleString('ko-KR')}원</span>
+          </div>`;
+      }).join('');
+    }
+    window.selectFare = (i) => { fareCtx.selectedIdx = i; renderFareCards(); };
+    window.closeFare = () => document.getElementById('fareModal').classList.remove('on');
+    window.confirmFare = () => {
+      if(!fareCtx) return;
+      const f = fareCtx.flight;
+      const c = CARD_FARES[fareCtx.selectedIdx];
+      const price = f.price + c.delta;
+      const p = new URLSearchParams({
+        type:'flight', id:f.id,
+        adult:SQ.adult, child:SQ.child, infant:SQ.infant,
+        cls:SQ.cls, dep:SQ.dep, card:c.name, fare:price
+      });
+      if(SQ.ret) p.set('ret', SQ.ret);
+      location.href = 'checkout.html?' + p.toString();
+    };
+
+    /* ========================================================================
+       📋 운임규정 모달 (야놀자 패턴 — 규정1 수수료 / 규정2 수하물·기타)
+       ======================================================================== */
+    let ruleTab = 1;
+    window.openRuleModal = (fid) => {
+      const f = (window._allFlights || []).find(x => x.id === fid) || { from:SQ.from, to:SQ.to };
+      ruleTab = 1;
+      window._ruleFlight = f;
+      renderRule();
+      document.getElementById('ruleModal').classList.add('on');
+    };
+    window.closeRule = () => document.getElementById('ruleModal').classList.remove('on');
+    window.setRuleTab = (t) => { ruleTab = t; renderRule(); };
+    function renderRule(){
+      const f = window._ruleFlight || { from:'ICN', to:'BKK' };
+      const cities = window.OMT?.DATA?.CITIES || {};
+      const fromN = cities[f.from]?.name || f.from || '서울';
+      const toN = cities[f.to]?.name || f.to || '방콕';
+      const seg = `${fromN}(${f.from})-${toN}(${f.to})`;
+      const tab1 = `
+        <div class="fare-note">
+          · 고객님이 예약하신 요금 및 모든 규정은 <b>1인 기준</b> 부과 요금입니다.<br>
+          · 안내된 각종 수수료는 항공사의 수수료이며, 여행사의 대행 수수료는 별도로 부과됩니다.<br>
+          · 2개 이상의 운임규정이 적용된 경우 <b>높은 금액의 가장 엄격한 규정</b>으로 적용됩니다.
+        </div>
+        <div class="fare-sec"><h4>구간</h4><p>${seg}</p></div>
+        <div class="fare-sec">
+          <h4>항공사 수수료 · 변경</h4>
+          <p>~ 출발 당일 : KRW 40,000</p>
+          <ul>
+            <li>출발 당일이라도 NO-SHOW인 경우 예약 변경 불가, 환불만 가능합니다.</li>
+            <li>NO-SHOW 기준 : 탑승 수속 마감 전까지 예약 취소·변경을 하지 않은 경우</li>
+            <li>모든 수수료는 1인 기준이며 구간당 징수됩니다.</li>
+          </ul>
+        </div>
+        <div class="fare-sec">
+          <h4>항공사 수수료 · 취소/환불</h4>
+          <table class="fee-table">
+            <tr><td>~ 출발 91일 전</td><td>무료</td></tr>
+            <tr><td>출발 90 ~ 61일 전</td><td>KRW 20,000</td></tr>
+            <tr><td>출발 60 ~ 31일 전</td><td>KRW 40,000</td></tr>
+            <tr><td>출발 30 ~ 6일 전</td><td>KRW 60,000</td></tr>
+            <tr><td>출발 5 ~ 1일 전</td><td>KRW 90,000</td></tr>
+            <tr><td>출발 당일 ~ 이후</td><td>KRW 120,000</td></tr>
+          </table>
+        </div>`;
+      const tab2 = `
+        <div class="fare-sec">
+          <h4>수하물 규정</h4>
+          <p>${seg} : 15kg</p>
+          <ul>
+            <li>무료 위탁/초과/기내 수하물 규정은 좌석 등급 및 노선에 따라 상이합니다.</li>
+            <li>공동 운항편·타항공사 연결편·24시간 이상 경유 시 규정이 상이할 수 있습니다.</li>
+          </ul>
+        </div>
+        <div class="fare-sec">
+          <h4>항공사 마일리지</h4>
+          <p>마일리지 적립 여부·적립률·업그레이드 가능 여부는 운임별/제휴 회원사별로 상이하며, 자세한 내용은 항공사 홈페이지에서 확인 가능합니다.</p>
+        </div>
+        <div class="fare-sec">
+          <h4>여행일정순위</h4>
+          <p>항공권은 반드시 첫 번째 여정부터 순서대로 사용해야 합니다. 순서대로 이용하지 않은 항공권은 이용이 불가하며, 운임 규정에 따라 환불이 불가하거나 새로 구매하셔야 합니다.</p>
+        </div>
+        <div class="fare-sec">
+          <h4>일반 규정</h4>
+          <ul>
+            <li>출국 전 경유지 및 목적지 국가의 비자 필요 여부를 반드시 확인하셔야 합니다.</li>
+            <li>무비자 입국 가능 국가는 반드시 왕복 항공권을 소지하셔야 합니다 (무비자 편도 입국 불가).</li>
+            <li>항공권 유효기간은 미사용 시 발권일로부터 1년, 여행 개시 후에는 최초 출발일로부터 1년입니다.</li>
+            <li>환불 신청 기한은 항공권 유효기간 만료일로부터 30일 이내입니다.</li>
+          </ul>
+        </div>`;
+      document.getElementById('ruleBody').innerHTML = `
+        <div class="fare-tabs">
+          <button class="fare-tab ${ruleTab===1?'on':''}" onclick="setRuleTab(1)">규정 1 · 수수료</button>
+          <button class="fare-tab ${ruleTab===2?'on':''}" onclick="setRuleTab(2)">규정 2 · 수하물·기타</button>
+        </div>
+        ${ruleTab === 1 ? tab1 : tab2}`;
+    }
 
     init();
     renderWeekTrend();
