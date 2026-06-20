@@ -793,20 +793,18 @@
 ### 18.1 state.js 헬퍼 (5 도메인)
 - [ ] `getUserTier()` — 누적 결제액 기반 5등급 자동 산정 (브론즈/실버/골드/플래티넘/VIP)
 - [ ] `getTierBenefit(tier)` — 등급별 할인율 + 혜택 객체 반환
-- [ ] `getTripCoins()` — 초기값 {balance: 12500}
-- [ ] `useTripCoins()` / `earnTripCoins()` — 잔액 차감/적립 + 이력
-- [ ] `getMiles()` — 마일리지 잔액 + 이력
+- [ ] `getMiles()` — 단일 리워드, 초기값 {balance: 12500}
+- [ ] `useMiles()` / `earnMiles()` — 잔액 차감/적립 + 이력 (1마일 = 1원)
 - [ ] `getReturningVisit()` / `incrementVisit()` — 방문 카운터
 - [ ] `getExpressBookingProfile()` — 저장된 결제수단 + 여행자 정보
 
 ### 18.2 checkout.html — 5 결제 강화
 - [ ] 회원 등급 자동 할인 카드 (브론즈 0% ~ VIP -7%)
 - [ ] 등급 혜택 리스트 (조식 무료, 룸 업그레이드 등)
-- [ ] 마일리지 입력 필드 (100마일 = 1,000원)
-- [ ] 트립코인 슬라이더 (보유 잔액 + 500P 단위)
+- [ ] 마일리지 사용 슬라이더 (보유 잔액 기반 + 500마일 단위, 1마일 = 1원)
 - [ ] 신용카드 무이자 할부 (10만원+ 자동 노출, 3/6/12개월 자동 계산)
 - [ ] 회원 1-click 빠른 예약 (저장 정보 자동 입력 + 약관 자동 동의)
-- [ ] computeTotal 모든 할인 합산 (등급·마일·코인)
+- [ ] computeTotal 모든 할인 합산 (등급 + 마일리지)
 
 ### 18.3 안정성 (사이클 28 수정 반영)
 - [ ] try-catch로 OMT.State 없을 때 fallback 동작
@@ -884,10 +882,10 @@
 - [ ] max-width 640 + word-break: keep-all + line-height 1.6
 - [ ] 자동완성 드롭다운 z-index 999 (다음 섹션 위에 정상 노출)
 
-### 21.4 checkout 등급·마일·코인 (사이클 28)
+### 21.4 checkout 등급·마일리지 (사이클 28 / 36 단일화)
 - [ ] tierBenefitBlock 즉시 표시 (브론즈 기본)
-- [ ] coinBalance 초기 12,500P 표시
-- [ ] slider 정상 동작
+- [ ] milesBalance 초기 12,500마일 표시 (단일 리워드 — 트립코인 폐지)
+- [ ] milesSlider 정상 동작 (보유 잔액 max, 1마일 = 1원 차감)
 - [ ] expressBtn 항상 표시
 - [ ] console.error 없음
 

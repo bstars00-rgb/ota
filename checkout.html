@@ -457,7 +457,7 @@
       <div class="sum-divider"></div>
       <div id="sumRows"></div>
 
-      <!-- 🆕 사이클 27: 회원 등급 자동 할인 + 마일리지 + 트립코인 -->
+      <!-- 회원 등급 자동 할인 + 마일리지 (단일 리워드) -->
       <div id="tierBenefitBlock" style="background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:10px;padding:12px 14px;margin:10px 0;">
         <div id="tierLabel" style="font-size:11px;font-weight:900;color:#FF6B35;letter-spacing:.04em;">🥉 브론즈 회원 · 자동 할인 <strong style="color:#10B981;font-family:'JetBrains Mono',monospace;">-0%</strong></div>
         <div id="tierBenefitList" style="font-size:11px;color:#374151;margin-top:6px;line-height:1.5;">✓ 기본 예약 · 누적 50만원+ 시 실버 자동 승급</div>
@@ -466,26 +466,16 @@
       <div id="milesCoinBlock" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin:8px 0;">
         <div style="font-size:11px;font-weight:900;color:#6B7280;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;">🎁 추가 할인</div>
 
-        <div style="margin-bottom:8px;">
-          <label style="font-size:11px;font-weight:800;color:#374151;display:flex;justify-content:space-between;">
-            <span>✈️ 마일리지 입력</span>
-            <span style="font-size:10px;color:#9CA3AF;font-weight:700;">100마일 = 1,000원</span>
-          </label>
-          <div style="display:flex;gap:4px;margin-top:4px;">
-            <input type="number" id="milesInput" placeholder="0" min="0" step="100" oninput="recalcDiscounts()" style="flex:1;padding:6px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;font-weight:700;outline:none;font-family:'JetBrains Mono',monospace;" />
-            <span style="font-size:11px;font-weight:800;color:#6B7280;align-self:center;">마일</span>
-          </div>
-        </div>
-
         <div>
           <label style="font-size:11px;font-weight:800;color:#374151;display:flex;justify-content:space-between;">
-            <span>🪙 트립코인 사용</span>
-            <span style="font-size:10px;color:#10B981;font-weight:900;font-family:'JetBrains Mono',monospace;">보유 <span id="coinBalance">0</span>P</span>
+            <span>✈️ 마일리지 사용</span>
+            <span style="font-size:10px;color:#10B981;font-weight:900;font-family:'JetBrains Mono',monospace;">보유 <span id="milesBalance">0</span>마일</span>
           </label>
           <div style="display:flex;gap:4px;margin-top:4px;align-items:center;">
-            <input type="range" id="coinSlider" min="0" max="0" step="500" value="0" oninput="document.getElementById('coinValue').textContent=this.value;recalcDiscounts()" style="flex:1;accent-color:#FF6B35;" />
-            <span style="font-size:11px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;min-width:50px;text-align:right;"><span id="coinValue">0</span>P</span>
+            <input type="range" id="milesSlider" min="0" max="0" step="500" value="0" oninput="document.getElementById('milesValue').textContent=Number(this.value).toLocaleString('ko-KR');recalcDiscounts()" style="flex:1;accent-color:#FF6B35;" />
+            <span style="font-size:11px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;min-width:60px;text-align:right;"><span id="milesValue">0</span>마일</span>
           </div>
+          <div style="font-size:10px;color:#9CA3AF;font-weight:700;margin-top:4px;">1마일 = 1원 · 보유 마일리지로 즉시 할인</div>
         </div>
       </div>
 
@@ -1088,14 +1078,12 @@
       (pkg.activities||[]).forEach(a => sub += a.price);
       base = sub - Math.round(sub * 0.07);
     }
-    // 🆕 사이클 27: 등급·마일리지·트립코인 차감
+    // 등급 자동 할인 + 마일리지 차감 (단일 리워드, 1마일 = 1원)
     const tier = OMT.State.getUserTier?.() || 'bronze';
     const benefit = OMT.State.getTierBenefit?.(tier) || { discount: 0 };
     const tierDiscount = Math.round(base * (benefit.discount || 0));
-    const milesInput = parseInt(document.getElementById('milesInput')?.value || '0') || 0;
-    const milesDiscount = Math.floor(milesInput / 100) * 1000;
-    const coinUse = parseInt(document.getElementById('coinSlider')?.value || '0') || 0;
-    const total = Math.max(0, base - tierDiscount - milesDiscount - coinUse);
+    const milesUse = parseInt(document.getElementById('milesSlider')?.value || '0') || 0;
+    const total = Math.max(0, base - tierDiscount - milesUse);
     return total;
   }
 
@@ -1153,12 +1141,12 @@
   renderPaxForm();
   renderSummary();
 
-  // 🆕 사이클 27: 트립코인/등급/빠른 예약 즉시 초기화 (try-catch로 안전 처리)
+  // 마일리지/등급/빠른 예약 즉시 초기화 (try-catch로 안전 처리)
   try {
-    const coins = (OMT.State && OMT.State.getTripCoins) ? OMT.State.getTripCoins() : { balance: 12500 };
-    const balance = (coins && typeof coins.balance === 'number') ? coins.balance : 12500;
-    const balanceEl = document.getElementById('coinBalance');
-    const slider = document.getElementById('coinSlider');
+    const miles = (OMT.State && OMT.State.getMiles) ? OMT.State.getMiles() : { balance: 12500 };
+    const balance = (miles && typeof miles.balance === 'number') ? miles.balance : 12500;
+    const balanceEl = document.getElementById('milesBalance');
+    const slider = document.getElementById('milesSlider');
     if(balanceEl) balanceEl.textContent = balance.toLocaleString('ko-KR');
     if(slider){
       slider.max = Math.max(500, Math.min(balance, 50000));
@@ -1170,7 +1158,7 @@
     const btn = document.getElementById('expressBtn');
     if(btn) btn.style.display = 'block';
   } catch(err){
-    console.error('[Checkout] Tier/miles/coins init error:', err);
+    console.error('[Checkout] Tier/miles init error:', err);
   }
   updatePayButton();
   </script>

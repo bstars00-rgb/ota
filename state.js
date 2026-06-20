@@ -33,12 +33,11 @@
     groupBookings: 'omt_group_bookings_v1', // 그룹(단체) 예약 — 4인+ 단체 골프투어
     priceAlerts:   'omt_price_alerts_v1',  // 항공 가격 알리미 (Trip.com 스타일)
     visitCount:    'omt_visit_count_v1',   // 재방문 카운터 (사이클 27)
-    miles:         'omt_miles_v1',         // 마일리지 적립 이력
-    tripCoins:     'omt_trip_coins_v1'     // 트립 코인 잔액 + 이력
+    miles:         'omt_miles_v1'          // 마일리지 잔액 + 적립/사용 이력 (단일 리워드)
   };
 
   // ============================================================
-  // 🏆 회원 등급 자동 산정 (시트립 트립코인 스타일)
+  // 🏆 회원 등급 자동 산정 (누적 결제액 기준 5단)
   // ============================================================
   function getUserTier(){
     // 누적 결제액 기준
@@ -63,33 +62,30 @@
   }
 
   // ============================================================
-  // ✈️ 마일리지·트립코인 (시트립 트립코인 패턴)
+  // ✈️ 마일리지 (단일 리워드 — 적립금처럼 결제 시 차감 가능)
   // ============================================================
   function getMiles(){
-    return read(KEYS.miles, { balance: 0, history: [] });
+    // 마일리지 잔액은 초기에 일부 부여 (mock)
+    return read(KEYS.miles, { balance: 12500, history: [] });
   }
-  function getTripCoins(){
-    // 트립코인 잔액은 초기에 일부 부여 (mock)
-    return read(KEYS.tripCoins, { balance: 12500, history: [] });
-  }
-  function useTripCoins(amount, reason){
-    const c = getTripCoins();
-    if(c.balance < amount) return false;
-    c.balance -= amount;
-    c.history = c.history || [];
-    c.history.unshift({ amount: -amount, reason, when: new Date().toISOString() });
-    if(c.history.length > 50) c.history.length = 50;
-    write(KEYS.tripCoins, c);
+  function useMiles(amount, reason){
+    const m = getMiles();
+    if(m.balance < amount) return false;
+    m.balance -= amount;
+    m.history = m.history || [];
+    m.history.unshift({ amount: -amount, reason, when: new Date().toISOString() });
+    if(m.history.length > 50) m.history.length = 50;
+    write(KEYS.miles, m);
     return true;
   }
-  function earnTripCoins(amount, reason){
-    const c = getTripCoins();
-    c.balance += amount;
-    c.history = c.history || [];
-    c.history.unshift({ amount, reason, when: new Date().toISOString() });
-    if(c.history.length > 50) c.history.length = 50;
-    write(KEYS.tripCoins, c);
-    return c;
+  function earnMiles(amount, reason){
+    const m = getMiles();
+    m.balance += amount;
+    m.history = m.history || [];
+    m.history.unshift({ amount, reason, when: new Date().toISOString() });
+    if(m.history.length > 50) m.history.length = 50;
+    write(KEYS.miles, m);
+    return m;
   }
 
   // ============================================================
@@ -821,7 +817,7 @@
     getPriceAlerts, addPriceAlert, removePriceAlert,
     // 🆕 사이클 27 — 시트립 추가 패턴
     getUserTier, getTierBenefit,
-    getMiles, getTripCoins, useTripCoins, earnTripCoins,
+    getMiles, useMiles, earnMiles,
     getReturningVisit, incrementVisit,
     getExpressBookingProfile,
     // User
