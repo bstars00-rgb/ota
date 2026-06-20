@@ -568,13 +568,14 @@
         };
       }
     }
-    const product = b.productId ? OMT.getProduct(b.productId) : null;
+    const isHotel = b.productId && b.productId.startsWith('h-');
+    const hotel = isHotel ? OMT.getHotel(b.productId) : null;
     return {
-      name: product?.name || b.productName || '예약 상품',
-      img: product?.images?.[0] || b.productImage || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80',
-      productLink: b.productId ? `product.html?id=${b.productId}` : null,
+      name: hotel?.name || b.productName || '예약 상품',
+      img: hotel?.gallery?.[0] || hotel?.img || b.productImage || 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80',
+      productLink: isHotel ? `hotel.html?id=${b.productId}` : null,
       isGolftel: false,
-      productType: b.productType || 'package'
+      productType: b.productType || 'hotel'
     };
   }
 
@@ -688,7 +689,8 @@
   };
   window.rebook = (pid, pt) => {
     if(pid && pid.startsWith('gt-')) location.href = 'golftel.html?id=' + pid;
-    else location.href = 'product.html?id=' + pid;
+    else if(pid && pid.startsWith('h-')) location.href = 'hotel.html?id=' + pid;
+    else location.href = 'golftels.html';
   };
   window.goTab = (t) => document.querySelector(`.sn-item[data-tab="${t}"]`)?.click();
 
@@ -710,13 +712,18 @@
       return;
     }
     document.getElementById('wishGrid').innerHTML = wish.map(pid => {
-      const p = OMT.getProduct(pid);
-      if(!p) return '';
+      const isGolftel = pid.startsWith('gt-');
+      const isHotel = pid.startsWith('h-');
+      const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : (isHotel ? OMT.getHotel(pid) : null);
+      if(!item) return '';
+      const link = isGolftel ? `golftel.html?id=${pid}` : `hotel.html?id=${pid}`;
+      const thumb = item.images?.[0] || item.gallery?.[0] || item.img || '';
+      const price = isGolftel ? item.pricePerPerson : item.price;
       return `
-        <div class="wish-card" onclick="location.href='product.html?id=${p.id}'">
-          <div class="wish-thumb" style="background-image:url('${p.images?.[0]}')"></div>
-          <span class="wish-heart" onclick="event.stopPropagation();unwish('${p.id}');">❤️</span>
-          <div class="wish-body"><div class="wish-name">${p.name}</div><div class="wish-price">${krw(p.price)}~</div></div>
+        <div class="wish-card" onclick="location.href='${link}'">
+          <div class="wish-thumb" style="background-image:url('${thumb}')"></div>
+          <span class="wish-heart" onclick="event.stopPropagation();unwish('${pid}');">❤️</span>
+          <div class="wish-body"><div class="wish-name">${item.name}</div><div class="wish-price">${krw(price)}~</div></div>
         </div>`;
     }).join('');
   }
@@ -777,9 +784,10 @@
     }
     document.getElementById('reviewList').innerHTML = reviews.map(r => {
       const isGT = r.productId?.startsWith('gt-');
-      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : OMT.getProduct(r.productId);
-      const link = isGT ? `golftel.html?id=${r.productId}` : `product.html?id=${r.productId}`;
-      const thumb = item?.images?.[0] || '';
+      const isHotel = r.productId?.startsWith('h-');
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : (isHotel ? OMT.getHotel(r.productId) : null);
+      const link = isGT ? `golftel.html?id=${r.productId}` : (isHotel ? `hotel.html?id=${r.productId}` : 'golftels.html');
+      const thumb = item?.images?.[0] || item?.gallery?.[0] || item?.img || '';
       const photos = r.images || [];
       return `
         <div class="book-card">
@@ -803,9 +811,9 @@
   window.openReviewModal = (bookingId) => {
     const b = OMT.State.getBookings().find(x => x.id === bookingId);
     if(!b) return;
-    // 골프텔 + 일반 패키지 모두 지원
+    // 골프텔 + 호텔 모두 지원
     const isGT = b.productId?.startsWith('gt-');
-    const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === b.productId) : OMT.getProduct(b.productId);
+    const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === b.productId) : OMT.getHotel(b.productId);
     reviewState = { bookingId, productId: b.productId, score: 5, photos: [] };
     document.getElementById('reviewModalSub').textContent = item ? `"${item.name}" 어떠셨나요?` : '이 상품 어떠셨어요?';
     document.getElementById('reviewText').value = '';
@@ -1101,11 +1109,13 @@
       recentEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
         ${recent.map(pid => {
           const isGolftel = pid.startsWith('gt-');
-          const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+          const isHotel = pid.startsWith('h-');
+          const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : (isHotel ? OMT.getHotel(pid) : null);
           if(!item) return '';
-          const link = isGolftel ? `golftel.html?id=${pid}` : `product.html?id=${pid}`;
+          const link = isGolftel ? `golftel.html?id=${pid}` : `hotel.html?id=${pid}`;
+          const thumb = item.images?.[0] || item.gallery?.[0] || item.img || '';
           return `<a href="${link}" style="display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);text-decoration:none;color:inherit;">
-            <div style="aspect-ratio:4/3;background:url('${item.images?.[0]}') center/cover;background-color:#eee;"></div>
+            <div style="aspect-ratio:4/3;background:url('${thumb}') center/cover;background-color:#eee;"></div>
             <div style="padding:8px;font-size:12px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${item.name}</div>
           </a>`;
         }).join('')}
@@ -1170,12 +1180,14 @@
     }
     el.innerHTML = ids.map(pid => {
       const isGolftel = pid.startsWith('gt-');
-      const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+      const isHotel = pid.startsWith('h-');
+      const item = isGolftel ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : (isHotel ? OMT.getHotel(pid) : null);
       if(!item) return '';
-      const link = isGolftel ? `golftel.html?id=${pid}` : `product.html?id=${pid}`;
+      const link = isGolftel ? `golftel.html?id=${pid}` : `hotel.html?id=${pid}`;
       const price = isGolftel ? item.pricePerPerson : item.price;
+      const thumb = item.images?.[0] || item.gallery?.[0] || item.img || '';
       return `<div class="wish-card" onclick="location.href='${link}'">
-        <div class="wish-thumb" style="background-image:url('${item.images?.[0]}')"></div>
+        <div class="wish-thumb" style="background-image:url('${thumb}')"></div>
         ${isGolftel ? '<span class="wish-heart" style="background:var(--golf,#0B6E4F);">⛳</span>' : ''}
         <div class="wish-body"><div class="wish-name">${item.name}</div><div class="wish-price">${krw(price)}~</div></div>
       </div>`;
@@ -1348,7 +1360,7 @@
     // 2) 리뷰 검색 (text / productName)
     OMT.State.getMyReviews().forEach(r => {
       const isGT = r.productId?.startsWith('gt-');
-      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : OMT.getProduct(r.productId);
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === r.productId) : OMT.getHotel(r.productId);
       const hay = `${r.text || ''} ${item?.name || ''}`.toLowerCase();
       if(hay.includes(q)){
         results.push({
@@ -1383,7 +1395,7 @@
     // 4) 찜 검색 (상품명)
     OMT.State.getWishlist().forEach(pid => {
       const isGT = pid.startsWith('gt-');
-      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getProduct(pid);
+      const item = isGT ? OMT.DATA.GOLFTELS.find(g => g.id === pid) : OMT.getHotel(pid);
       if(item && item.name.toLowerCase().includes(q)){
         results.push({
           type: 'wish',

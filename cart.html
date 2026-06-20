@@ -87,19 +87,11 @@
     .empty p{margin:0 0 20px;font-size:14px;color:var(--ink-3);}
     .empty a{display:inline-block;padding:12px 24px;background:var(--primary);color:#fff;border-radius:10px;font-weight:900;font-size:14px;}
 
-    .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-    .rec-card{background:var(--bg-soft);border-radius:12px;overflow:hidden;transition:transform .15s;}
-    .rec-card:hover{transform:translateY(-2px);}
-    .rec-thumb{aspect-ratio:4/3;background-size:cover;background-position:center;background-color:#eee;}
-    .rec-body{padding:12px;}
-    .rec-name{font-size:12px;font-weight:800;line-height:1.35;}
-    .rec-price{font-size:14px;font-weight:900;color:var(--primary);margin-top:4px;}
-
     .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;z-index:100;transition:transform .3s;pointer-events:none;}
     .toast.show{transform:translateX(-50%) translateY(0);}
 
-    @media (max-width:1024px){.cart-grid{grid-template-columns:1fr;}.sum-panel{position:static;}.rec-grid{grid-template-columns:1fr 1fr;}}
-    @media (max-width:768px){:root{--header-h:56px;}.page-title{display:none;}.cart-item{grid-template-columns:auto 72px 1fr;}.ci-right{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;flex-direction:row;justify-content:space-between;align-items:center;}.rec-grid{grid-template-columns:1fr;}}
+    @media (max-width:1024px){.cart-grid{grid-template-columns:1fr;}.sum-panel{position:static;}}
+    @media (max-width:768px){:root{--header-h:56px;}.page-title{display:none;}.cart-item{grid-template-columns:auto 72px 1fr;}.ci-right{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;flex-direction:row;justify-content:space-between;align-items:center;}}
   </style>
 </head>
 <body>
@@ -142,11 +134,6 @@
         </div>
         <div id="appliedCoupon"></div>
         <div class="coupon-list" id="couponList"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h3 class="card-title">✨ 추천 상품</h3></div>
-        <div class="rec-grid" id="recGrid"></div>
       </div>
     </section>
 
@@ -229,7 +216,10 @@
       const tagClass = it.type === 'GOLFTEL_AIR' ? 'golftel-air' : (isGT ? 'golftel' : (it.orig ? 'orig' : ''));
       const tagLabel = it.type === 'GOLFTEL_AIR' ? '✈️ 골프투어' : (it.type === 'GOLFTEL' ? '⛳ 골프텔' : it.type);
       const directTag = isGT && it.orig ? '<span class="ci-tag direct">⭐ OMT 직영</span>' : '';
-      const productLink = isGT ? `golftel.html?id=${it.productId||''}` : `product.html?id=${it.productId||''}`;
+      const pid = it.productId||'';
+      const productLink = isGT
+        ? `golftel.html?id=${pid}`
+        : (pid.startsWith('h-') ? `hotel.html?id=${pid}` : (pid.startsWith('gt-') ? `golftel.html?id=${pid}` : 'golftels.html'));
       return `
       <div class="cart-item" data-cartid="${it.cartId}">
         <div class="ci-check ${it.checked?'checked':''}" onclick="toggleCheck('${it.cartId}')"></div>
@@ -281,7 +271,12 @@
       toast(`${selected.length}개 삭제됨`);
     }
   };
-  window.goToProduct = (id) => { if(id) location.href = 'product.html?id='+id; };
+  window.goToProduct = (id) => {
+    if(!id){ location.href = 'golftels.html'; return; }
+    if(id.startsWith('gt-')) location.href = 'golftel.html?id='+id;
+    else if(id.startsWith('h-')) location.href = 'hotel.html?id='+id;
+    else location.href = 'golftels.html';
+  };
 
   /* Coupons */
   window.applyCoupon = () => {
@@ -432,20 +427,8 @@
     location.href = 'checkout.html';
   };
 
-  /* Recommended products */
-  function renderRec(){
-    const recs = OMT.DATA.PRODUCTS.filter(p => p.originalFlag).slice(0, 3);
-    document.getElementById('recGrid').innerHTML = recs.map(r => `
-      <a class="rec-card" href="product.html?id=${r.id}">
-        <div class="rec-thumb" style="background-image:url('${r.images?.[0]}')"></div>
-        <div class="rec-body"><div class="rec-name">${r.name}</div><div class="rec-price">${krw(r.price)}~</div></div>
-      </a>
-    `).join('');
-  }
-
   renderItems();
   renderSummary();
-  renderRec();
   </script>
 </body>
 </html>

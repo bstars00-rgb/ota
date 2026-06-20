@@ -839,7 +839,8 @@
         <a href="country.html?c=thailand">태국</a>
         <a href="country.html?c=philippines">필리핀</a>
         <a href="feed.html">▶ 피드</a>
-        <a href="packages.html">📦 패키지</a>
+        <a href="flights.html">✈️ 항공</a>
+        <a href="hotels.html">🏨 호텔</a>
       </nav>
 
       <div class="header-actions">
@@ -884,7 +885,8 @@
       <a href="country.html?c=philippines">섬의 나라 · 필리핀</a>
       <a href="ai-planner.html">✦ AI 여행 플래너</a>
       <a href="feed.html">▶ 크리에이터 피드</a>
-      <a href="packages.html">📦 다이나믹 패키지</a>
+      <a href="flights.html">✈️ 항공권</a>
+      <a href="hotels.html">🏨 호텔</a>
       <a href="mypage.html">👤 마이페이지</a>
       <a href="creator.html">크리에이터 파트너 신청</a>
     </nav>
@@ -920,10 +922,9 @@
       </form>
 
       <div class="quick-tabs" role="tablist">
+        <button class="quick-tab" data-type="golf">⛳ 골프텔</button>
         <button class="quick-tab" data-type="flight">✈️ 항공</button>
         <button class="quick-tab" data-type="hotel">🏨 호텔</button>
-        <button class="quick-tab" data-type="package">📦 패키지</button>
-        <button class="quick-tab" data-type="golf">⛳ 골프</button>
         <button class="quick-tab" data-type="tour">🎫 투어</button>
       </div>
     </div>
@@ -963,10 +964,10 @@
     <div class="container">
       <div class="section-head-row">
         <div>
-          <h2 class="section-title">🏠 오마이트립 오리지널 · 직영 호텔</h2>
-          <p class="section-sub">지역마다 오마이트립이 직접 운영하는 프리미엄 부티크 · 한정 수량 단독 공급</p>
+          <h2 class="section-title">🏠 오마이트립 직영 골프텔</h2>
+          <p class="section-sub">일본·베트남 직영 운영 — OMT가 직접 계약한 프리미엄 골프 리조트 · 한정 수량 단독 공급</p>
         </div>
-        <a href="country.html?c=japan" class="see-all">전체보기 →</a>
+        <a href="golftels.html" class="see-all">전체보기 →</a>
       </div>
       <div class="originals-grid" id="originalsGrid">
         <!-- Rendered by JS — see /api/products/originals -->
@@ -992,46 +993,7 @@
     </div>
   </section>
 
-  <!-- ================================
-       DYNAMIC PACKAGE BUILDER
-       ================================ -->
-  <section class="section reveal">
-    <div class="container">
-      <div class="pkg-builder">
-        <div class="section-head-row" style="margin-bottom:8px;">
-          <div>
-            <h2 class="section-title">나만의 여행을 조합하세요</h2>
-            <p class="section-sub">항공·호텔·액티비티를 자유롭게 조합하면 더 저렴해집니다</p>
-          </div>
-        </div>
-
-        <!-- 🆕 사이클 30: 카드 그리드 빌더 (정보 풍부화) -->
-        <!-- 🆕 사이클 31: 무거운 빌더 → 가벼운 CTA (trip-builder.html로 이동) -->
-        <a href="trip-builder.html" style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;padding:28px 30px;background:linear-gradient(135deg,#FFF5F0,#FFEDE0,#FFFAF0);border:2px solid #FF6B35;border-radius:18px;text-decoration:none;color:inherit;transition:all .2s;box-shadow:0 6px 18px rgba(255,107,53,.12);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(255,107,53,.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 18px rgba(255,107,53,.12)'">
-          <div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
-              <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#fff;border-radius:18px;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;">✦ Dynamic Package</span>
-              <span style="font-size:11px;color:#10B981;font-weight:900;">최대 -10% 자동 번들 할인</span>
-            </div>
-            <div style="font-size:24px;font-weight:900;color:#1A1A1A;line-height:1.3;margin-bottom:6px;">나만의 여행을 조합하세요 →</div>
-            <div style="font-size:13px;color:#6B7280;font-weight:600;line-height:1.5;">
-              📷 사진·평점·시설 정보 보고 호텔 선택<br>
-              🎫 12개 액티비티 카테고리별 비교 (테마파크·문화체험·시티투어·미식·스포츠·픽업)<br>
-              💡 OMT 팁으로 의사결정 도움
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-            <div style="display:flex;gap:6px;">
-              <span style="width:44px;height:44px;border-radius:12px;background:#fff;border:2px solid #E5E7EB;display:grid;place-items:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.06);">✈️</span>
-              <span style="width:44px;height:44px;border-radius:12px;background:#fff;border:2px solid #E5E7EB;display:grid;place-items:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.06);">🏨</span>
-              <span style="width:44px;height:44px;border-radius:12px;background:#fff;border:2px solid #E5E7EB;display:grid;place-items:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.06);">🎫</span>
-            </div>
-            <span style="font-size:11px;color:#9CA3AF;font-weight:700;">자유롭게 조합</span>
-          </div>
-        </a>
-      </div>
-    </div>
-  </section>
+  <!-- 에어텔(다이내믹 패키지) 빌더 폐지 — FIT 트렌드 대응 (사이클 38) -->
 
   <!-- ================================
        FLIGHT DEALS
@@ -1098,9 +1060,9 @@
         <div>
           <h5>서비스</h5>
           <ul>
-            <li><a href="/flights/search">항공권</a></li>
-            <li><a href="/hotels/search">호텔</a></li>
-            <li><a href="/packages">다이나믹 패키지</a></li>
+            <li><a href="golftels.html">골프텔</a></li>
+            <li><a href="flights.html">항공권</a></li>
+            <li><a href="hotels.html">호텔</a></li>
             <li><a href="/feed">크리에이터 피드</a></li>
             <li><a href="/ai-planner">AI 플래너</a></li>
           </ul>
@@ -1202,19 +1164,19 @@
       cities:'유럽 · 미주 · 오세아니아',    count:'12,340개 호텔' }
   ];
 
-  // Originals — 중앙 data.js에서 동적 생성 (originalFlag=true 상품 중 4개)
-  // TODO: API 연동 필요 - GET /api/products/originals?limit=4
-  const ORIGINALS = (OMT.DATA?.PRODUCTS || [])
-    .filter(p => p.originalFlag)
+  // 직영 골프텔 — 일본·베트남 직영(OWNERSHIP.model==='direct') 중 4개
+  // TODO: API 연동 필요 - GET /api/golftels?ownership=direct&limit=4
+  const ORIGINALS = (OMT.DATA?.GOLFTELS || [])
+    .filter(g => (OMT.DATA.OWNERSHIP[g.country] || {}).model === 'direct')
     .slice(0, 4)
-    .map(p => ({
-      id: p.id,
-      img: p.images?.[0] || '',
-      country: OMT.DATA.COUNTRIES[p.country]?.name || p.country,
-      title: p.name,
-      compo: p.subtitle,
-      price: p.price,
-      oldPrice: p.oldPrice
+    .map(g => ({
+      id: g.id,
+      img: g.images?.[0] || '',
+      country: OMT.DATA.COUNTRIES[g.country]?.name || g.country,
+      title: g.name,
+      compo: `${g.nights}박 ${g.nights+1}일 · ${g.rounds}라운딩`,
+      price: g.pricePerPerson,
+      oldPrice: g.oldPricePerPerson
     }));
 
   // TODO: API 연동 필요 - GET /api/creator/shorts?featured=true&limit=4
@@ -1305,10 +1267,10 @@
   function renderOriginals(){
     const el = document.getElementById('originalsGrid');
     el.innerHTML = ORIGINALS.map(p => `
-      <a class="product-card" href="product.html?id=${p.id}">
+      <a class="product-card" href="golftel.html?id=${p.id}">
         <div class="product-thumb" style="background-image:url('${p.img}')">
           <div class="product-badges">
-            <span class="badge original">ORIGINAL</span>
+            <span class="badge original">직영</span>
             <span class="badge country">${p.country}</span>
           </div>
         </div>
@@ -1316,11 +1278,11 @@
           <div class="product-title">${p.title}</div>
           <div class="product-compo">${p.compo}</div>
           <div class="product-price-row">
-            <span class="from">최저가</span>
+            <span class="from">1인</span>
             <span class="price">${krw(p.price)}</span>
             <span class="unit">~</span>
           </div>
-          <div class="product-old">${krw(p.oldPrice)}</div>
+          ${p.oldPrice ? `<div class="product-old">${krw(p.oldPrice)}</div>` : ''}
         </div>
       </a>
     `).join('');
@@ -1430,10 +1392,10 @@
       const isGT = pid.startsWith('gt-');
       const item = isGT
         ? window.OMT.DATA.GOLFTELS?.find(g => g.id === pid)
-        : (window.OMT.DATA.HOTELS?.find(h => h.id === pid) || window.OMT.getProduct?.(pid));
+        : window.OMT.DATA.HOTELS?.find(h => h.id === pid);
       if(!item) return null;
-      const link = isGT ? `golftel.html?id=${pid}` : (pid.startsWith('h-') ? `hotel.html?id=${pid}` : `product.html?id=${pid}`);
-      const typeLabel = isGT ? '⛳ 골프텔' : (pid.startsWith('h-') ? '🏨 호텔' : '📦 패키지');
+      const link = isGT ? `golftel.html?id=${pid}` : `hotel.html?id=${pid}`;
+      const typeLabel = isGT ? '⛳ 골프텔' : '🏨 호텔';
       const price = item.pricePerPerson || item.price || 0;
       return { name: item.name, img: item.images?.[0] || item.gallery?.[0] || item.img, link, typeLabel, price };
     }).filter(Boolean);
@@ -1483,9 +1445,9 @@
       const own = OMT.DATA.OWNERSHIP[g.country] || {};
       items.push({ type:'golftel', icon:'⛳', tag:'골프텔', title:g.name, sub:`${own.label || ''} · ${g.rounds}라운딩 · ${(g.pricePerPerson/10000).toFixed(0)}만원~/인`, link:`golftel.html?id=${g.id}`, keywords:[g.name, g.city, OMT.DATA.COUNTRIES[g.country]?.name || '', '골프', '골프텔'] });
     });
-    // 일반 패키지
-    (OMT.DATA.PRODUCTS || []).forEach(p => {
-      items.push({ type:'package', icon:'📦', tag:'패키지', title:p.name, sub:`${p.subtitle || ''} · ${(p.price/10000).toFixed(0)}만원`, link:`product.html?id=${p.id}`, keywords:[p.name, p.subtitle || '', p.city || '', OMT.DATA.COUNTRIES[p.country]?.name || ''] });
+    // 호텔 (HOTELS)
+    (OMT.DATA.HOTELS || []).forEach(h => {
+      items.push({ type:'hotel', icon:'🏨', tag:'호텔', title:h.name, sub:`${h.area || ''} · ${(h.price/10000).toFixed(0)}만원~`, link:`hotel.html?id=${h.id}`, keywords:[h.name, h.area || '', h.city || '', OMT.DATA.COUNTRIES[h.country]?.name || ''] });
     });
     // 도시 (CITIES)
     Object.values(OMT.DATA.CITIES).forEach(ct => {
@@ -1635,10 +1597,9 @@
     aiQuery.addEventListener('blur', () => { setTimeout(() => { searchSuggest.style.display = 'none'; }, 200); });
   }
   const QUICK_TAB_DESTINATIONS = {
+    golf:     'golftels.html',
     flight:   'flights.html',
     hotel:    'hotels.html',
-    package:  'packages.html',
-    golf:     'country.html?c=japan#golf',
     tour:     'country.html?c=japan'
   };
   document.querySelectorAll('.quick-tab').forEach(btn => {

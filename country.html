@@ -263,42 +263,6 @@
     .cat-item .icon{font-size:16px;}
 
     /* =========================================
-       Product Card (shared)
-       ========================================= */
-    .product-card{
-      border-radius: var(--radius);
-      overflow:hidden;
-      background:#fff;
-      border:1px solid var(--line);
-      transition: transform .2s, box-shadow .2s;
-      display:flex; flex-direction:column;
-    }
-    .product-card:hover{transform:translateY(-4px); box-shadow: var(--shadow-lg);}
-    .product-thumb{
-      position:relative; aspect-ratio: 4/3;
-      background-size:cover; background-position:center;
-      background-color:#eee;
-    }
-    .product-badges{position:absolute; top:12px; left:12px; display:flex; gap:6px; flex-wrap:wrap;}
-    .badge{
-      padding: 5px 10px; border-radius: 999px;
-      font-size: 11px; font-weight:700;
-      background: rgba(0,0,0,.7); color:#fff; backdrop-filter: blur(6px);
-    }
-    .badge.original{background: linear-gradient(135deg, var(--primary), #FF9A6C);}
-    .badge.country{background: rgba(255,255,255,.92); color: var(--ink);}
-    .product-body{padding:16px; display:flex; flex-direction:column; flex:1;}
-    .product-title{font-weight:800; font-size:15px; line-height:1.4; letter-spacing:-0.01em;}
-    .product-compo{font-size:12px; color: var(--ink-3); margin:6px 0 14px; flex:1;}
-    .product-price-row{display:flex; align-items:baseline; gap:6px;}
-    .product-price-row .from{font-size:11px; color: var(--ink-3);}
-    .product-price-row .price{font-size:20px; font-weight:900; letter-spacing:-0.02em;}
-    .product-price-row .unit{font-size:12px; color: var(--ink-2); font-weight:600;}
-    .product-old{font-size:12px; color:var(--ink-3); text-decoration:line-through;}
-
-    .originals-grid{display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px;}
-
-    /* =========================================
        Flight Deals
        ========================================= */
     .tabs{display:flex; gap:4px; margin-bottom:20px; border-bottom: 1px solid var(--line); overflow-x:auto;}
@@ -418,76 +382,6 @@
     .golf-compo{font-size:12px; opacity:.8; margin-bottom:12px;}
     .golf-price{display:flex; justify-content:space-between; align-items:baseline; padding-top:12px; border-top: 1px dashed rgba(255,255,255,.2);}
     .golf-price .price{font-size: 20px; font-weight:900; color: var(--accent);}
-
-    /* =========================================
-       Package Builder (stepper)
-       ========================================= */
-    .pkg-builder{
-      background: linear-gradient(135deg, #FFF5EE, #FFFBEB);
-      border-radius: var(--radius-lg); padding: 36px;
-      border: 1px solid var(--line);
-    }
-    .pkg-steps{
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 28px; margin-top: 20px;
-    }
-    .pkg-stages{display:flex; flex-direction:column; gap:12px;}
-    .pkg-stage{
-      background:#fff;
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      border: 1px solid var(--line);
-    }
-    .pkg-stage-head{
-      display:flex; align-items:center; gap:12px; margin-bottom: 14px;
-    }
-    .pkg-step-num{
-      width:32px; height:32px; border-radius:50%;
-      background: var(--primary); color:#fff;
-      display:grid; place-items:center;
-      font-weight:900; font-size:14px;
-      flex-shrink:0;
-    }
-    .pkg-step-title{font-weight:800; font-size:15px;}
-    .pkg-step-sub{font-size:12px; color: var(--ink-3); font-weight:500;}
-    .pkg-options{
-      display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;
-    }
-    .pkg-option{
-      padding: 12px 14px; border-radius: 10px;
-      border: 1.5px solid var(--line);
-      background:#fff; cursor:pointer;
-      text-align:left;
-      transition: border-color .15s, background .15s;
-    }
-    .pkg-option:hover{border-color: var(--primary);}
-    .pkg-option.active{
-      border-color: var(--primary);
-      background: var(--primary-soft);
-    }
-    .pkg-option .opt-title{font-weight:700; font-size:13px; line-height:1.3;}
-    .pkg-option .opt-price{font-size:12px; color: var(--primary); font-weight:800; margin-top:4px;}
-    .pkg-summary{
-      background: var(--ink); color:#fff;
-      border-radius: var(--radius); padding: 24px;
-      display:flex; flex-direction:column;
-      position: sticky; top: calc(var(--header-h) + 70px);
-      align-self: flex-start;
-    }
-    .pkg-summary h4{margin:0 0 12px; font-size:14px; opacity:.7; font-weight:600;}
-    .pkg-lines{display:flex; flex-direction:column; gap:8px; margin-bottom:12px;}
-    .pkg-line{display:flex; justify-content:space-between; font-size:13px; opacity:.88; gap:10px;}
-    .pkg-line .l{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-    .pkg-divider{height:1px; background: rgba(255,255,255,.15); margin: 10px 0;}
-    .pkg-total{display:flex; justify-content:space-between; align-items:baseline;}
-    .pkg-total .label{font-size:14px; opacity:.7;}
-    .pkg-total .price{font-size: 28px; font-weight:900; color: var(--accent); letter-spacing:-0.02em;}
-    .pkg-cta{
-      margin-top:18px; padding: 14px; border-radius: 10px;
-      background: var(--primary); color:#fff;
-      font-weight:800; font-size:15px; text-align:center;
-    }
 
     /* =========================================
        Footer (compact)
@@ -624,13 +518,10 @@
     }
 
     @media (max-width: 1024px){
-      .originals-grid{grid-template-columns: repeat(2, 1fr);}
       .shorts-grid{grid-template-columns: repeat(3, 1fr);}
       .flights-grid{grid-template-columns: repeat(2, 1fr);}
       .hotels-grid{grid-template-columns: repeat(2, 1fr);}
       .golf-grid{grid-template-columns: repeat(2, 1fr);}
-      .pkg-steps{grid-template-columns: 1fr;}
-      .pkg-summary{position: static;}
       .search-form{grid-template-columns: 1fr 1fr;}
       .search-field{border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);}
       .search-field:nth-child(2n){border-right:none;}
@@ -662,11 +553,6 @@
       .cat-strip-wrap{top: var(--header-h);}
       .cat-item{font-size:13px; padding: 8px 12px;}
 
-      .originals-grid{grid-template-columns: repeat(2, 1fr); gap: 12px;}
-      .product-body{padding:12px;}
-      .product-title{font-size:14px;}
-      .product-price-row .price{font-size:17px;}
-
       .flights-grid{grid-template-columns: 1fr; gap:10px;}
       .flight-card{padding:14px;}
 
@@ -687,10 +573,6 @@
 
       .golf-wrap{padding: 24px 18px;}
       .golf-grid{grid-template-columns: 1fr; gap:12px;}
-
-      .pkg-builder{padding: 20px 16px;}
-      .pkg-options{grid-template-columns: 1fr;}
-      .pkg-summary{padding: 18px;}
 
       .footer{padding: 32px 0 100px;}
 
@@ -898,22 +780,6 @@
   </div>
 
   <!-- ================================
-       ORIGINALS
-       ================================ -->
-  <section class="section reveal" id="secOriginals">
-    <div class="container">
-      <div class="section-head-row">
-        <div>
-          <h2 class="section-title">🔥 오마이트립 오리지널 <span id="origCountry">일본</span></h2>
-          <p class="section-sub">단독 기획 상품만 모았습니다</p>
-        </div>
-        <a href="packages.html" class="see-all">전체보기 →</a>
-      </div>
-      <div class="originals-grid" id="originalsGrid"></div>
-    </div>
-  </section>
-
-  <!-- ================================
        FLIGHT DEALS
        ================================ -->
   <section class="section reveal" style="background: var(--bg-soft);">
@@ -981,69 +847,6 @@
     </div>
   </section>
 
-  <!-- ================================
-       DYNAMIC PACKAGE BUILDER (stepper)
-       ================================ -->
-  <section class="section reveal" id="secBuilder">
-    <div class="container">
-      <div class="pkg-builder">
-        <div class="section-head-row" style="margin-bottom:6px;">
-          <div>
-            <h2 class="section-title">나만의 <span id="builderCountry">일본</span> 여행 조합하기</h2>
-            <p class="section-sub">항공 → 호텔 → 액티비티 순으로 선택하면 총 가격이 실시간으로 업데이트됩니다</p>
-          </div>
-        </div>
-        <div class="pkg-steps">
-          <div class="pkg-stages">
-            <!-- Step 1 -->
-            <div class="pkg-stage">
-              <div class="pkg-stage-head">
-                <div class="pkg-step-num">1</div>
-                <div>
-                  <div class="pkg-step-title">항공 선택</div>
-                  <div class="pkg-step-sub">왕복 기준</div>
-                </div>
-              </div>
-              <div class="pkg-options" id="stepFlight"></div>
-            </div>
-            <!-- Step 2 -->
-            <div class="pkg-stage">
-              <div class="pkg-stage-head">
-                <div class="pkg-step-num">2</div>
-                <div>
-                  <div class="pkg-step-title">호텔 선택</div>
-                  <div class="pkg-step-sub">3박 기준</div>
-                </div>
-              </div>
-              <div class="pkg-options" id="stepHotel"></div>
-            </div>
-            <!-- Step 3 -->
-            <div class="pkg-stage">
-              <div class="pkg-stage-head">
-                <div class="pkg-step-num">3</div>
-                <div>
-                  <div class="pkg-step-title">액티비티 추가 (선택)</div>
-                  <div class="pkg-step-sub">패키지에 더해지는 옵션</div>
-                </div>
-              </div>
-              <div class="pkg-options" id="stepActivity"></div>
-            </div>
-          </div>
-
-          <aside class="pkg-summary" aria-live="polite">
-            <h4>실시간 예상 비용</h4>
-            <div class="pkg-lines" id="pkgLines"></div>
-            <div class="pkg-divider"></div>
-            <div class="pkg-total">
-              <span class="label">총 예상 가격 (1인)</span>
-              <span class="price" id="pkgTotal">0원</span>
-            </div>
-            <button class="pkg-cta" onclick="addPackageToCart()">이 조합으로 예약하기</button>
-          </aside>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ================================
        FOOTER (compact)
@@ -1107,7 +910,6 @@
      실제 서비스에서는 아래 객체 전체를 /api/countries/{slug} 응답으로 교체.
      ========================================================================= */
   const CATEGORIES = [
-    { id:'package',    icon:'📦', label:'오마이팩' },
     { id:'flight',     icon:'✈️', label:'항공권' },
     { id:'hotel',      icon:'🏨', label:'호텔' },
     { id:'golf',       icon:'⛳', label:'골프' },
@@ -1139,16 +941,6 @@
         { id:'sapporo',  label:'삿포로' },
         { id:'kyoto',    label:'교토' },
         { id:'okinawa',  label:'오키나와' }
-      ],
-      originals: [
-        { id:'jp-o-1', img:'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80',
-          title:'오마이트립 × APA 호텔 오사카 단독특가 3박', compo:'티웨이항공 왕복 + APA 호텔 3박', price:398000, oldPrice:539000 },
-        { id:'jp-o-2', img:'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
-          title:'[단독] 도쿄 벚꽃 크루즈 3박4일 프리미엄', compo:'대한항공 + 파크하얏트 도쿄 + 스미다강 크루즈', price:1290000, oldPrice:1590000 },
-        { id:'jp-o-3', img:'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=800&q=80',
-          title:'후쿠오카 온천 힐링 2박3일', compo:'제주항공 + 유후인 료칸 + 가이세키 석식', price:589000, oldPrice:780000 },
-        { id:'jp-o-4', img:'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=800&q=80',
-          title:'오사카 유니버설 패밀리 4박5일', compo:'티웨이항공 + 리가로얄 호텔 + USJ 2일권', price:1180000, oldPrice:1450000 }
       ],
       flightTabs: [
         { id:'tokyo',   label:'도쿄' },
@@ -1230,25 +1022,7 @@
           title:'기타큐슈 골프 2박3일 라운딩 2회', compo:'기타큐슈 골프CC + 세이부 호텔', price:598000 },
         { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
           title:'홋카이도 니세코 골프 4박5일', compo:'니세코 골프코스 3라운드 + 리조트', price:1380000 }
-      ],
-      builder: {
-        flights: [
-          { id:'f1', label:'인천→오사카 (티웨이)',  price:380000 },
-          { id:'f2', label:'인천→도쿄 (대한항공)',   price:520000 },
-          { id:'f3', label:'부산→후쿠오카 (제주항공)', price:298000 }
-        ],
-        hotels: [
-          { id:'h1', label:'호텔 그란비아 오사카 3박', price:240000 },
-          { id:'h2', label:'리가로얄 오사카 3박',     price:390000 },
-          { id:'h3', label:'APA호텔 난바 3박',        price:180000 }
-        ],
-        activities: [
-          { id:'a0', label:'선택 안 함',              price:0 },
-          { id:'a1', label:'유니버설 스튜디오 1일권', price:89000 },
-          { id:'a2', label:'오사카 성 벚꽃 크루즈',  price:65000 },
-          { id:'a3', label:'오사카 골프 라운딩 1회',  price:120000 }
-        ]
-      }
+      ]
     },
 
     vietnam: {
@@ -1268,16 +1042,6 @@
         { id:'hcmc',     label:'호치민' },
         { id:'phuquoc',  label:'푸꾸옥' },
         { id:'hoian',    label:'호이안' }
-      ],
-      originals: [
-        { id:'vn-o-1', img:'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
-          title:'[단독] 다낭 풀빌라 4박5일 올인클루시브', compo:'비엣젯 + 프리미어빌리지 + 조식/석식', price:1290000, oldPrice:1590000 },
-        { id:'vn-o-2', img:'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=800&q=80',
-          title:'나트랑 5성 리조트 3박 단독특가', compo:'베트남항공 + 빈펄 리조트 + 조식', price:798000, oldPrice:980000 },
-        { id:'vn-o-3', img:'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=800&q=80',
-          title:'푸꾸옥 럭셔리 풀빌라 4박', compo:'비엣젯 + JW메리어트 에메랄드베이', price:1580000, oldPrice:1890000 },
-        { id:'vn-o-4', img:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
-          title:'호이안 올드타운 3박4일', compo:'대한항공 다낭 + 포시즌스 남하이', price:1090000, oldPrice:1350000 }
       ],
       flightTabs:[
         { id:'danang', label:'다낭' },
@@ -1359,25 +1123,7 @@
           title:'호이안 골프 4박5일 라운딩 4회', compo:'몽고메리 링크스 + 포시즌스', price:989000 },
         { img:'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=800&q=80',
           title:'푸꾸옥 골프 3박4일 라운딩 2회', compo:'빈펄 골프 + 리조트 숙박', price:798000 }
-      ],
-      builder:{
-        flights:[
-          { id:'f1', label:'인천→다낭 (비엣젯)',   price:329000 },
-          { id:'f2', label:'인천→나트랑 (베트남항공)', price:389000 },
-          { id:'f3', label:'인천→하노이 (티웨이)',  price:279000 }
-        ],
-        hotels:[
-          { id:'h1', label:'프리미어빌리지 다낭 3박', price:1194000 },
-          { id:'h2', label:'빈펄 럭셔리 나트랑 3박',  price:894000 },
-          { id:'h3', label:'노보텔 나트랑 3박',       price:474000 }
-        ],
-        activities:[
-          { id:'a0', label:'선택 안 함',           price:0 },
-          { id:'a1', label:'다낭 바나힐 1일 투어', price:68000 },
-          { id:'a2', label:'호이안 야경 크루즈',   price:45000 },
-          { id:'a3', label:'BRG 골프 라운딩 1회',  price:150000 }
-        ]
-      }
+      ]
     },
 
     thailand: {
@@ -1397,16 +1143,6 @@
         { id:'pattaya',    label:'파타야' },
         { id:'krabi',      label:'끄라비' },
         { id:'kosamui',    label:'코사무이' }
-      ],
-      originals:[
-        { id:'th-o-1', img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
-          title:'[단독] 방콕+파타야 5박6일 콤비', compo:'타이항공 + ONE15 + 수상시장 투어', price:890000, oldPrice:1180000 },
-        { id:'th-o-2', img:'https://images.unsplash.com/photo-1552550049-db097c9480d1?auto=format&fit=crop&w=800&q=80',
-          title:'푸켓 올인클루시브 4박5일', compo:'타이항공 + 빈쯔찌 푸켓 + 피피섬 투어', price:1180000, oldPrice:1490000 },
-        { id:'th-o-3', img:'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=800&q=80',
-          title:'치앙마이 힐링 3박4일', compo:'에어아시아 + 포시즌스 치앙마이', price:890000, oldPrice:1150000 },
-        { id:'th-o-4', img:'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=800&q=80',
-          title:'방콕 럭셔리 스파 3박4일', compo:'대한항공 + 만다린오리엔탈 + 스파 2회', price:1290000, oldPrice:1580000 }
       ],
       flightTabs:[
         { id:'bangkok', label:'방콕' },
@@ -1488,25 +1224,7 @@
           title:'치앙마이 골프 3박4일 라운딩 3회', compo:'알파인 골프 + 포시즌스', price:898000 },
         { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
           title:'후아힌 골프 리조트 4박5일', compo:'블랙마운틴 + 힐튼 후아힌', price:998000 }
-      ],
-      builder:{
-        flights:[
-          { id:'f1', label:'인천→방콕 (타이항공)',   price:319000 },
-          { id:'f2', label:'인천→푸켓 (에어아시아)', price:469000 },
-          { id:'f3', label:'인천→치앙마이 (타이베트남항공)', price:359000 }
-        ],
-        hotels:[
-          { id:'h1', label:'만다린 오리엔탈 방콕 3박', price:1587000 },
-          { id:'h2', label:'노보텔 방콕 3박',          price:444000 },
-          { id:'h3', label:'빈쯔찌 푸켓 3박',          price:1284000 }
-        ],
-        activities:[
-          { id:'a0', label:'선택 안 함',         price:0 },
-          { id:'a1', label:'방콕 수상시장 투어', price:58000 },
-          { id:'a2', label:'피피섬 1일 투어',    price:72000 },
-          { id:'a3', label:'치앙마이 코끼리 보호소', price:85000 }
-        ]
-      }
+      ]
     },
 
     philippines: {
@@ -1526,16 +1244,6 @@
         { id:'manila',   label:'마닐라' },
         { id:'palawan',  label:'팔라완' },
         { id:'elnido',   label:'엘니도' }
-      ],
-      originals:[
-        { id:'ph-o-1', img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
-          title:'[단독] 세부 샹그릴라 막탄 4박5일', compo:'세부퍼시픽 + 샹그릴라 막탄 + 호핑투어', price:1580000, oldPrice:1890000 },
-        { id:'ph-o-2', img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80',
-          title:'보라카이 5성 리조트 4박', compo:'필리핀항공 + 헤난 크리스탈샌즈', price:1380000, oldPrice:1690000 },
-        { id:'ph-o-3', img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
-          title:'엘니도 풀빌라 단독특가 3박', compo:'세부퍼시픽 + 엘니도 리조트', price:1890000, oldPrice:2290000 },
-        { id:'ph-o-4', img:'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=800&q=80',
-          title:'보홀 초콜릿힐 3박4일', compo:'대한항공 + 아모라 리조트 + 타르시어 투어', price:990000, oldPrice:1250000 }
       ],
       flightTabs:[
         { id:'cebu', label:'세부' },
@@ -1615,25 +1323,7 @@
           title:'세부 골프 3박4일 라운딩 3회', compo:'알타비스타 골프 + 막탄 리조트', price:798000 },
         { img:'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80',
           title:'클락 골프 리조트 4박5일', compo:'민트 밸리 골프 + 5성 호텔', price:898000 }
-      ],
-      builder:{
-        flights:[
-          { id:'f1', label:'인천→세부 (세부퍼시픽)',  price:389000 },
-          { id:'f2', label:'인천→마닐라 (필리핀항공)', price:349000 },
-          { id:'f3', label:'인천→칼리보 (세부퍼시픽)', price:489000 }
-        ],
-        hotels:[
-          { id:'h1', label:'샹그릴라 막탄 리조트 3박', price:1467000 },
-          { id:'h2', label:'크림슨 리조트 3박',        price:1074000 },
-          { id:'h3', label:'헤난 크리스탈샌즈 3박',    price:894000 }
-        ],
-        activities:[
-          { id:'a0', label:'선택 안 함',         price:0 },
-          { id:'a1', label:'세부 호핑 투어',     price:68000 },
-          { id:'a2', label:'보라카이 선셋 세일링', price:49000 },
-          { id:'a3', label:'세부 골프 라운딩 1회', price:120000 }
-        ]
-      }
+      ]
     }
   };
 
@@ -1666,7 +1356,7 @@
 
     // Country name tokens in section titles (이미 "일본" 형식이므로 replace 불필요)
     const shortName = cfg.name.replace('한국인의 ', '');
-    ['origCountry','flightCountry','shortsCountry','builderCountry'].forEach(id => {
+    ['flightCountry','shortsCountry'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.textContent = shortName;
     });
@@ -2019,13 +1709,11 @@
           location.href = 'flights.html';
         } else if(cat === 'hotel'){
           location.href = `hotels.html?c=${countrySlug}`;
-        } else if(cat === 'package'){
-          location.href = 'packages.html';
         } else if(cat === 'golf'){
           document.getElementById('secGolf')?.scrollIntoView({ behavior:'smooth', block:'start' });
         } else {
-          // 투어/스파/티켓/레스토랑/렌터카 → 오리지널 섹션으로 스크롤 (현재는 상세 페이지 없음)
-          document.getElementById('secOriginals')?.scrollIntoView({ behavior:'smooth', block:'start' });
+          // 투어/스파/티켓/레스토랑/렌터카 → 골프 섹션으로 스크롤 (현재는 상세 페이지 없음)
+          document.getElementById('secGolf')?.scrollIntoView({ behavior:'smooth', block:'start' });
         }
       });
     });
@@ -2034,37 +1722,6 @@
   /* =========================================================================
      Renderers
      ========================================================================= */
-  function renderOriginals(){
-    // TODO: API 연동 필요 - GET /api/products/originals?country=${countrySlug}
-    const el = document.getElementById('originalsGrid');
-    // Map config originals to real product IDs from data.js (same-country products)
-    const centralProducts = (OMT.DATA?.PRODUCTS || []).filter(p => p.country === countrySlug);
-    const mapped = cfg.originals.map((p, i) => ({
-      ...p,
-      id: centralProducts[i]?.id || centralProducts[0]?.id || p.id
-    }));
-    el.innerHTML = mapped.map(p => `
-      <a class="product-card" href="product.html?id=${p.id}">
-        <div class="product-thumb" style="background-image:url('${p.img}')">
-          <div class="product-badges">
-            <span class="badge original">ORIGINAL</span>
-            <span class="badge country">${cfg.name}</span>
-          </div>
-        </div>
-        <div class="product-body">
-          <div class="product-title">${p.title}</div>
-          <div class="product-compo">${p.compo}</div>
-          <div class="product-price-row">
-            <span class="from">최저가</span>
-            <span class="price" style="color: var(--primary);">${krw(p.price)}</span>
-            <span class="unit">~</span>
-          </div>
-          <div class="product-old">${krw(p.oldPrice)}</div>
-        </div>
-      </a>
-    `).join('');
-  }
-
   function renderFlightTabs(){
     const tabsEl = document.getElementById('flightTabs');
     tabsEl.innerHTML = cfg.flightTabs.map((t, i) => `
@@ -2169,7 +1826,7 @@
     // TODO: API 연동 필요 - GET /api/products/golf?country=${countrySlug}
     const el = document.getElementById('golfGrid');
     el.innerHTML = cfg.golf.map(g => `
-      <a class="golf-card" href="packages.html">
+      <a class="golf-card" href="golftels.html">
         <div class="golf-thumb" style="background-image:url('${g.img}')"></div>
         <div class="golf-body">
           <div class="golf-title">${g.title}</div>
@@ -2181,64 +1838,6 @@
         </div>
       </a>
     `).join('');
-  }
-
-  /* =========================================================================
-     Dynamic Package Builder (stepper)
-     ========================================================================= */
-  const pkgState = { flight: null, hotel: null, activity: null };
-
-  function renderBuilderStep(containerId, options, stateKey, defaultIdx = 0){
-    const el = document.getElementById(containerId);
-    el.innerHTML = options.map((o, i) => `
-      <button type="button" class="pkg-option ${i===defaultIdx?'active':''}" data-id="${o.id}" data-price="${o.price}" data-label="${o.label}">
-        <div class="opt-title">${o.label}</div>
-        <div class="opt-price">${o.price > 0 ? '+ ' + krw(o.price) : '무료'}</div>
-      </button>
-    `).join('');
-    pkgState[stateKey] = options[defaultIdx];
-
-    el.querySelectorAll('.pkg-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        el.querySelectorAll('.pkg-option').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        pkgState[stateKey] = {
-          id: btn.dataset.id,
-          label: btn.dataset.label,
-          price: +btn.dataset.price
-        };
-        recalcPackage();
-      });
-    });
-  }
-
-  function recalcPackage(){
-    const items = [pkgState.flight, pkgState.hotel, pkgState.activity].filter(Boolean);
-    const subtotal = items.reduce((s, i) => s + (i.price || 0), 0);
-    const discount = Math.round(subtotal * 0.07); // 번들 7% 할인
-    const finalTotal = subtotal - discount;
-
-    const lines = items.filter(i => i.price > 0).map(i =>
-      `<div class="pkg-line"><span class="l">${i.label}</span><span>${krw(i.price)}</span></div>`
-    ).join('');
-    const discLine = subtotal > 0
-      ? `<div class="pkg-line" style="color: var(--accent);"><span class="l">번들 할인 (7%)</span><span>- ${krw(discount)}</span></div>`
-      : '';
-
-    document.getElementById('pkgLines').innerHTML = lines + discLine;
-    document.getElementById('pkgTotal').textContent = krw(finalTotal);
-  }
-
-  function addPackageToCart(){
-    // TODO: API 연동 필요 - POST /api/cart { country, items: pkgState }
-    alert('장바구니에 조합이 담겼습니다 (프로토타입)');
-  }
-
-  function renderBuilder(){
-    renderBuilderStep('stepFlight',   cfg.builder.flights,    'flight');
-    renderBuilderStep('stepHotel',    cfg.builder.hotels,     'hotel');
-    renderBuilderStep('stepActivity', cfg.builder.activities, 'activity');
-    recalcPackage();
   }
 
   /* =========================================================================
@@ -2273,12 +1872,10 @@
   renderPopularCities();
   renderSearchForm();
   renderCategoryStrip();
-  renderOriginals();
   renderFlightTabs();     renderFlights(cfg.flightTabs[0].id);
   renderShorts();
   renderHotelTabs();      renderHotels(cfg.hotelTabs[0].id);
   renderGolf();
-  renderBuilder();
   </script>
 </body>
 </html>

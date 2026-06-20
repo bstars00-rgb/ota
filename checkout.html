@@ -267,16 +267,16 @@
       <a href="index.html" class="logo"><span class="logo-mark"></span><span>오마이트립</span></a>
       <span class="page-title">결제하기</span>
       <div class="header-actions">
-        <a href="packages.html" class="btn-ghost">← 패키지 수정</a>
+        <a href="golftels.html" class="btn-ghost">← 골프텔 둘러보기</a>
       </div>
     </div>
   </header>
 
-  <!-- No package — empty state -->
+  <!-- No item — empty state -->
   <div id="emptyState" class="empty-state" hidden>
     <h2>예약할 상품이 없어요</h2>
-    <p>다이나믹 패키지를 먼저 구성해주세요.</p>
-    <p><a href="packages.html">→ 패키지 만들러 가기</a></p>
+    <p>골프텔·항공·호텔을 먼저 선택해주세요.</p>
+    <p><a href="golftels.html">→ 골프텔 둘러보기</a></p>
   </div>
 
   <!-- Checkout -->
@@ -515,7 +515,7 @@
   /* =========================================================================
      Load package or golftel booking from sessionStorage
      - omt_pending_booking (NEW): set by golftel.html for golftel / golftel-air
-     - omt_package        (LEGACY): set by cart/product/builder flows
+     - omt_package        (LEGACY): set by the cart checkout flow
      ========================================================================= */
   let pkg = null;
   let isGolftel = false;
