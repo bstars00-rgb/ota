@@ -279,42 +279,51 @@
     /* =========================================
        Country sectors
        ========================================= */
-    .countries-grid{
-      display:grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 14px;
+    /* 확장형 데스티네이션 갤러리 (craftwork 패턴) */
+    .expand-gallery{display:flex; gap:12px; height:clamp(400px, 54vh, 540px);}
+    .expand-panel{
+      position:relative; flex:1; min-width:0;
+      border-radius: var(--radius-lg); overflow:hidden;
+      background-size:cover; background-position:center; background-color:#e9e7e2;
+      cursor:pointer; isolation:isolate;
+      transition: flex .55s var(--ease);
     }
-    .country-card{
-      display:block;
-      border-radius: var(--radius);
-      background: var(--bg-soft);
-      padding: 22px 18px;
-      border: 1px solid var(--line);
-      transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
-      position:relative;
-      overflow:hidden;
+    .expand-panel::after{
+      content:""; position:absolute; inset:0; z-index:1;
+      background: linear-gradient(180deg, rgba(0,0,0,.04) 0%, rgba(0,0,0,.12) 42%, rgba(0,0,0,.64) 100%);
     }
-    .country-card::before{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(135deg, transparent 40%, var(--primary-soft) 100%);
-      opacity:0; transition: opacity .2s;
+    /* 기본 펼침 = 첫 패널 (.start). 갤러리 hover 시 해제 */
+    .expand-panel.start{flex:3.4;}
+    .expand-gallery:hover .expand-panel.start{flex:1;}
+    .expand-gallery .expand-panel:hover{flex:3.4;}
+
+    .ep-body{position:absolute; z-index:2; left:0; right:0; bottom:0; padding:26px 24px; color:#fff;}
+    .ep-kicker{
+      font-size:15px; font-weight:700; opacity:0; max-height:0; overflow:hidden;
+      text-shadow:0 2px 10px rgba(0,0,0,.45);
+      transition: opacity .4s var(--ease), max-height .4s var(--ease), margin .4s var(--ease);
     }
-    .country-card:hover{transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--primary);}
-    .country-card:hover::before{opacity:1;}
-    .country-card > *{position:relative;}
-    .country-landmark{
-      width:64px;height:64px;border-radius:50%;
-      background-size:cover;background-position:center;background-color:#eee;
-      margin-bottom:14px;border:3px solid #fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.10);
-      transition:transform .25s;
+    .ep-name{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:18px; font-weight:900; letter-spacing:-0.03em; line-height:1.1; white-space:nowrap;
+      text-shadow:0 2px 16px rgba(0,0,0,.5);
+      transition: font-size .5s var(--ease);
     }
-    .country-card:hover .country-landmark{transform:scale(1.05);}
-    .country-name{font-weight: 900; font-size: 18px; letter-spacing:-0.02em;}
-    .country-tagline{font-size: 12px; color: var(--ink-2); margin-top:3px; font-weight:600;}
-    .country-cities{font-size: 11px; color: var(--ink-3); margin: 3px 0 10px;}
-    .country-count{font-size: 12px; color: var(--primary); font-weight:800;}
+    .ep-arrow{
+      flex-shrink:0; font-size:26px; font-weight:700; opacity:0; transform:translateX(-8px);
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    /* 활성(기본 .start 또는 hover) 시 풀 표기 */
+    .expand-panel.start .ep-kicker,
+    .expand-panel:hover .ep-kicker{opacity:.96; max-height:48px; margin-bottom:8px;}
+    .expand-panel.start .ep-name,
+    .expand-panel:hover .ep-name{font-size:clamp(28px, 3vw, 42px);}
+    .expand-panel.start .ep-arrow,
+    .expand-panel:hover .ep-arrow{opacity:1; transform:translateX(0);}
+    /* 다른 패널 hover 중이면 기본 .start 표기 접기 */
+    .expand-gallery:hover .expand-panel.start:not(:hover) .ep-kicker{opacity:0; max-height:0; margin-bottom:0;}
+    .expand-gallery:hover .expand-panel.start:not(:hover) .ep-name{font-size:18px;}
+    .expand-gallery:hover .expand-panel.start:not(:hover) .ep-arrow{opacity:0; transform:translateX(-8px);}
 
     /* =========================================
        Originals
@@ -704,7 +713,7 @@
        Responsive — Tablet (max 1024)
        ========================================= */
     @media (max-width: 1024px){
-      .countries-grid{grid-template-columns: repeat(3, 1fr);}
+      .expand-gallery{height:clamp(360px, 46vh, 460px);}
       .originals-grid{grid-template-columns: repeat(2, 1fr);}
       .creator-scroll{grid-template-columns: repeat(3, 1fr);}
       .flights-grid{grid-template-columns: repeat(2, 1fr);}
@@ -736,10 +745,9 @@
       .ai-search button{padding: 11px 16px; font-size:13px;}
       .quick-tab{padding:8px 14px; font-size:13px;}
 
-      /* Country cards: horizontal scroll */
-      .countries-grid{
-        display:flex;
-        grid-template-columns: unset;
+      /* 확장 갤러리: 모바일은 가로 스크롤 (각 패널 큼지막 + 항상 라벨 노출) */
+      .expand-gallery{
+        height:auto;
         gap: 10px;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
@@ -748,12 +756,19 @@
         padding-left: 16px;
         padding-right: 16px;
       }
-      .countries-grid::-webkit-scrollbar{display:none;}
-      .country-card{
-        flex: 0 0 44%;
+      .expand-gallery::-webkit-scrollbar{display:none;}
+      .expand-panel,
+      .expand-panel.start,
+      .expand-gallery:hover .expand-panel.start,
+      .expand-gallery .expand-panel:hover{
+        flex: 0 0 76%;
+        height: 420px;
         scroll-snap-align: start;
-        min-width: 150px;
       }
+      /* 터치엔 hover가 없으므로 모든 패널에 풀 표기 */
+      .expand-panel .ep-kicker{opacity:.96; max-height:48px; margin-bottom:8px;}
+      .expand-panel .ep-name{font-size:28px;}
+      .expand-panel .ep-arrow{opacity:1; transform:none;}
 
       .originals-grid{grid-template-columns: repeat(2, 1fr); gap:12px;}
       .product-body{padding:12px;}
@@ -957,7 +972,7 @@
           <p class="section-sub">한국인이 가장 사랑하는 여행지를 국가별로 큐레이션했어요</p>
         </div>
       </div>
-      <div class="countries-grid" id="countriesGrid">
+      <div class="expand-gallery" id="countriesGrid">
         <!-- Rendered by JS — see /api/countries/sectors -->
       </div>
     </div>
@@ -1259,15 +1274,18 @@
      ========================================= */
   function renderCountries(){
     const el = document.getElementById('countriesGrid');
-    el.innerHTML = COUNTRIES.map(c => `
-      <a class="country-card" href="country.html?c=${c.slug}">
-        <div class="country-landmark" aria-hidden="true" style="background-image:url('${c.landmark}')"></div>
-        <div class="country-tagline">${c.epithet}</div>
-        <div class="country-name">${c.name}</div>
-        <div class="country-cities">${c.cities}</div>
-        <div class="country-count">${c.count} →</div>
-      </a>
-    `).join('');
+    el.innerHTML = COUNTRIES.map((c, i) => {
+      // 작은 240² 썸네일 → 세로형 큰 이미지로 업사이즈
+      const img = (c.landmark || '').replace(/w=240&h=240/, 'w=900&h=1200');
+      const href = c.slug === 'world' ? 'hotels.html' : `country.html?c=${c.slug}`;
+      return `
+      <a class="expand-panel${i === 0 ? ' start' : ''}" href="${href}" style="background-image:url('${img}')" aria-label="${c.name}">
+        <div class="ep-body">
+          <div class="ep-kicker">${c.name}으로 떠나봐요</div>
+          <div class="ep-name">${c.name} <span class="ep-arrow" aria-hidden="true">↗</span></div>
+        </div>
+      </a>`;
+    }).join('');
   }
 
   function renderOriginals(){
