@@ -246,7 +246,17 @@
     { id:'f-PR469',  code:'PR', number:'PR469',  from:'ICN', to:'CEB', outDep:'08:30', outArr:'12:30', outDur:'4h 30m', retDep:'14:00', retArr:'21:00', retDur:'4h 30m', stops:0, price:419000, class:'economy', depTime:'morning' },
     { id:'f-5J189',  code:'5J', number:'5J189',  from:'ICN', to:'MNL', outDep:'23:00', outArr:'02:40', outDur:'4h 10m', retDep:'04:30', retArr:'11:00', retDur:'4h 00m', stops:0, price:349000, class:'economy', depTime:'evening' },
     { id:'f-PR467',  code:'PR', number:'PR467',  from:'ICN', to:'MNL', outDep:'11:00', outArr:'14:40', outDur:'4h 10m', retDep:'16:00', retArr:'22:30', retDur:'4h 00m', stops:0, price:379000, class:'economy', depTime:'morning' },
-    { id:'f-PR488',  code:'PR', number:'PR488',  from:'ICN', to:'KLO', outDep:'06:30', outArr:'10:30', outDur:'4h 30m', retDep:'12:00', retArr:'19:00', retDur:'4h 30m', stops:0, price:489000, class:'economy', depTime:'morning' }
+    { id:'f-PR488',  code:'PR', number:'PR488',  from:'ICN', to:'KLO', outDep:'06:30', outArr:'10:30', outDur:'4h 30m', retDep:'12:00', retArr:'19:00', retDur:'4h 30m', stops:0, price:489000, class:'economy', depTime:'morning' },
+
+    // Korea → Vietnam (Phu Quoc) — 인기 노선
+    { id:'f-VJ975',  code:'VJ', number:'VJ975',  from:'ICN', to:'PQC', outDep:'20:30', outArr:'00:20', outDur:'5h 00m', retDep:'01:40', retArr:'09:10', retDur:'5h 00m', stops:0, price:419000, class:'economy', depTime:'evening' },
+    { id:'f-KE467',  code:'KE', number:'KE467',  from:'ICN', to:'PQC', outDep:'18:20', outArr:'22:10', outDur:'5h 00m', retDep:'23:40', retArr:'07:10', retDur:'5h 00m', stops:0, price:559000, class:'economy', depTime:'evening' },
+    { id:'f-7C3905', code:'7C', number:'7C3905', from:'ICN', to:'PQC', outDep:'09:10', outArr:'13:00', outDur:'5h 00m', retDep:'14:20', retArr:'21:50', retDur:'5h 00m', stops:0, price:389000, class:'economy', depTime:'morning' },
+
+    // Korea → Japan (Okinawa) — 인기 노선
+    { id:'f-7C1383', code:'7C', number:'7C1383', from:'ICN', to:'OKA', outDep:'08:40', outArr:'11:10', outDur:'2h 30m', retDep:'12:10', retArr:'14:50', retDur:'2h 40m', stops:0, price:259000, class:'economy', depTime:'morning' },
+    { id:'f-TW289',  code:'TW', number:'TW289',  from:'ICN', to:'OKA', outDep:'14:30', outArr:'17:00', outDur:'2h 30m', retDep:'18:00', retArr:'20:40', retDur:'2h 40m', stops:0, price:279000, class:'economy', depTime:'afternoon' },
+    { id:'f-KE757O', code:'KE', number:'KE757',  from:'ICN', to:'OKA', outDep:'10:20', outArr:'12:50', outDur:'2h 30m', retDep:'14:00', retArr:'16:40', retDur:'2h 40m', stops:0, price:359000, class:'economy', depTime:'morning' }
   ];
 
   /* =====================================================================
@@ -1322,22 +1332,22 @@
 
     // ----- 📦 패키지 (기존) -----
     {
-      id:'bk-seed-1', bookingNumber:'OMT-K3X9LP2M', status:'confirmed', productId:'prod-jp-01',
-      productType:'package',
+      id:'bk-seed-1', bookingNumber:'OMT-K3X9LP2M', status:'confirmed', productId:'gt-th-bangkok-thanacity-3n',
+      productType:'golftel', productName:'방콕 타나시티 골프 3박4일 (라운딩 2회)',
       dates:'2026.05.10 - 2026.05.13', paxCount:2, total:1796000,
       paymentMethod:'kakao', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
     },
     {
-      id:'bk-seed-2', bookingNumber:'OMT-J7N2QW4K', status:'pending', productId:'prod-vn-01',
-      productType:'package',
+      id:'bk-seed-2', bookingNumber:'OMT-J7N2QW4K', status:'pending', productId:'gt-jp-fukuoka-kitakyushu-2n',
+      productType:'golftel', productName:'후쿠오카 기타큐슈 골프 2박3일',
       dates:'2026.06.07 - 2026.06.12', paxCount:2, total:1290000,
       paymentMethod:'bank', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 3600000 * 22).toISOString()
     },
     {
-      id:'bk-seed-4', bookingNumber:'OMT-B1D4FG7C', status:'completed', productId:'prod-jp-02',
-      productType:'package',
+      id:'bk-seed-4', bookingNumber:'OMT-B1D4FG7C', status:'completed', productId:'gt-vn-phuquoc-vinpearl-5n',
+      productType:'golftel', productName:'푸꾸옥 빈펄 골프 5박6일',
       dates:'2026.02.15 - 2026.02.18', paxCount:2, total:1178000,
       paymentMethod:'kakao', leadName:'홍길동', phone:'010-1234-5678',
       createdAt: new Date(Date.now() - 86400000 * 65).toISOString()

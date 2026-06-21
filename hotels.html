@@ -1727,6 +1727,8 @@
         </article>
       `;
     }).join('');
+    // 매 렌더마다 가격 캘린더 hover 재부착 (innerHTML 교체로 리스너가 사라지므로)
+    try { attachPriceCalendarHover(); } catch(e){}
   }
 
   window.galleryNav = (e, hid, dir) => {
@@ -1985,6 +1987,13 @@
     renderCompareDrawer();
   };
 
+  // 비교 드로어에서 제거 (인라인 중첩 따옴표 onclick 버그 대체)
+  window.removeCompare = (hid) => {
+    compareState.delete(hid);
+    renderCompareDrawer();
+    render();  // 목록 재렌더로 카드 체크박스 동기화
+  };
+
   function renderCompareDrawer(){
     let drawer = document.getElementById('compareDrawer');
     if(!drawer){
@@ -2013,7 +2022,7 @@
                 <div style="font-size:11px;font-weight:800;color:#1A1A1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h.name}</div>
                 <div style="font-size:10px;color:#6B7280;font-family:'JetBrains Mono',monospace;">${(h.price/10000).toFixed(0)}만~</div>
               </div>
-              <button onclick="toggleCompare({stopPropagation:()=>{},target:{checked:false}},'${h.id}');document.querySelector('[data-id=\\'${h.id}\\'] .hc-compare-label input').checked=false;" style="width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #FECACA;color:#EF4444;font-size:11px;font-weight:900;cursor:pointer;line-height:1;">×</button>
+              <button onclick="removeCompare('${h.id}')" style="width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #FECACA;color:#EF4444;font-size:11px;font-weight:900;cursor:pointer;line-height:1;">×</button>
             </div>
           `).join('')}
         </div>
@@ -2201,15 +2210,18 @@
   }
 
   window.searchHotelCity = (cityName, code) => {
-    // 검색 strip의 목적지 input에 값 설정 + scroll
-    const destInput = document.querySelector('input[name="dest"]') || document.querySelector('#destInput');
-    if(destInput){
-      destInput.value = cityName;
-      destInput.dispatchEvent(new Event('input', {bubbles:true}));
+    // 목적지 draft를 실제로 설정 (input은 없음 — selectDestination 사용)
+    const d = DESTINATIONS.find(x => x.label === cityName)
+           || DESTINATIONS.find(x => (x.id||'').toLowerCase() === (code||'').toLowerCase())
+           || DESTINATIONS.find(x => x.label && x.label.includes(cityName));
+    if(d){
+      selectDestination(d);
+      document.querySelector('.search-strip')?.scrollIntoView({behavior:'smooth', block:'start'});
+      setTimeout(() => alert(`📍 ${cityName}(으)로 목적지 설정됐어요. 날짜를 확인하고 "호텔 검색"을 눌러주세요!`), 500);
+    } else {
+      document.querySelector('.search-strip')?.scrollIntoView({behavior:'smooth', block:'start'});
+      setTimeout(() => alert(`📍 ${cityName} 호텔은 준비 중이에요. 검색창에서 다른 도시를 입력해보세요.`), 500);
     }
-    // 검색 strip으로 스크롤
-    document.querySelector('.search-strip')?.scrollIntoView({behavior:'smooth', block:'start'});
-    setTimeout(() => alert(`📍 ${cityName} (${code})으로 검색 설정됐어요. 날짜를 확인하고 검색 버튼을 눌러주세요!`), 600);
   };
 
   // 펄스 애니메이션 정의 (호텔 카드 "지금 N명이 보는 중" 인디케이터용)

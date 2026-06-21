@@ -520,6 +520,7 @@
   let pkg = null;
   let isGolftel = false;
   let isFlightOnly = false;
+  let isHotelOnly = false;
 
   // 🆕 URL 파라미터 — 항공 단독 결제 (?type=flight&id=f-XXX)
   const urlParams = new URLSearchParams(location.search);
@@ -619,11 +620,30 @@
       golftel: g,
       _explicitTotal: pending.total
     };
+  } else if(pending && pending.source === 'hotel'){
+    isHotelOnly = true;
+    const nights = pending.nights || 2;
+    const pax = pending.pax || 2;
+    pkg = {
+      source: 'hotel',
+      productType: 'hotel',
+      productId: pending.productId,
+      productName: pending.productName,
+      productImage: pending.productImage,
+      country: pending.country,
+      city: pending.city,
+      paxCount: pax,
+      nights,
+      dates: pending.dates || '',
+      hotel: { name: pending.productName, areaLabel: pending.city, price: pending.pricePerPerson || 0 },
+      flight: null,
+      _explicitTotal: pending.total || ((pending.pricePerPerson || 0) * nights)
+    };
   } else if(!pkg){
     pkg = JSON.parse(sessionStorage.getItem('omt_package') || 'null');
   }
 
-  if(!pkg || (!isGolftel && !isFlightOnly && (!pkg.flight || !pkg.hotel))){
+  if(!pkg || (!isGolftel && !isFlightOnly && !isHotelOnly && (!pkg.flight || !pkg.hotel))){
     document.getElementById('emptyState').hidden = false;
     document.getElementById('checkoutMain').style.display = 'none';
     document.querySelector('.m-pay-bar').style.display = 'none';
@@ -801,6 +821,7 @@
   function renderSummary(){
     if(isGolftel) return renderGolftelSummary();
     if(isFlightOnly) return renderFlightOnlySummary();
+    if(isHotelOnly) return renderHotelOnlySummary();
 
     const items = [];
     items.push({
@@ -896,6 +917,34 @@
     document.getElementById('sumTotal').textContent = krw(total);
     document.getElementById('mTotal').textContent = krw(total);
 
+    return total;
+  }
+
+  /* =========================================================================
+     🆕 호텔 단독 결제 요약
+     ========================================================================= */
+  function renderHotelOnlySummary(){
+    const h = pkg.hotel;
+    const perNight = h.price || 0;
+    document.getElementById('sumItems').innerHTML = `
+      <div class="sum-item">
+        <div class="sum-icon">🏨</div>
+        <div>
+          <div class="sum-t">🏨 호텔</div>
+          <div class="sum-n">${pkg.productName}</div>
+          <div class="sum-s">${h.areaLabel || ''} · ${pkg.nights}박 · ${pkg.paxCount}인</div>
+        </div>
+        <div class="sum-p">${krw(perNight)}<small style="color:#9CA3AF;font-weight:600;">/박</small></div>
+      </div>`;
+    const total = pkg._explicitTotal || (perNight * pkg.nights);
+    document.getElementById('sumRows').innerHTML = `
+      <div class="sum-row"><span>숙박</span><span>${pkg.nights}박</span></div>
+      <div class="sum-row"><span>투숙 인원</span><span>${pkg.paxCount}인</span></div>
+      <div class="sum-row"><span>1박 요금</span><span>${krw(perNight)}</span></div>
+      <div class="sum-row" style="color:#9CA3AF;font-size:12px;"><span>· 세금·봉사료 포함</span><span></span></div>
+    `;
+    document.getElementById('sumTotal').textContent = krw(total);
+    document.getElementById('mTotal').textContent = krw(total);
     return total;
   }
 
@@ -1039,10 +1088,16 @@
       packageSnapshot: pkg
     });
 
-    // 골프텔 예약 완료 시 임시 데이터 정리
-    if(isGolftel){
+    // 골프텔/호텔 예약 완료 시 임시 데이터 정리
+    if(isGolftel || isHotelOnly){
       try { sessionStorage.removeItem('omt_pending_booking'); } catch(e){}
     }
+
+    // 사용한 마일리지 실제 차감 (슬라이더에서 적용한 만큼)
+    try {
+      const milesUsed = parseInt(document.getElementById('milesSlider')?.value || '0') || 0;
+      if(milesUsed > 0 && OMT.State.useMiles) OMT.State.useMiles(milesUsed, '예약 사용');
+    } catch(e){}
 
     // Award points (1% of total)
     OMT.State.addPoints(Math.round(total * 0.01), '예약 적립');
@@ -1078,6 +1133,8 @@
     let base;
     if(isGolftel) base = pkg._explicitTotal || (pkg.pricePerPerson * pkg.paxCount);
     else if(isFlightOnly) base = pkg._explicitTotal || (pkg.flight.price * pkg.paxCount);
+    else if(isHotelOnly) base = pkg._explicitTotal || ((pkg.hotel?.price || 0) * pkg.nights);
+    else if(pkg._explicitTotal) base = pkg._explicitTotal;  // 카트 등 사전 계산 총액 우선
     else {
       let sub = pkg.flight.price + pkg.hotel.price * pkg.nights;
       (pkg.activities||[]).forEach(a => sub += a.price);

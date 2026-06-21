@@ -869,7 +869,7 @@
     OMT.State.addPoints(5000 + (reviewState.photos.length > 0 ? 2000 : 0), '리뷰 작성 보너스' + (reviewState.photos.length > 0 ? ' (사진 보너스 +2,000P)' : ''));
     closeReviewModal();
     renderMyReviews(); renderBookings(); renderProfileStats();
-    toast(`리뷰 등록 완료! +${5000 + (reviewState.photos.length > 0 ? 2000 : 0).toLocaleString('ko-KR')}P 적립`);
+    toast(`리뷰 등록 완료! +${(5000 + (reviewState.photos.length > 0 ? 2000 : 0)).toLocaleString('ko-KR')}P 적립`);
   };
 
   document.querySelectorAll('.star-input span').forEach((s,i) => {

@@ -40,8 +40,8 @@
   // 🏆 회원 등급 자동 산정 (누적 결제액 기준 5단)
   // ============================================================
   function getUserTier(){
-    // 누적 결제액 기준
-    const bookings = read(KEYS.bookings, []) || [];
+    // 누적 결제액 기준 (getBookings로 INITIAL_BOOKINGS 시드 보장 → 진입 경로 무관 결정적)
+    const bookings = getBookings() || [];
     const total = bookings.reduce((s, b) => s + (b.total || 0), 0);
     if(total >= 100000000) return 'vip';      // 1억+
     if(total >= 5000000)   return 'platinum';  // 500만+
@@ -115,7 +115,7 @@
       paxName: user?.name || '',
       paxPhone: user?.phone || '',
       paxEmail: user?.email || '',
-      defaultPaymentMethod: 'kakaopay',
+      defaultPaymentMethod: 'kakao',
       lastUsed: read('omt_last_payment', null)
     };
   }
@@ -630,7 +630,7 @@
   /* =====================================================================
      WISHLIST
      ===================================================================== */
-  function getWishlist(){ return read(KEYS.wishlist, ['prod-ph-01','prod-th-01','prod-jp-03']); }
+  function getWishlist(){ return read(KEYS.wishlist, ['gt-vn-danang-ba-na-4n','gt-jp-okinawa-kanucha-3n','h-granvia-osaka']); }
   function isWished(productId){ return getWishlist().includes(productId); }
   function toggleWishlist(productId){
     const list = getWishlist();

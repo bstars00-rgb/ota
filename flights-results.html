@@ -308,7 +308,7 @@
               <input type="text" id="priceMaxInput" placeholder="최대" />
               <button onclick="applyPriceRange()">적용</button>
             </div>
-            <input type="range" id="priceMaxRange" min="100000" max="2000000" step="50000" style="width:100%;accent-color:var(--primary);" oninput="updatePriceRangeLabel()" />
+            <input type="range" id="priceMaxRange" min="100000" max="2000000" step="50000" style="width:100%;accent-color:var(--primary);" oninput="updatePriceRangeLabel()" onchange="applyPriceRange()" />
             <div class="price-range">
               <span id="priceMinLabel">100,000원</span>
               <span id="priceMaxLabel">2,000,000원</span>
@@ -360,7 +360,6 @@
         <div class="results-head">
           <div class="note">표시된 금액은 항공권 + 유류할증료 + 제세공과금 + 발권 수수료가 포함된 금액입니다. <span style="display:inline-block;margin-left:6px;padding:2px 8px;background:rgba(16,185,129,.15);color:var(--success);border-radius:5px;font-weight:900;font-size:11px;">✓ 총액 표시</span></div>
           <div class="actions">
-            <button class="compare-btn">⚖️ 비교하기</button>
             <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
               <option value="recommend">추천순</option>
               <option value="cheapest">최저가순</option>
@@ -469,14 +468,11 @@
 
       // 항공편 필터 + 매칭 (해당 노선)
       const allFlights = (data.FLIGHTS || []).filter(f => f.from === SQ.from && f.to === SQ.to);
-      // 매칭이 없으면 to만 같은 거 + ICN 기본 fallback
+      // 매칭이 없으면 도착지(to)만 같은 노선까지 fallback. 그래도 없으면 빈 상태
+      // (예전엔 무관한 노선 12개를 보여줘 제목과 불일치 — 제거)
       let flights = allFlights;
       if(flights.length === 0){
         flights = (data.FLIGHTS || []).filter(f => f.to === SQ.to).slice(0, 8);
-      }
-      if(flights.length === 0){
-        // 다른 노선이라도 항공사 다양성을 보여주기 위해 처음 12개
-        flights = (data.FLIGHTS || []).slice(0, 12);
       }
       // nonstop 필터 (검색 시점)
       if(SQ.nonstop){
