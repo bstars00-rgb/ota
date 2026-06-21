@@ -6,6 +6,8 @@
   <title>항공권 검색 | 오마이트립</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- 시트립 스타일 폰트 (Pretendard) -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root{
       --primary:#FF6B35;--primary-d:#E85826;--primary-dark:#E85826;--primary-soft:#FFF1EA;--accent:#FFD23F;
@@ -22,7 +24,7 @@
     body{word-break:keep-all;}
     *,*::before,*::after{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
-    body{font-family:'Noto Sans KR',-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
+    body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;}
     a{color:inherit;text-decoration:none;}
     button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
     input,select,textarea{font-family:inherit;}
@@ -62,6 +64,35 @@
     .sf-swap:hover{background:var(--primary);color:#fff;transform:rotate(180deg);transition:transform .25s;}
     .sf-search{padding:0 28px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:900;font-size:16px;letter-spacing:.04em;min-width:100px;transition:background .3s var(--ease),box-shadow .3s var(--ease),transform .3s var(--ease);}
     .sf-search:hover{background:var(--primary-d);box-shadow:var(--shadow);transform:translateY(-1px);}
+
+    /* 인라인 도시 자동완성 드롭다운 (시트립 패턴) */
+    .sf-cell.sf-city{position:relative;}
+    .sf-input{border:none;outline:none;background:transparent;width:100%;padding:0;font-family:inherit;font-size:15px;font-weight:800;color:var(--ink);}
+    .sf-input::placeholder{color:var(--ink-4);font-weight:700;}
+    .city-dd{position:absolute;top:calc(100% + 10px);left:0;width:min(440px,86vw);max-height:430px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);z-index:120;display:none;padding:8px;}
+    .city-dd.on{display:block;}
+    .city-dd .dd-group{font-size:11px;font-weight:800;color:var(--ink-4);padding:12px 12px 6px;letter-spacing:.04em;}
+    .city-dd .dd-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .12s;}
+    .city-dd .dd-item:hover,.city-dd .dd-item.active{background:var(--bg-soft);}
+    .city-dd .dd-ic{width:22px;text-align:center;color:var(--primary);font-size:15px;flex-shrink:0;}
+    .city-dd .dd-tx{min-width:0;flex:1;}
+    .city-dd .dd-main{font-size:14px;font-weight:800;color:var(--ink);}
+    .city-dd .dd-main b{color:var(--primary);}
+    .city-dd .dd-sub{font-size:11px;color:var(--ink-3);margin-top:1px;}
+    .city-dd .dd-code{font-size:11px;color:var(--ink-3);font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+    .city-dd .dd-empty{padding:28px 16px;text-align:center;color:var(--ink-3);font-size:13px;}
+
+    /* 검색 로딩 오버레이 (시트립 패턴) */
+    .search-loading{position:fixed;inset:0;z-index:300;background:rgba(20,21,26,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+    .search-loading.on{display:flex;}
+    .sl-card{background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);width:min(420px,100%);padding:30px 28px;text-align:center;animation:slPop .3s var(--ease);}
+    @keyframes slPop{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .sl-route{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.02em;}
+    .sl-meta{font-size:13px;color:var(--ink-3);font-weight:700;margin-top:6px;}
+    .sl-note{font-size:12px;color:var(--ink-2);margin:18px 0 12px;}
+    .sl-bar{height:6px;border-radius:6px;background:var(--bg-soft);overflow:hidden;}
+    .sl-bar i{display:block;height:100%;width:30%;border-radius:6px;background:linear-gradient(90deg,var(--primary),var(--accent));animation:slBar 1.1s var(--ease) infinite;}
+    @keyframes slBar{0%{margin-left:-30%;}100%{margin-left:100%;}}
 
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
     .modal-overlay.on{display:flex;}
@@ -193,16 +224,20 @@
       </div>
 
       <form class="search-form" onsubmit="goSearch();return false;">
-        <div class="sf-cell" onclick="openCityModal('from')">
+        <div class="sf-cell sf-city">
           <div class="lb">출발지</div>
-          <div class="val placeholder" id="fromLabel">도시명 또는 공항명 입력</div>
+          <input type="text" class="sf-input" id="fromInput" autocomplete="off" placeholder="도시·공항 검색"
+                 onfocus="openCityDD('from')" oninput="onCityInput('from',this.value)" />
           <div class="sub" id="fromSub"></div>
+          <div class="city-dd" id="fromDD"></div>
         </div>
         <button type="button" class="sf-swap" onclick="swapCities()" aria-label="출발지·도착지 교환">⇄</button>
-        <div class="sf-cell" onclick="openCityModal('to')">
+        <div class="sf-cell sf-city">
           <div class="lb">도착지</div>
-          <div class="val placeholder" id="toLabel">도시명 또는 공항명 입력</div>
+          <input type="text" class="sf-input" id="toInput" autocomplete="off" placeholder="도시·공항 검색"
+                 onfocus="openCityDD('to')" oninput="onCityInput('to',this.value)" />
           <div class="sub" id="toSub"></div>
+          <div class="city-dd" id="toDD"></div>
         </div>
         <div class="sf-cell" onclick="openCalModal()">
           <div class="lb">여행일정</div>
@@ -398,16 +433,15 @@
     </div>
   </section>
 
-  <div class="modal-overlay" id="cityModal" onclick="if(event.target===this)closeModal('cityModal')">
-    <div class="modal">
-      <div class="modal-head">
-        <div class="h">항공 <span id="cityModalType" style="font-size:13px;color:var(--ink-3);font-weight:700;margin-left:6px;">출발지</span></div>
-        <button class="close" onclick="closeModal('cityModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <input class="city-search" type="text" placeholder="도시명 또는 공항명 입력 (예: 도쿄, NRT)" id="citySearchInput" oninput="filterCities(this.value)" />
-        <div id="cityGridContainer"></div>
-      </div>
+  <!-- 도시 선택은 검색폼 인라인 드롭다운(#fromDD/#toDD)으로 대체 (시트립 패턴) -->
+
+  <!-- 검색 로딩 오버레이 -->
+  <div class="search-loading" id="searchLoading">
+    <div class="sl-card">
+      <div class="sl-route" id="slRoute">서울 ⇌ 도쿄</div>
+      <div class="sl-meta" id="slMeta"></div>
+      <div class="sl-note">최저가 항공편을 찾고 있어요 · 예약 시 연중무휴 24시간 지원</div>
+      <div class="sl-bar"><i></i></div>
     </div>
   </div>
 
@@ -526,72 +560,105 @@
       state.nonstop = e.target.checked;
     });
 
-    window.openCityModal = (target) => {
-      currentCityTarget = target;
-      document.getElementById('cityModalType').textContent = target === 'from' ? '출발지' : '도착지';
-      document.getElementById('citySearchInput').value = '';
-      renderCityGrid();
-      document.getElementById('cityModal').classList.add('on');
-    };
     window.closeModal = (id) => document.getElementById(id).classList.remove('on');
 
-    function renderCityGrid(filter = ''){
-      const container = document.getElementById('cityGridContainer');
+    /* ===== 인라인 도시 자동완성 드롭다운 (시트립 패턴) ===== */
+    const POPULAR_CODES = ['ICN','KIX','NRT','FUK','DAD','BKK','CEB','OKA'];
+    let recentCities = (() => { try { return JSON.parse(localStorage.getItem('omt_recent_air_cities') || '[]'); } catch(e){ return []; } })();
+    const escHtml = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    function ddItem(target, code, q){
+      const cities = window.OMT?.DATA?.CITIES || {};
+      const countries = window.OMT?.DATA?.COUNTRIES || {};
+      const c = cities[code]; if(!c) return '';
+      const cn = countries[c.country]?.name || c.country || '';
+      const hl = (txt) => {
+        if(!q) return escHtml(txt);
+        const i = txt.toLowerCase().indexOf(q.toLowerCase());
+        if(i < 0) return escHtml(txt);
+        return escHtml(txt.slice(0,i)) + '<b>' + escHtml(txt.slice(i,i+q.length)) + '</b>' + escHtml(txt.slice(i+q.length));
+      };
+      return `<div class="dd-item" onmousedown="event.preventDefault()" onclick="pickCityDD('${target}','${code}')">
+        <span class="dd-ic">✈</span>
+        <div class="dd-tx"><div class="dd-main">${hl(c.name)} <span class="dd-code">${code}</span></div><div class="dd-sub">${cn || '국제공항'}</div></div>
+      </div>`;
+    }
+
+    function renderCityDD(target, filter=''){
+      const dd = document.getElementById(target + 'DD');
       const grid = window.OMT?.DATA?.CITY_GRID || {};
       const cities = window.OMT?.DATA?.CITIES || {};
-      const f = filter.toLowerCase().trim();
-      const html = Object.entries(grid).map(([groupName, codes]) => {
-        const filtered = codes.filter(code => {
-          if(!f) return true;
-          const c = cities[code];
-          if(!c) return false;
-          return code.toLowerCase().includes(f) || (c.name || '').toLowerCase().includes(f);
+      const f = (filter||'').toLowerCase().trim();
+      let html = '';
+      if(!f){
+        // 최근 검색
+        const recents = recentCities.filter(code => cities[code]).slice(0,3);
+        if(recents.length){
+          html += `<div class="dd-group">최근 검색</div>` + recents.map(code => ddItem(target, code, '')).join('');
+        }
+        // 인기 도시
+        html += `<div class="dd-group">인기 도시</div>` + POPULAR_CODES.filter(code => cities[code]).map(code => ddItem(target, code, '')).join('');
+        // 권역별
+        Object.entries(grid).forEach(([groupName, codes]) => {
+          html += `<div class="dd-group">${groupName}</div>` + codes.filter(code => cities[code]).map(code => ddItem(target, code, '')).join('');
         });
-        if(filtered.length === 0) return '';
-        return `
-          <div class="city-section">
-            <div class="city-section-h">${groupName}</div>
-            <div class="city-grid">
-              ${filtered.map(code => {
-                const c = cities[code] || { code, name: code };
-                const selected = state[currentCityTarget]?.code === code;
-                return `<button type="button" class="city-btn ${selected?'on':''}" onclick="pickCity('${code}')">${c.name}<span class="code">${code}</span></button>`;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-      container.innerHTML = html || '<div style="padding:60px 20px;text-align:center;color:var(--ink-3);">검색 결과가 없어요. 다른 키워드로 시도해보세요.</div>';
+      } else {
+        // 키워드 매칭 — 코드/도시명/국가명 (공항 단위)
+        const all = Object.keys(cities);
+        const matched = all.filter(code => {
+          const c = cities[code]; if(!c) return false;
+          const cn = (window.OMT?.DATA?.COUNTRIES?.[c.country]?.name || '');
+          return code.toLowerCase().includes(f) || (c.name||'').toLowerCase().includes(f) || cn.toLowerCase().includes(f);
+        }).slice(0, 30);
+        if(matched.length){
+          html += `<div class="dd-group">검색 결과</div>` + matched.map(code => ddItem(target, code, filter)).join('');
+        } else {
+          html = `<div class="dd-empty">"${escHtml(filter)}" 검색 결과가 없어요</div>`;
+        }
+      }
+      dd.innerHTML = html;
+      dd.classList.add('on');
     }
-    window.filterCities = (val) => renderCityGrid(val);
 
-    window.pickCity = (code) => {
+    window.openCityDD = (target) => {
+      currentCityTarget = target;
+      closeAllDD(target);
+      renderCityDD(target, document.getElementById(target + 'Input').value.trim());
+    };
+    window.onCityInput = (target, val) => { renderCityDD(target, val.trim()); };
+
+    function closeAllDD(except){
+      ['from','to'].forEach(k => { if(k !== except){ const dd = document.getElementById(k+'DD'); if(dd) dd.classList.remove('on'); } });
+    }
+    // 바깥 클릭 시 드롭다운 닫기
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.sf-city')){
+        ['from','to'].forEach(k => document.getElementById(k+'DD')?.classList.remove('on'));
+      }
+    });
+
+    window.pickCityDD = (target, code) => {
       const cities = window.OMT?.DATA?.CITIES || {};
       const city = cities[code] || { code, name: code };
-      state[currentCityTarget] = city;
-      const label = document.getElementById(currentCityTarget + 'Label');
-      const sub = document.getElementById(currentCityTarget + 'Sub');
-      label.textContent = city.name;
-      label.classList.remove('placeholder');
-      sub.textContent = city.code;
-      closeModal('cityModal');
+      state[target] = city;
+      const input = document.getElementById(target + 'Input');
+      const sub = document.getElementById(target + 'Sub');
+      input.value = city.name;
+      sub.textContent = code;
+      document.getElementById(target + 'DD').classList.remove('on');
+      // 최근 검색 저장
+      recentCities = [code, ...recentCities.filter(c => c !== code)].slice(0, 6);
+      try { localStorage.setItem('omt_recent_air_cities', JSON.stringify(recentCities)); } catch(e){}
     };
 
     window.swapCities = () => {
       const f = state.from, t = state.to;
       state.from = t; state.to = f;
       ['from','to'].forEach(k => {
-        const label = document.getElementById(k + 'Label');
+        const input = document.getElementById(k + 'Input');
         const sub = document.getElementById(k + 'Sub');
-        if(state[k]){
-          label.textContent = state[k].name;
-          label.classList.remove('placeholder');
-          sub.textContent = state[k].code;
-        } else {
-          label.textContent = '도시명 또는 공항명 입력';
-          label.classList.add('placeholder');
-          sub.textContent = '';
-        }
+        if(state[k]){ input.value = state[k].name; sub.textContent = state[k].code; }
+        else { input.value = ''; sub.textContent = ''; }
       });
     };
 
@@ -790,8 +857,18 @@
         adult: state.pax.adult, child: state.pax.child, infant: state.pax.infant
       });
       if(state.retDate) params.set('ret', state.retDate);
-      location.href = 'flights-results.html?' + params.toString();
+      // 검색 로딩 오버레이 → 결과로 이동 (시트립 패턴)
+      showSearchLoading(state.from.name, state.to.name, state.depDate, state.retDate, state.pax);
+      setTimeout(() => { location.href = 'flights-results.html?' + params.toString(); }, 1100);
     };
+
+    function showSearchLoading(fromName, toName, dep, ret, pax){
+      const fmt = key => { if(!key) return ''; const [y,m,d]=key.split('-'); return `${+m}월 ${+d}일`; };
+      const total = (pax.adult||1) + (pax.child||0) + (pax.infant||0);
+      document.getElementById('slRoute').textContent = `${fromName} ⇌ ${toName}`;
+      document.getElementById('slMeta').textContent = `${fmt(dep)}${ret ? ' - ' + fmt(ret) : ''} · ${total}명`;
+      document.getElementById('searchLoading').classList.add('on');
+    }
 
     window.quickSearch = (from, to) => {
       const cities = window.OMT?.DATA?.CITIES || {};
@@ -860,12 +937,13 @@
       const cities = window.OMT?.DATA?.CITIES || {};
       if(!state.from) state.from = cities['ICN'];
       if(!state.to) state.to = cities['NGO'];
-      // 출발지/도착지/날짜 label 갱신
+      // 출발지/도착지 인풋 갱신
       ['from','to'].forEach(k => {
         if(state[k]){
-          document.getElementById(k + 'Label').textContent = state[k].name;
-          document.getElementById(k + 'Label').classList.remove('placeholder');
-          document.getElementById(k + 'Sub').textContent = state[k].code;
+          const input = document.getElementById(k + 'Input');
+          if(input) input.value = state[k].name;
+          const sub = document.getElementById(k + 'Sub');
+          if(sub) sub.textContent = state[k].code;
         }
       });
       const fmt = key => {
