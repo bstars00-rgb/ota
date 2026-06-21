@@ -1495,6 +1495,9 @@
             const basePrice = computeSlotPrice(g, course, w);
             const price = Math.round(basePrice * (1 + surcharge));
             const channel = D.CHANNEL_MANAGERS[course.channelManager] || D.CHANNEL_MANAGERS.partner;
+            // 실시간 코스라도 일부 슬롯은 24h 견적 (현실적 mix + "실시간 예약" 필터 유효화)
+            const tMin = parseInt(t.split(':')[0]) * 60 + parseInt(t.split(':')[1]);
+            const realTime = !!course.realTimeBooking && (tMin % 3 !== 0);
             slots.push({
               key: `${w}:${t}:${cid}`,
               window: w,
@@ -1511,7 +1514,7 @@
               roundIdx: nextRoundIdx,
               channelManager: course.channelManager,
               channelShort: channel.short,
-              realTime: !!course.realTimeBooking
+              realTime
             });
           });
         });
@@ -1545,14 +1548,18 @@
         allSlots = allSlots.filter(s => s.window === teeFilter);
       }
 
-      // 3. "최저가만" — 같은 시간대에서 가장 싼 슬롯만 (코스 여러개 중 최저)
-      if(teeOptions.cheapest){
+      // 3. "최저가만" — 코스 중복 제거 후 전체 최저가 슬롯만 노출 (가장 저렴한 시간대)
+      if(teeOptions.cheapest && allSlots.length){
+        // 3a. 같은 시간대에 코스 여러개면 최저 코스만
         const byTime = new Map();
         allSlots.forEach(s => {
           const k = `${s.window}:${s.time}`;
           if(!byTime.has(k) || byTime.get(k).price > s.price) byTime.set(k, s);
         });
         allSlots = Array.from(byTime.values());
+        // 3b. 전체에서 최저가와 동일한 가격의 슬롯만 (시간대별 가격차 → 가장 싼 윈도우만 남음)
+        const minPrice = Math.min(...allSlots.map(s => s.price));
+        allSlots = allSlots.filter(s => s.price === minPrice);
       }
 
       // 3-1. "실시간 예약" 토글 — 실시간 가능 슬롯만 (채널 매니저 연동된 코스)
