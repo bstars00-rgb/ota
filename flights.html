@@ -457,6 +457,7 @@
         <button class="close" onclick="closeModal('calModal')">×</button>
       </div>
       <div class="modal-body">
+        <div id="calPriceHint" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--bg-soft);border-radius:10px;font-size:12px;color:var(--ink-2);font-weight:700;">💡 출발지·도착지를 먼저 선택하면 날짜별 최저가가 표시돼요.</div>
         <div class="cal-nav">
           <button onclick="calPrev()">‹ 이전</button>
           <button onclick="calNext()">다음 ›</button>
@@ -685,19 +686,29 @@
         return d;
       });
       wrap.innerHTML = months.map(d => renderMonth(d)).join('');
+      const hint = document.getElementById('calPriceHint');
+      if(hint) hint.style.display = (state.from && state.to) ? 'none' : 'block';
       updateDateSummary();
     }
 
-    // 날짜별 mock 최저가 (결정론적 — sine + 주말 가산, renderPriceTrend와 동일 계열)
-    function dayPrice(date){
+    // 선택된 노선의 실제 최저가 (출발지·도착지 모두 선택돼야 가격 표시)
+    function routeBase(){
+      if(!state.from || !state.to) return null;
+      const fl = (window.OMT?.DATA?.FLIGHTS || []).filter(f => f.from === state.from.code && f.to === state.to.code);
+      if(fl.length) return Math.min(...fl.map(f => f.price));
+      // 노선 직접 매칭 없으면 도착지 기준 최저가로 추정
+      const byTo = (window.OMT?.DATA?.FLIGHTS || []).filter(f => f.to === state.to.code);
+      return byTo.length ? Math.min(...byTo.map(f => f.price)) : 380000;
+    }
+    // 날짜별 mock 최저가 — 노선 최저가(base)를 중심으로 변동 (결정론적)
+    function dayPrice(date, base){
       const t = new Date(); t.setHours(0,0,0,0);
       const diff = Math.round((date - t) / 86400000);
-      const base = 380000;
-      const wave = Math.sin(diff * 0.5) * 60000;
+      const wave = Math.sin(diff * 0.5) * (base * 0.16);
       const dow = date.getDay();
-      const weekend = (dow === 0 || dow === 6) ? 50000 : 0;
-      const noise = (diff % 7 === 0 ? -90000 : 0) + (diff % 11 === 0 ? 60000 : 0);
-      return Math.max(Math.round((base + wave + weekend + noise) / 100) * 100, 189000);
+      const weekend = (dow === 0 || dow === 6) ? base * 0.13 : 0;
+      const noise = (diff % 7 === 0 ? -base * 0.24 : 0) + (diff % 11 === 0 ? base * 0.16 : 0);
+      return Math.max(Math.round((base + wave + weekend + noise) / 100) * 100, Math.round(base * 0.7));
     }
     // 만원 단위 축약 (셀 폭 대응): 542,600 → "54.3만"
     function priceShort(p){ return (p / 10000).toFixed(1) + '만'; }
@@ -709,13 +720,17 @@
       const startDow = first.getDay();
       const daysInMonth = last.getDate();
       const today = new Date(); today.setHours(0,0,0,0);
-      // 이번 달 내 최저가 일자 1건 표시
+      // 노선(출발지·도착지)이 선택돼야 날짜별 요금 표시 (미선택 시 가격 숨김)
+      const base = routeBase();
+      // 이번 달 내 최저가 일자 1건 표시 (노선 선택 시에만)
       let cheapestKey = null, cheapestVal = Infinity;
-      for(let day = 1; day <= daysInMonth; day++){
-        const date = new Date(y, m, day);
-        if(date < today) continue;
-        const p = dayPrice(date);
-        if(p < cheapestVal){ cheapestVal = p; cheapestKey = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+      if(base){
+        for(let day = 1; day <= daysInMonth; day++){
+          const date = new Date(y, m, day);
+          if(date < today) continue;
+          const p = dayPrice(date, base);
+          if(p < cheapestVal){ cheapestVal = p; cheapestKey = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+        }
       }
       const dowHtml = ['일','월','화','수','목','금','토'].map((n, i) =>
         `<div class="cal-dow ${i===0?'sun':''}">${n}</div>`
@@ -734,9 +749,9 @@
         if(state.depDate === dateKey) cls += ' start';
         if(state.retDate === dateKey) cls += ' end';
         if(state.depDate && state.retDate && dateKey > state.depDate && dateKey < state.retDate) cls += ' in-range';
-        if(!past && dateKey === cheapestKey) cls += ' cheapest';
+        if(base && !past && dateKey === cheapestKey) cls += ' cheapest';
         const onclick = past ? '' : `onclick="pickDate('${dateKey}')"`;
-        const priceHtml = past ? '' : `<span class="dprice">${priceShort(dayPrice(date))}</span>`;
+        const priceHtml = (base && !past) ? `<span class="dprice">${priceShort(dayPrice(date, base))}</span>` : '';
         cells.push(`<div class="${cls}" ${onclick}><span class="dnum">${day}</span>${priceHtml}</div>`);
       }
       return `
