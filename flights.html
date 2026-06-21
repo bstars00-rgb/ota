@@ -252,6 +252,11 @@
         <button type="submit" class="sf-search">검색</button>
       </form>
 
+      <!-- 항공+호텔 동적 결합 진입 (시트립 패턴) -->
+      <button type="button" onclick="goAirHotel()" style="margin-top:12px;width:100%;padding:13px 18px;background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff;border-radius:var(--radius-sm);font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow-sm);transition:filter .2s;" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter=''">
+        🧳 항공 + 호텔 같이 검색하고 <span style="color:var(--accent);">평균 15~30% 절약</span> →
+      </button>
+
       <div class="standalone-note">
         <span class="ic">✈️</span>
         <div class="txt">
@@ -860,6 +865,19 @@
       // 검색 로딩 오버레이 → 결과로 이동 (시트립 패턴)
       showSearchLoading(state.from.name, state.to.name, state.depDate, state.retDate, state.pax);
       setTimeout(() => { location.href = 'flights-results.html?' + params.toString(); }, 1100);
+    };
+
+    window.goAirHotel = () => {
+      if(!state.to){ alert('도착지를 선택해주세요 (항공+호텔은 도착지 호텔을 함께 추천해요)'); return; }
+      if(!state.depDate){ alert('여행일정을 선택해주세요'); return; }
+      const from = state.from?.code || 'ICN';
+      const params = new URLSearchParams({
+        from, to: state.to.code, dep: state.depDate,
+        adult: state.pax.adult, child: state.pax.child, infant: state.pax.infant
+      });
+      if(state.retDate) params.set('ret', state.retDate);
+      showSearchLoading(state.from?.name || '서울', state.to.name, state.depDate, state.retDate, state.pax);
+      setTimeout(() => { location.href = 'airhotel.html?' + params.toString(); }, 1100);
     };
 
     function showSearchLoading(fromName, toName, dep, ret, pax){

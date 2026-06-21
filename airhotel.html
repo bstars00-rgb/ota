@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>항공 + 호텔 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root{
+      --primary:#FF6B35;--primary-d:#E85826;--primary-soft:#FFF1EA;--accent:#FFD23F;
+      --ink:#15161B;--ink-2:#52565F;--ink-3:#9AA0A8;--ink-4:#B6BAC1;
+      --line:#ECEAE3;--bg:#FAFAF8;--bg-2:#FFFFFF;--bg-soft:#F7F5F1;
+      --success:#10B981;--info:#2563EB;--danger:#EF4444;
+      --radius-sm:10px;--radius:16px;--radius-lg:24px;--radius-pill:999px;
+      --shadow-sm:0 1px 2px rgba(20,21,26,.04),0 2px 8px rgba(20,21,26,.05);
+      --shadow:0 10px 30px rgba(20,21,26,.08);
+      --shadow-lg:0 24px 60px rgba(20,21,26,.13);
+      --ease:cubic-bezier(.4,.14,.2,1);--max-w:1180px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+    .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
+    .mono{font-family:'JetBrains Mono',monospace;}
+
+    .header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
+    .header-inner{height:60px;display:flex;align-items:center;gap:20px;}
+    .logo{font-size:22px;font-weight:900;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:8px;}
+    .logo .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;}
+    .gnb{display:flex;gap:6px;margin-left:14px;}
+    .gnb a{padding:8px 13px;border-radius:8px;font-size:13px;font-weight:800;color:var(--ink-3);}
+    .gnb a.on{background:var(--bg);color:var(--ink);}
+
+    .hero{background:linear-gradient(135deg,#1E3A8A,#2563EB 60%,#3B82F6);color:#fff;padding:26px 0 22px;}
+    .hero h1{font-size:clamp(22px,3vw,28px);font-weight:900;letter-spacing:-0.03em;margin:0;}
+    .hero .sub{font-size:13px;opacity:.9;margin-top:4px;}
+
+    /* combined search bar */
+    .csb{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-top:16px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+    .csb .row{display:flex;gap:10px;}
+    .csb .fld{flex:1;border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 12px;min-width:0;}
+    .csb .fld .lb{font-size:10px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;}
+    .csb .fld .vl{font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .csb .opt{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink-2);}
+    .csb .opt input{accent-color:var(--primary);width:15px;height:15px;}
+    .csb .go{padding:0 22px;height:100%;min-height:58px;background:var(--info);color:#fff;border-radius:var(--radius-sm);font-weight:900;font-size:15px;display:inline-flex;align-items:center;gap:6px;}
+    .csb .go:hover{filter:brightness(1.05);}
+
+    main{padding:22px 0 70px;}
+    .sec-title{font-size:13px;font-weight:900;color:var(--ink-3);letter-spacing:.04em;margin:22px 0 10px;text-transform:uppercase;}
+
+    /* recommended flight card */
+    .flt-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px 22px;}
+    .flt-head{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;margin-bottom:14px;}
+    .flt-head .ic{color:var(--info);}
+    .flt-leg{display:grid;grid-template-columns:120px 1fr 110px;gap:16px;align-items:center;padding:12px 0;}
+    .flt-leg+.flt-leg{border-top:1px dashed var(--line);}
+    .flt-air{display:flex;align-items:center;gap:10px;}
+    .flt-air .lg{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px;flex-shrink:0;}
+    .flt-air .nm{font-size:11px;font-weight:800;color:var(--ink-2);}
+    .flt-air .dt{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .flt-mid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
+    .flt-mid .t{font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;text-align:center;}
+    .flt-mid .ap{font-size:11px;font-weight:800;color:var(--ink-3);text-align:center;}
+    .flt-mid .c{text-align:center;}
+    .flt-mid .dur{font-size:11px;color:var(--ink-3);font-weight:700;}
+    .flt-mid .line{height:1px;background:var(--line);position:relative;margin:6px 0;}
+    .flt-mid .line::after{content:'직항';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#fff;padding:0 6px;font-size:10px;color:var(--ink-3);font-weight:700;}
+    .flt-right{text-align:right;}
+    .flt-change{padding:9px 16px;border:1.5px solid var(--info);color:var(--info);border-radius:var(--radius-sm);font-size:13px;font-weight:900;transition:all .2s var(--ease);}
+    .flt-change:hover{background:var(--info);color:#fff;}
+
+    /* hotel list */
+    .hotsec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 12px;}
+    .hotsec-head .h{font-size:16px;font-weight:900;display:flex;align-items:center;gap:8px;}
+    .hotsec-head .h .ic{color:var(--info);}
+    .hot-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;display:grid;grid-template-columns:200px 1fr;gap:0;margin-bottom:12px;transition:box-shadow .3s var(--ease),transform .3s var(--ease);}
+    .hot-card:hover{box-shadow:var(--shadow);transform:translateY(-3px);}
+    .hot-img{background-size:cover;background-position:center;background-color:#e9e7e2;min-height:160px;}
+    .hot-body{padding:16px 18px;display:grid;grid-template-columns:1fr 230px;gap:16px;}
+    .hot-name{font-size:16px;font-weight:900;letter-spacing:-0.01em;}
+    .hot-meta{font-size:12px;color:var(--ink-3);font-weight:700;margin-top:3px;}
+    .hot-score{display:inline-flex;align-items:center;gap:6px;margin-top:8px;}
+    .hot-score .sc{background:var(--info);color:#fff;font-weight:900;font-size:12px;padding:2px 8px;border-radius:6px;}
+    .hot-score .rv{font-size:11px;color:var(--ink-3);font-weight:700;}
+    .hot-amen{margin-top:10px;display:flex;flex-wrap:wrap;gap:4px;}
+    .hot-amen span{font-size:10px;font-weight:700;color:var(--ink-2);background:var(--bg-soft);padding:2px 7px;border-radius:5px;}
+    /* price compare */
+    .cmp{border-left:1px solid var(--line);padding-left:16px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;}
+    .cmp .vs{display:flex;align-items:center;gap:8px;}
+    .cmp .sep{text-align:right;}
+    .cmp .sep .lb{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .cmp .sep .pr{font-size:13px;color:var(--ink-3);font-weight:800;text-decoration:line-through;font-family:'JetBrains Mono',monospace;}
+    .cmp .vsbadge{font-size:11px;font-weight:900;color:#fff;background:var(--primary);border-radius:5px;padding:1px 5px;}
+    .cmp .bun{text-align:right;}
+    .cmp .bun .lb{font-size:10px;color:var(--info);font-weight:900;}
+    .cmp .bun .pr{font-size:19px;color:var(--info);font-weight:900;font-family:'JetBrains Mono',monospace;letter-spacing:-0.02em;}
+    .cmp .save{font-size:11px;font-weight:900;color:var(--success);margin-top:2px;}
+    .cmp .perp{font-size:10px;color:var(--ink-4);font-weight:700;margin-top:1px;}
+    .cmp .pick{margin-top:10px;width:100%;padding:11px;background:var(--info);color:#fff;border-radius:var(--radius-sm);font-weight:900;font-size:14px;transition:filter .2s;}
+    .cmp .pick:hover{filter:brightness(1.06);}
+
+    .savings-banner{background:linear-gradient(135deg,#FFF1EA,#FFFAF0);border:1px solid #FECACA;border-radius:var(--radius);padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+    .savings-banner .big{font-size:20px;}
+    .savings-banner .tx{font-size:13px;font-weight:800;color:var(--ink);}
+    .savings-banner .tx b{color:var(--primary);}
+
+    /* flight change modal */
+    .ov{position:fixed;inset:0;background:rgba(20,21,26,.5);z-index:120;display:none;align-items:center;justify-content:center;padding:24px;}
+    .ov.on{display:flex;}
+    .ov-card{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:min(560px,100%);max-height:calc(100vh - 60px);overflow:hidden;display:flex;flex-direction:column;}
+    .ov-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .ov-head .h{font-size:17px;font-weight:900;}
+    .ov-head .x{font-size:24px;color:var(--ink-3);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;}
+    .ov-body{padding:8px 14px;overflow-y:auto;}
+    .fopt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 8px;border-bottom:1px solid var(--bg-soft);cursor:pointer;border-radius:10px;}
+    .fopt:hover{background:var(--bg-soft);}
+    .fopt .lg{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:11px;}
+    .fopt .info .a{font-size:13px;font-weight:800;}
+    .fopt .info .t{font-size:11px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;}
+    .fopt .pr{font-size:15px;font-weight:900;color:var(--info);font-family:'JetBrains Mono',monospace;}
+
+    .empty{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:60px 20px;text-align:center;color:var(--ink-3);}
+
+    @media (max-width:860px){
+      .csb{grid-template-columns:1fr;}
+      .csb .go{min-height:48px;}
+      .hot-card{grid-template-columns:1fr;}
+      .hot-body{grid-template-columns:1fr;}
+      .cmp{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:12px;align-items:stretch;}
+      .cmp .vs{justify-content:space-between;}
+      .flt-leg{grid-template-columns:1fr;gap:8px;}
+      .flt-right{text-align:left;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span class="mark">O</span>오마이트립</a>
+      <nav class="gnb">
+        <a href="index.html">🏠 홈</a>
+        <a href="golftels.html">⛳ 골프텔</a>
+        <a href="flights.html">✈️ 항공권</a>
+        <a href="hotels.html">🏨 호텔</a>
+        <a href="#" class="on">🧳 항공+호텔</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>🧳 항공 + 호텔, 한 번에 더 저렴하게</h1>
+      <div class="sub">항공권에 호텔을 묶으면 따로 예약보다 평균 15~30% 절약돼요</div>
+      <div class="csb">
+        <div class="row">
+          <div class="fld"><div class="lb">출발지</div><div class="vl" id="fFrom">서울</div></div>
+          <div class="fld"><div class="lb">도착지</div><div class="vl" id="fTo">다낭</div></div>
+        </div>
+        <div class="row">
+          <div class="fld"><div class="lb">가는날 — 오는날</div><div class="vl" id="fDates">-</div></div>
+          <div class="fld"><div class="lb">여행 정보</div><div class="vl" id="fPax">성인 1명, 일반석</div></div>
+        </div>
+        <button class="go" onclick="rerunSearch()">🔍 항공+호텔 검색</button>
+        <label class="opt"><input type="checkbox" id="optDiffHotel" /> 다른 도시/날짜의 호텔도 검색</label>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <!-- 추천 항공편 -->
+    <div class="sec-title">1단계 · 추천 항공편 (변경 가능)</div>
+    <div id="flightCard"></div>
+
+    <!-- 호텔 -->
+    <div class="hotsec-head">
+      <div class="h"><span class="ic">🏨</span> <span id="hotelCount">호텔</span></div>
+      <div style="font-size:12px;color:var(--ink-3);font-weight:700;" id="nightsLabel"></div>
+    </div>
+    <div class="savings-banner">
+      <span class="big">💸</span>
+      <div class="tx"><b>따로 예약</b> 대신 <b>항공+호텔</b>로 묶으면 호텔별 절약액을 바로 비교할 수 있어요.</div>
+    </div>
+    <div id="hotelList"></div>
+  </main>
+
+  <!-- 항공편 변경 모달 -->
+  <div class="ov" id="flightModal" onclick="if(event.target===this)closeFlightModal()">
+    <div class="ov-card">
+      <div class="ov-head"><div class="h">항공편 변경</div><button class="x" onclick="closeFlightModal()">×</button></div>
+      <div class="ov-body" id="flightOptions"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+  (function(){
+    const D = window.OMT?.DATA || {};
+    const CITIES = D.CITIES || {}, AIRLINES = D.AIRLINES || {}, COUNTRIES = D.COUNTRIES || {};
+    const params = new URLSearchParams(location.search);
+    const krw = n => (n||0).toLocaleString('ko-KR') + '원';
+
+    const SQ = {
+      from: params.get('from') || 'ICN',
+      to:   params.get('to')   || 'DAD',
+      dep:  params.get('dep')  || '',
+      ret:  params.get('ret')  || '',
+      adult: parseInt(params.get('adult')||'1'),
+      child: parseInt(params.get('child')||'0'),
+      infant: parseInt(params.get('infant')||'0')
+    };
+
+    function diffNights(a,b){ if(!a||!b) return 4; const d=(new Date(b)-new Date(a))/86400000; return d>0?Math.round(d):4; }
+    function fmtDate(key){ if(!key) return ''; const [y,m,d]=key.split('-'); const dt=new Date(+y,+m-1,+d); const dow=['일','월','화','수','목','금','토'][dt.getDay()]; return `${+m}월 ${+d}일(${dow})`; }
+    function fmtShort(key){ if(!key) return ''; const [,m,d]=key.split('-'); return `${+m}.${+d}`; }
+
+    const fromCity = CITIES[SQ.from] || {name:SQ.from, code:SQ.from};
+    const toCity   = CITIES[SQ.to]   || {name:SQ.to, code:SQ.to};
+    const destSlug = toCity.city || null;
+    const nights = diffNights(SQ.dep, SQ.ret);
+    const paxTotal = SQ.adult + SQ.child + SQ.infant;
+
+    // 노선 항공편
+    let routeFlights = (D.FLIGHTS||[]).filter(f => f.from===SQ.from && f.to===SQ.to);
+    if(!routeFlights.length) routeFlights = (D.FLIGHTS||[]).filter(f => f.to===SQ.to);
+    if(!routeFlights.length) routeFlights = (D.FLIGHTS||[]).slice(0,6);
+    routeFlights = routeFlights.slice().sort((a,b)=>a.price-b.price);
+    let recFlight = routeFlights[0] || null;
+
+    // 목적지 호텔
+    let hotels = (D.HOTELS||[]).filter(h => destSlug && h.city===destSlug);
+    if(!hotels.length) hotels = (D.HOTELS||[]).slice(0,8);
+
+    function bundleDiscount(hotelId){
+      // 호텔별 결정적 할인율 0.15~0.30
+      let s=0; for(const ch of String(hotelId)) s += ch.charCodeAt(0);
+      return 0.15 + (s % 16) / 100;  // 0.15 ~ 0.30
+    }
+
+    function renderHeader(){
+      document.getElementById('fFrom').textContent = fromCity.name;
+      document.getElementById('fTo').textContent = toCity.name;
+      document.getElementById('fDates').textContent = SQ.dep ? `${fmtDate(SQ.dep)} — ${fmtDate(SQ.ret)}` : '날짜 미정';
+      const pb=[]; if(SQ.adult)pb.push(`성인 ${SQ.adult}명`); if(SQ.child)pb.push(`아동 ${SQ.child}명`); if(SQ.infant)pb.push(`유아 ${SQ.infant}명`);
+      document.getElementById('fPax').textContent = pb.join(', ') + ', 일반석';
+      document.getElementById('nightsLabel').textContent = `${nights}박 · ${SQ.dep?fmtShort(SQ.dep)+'~'+fmtShort(SQ.ret):''}`;
+      document.getElementById('hotelCount').textContent = `${toCity.name} 호텔 (${nights}박)`;
+    }
+
+    function airLogo(code){ const a=AIRLINES[code]||{}; return `<span class="lg" style="background:${a.color||'linear-gradient(135deg,#6B7280,#9CA3AF)'}">${code.replace(/\W/g,'').slice(0,2)}</span>`; }
+
+    function renderFlight(){
+      const el = document.getElementById('flightCard');
+      if(!recFlight){ el.innerHTML = '<div class="empty">이 노선의 항공편을 찾을 수 없어요.</div>'; return; }
+      const f = recFlight; const a = AIRLINES[f.code] || {name:f.code};
+      const depD = SQ.dep ? fmtDate(SQ.dep) : '가는편';
+      const retD = SQ.ret ? fmtDate(SQ.ret) : '오는편';
+      el.innerHTML = `
+        <div class="flt-card">
+          <div class="flt-head"><span class="ic">✈️</span> 추천 항공편 · 왕복 · ${a.name}</div>
+          <div class="flt-leg">
+            <div class="flt-air">${airLogo(f.code)}<div><div class="nm">${a.name}</div><div class="dt">${depD} · 일반석</div></div></div>
+            <div class="flt-mid">
+              <div class="c"><div class="t">${f.outDep}</div><div class="ap">${f.from}</div></div>
+              <div><div class="dur">${f.outDur||''}</div><div class="line"></div></div>
+              <div class="c"><div class="t">${f.outArr}</div><div class="ap">${f.to}</div></div>
+            </div>
+            <div class="flt-right" rowspan="2"></div>
+          </div>
+          <div class="flt-leg">
+            <div class="flt-air">${airLogo(f.code)}<div><div class="nm">${a.name} (귀국)</div><div class="dt">${retD} · 일반석</div></div></div>
+            <div class="flt-mid">
+              <div class="c"><div class="t">${f.retDep||'--:--'}</div><div class="ap">${f.to}</div></div>
+              <div><div class="dur">${f.retDur||''}</div><div class="line"></div></div>
+              <div class="c"><div class="t">${f.retArr||'--:--'}</div><div class="ap">${f.from}</div></div>
+            </div>
+            <div class="flt-right"><button class="flt-change" onclick="openFlightModal()">항공편 변경</button></div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-3);font-weight:700;">1인 왕복 항공 <b style="color:var(--info);font-family:'JetBrains Mono',monospace;">${krw(f.price)}</b> · 호텔과 묶으면 더 저렴 ↓</div>
+        </div>`;
+    }
+
+    function renderHotels(){
+      const el = document.getElementById('hotelList');
+      if(!hotels.length){ el.innerHTML = '<div class="empty">이 목적지의 호텔이 준비 중이에요.</div>'; return; }
+      const flightPP = recFlight ? recFlight.price : 0;
+      el.innerHTML = hotels.map(h => {
+        const hotelTotal = (h.price||0) * nights;
+        const separate = flightPP + hotelTotal;            // 따로 예약 (1인 항공 + 호텔 N박)
+        const disc = bundleDiscount(h.id);
+        const bundle = Math.round(separate * (1-disc) / 100) * 100;
+        const save = separate - bundle;
+        const img = h.img || (h.gallery&&h.gallery[0]) || (h.images&&h.images[0]) || '';
+        const amen = (h.amenities||[]).slice(0,3).map(x=>`<span>${x}</span>`).join('');
+        return `
+          <div class="hot-card">
+            <div class="hot-img" style="background-image:url('${img}')"></div>
+            <div class="hot-body">
+              <div>
+                <div class="hot-name">${h.name} ${'★'.repeat(h.stars||0)}</div>
+                <div class="hot-meta">${h.area||''} · ${nights}박</div>
+                <div class="hot-score"><span class="sc">${(h.score||8).toFixed(1)}</span><span class="rv">리뷰 ${(h.reviews||0).toLocaleString('ko-KR')}개</span></div>
+                <div class="hot-amen">${amen}</div>
+              </div>
+              <div class="cmp">
+                <div class="vs">
+                  <div class="sep"><div class="lb">따로 예약</div><div class="pr">${krw(separate)}</div></div>
+                  <span class="vsbadge">VS</span>
+                  <div class="bun"><div class="lb">항공+호텔</div><div class="pr">${krw(bundle)}</div></div>
+                </div>
+                <div class="save">▼ ${krw(save)} 절약 (-${Math.round(disc*100)}%)</div>
+                <div class="perp">1인 · 항공 왕복 + 호텔 ${nights}박</div>
+                <button class="pick" onclick="selectBundle('${h.id}')">선택</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    window.openFlightModal = () => {
+      const box = document.getElementById('flightOptions');
+      box.innerHTML = routeFlights.map(f => {
+        const a = AIRLINES[f.code]||{name:f.code};
+        const sel = recFlight && f.id===recFlight.id;
+        return `<div class="fopt" onclick="pickFlight('${f.id}')" style="${sel?'background:var(--primary-soft);':''}">
+          <span class="lg" style="background:${a.color||'#6B7280'}">${f.code.replace(/\W/g,'').slice(0,2)}</span>
+          <div class="info"><div class="a">${a.name} ${sel?'· 선택됨':''}</div><div class="t">${f.outDep}→${f.outArr} · ${f.outDur||''} · ${f.stops===0?'직항':(f.stops+'회 경유')}</div></div>
+          <div class="pr">${krw(f.price)}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('flightModal').classList.add('on');
+    };
+    window.closeFlightModal = () => document.getElementById('flightModal').classList.remove('on');
+    window.pickFlight = (id) => {
+      const f = routeFlights.find(x=>x.id===id); if(f) recFlight=f;
+      closeFlightModal(); renderFlight(); renderHotels();
+    };
+
+    window.selectBundle = (hotelId) => {
+      const h = hotels.find(x=>x.id===hotelId); if(!h||!recFlight) return;
+      const f = recFlight; const a = AIRLINES[f.code]||{name:f.code};
+      const hotelTotal = (h.price||0) * nights;
+      const separate = f.price + hotelTotal;
+      const disc = bundleDiscount(h.id);
+      const bundle = Math.round(separate * (1-disc) / 100) * 100;
+      const pkg = {
+        source:'airhotel',
+        productName: `${fromCity.name}→${toCity.name} 항공+호텔 · ${h.name}`,
+        productImage: h.img || (h.gallery&&h.gallery[0]) || '',
+        country: toCity.country || 'flight', city: destSlug,
+        paxCount: Math.max(1, SQ.adult + SQ.child), nights,
+        dates: SQ.dep ? `${fmtDate(SQ.dep)} ~ ${fmtDate(SQ.ret)}` : '',
+        flight: {
+          airline: a.name, airlineCode: f.code, number: f.number, price: f.price,
+          out: { depAp:f.from, arrAp:f.to, depCity:fromCity.name, arrCity:toCity.name, depTime:f.outDep, arrTime:f.outArr, duration:f.outDur, stops:f.stops },
+          ret: f.retDep ? { depAp:f.to, arrAp:f.from, depTime:f.retDep, arrTime:f.retArr, duration:f.retDur } : null,
+          seatClass:'economy'
+        },
+        hotel: { name:h.name, areaLabel:h.area, price:h.price||0 },
+        activities: [],
+        bundleDiscountPct: Math.round(disc*100),
+        separateTotal: separate,
+        final: bundle,
+        _explicitTotal: bundle
+      };
+      try { sessionStorage.setItem('omt_package', JSON.stringify(pkg)); } catch(e){}
+      location.href = 'checkout.html';
+    };
+
+    window.rerunSearch = () => {
+      // 검색바는 프로토타입 — 현재 파라미터로 재조회(스크롤 상단)
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
+
+    // init
+    renderHeader();
+    renderFlight();
+    renderHotels();
+  })();
+  </script>
+</body>
+</html>
