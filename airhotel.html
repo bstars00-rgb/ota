@@ -49,6 +49,21 @@
     .csb .opt input{accent-color:var(--primary);width:15px;height:15px;}
     .csb .go{padding:0 22px;height:100%;min-height:58px;background:var(--info);color:#fff;border-radius:var(--radius-sm);font-weight:900;font-size:15px;display:inline-flex;align-items:center;gap:6px;}
     .csb .go:hover{filter:brightness(1.05);}
+    .csb .fld.sf-city{position:relative;}
+    .csb-input,.csb-date{border:none;outline:none;background:transparent;width:100%;font-family:inherit;font-size:14px;font-weight:800;color:var(--ink);padding:2px 0 0;}
+    .csb-input::placeholder{color:var(--ink-4);}
+    .city-dd{position:absolute;top:calc(100% + 8px);left:0;width:min(380px,80vw);max-height:380px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);z-index:140;display:none;padding:8px;}
+    .city-dd.on{display:block;}
+    .city-dd .dd-group{font-size:11px;font-weight:800;color:var(--ink-4);padding:10px 10px 4px;letter-spacing:.04em;}
+    .city-dd .dd-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;}
+    .city-dd .dd-item:hover{background:var(--bg-soft);}
+    .city-dd .dd-ic{width:20px;text-align:center;color:var(--info);flex-shrink:0;}
+    .city-dd .dd-tx{min-width:0;flex:1;}
+    .city-dd .dd-main{font-size:14px;font-weight:800;color:var(--ink);}
+    .city-dd .dd-main b{color:var(--info);}
+    .city-dd .dd-sub{font-size:11px;color:var(--ink-3);}
+    .city-dd .dd-code{font-size:11px;color:var(--ink-3);font-weight:800;font-family:'JetBrains Mono',monospace;}
+    .city-dd .dd-empty{padding:24px;text-align:center;color:var(--ink-3);font-size:13px;}
 
     main{padding:22px 0 70px;}
     .sec-title{font-size:13px;font-weight:900;color:var(--ink-3);letter-spacing:.04em;margin:22px 0 10px;text-transform:uppercase;}
@@ -158,11 +173,22 @@
       <div class="sub">항공권에 호텔을 묶으면 따로 예약보다 평균 15~30% 절약돼요</div>
       <div class="csb">
         <div class="row">
-          <div class="fld"><div class="lb">출발지</div><div class="vl" id="fFrom">서울</div></div>
-          <div class="fld"><div class="lb">도착지</div><div class="vl" id="fTo">다낭</div></div>
+          <div class="fld sf-city">
+            <div class="lb">출발지</div>
+            <input class="csb-input" id="abFromInput" autocomplete="off" placeholder="도시·공항"
+                   onfocus="airOpenDD('from')" oninput="airInput('from',this.value)" />
+            <div class="city-dd" id="abFromDD"></div>
+          </div>
+          <div class="fld sf-city">
+            <div class="lb">도착지</div>
+            <input class="csb-input" id="abToInput" autocomplete="off" placeholder="도시·공항"
+                   onfocus="airOpenDD('to')" oninput="airInput('to',this.value)" />
+            <div class="city-dd" id="abToDD"></div>
+          </div>
         </div>
         <div class="row">
-          <div class="fld"><div class="lb">가는날 — 오는날</div><div class="vl" id="fDates">-</div></div>
+          <div class="fld"><div class="lb">가는날</div><input type="date" class="csb-date" id="abDep" /></div>
+          <div class="fld"><div class="lb">오는날</div><input type="date" class="csb-date" id="abRet" /></div>
           <div class="fld"><div class="lb">여행 정보</div><div class="vl" id="fPax">성인 1명, 일반석</div></div>
         </div>
         <button class="go" onclick="rerunSearch()">🔍 항공+호텔 검색</button>
@@ -243,14 +269,57 @@
     }
 
     function renderHeader(){
-      document.getElementById('fFrom').textContent = fromCity.name;
-      document.getElementById('fTo').textContent = toCity.name;
-      document.getElementById('fDates').textContent = SQ.dep ? `${fmtDate(SQ.dep)} — ${fmtDate(SQ.ret)}` : '날짜 미정';
+      document.getElementById('abFromInput').value = fromCity.name || '';
+      document.getElementById('abToInput').value = toCity.name || '';
+      document.getElementById('abDep').value = SQ.dep || '';
+      document.getElementById('abRet').value = SQ.ret || '';
       const pb=[]; if(SQ.adult)pb.push(`성인 ${SQ.adult}명`); if(SQ.child)pb.push(`아동 ${SQ.child}명`); if(SQ.infant)pb.push(`유아 ${SQ.infant}명`);
       document.getElementById('fPax').textContent = pb.join(', ') + ', 일반석';
       document.getElementById('nightsLabel').textContent = `${nights}박 · ${SQ.dep?fmtShort(SQ.dep)+'~'+fmtShort(SQ.ret):''}`;
       document.getElementById('hotelCount').textContent = `${toCity.name} 호텔 (${nights}박)`;
     }
+
+    /* ===== 검색바 인라인 도시 자동완성 (시트립 패턴) ===== */
+    const editSel = { from: SQ.from, to: SQ.to };
+    const AB_POPULAR = ['ICN','KIX','NRT','FUK','DAD','BKK','CEB','OKA'];
+    const abEsc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const abInputId = t => 'ab' + (t==='from'?'From':'To') + 'Input';
+    function abItem(target, code, q){
+      const c = CITIES[code]; if(!c) return '';
+      const cn = COUNTRIES[c.country]?.name || c.country || '국제공항';
+      const hl = txt => { if(!q) return abEsc(txt); const i=txt.toLowerCase().indexOf(q.toLowerCase()); return i<0?abEsc(txt):abEsc(txt.slice(0,i))+'<b>'+abEsc(txt.slice(i,i+q.length))+'</b>'+abEsc(txt.slice(i+q.length)); };
+      return `<div class="dd-item" onmousedown="event.preventDefault()" onclick="airPick('${target}','${code}')">
+        <span class="dd-ic">✈</span><div class="dd-tx"><div class="dd-main">${hl(c.name)} <span class="dd-code">${code}</span></div><div class="dd-sub">${cn}</div></div></div>`;
+    }
+    function abRenderDD(target, filter){
+      const dd = document.getElementById('ab' + (target==='from'?'From':'To') + 'DD');
+      const grid = D.CITY_GRID || {};
+      const f = (filter||'').toLowerCase().trim();
+      let html = '';
+      if(!f){
+        html += `<div class="dd-group">인기 도시</div>` + AB_POPULAR.filter(c=>CITIES[c]).map(c=>abItem(target,c,'')).join('');
+        Object.entries(grid).forEach(([g,codes]) => { html += `<div class="dd-group">${g}</div>` + codes.filter(c=>CITIES[c]).map(c=>abItem(target,c,'')).join(''); });
+      } else {
+        const matched = Object.keys(CITIES).filter(code => {
+          const c = CITIES[code]; if(!c) return false;
+          const cn = COUNTRIES[c.country]?.name || '';
+          return code.toLowerCase().includes(f) || (c.name||'').toLowerCase().includes(f) || cn.toLowerCase().includes(f);
+        }).slice(0,30);
+        html = matched.length ? `<div class="dd-group">검색 결과</div>` + matched.map(c=>abItem(target,c,filter)).join('') : `<div class="dd-empty">"${abEsc(filter)}" 결과 없음</div>`;
+      }
+      dd.innerHTML = html; dd.classList.add('on');
+    }
+    window.airOpenDD = (t) => { abRenderDD(t, document.getElementById(abInputId(t)).value.trim()); };
+    window.airInput = (t,v) => abRenderDD(t, v.trim());
+    window.airPick = (t, code) => {
+      const c = CITIES[code] || {code,name:code};
+      editSel[t] = code;
+      document.getElementById(abInputId(t)).value = c.name;
+      document.getElementById('ab' + (t==='from'?'From':'To') + 'DD').classList.remove('on');
+    };
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.sf-city')){ ['From','To'].forEach(k => document.getElementById('ab'+k+'DD')?.classList.remove('on')); }
+    });
 
     function airLogo(code){ const a=AIRLINES[code]||{}; return `<span class="lg" style="background:${a.color||'linear-gradient(135deg,#6B7280,#9CA3AF)'}">${code.replace(/\W/g,'').slice(0,2)}</span>`; }
 
@@ -373,8 +442,15 @@
     };
 
     window.rerunSearch = () => {
-      // 검색바는 프로토타입 — 현재 파라미터로 재조회(스크롤 상단)
-      window.scrollTo({top:0, behavior:'smooth'});
+      const to = editSel.to, from = editSel.from || 'ICN';
+      const dep = document.getElementById('abDep').value;
+      const ret = document.getElementById('abRet').value;
+      if(!to){ alert('도착지를 선택해주세요'); return; }
+      if(!dep){ alert('가는날을 선택해주세요'); return; }
+      if(ret && ret < dep){ alert('오는날은 가는날 이후로 선택해주세요'); return; }
+      const p = new URLSearchParams({ from, to, dep, adult:SQ.adult, child:SQ.child, infant:SQ.infant });
+      if(ret) p.set('ret', ret);
+      location.href = 'airhotel.html?' + p.toString();
     };
 
     // init

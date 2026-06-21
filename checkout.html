@@ -852,14 +852,26 @@
     `).join('');
 
     const sub = items.reduce((s, i) => s + i.price, 0);
-    const discount = Math.round(sub * 0.07);
-    const total = sub - discount;
-
-    document.getElementById('sumRows').innerHTML = `
-      <div class="sum-row"><span>소계</span><span>${krw(sub)}</span></div>
-      <div class="sum-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
-      <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>
-    `;
+    let total, rowsHtml;
+    if(pkg.source === 'airhotel' && pkg.separateTotal){
+      // 항공+호텔 동적 결합 — 실제 묶음 할인율 표시 (따로 예약 대비)
+      const separate = pkg.separateTotal;
+      total = pkg._explicitTotal || sub;
+      const saved = Math.max(0, separate - total);
+      const pct = pkg.bundleDiscountPct || Math.round(saved / separate * 100);
+      rowsHtml = `
+        <div class="sum-row"><span>따로 예약 시 (항공+호텔)</span><span style="text-decoration:line-through;color:#9CA3AF;">${krw(separate)}</span></div>
+        <div class="sum-row discount"><span>🧳 항공+호텔 묶음 할인 (-${pct}%)</span><span>- ${krw(saved)}</span></div>
+        <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>`;
+    } else {
+      const discount = Math.round(sub * 0.07);
+      total = sub - discount;
+      rowsHtml = `
+        <div class="sum-row"><span>소계</span><span>${krw(sub)}</span></div>
+        <div class="sum-row discount"><span>번들 할인 (-7%)</span><span>- ${krw(discount)}</span></div>
+        <div class="sum-row"><span>여행자 수</span><span>성인 ${paxCount}명</span></div>`;
+    }
+    document.getElementById('sumRows').innerHTML = rowsHtml;
     document.getElementById('sumTotal').textContent = krw(total);
     document.getElementById('mTotal').textContent = krw(total);
 
