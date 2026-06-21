@@ -1755,11 +1755,7 @@
   // 기존 fallback 로직 (호출 안 됨, 보존용)
   window._selectHotelLegacy = (hid) => {
     const h = HOTELS.find(x => x.id === hid);
-    const matchedProduct = (OMT.DATA?.PRODUCTS || []).find(p => p.hotel === hid);
-    if(matchedProduct){
-      location.href = 'product.html?id=' + matchedProduct.id;
-      return;
-    }
+    // 에어텔 패키지 폐지 — 장바구니 담기 fallback만 유지
     // Fallback: add to cart + redirect
     OMT.State.addToCart({
       productId: null, type:'호텔', orig: h.deals?.includes('original'),
