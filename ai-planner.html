@@ -992,9 +992,8 @@
           // 골프텔 모드 — 직접 ID 사용
           location.href = 'golftel.html?id=' + btn.dataset.id;
         } else {
-          const idx = +btn.dataset.idx;
-          const pid = productIds[idx] || productIds[0];
-          location.href = 'product.html?id=' + pid;
+          // 에어텔 패키지 폐지 — 골프텔 목록으로 안전 라우팅
+          location.href = 'golftels.html';
         }
       });
     });
@@ -1107,7 +1106,7 @@
                   ${recs.map(r => {
                     const v = row.get(r);
                     const isPrice = row.lb.includes('가격');
-                    return `<td style="padding:14px 10px;color:#1A1A1A;font-weight:${isPrice?'900':'600'};border-bottom:1px solid #F3F4F6;${isPrice?'color:#FF6B35;font-family:\\'JetBrains Mono\\',monospace;':''}">${v}</td>`;
+                    return `<td style="padding:14px 10px;color:#1A1A1A;font-weight:${isPrice?'900':'600'};border-bottom:1px solid #F3F4F6;${isPrice?'color:#FF6B35;font-family:\'JetBrains Mono\',monospace;':''}">${v}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
