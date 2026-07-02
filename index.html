@@ -115,6 +115,7 @@
       display:inline-flex; align-items:center; gap:8px;
       font-weight: 900; font-size: 22px; letter-spacing:-0.02em;
       color: var(--ink);
+      white-space:nowrap; flex-shrink:0;
     }
     .logo-mark{
       width:34px; height:34px; border-radius:10px;
@@ -125,11 +126,13 @@
     }
     .logo-mark::after{content:"O";}
     .gnb{
-      display:flex; align-items:center; gap:6px; margin-left:16px;
+      display:flex; align-items:center; gap:2px; margin-left:12px;
+      min-width:0; flex-wrap:nowrap;
     }
     .gnb a{
-      padding: 10px 14px; border-radius: 10px;
-      font-weight: 600; font-size: 15px; color: var(--ink-2);
+      padding: 8px 11px; border-radius: 10px;
+      font-weight: 600; font-size: 14px; color: var(--ink-2);
+      white-space:nowrap; flex-shrink:0;
       transition: background .15s, color .15s;
     }
     .gnb a:hover{background: var(--bg-soft); color: var(--ink);}
@@ -855,14 +858,10 @@
 
       <nav class="gnb" aria-label="주요 메뉴">
         <a href="golftels.html" style="color:#0B6E4F;font-weight:900;">⛳ 골프텔</a>
-        <a href="country.html?c=japan">일본</a>
-        <a href="country.html?c=vietnam">베트남</a>
-        <a href="country.html?c=thailand">태국</a>
-        <a href="country.html?c=philippines">필리핀</a>
-        <a href="feed.html">▶ 피드</a>
         <a href="flights.html">✈️ 항공</a>
         <a href="hotels.html">🏨 호텔</a>
         <a href="airhotel.html">🧳 항공+호텔</a>
+        <a href="feed.html">▶ 피드</a>
       </nav>
 
       <div class="header-actions">
