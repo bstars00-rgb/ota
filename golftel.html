@@ -340,6 +340,9 @@
       margin-top:14px;padding:14px;background:var(--bg-soft);border-radius:var(--radius-sm);
     }
     .opt-block .lb{font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .room-count-hint{margin-top:8px;font-size:12px;font-weight:700;color:var(--ink-2);line-height:1.5;}
+    .room-count-hint b{color:var(--golf-dark,#0B6E4F);}
+    .room-count-hint .odd{color:var(--warning,#F59E0B);}
     .room-list, .tee-list{display:flex;flex-direction:column;gap:6px;}
     .room-item, .tee-item{
       display:flex;align-items:center;justify-content:space-between;
@@ -1246,6 +1249,7 @@
                     </div>
                   `).join('')}
                 </div>
+                <div id="roomCountHint" class="room-count-hint"></div>
               </div>
 
               <!-- 티타임 슬롯은 좌측 메인 콘텐츠로 이동 -->
@@ -1255,7 +1259,7 @@
                 <div class="at-switch"></div>
                 <div class="at-text">
                   <div class="at-title">항공권 함께 예약</div>
-                  <div class="at-sub" id="airSub">+ 인천 왕복 항공 약 ${(getAirEstimate()).toLocaleString('ko-KR')}원/인</div>
+                  <div class="at-sub" id="airSub">+ 예상 왕복 항공료 약 ${(getAirEstimate()).toLocaleString('ko-KR')}원/인 · 실제 항공편은 결제 단계에서 선택</div>
                 </div>
               </div>
 
@@ -1288,6 +1292,7 @@
       bindCheckinDate();
       renderTeeSlots();
       bindFAQ();
+      updateTotal();
     }
 
     // ===== 체크인 날짜 picker =====
@@ -1659,18 +1664,28 @@
     function updateTeeMiniSummary(){
       const el = document.getElementById('teeMiniSummary');
       if(!el) return;
+      const g = D.GOLFTELS.find(x => x.id === id);
       if(selectedSlots.length === 0){
         el.classList.remove('on');
         el.innerHTML = '';
         return;
       }
+      const dayLabels = ['일','월','화','수','목','금','토'];
       el.classList.add('on');
-      el.innerHTML = `<div style="font-weight:900;margin-bottom:4px;">✓ 선택된 티오프</div>` +
-        selectedSlots.map(s => `
-          <div class="tms-line">
-            ${WINDOW_LABEL[s.window] || ''} ${s.time} · ${s.courseName.replace(/^[^a-zA-Z가-힣]+/,'')}
-          </div>
-        `).join('');
+      // 티오프 = 라운드별(1일 1라운드) 티타임. i번째 선택 = R{i+1} = 체크인+i일
+      el.innerHTML = `<div style="font-weight:900;margin-bottom:5px;">선택된 티오프 <span style="font-weight:700;color:var(--ink-3);font-size:11px;">· 1일 1라운드 (같은 시간도 날짜가 다르면 OK)</span></div>` +
+        selectedSlots.map((s, i) => {
+          const d = _slotDate(i);
+          const dstr = d ? `${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]})` : '';
+          return `
+            <div class="tms-line">
+              <span style="display:inline-block;min-width:78px;font-weight:900;color:var(--golf-dark,#0B6E4F);">R${i+1} · ${dstr}</span>
+              ${WINDOW_LABEL[s.window] || ''} ${s.time} · ${s.courseName.replace(/^[^a-zA-Z가-힣]+/,'')}
+            </div>`;
+        }).join('') +
+        (g && selectedSlots.length < g.rounds
+          ? `<div style="font-size:11px;color:var(--warning,#F59E0B);font-weight:700;margin-top:5px;">R${selectedSlots.length+1}~R${g.rounds} 티오프를 더 선택하세요 (${g.rounds - selectedSlots.length}개 남음)</div>`
+          : '');
     }
 
     function bindTeeFilters(){
@@ -1740,10 +1755,21 @@
     function updateTotal(){
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
-      const room = g.roomOptions?.[selectedRoomIdx] || { supplement:0 };
+      const room = g.roomOptions?.[selectedRoomIdx] || { supplement:0, type:'2인 1실' };
       const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
       document.getElementById('totalPrice').textContent = (per * pax).toLocaleString('ko-KR') + '원';
       document.getElementById('bpPrice').innerHTML = per.toLocaleString('ko-KR') + '원<small> ~</small>';
+      // 필요 객실 수 = ceil(인원 / 객실 정원) — 인원과 객실 유형의 관계 명확화
+      const hint = document.getElementById('roomCountHint');
+      if(hint){
+        const occ = parseInt((String(room.type || '').match(/(\d+)\s*인/) || [])[1]) || 2;
+        const villas = Math.ceil(pax / occ);
+        const remainder = pax % occ;
+        const oddNote = (occ > 1 && remainder !== 0)
+          ? ` <span class="odd">· 잔여 ${remainder}인은 1객실 단독 사용</span>`
+          : '';
+        hint.innerHTML = `${room.type} 기준 · 필요 객실 <b>${villas}개</b> / ${pax}인${oddNote}<br>요금은 <b>1인 요금 × ${pax}인</b>으로 계산돼요`;
+      }
     }
 
     function bookNow(){
