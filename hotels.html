@@ -488,32 +488,6 @@
 
   <div class="popup-backdrop" id="popupBackdrop" onclick="closePopups()"></div>
 
-  <!-- 🆕 시트립 스타일 트러스트 시그널 (전체 width) -->
-  <section style="background:#fff;border-bottom:1px solid #E5E7EB;padding:16px 0;">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
-      <div style="text-align:center;padding:8px;">
-        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">1,624,549</div>
-        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">전 세계 숙소</div>
-      </div>
-      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
-        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">164M+</div>
-        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">실 리뷰 데이터</div>
-      </div>
-      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
-        <div style="font-size:20px;font-weight:900;color:#FF6B35;font-family:'JetBrains Mono',monospace;">⭐ 4.7</div>
-        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">평균 평점</div>
-      </div>
-      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
-        <div style="font-size:20px;font-weight:900;color:#10B981;font-family:'JetBrains Mono',monospace;">💰 최저가</div>
-        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">차액 100% 환급</div>
-      </div>
-      <div style="text-align:center;padding:8px;border-left:1px solid #E5E7EB;">
-        <div style="font-size:20px;font-weight:900;color:#3B82F6;font-family:'JetBrains Mono',monospace;">📞 24/7</div>
-        <div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px;">카톡 한국어 상담</div>
-      </div>
-    </div>
-  </section>
-
   <!-- 🆕 인기 도시 그리드 (시트립 스타일 9 권역) -->
   <section style="background:linear-gradient(180deg,#FAFBFC,#fff);border-bottom:1px solid #E5E7EB;padding:28px 0;">
     <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
@@ -1633,6 +1607,7 @@
      HOTEL CARDS RENDER
      ============================================================= */
   const galleryIndexes = {};
+  const compareState = new Set();   // 호텔 비교 선택 (render()보다 먼저 선언 — TDZ 방지)
 
   function render(){
     const results = applyFilters();
@@ -1969,9 +1944,8 @@
 
   /* =============================================================
      🆕 호텔 비교 모드 (Trip.com 스타일) — 최대 4개 비교
+     (compareState 선언은 render() 호출보다 앞으로 이동 — TDZ 방지)
      ============================================================= */
-  const compareState = new Set();
-
   window.toggleCompare = (e, hid) => {
     e.stopPropagation();
     if(compareState.has(hid)){
