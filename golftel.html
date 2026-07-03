@@ -343,6 +343,42 @@
     .room-count-hint{margin-top:8px;font-size:12px;font-weight:700;color:var(--ink-2);line-height:1.5;}
     .room-count-hint b{color:var(--golf-dark,#0B6E4F);}
     .room-count-hint .odd{color:var(--warning,#F59E0B);}
+    /* 항공편 선택 (골프+항공) */
+    .air-flight-card{margin-top:8px;border:1.5px solid var(--golf,#0B6E4F);border-radius:12px;padding:12px 14px;background:#fff;display:none;}
+    .air-flight-card.on{display:block;}
+    .afc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .afc-route{font-size:12px;font-weight:900;color:var(--ink);}
+    .afc-change{font-size:12px;font-weight:800;color:var(--golf,#0B6E4F);cursor:pointer;background:none;border:none;padding:0;}
+    .afc-body{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
+    .afc-t{text-align:center;}
+    .afc-t b{display:block;font-size:15px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+    .afc-t span{font-size:10px;color:var(--ink-3);font-weight:700;}
+    .afc-mid{text-align:center;font-size:10px;color:var(--ink-3);font-weight:700;line-height:1.4;}
+    .afc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+    .afc-air{font-size:11px;color:var(--ink-2);font-weight:800;}
+    .afc-price{font-size:13px;font-weight:900;color:var(--golf-dark,#0B6E4F);font-variant-numeric:tabular-nums;}
+    .afc-price small{font-size:10px;color:var(--ink-3);font-weight:700;}
+    /* 항공편 선택 모달 */
+    .afm-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;}
+    .afm-overlay.on{display:flex;}
+    .afm{background:#fff;border-radius:16px;width:min(560px,100%);max-height:calc(100vh - 48px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+    .afm-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;}
+    .afm-head h3{margin:0;font-size:16px;font-weight:900;}
+    .afm-head .sub{font-size:11px;color:var(--ink-3);font-weight:700;margin-top:3px;}
+    .afm-close{font-size:22px;color:var(--ink-3);cursor:pointer;background:none;border:none;line-height:1;}
+    .afm-body{padding:8px 10px;overflow-y:auto;flex:1;}
+    .afm-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:10px;align-items:center;padding:12px;border:1.5px solid var(--line);border-radius:12px;margin:6px 6px;cursor:pointer;transition:border-color .15s, box-shadow .15s;}
+    .afm-row:hover{border-color:var(--ink-3);}
+    .afm-row.on{border-color:var(--golf,#0B6E4F);box-shadow:0 0 0 3px rgba(11,110,79,.12);}
+    .afm-logo{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#0B6E4F,#3AA07A);color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;}
+    .afm-times{font-size:14px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+    .afm-times small{font-size:11px;color:var(--ink-3);font-weight:700;}
+    .afm-meta{font-size:11px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+    .afm-dur{font-size:11px;color:var(--ink-2);font-weight:700;text-align:center;white-space:nowrap;}
+    .afm-price{font-size:15px;font-weight:900;color:var(--golf-dark,#0B6E4F);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+    .afm-price small{display:block;font-size:10px;color:var(--ink-3);font-weight:700;}
+    .afm-badge{font-size:9px;font-weight:900;color:#fff;background:var(--golf,#0B6E4F);padding:1px 6px;border-radius:4px;margin-left:5px;}
+    .afm-foot{padding:12px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);font-weight:700;text-align:center;}
     .room-list, .tee-list{display:flex;flex-direction:column;gap:6px;}
     .room-item, .tee-item{
       display:flex;align-items:center;justify-content:space-between;
@@ -1259,9 +1295,10 @@
                 <div class="at-switch"></div>
                 <div class="at-text">
                   <div class="at-title">항공권 함께 예약</div>
-                  <div class="at-sub" id="airSub">+ 예상 왕복 항공료 약 ${(getAirEstimate()).toLocaleString('ko-KR')}원/인 · 실제 항공편은 결제 단계에서 선택</div>
+                  <div class="at-sub" id="airSub">+ 예상 왕복 항공료 약 ${(getAirEstimate()).toLocaleString('ko-KR')}원/인 · 켜면 실제 항공편을 선택해요</div>
                 </div>
               </div>
+              <div class="air-flight-card" id="airFlightCard"></div>
 
               <div class="pax-row">
                 <span class="lb">인원</span>
@@ -1717,6 +1754,7 @@
     // ===== State =====
     let pax = 2;
     let airOn = false;
+    let selectedAirFlight = null;  // 골프+항공 선택 항공편
     let selectedRoomIdx = 0;  // roomOptions[0] = 기본 (2인 1실)
     let selectedSlots = [];   // [{ slotKey, window, time, courseId, courseName, price, includesLabel }]
     let teeFilter = 'all';
@@ -1732,6 +1770,111 @@
       updateTotal();
     }
 
+    // ===== 골프 + 항공: 실시간 항공편 선택 =====
+    const GOLFTEL_AIRPORT = { okinawa:'OKA', fukuoka:'FUK', tokyo:'NRT', osaka:'KIX', nagoya:'NGO', sapporo:'CTS', danang:'DAD', phuquoc:'PQC', hanoi:'HAN', nhatrang:'CXR', bangkok:'BKK', pattaya:'BKK', chiangmai:'CNX', phuket:'HKT', cebu:'CEB', clark:'MNL', manila:'MNL', boracay:'KLO' };
+    const COUNTRY_AIRPORT_FALLBACK = { japan:'NRT', vietnam:'SGN', thailand:'BKK', philippines:'MNL' };
+    function golftelAirport(g){ return GOLFTEL_AIRPORT[g.city] || COUNTRY_AIRPORT_FALLBACK[g.country] || 'NRT'; }
+    function golftelFlights(g){
+      const ap = golftelAirport(g);
+      let list = (D.FLIGHTS || []).filter(f => f.from === 'ICN' && f.to === ap);
+      // 노선 mock이 없으면 추정가 기준 3편 합성 (결정론적)
+      if(!list.length){
+        const base = getAirEstimate();
+        const c = ap.charCodeAt(0) + ap.charCodeAt(1) + ap.charCodeAt(2);
+        list = [
+          { id:'syn-1', code:'7C', number:'7C'+(300+c%80), from:'ICN', to:ap, outDep:'07:10', outArr:'11:00', outDur:'4h 50m', retDep:'12:20', retArr:'16:10', retDur:'4h 50m', stops:0, price: Math.round(base*0.82/1000)*1000, class:'economy' },
+          { id:'syn-2', code:'KE', number:'KE'+(100+c%80), from:'ICN', to:ap, outDep:'09:20', outArr:'13:05', outDur:'4h 45m', retDep:'14:30', retArr:'18:20', retDur:'4h 50m', stops:0, price: base, class:'economy' },
+          { id:'syn-3', code:'OZ', number:'OZ'+(200+c%80), from:'ICN', to:ap, outDep:'11:40', outArr:'15:30', outDur:'4h 50m', retDep:'16:50', retArr:'20:40', retDur:'4h 50m', stops:0, price: Math.round(base*1.12/1000)*1000, class:'economy' }
+        ];
+      }
+      return list.slice().sort((a,b) => a.price - b.price);
+    }
+    const AIRLINE_NAME = code => (D.AIRLINES?.[code]?.name) || code;
+
+    function ensureAirModal(){
+      if(document.getElementById('airFlightModal')) return;
+      const ov = document.createElement('div');
+      ov.className = 'afm-overlay'; ov.id = 'airFlightModal';
+      ov.addEventListener('click', (e) => { if(e.target === ov) closeAirFlightModal(); });
+      ov.innerHTML = `
+        <div class="afm">
+          <div class="afm-head">
+            <div><h3 id="afmTitle">항공편 선택</h3><div class="sub" id="afmSub"></div></div>
+            <button class="afm-close" onclick="closeAirFlightModal()" aria-label="닫기">×</button>
+          </div>
+          <div class="afm-body" id="afmBody"></div>
+          <div class="afm-foot">인천(ICN) 출발 왕복 · 성인 1인 기준 · 세금·유류할증료 포함 · 실시간 시세</div>
+        </div>`;
+      document.body.appendChild(ov);
+    }
+    window.openAirFlightModal = () => {
+      const g = D.GOLFTELS.find(x => x.id === id);
+      if(!g) return;
+      ensureAirModal();
+      const ap = golftelAirport(g);
+      const cityName = (D.CITIES?.[ap]?.name) || g.city;
+      document.getElementById('afmTitle').textContent = `인천 → ${cityName} 항공편`;
+      document.getElementById('afmSub').textContent = `${g.nights}박 ${g.nights+1}일 일정 · 왕복 · ${golftelFlights(g).length}편`;
+      renderAirFlightRows(g);
+      document.getElementById('airFlightModal').classList.add('on');
+    };
+    window.closeAirFlightModal = () => {
+      const m = document.getElementById('airFlightModal');
+      if(m) m.classList.remove('on');
+    };
+    function renderAirFlightRows(g){
+      const flights = golftelFlights(g);
+      const minP = Math.min(...flights.map(f => f.price));
+      document.getElementById('afmBody').innerHTML = flights.map(f => {
+        const sel = selectedAirFlight && selectedAirFlight.id === f.id;
+        const cheapest = f.price === minP;
+        return `
+          <div class="afm-row ${sel ? 'on' : ''}" onclick="pickAirFlight('${f.id}')">
+            <div class="afm-logo">${(f.code || '').replace(/\W/g,'').slice(0,2)}</div>
+            <div>
+              <div class="afm-times">${f.outDep} → ${f.outArr} <small>${f.stops === 0 ? '직항' : f.stops + '회 경유'}</small></div>
+              <div class="afm-meta">${AIRLINE_NAME(f.code)} ${f.number}${cheapest ? '<span class="afm-badge">최저가</span>' : ''}</div>
+            </div>
+            <div class="afm-dur">${f.outDur}</div>
+            <div class="afm-price">${f.price.toLocaleString('ko-KR')}<small>원/인</small></div>
+          </div>`;
+      }).join('');
+    }
+    window.pickAirFlight = (fid) => {
+      const g = D.GOLFTELS.find(x => x.id === id);
+      const f = golftelFlights(g).find(x => x.id === fid);
+      if(!f) return;
+      selectedAirFlight = f;
+      updateAirCard();
+      updateTotal();
+      closeAirFlightModal();
+    };
+    function updateAirCard(){
+      const card = document.getElementById('airFlightCard');
+      if(!card) return;
+      if(!airOn || !selectedAirFlight){ card.classList.remove('on'); card.innerHTML = ''; return; }
+      const g = D.GOLFTELS.find(x => x.id === id);
+      const ap = golftelAirport(g);
+      const f = selectedAirFlight;
+      card.classList.add('on');
+      card.innerHTML = `
+        <div class="afc-head">
+          <span class="afc-route">선택한 항공편 · ICN ⇌ ${ap}</span>
+          <button class="afc-change" onclick="openAirFlightModal()">변경</button>
+        </div>
+        <div class="afc-body">
+          <div class="afc-t"><b>${f.outDep}</b><span>ICN</span></div>
+          <div class="afc-mid">${f.outDur}<br>${f.stops === 0 ? '직항' : f.stops + '회'}</div>
+          <div class="afc-t"><b>${f.outArr}</b><span>${ap}</span></div>
+        </div>
+        <div class="afc-foot">
+          <span class="afc-air">${AIRLINE_NAME(f.code)} ${f.number}</span>
+          <span class="afc-price">${f.price.toLocaleString('ko-KR')}<small>원/인 왕복</small></span>
+        </div>`;
+    }
+    // 항공 1인 요금 (선택 항공편 우선, 미선택 시 추정가)
+    function airPerPerson(){ return airOn ? (selectedAirFlight ? selectedAirFlight.price : getAirEstimate()) : 0; }
+
     function toggleAir(){
       airOn = !airOn;
       const t = document.getElementById('airToggle');
@@ -1743,11 +1886,16 @@
         label.classList.add('air');
         cta.classList.add('air');
         cta.textContent = '골프투어로 예약 →';
+        const g = D.GOLFTELS.find(x => x.id === id);
+        if(!selectedAirFlight) selectedAirFlight = golftelFlights(g)[0] || null;
+        updateAirCard();
+        openAirFlightModal();   // 실제 항공편 선택창 오픈
       } else {
         label.textContent = '⛳ 골프텔 (호텔+골프)';
         label.classList.remove('air');
         cta.classList.remove('air');
         cta.textContent = '예약 진행하기 →';
+        updateAirCard();
       }
       updateTotal();
     }
@@ -1756,7 +1904,7 @@
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
       const room = g.roomOptions?.[selectedRoomIdx] || { supplement:0, type:'2인 1실' };
-      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
+      const per = g.pricePerPerson + (room.supplement || 0) + airPerPerson();
       document.getElementById('totalPrice').textContent = (per * pax).toLocaleString('ko-KR') + '원';
       document.getElementById('bpPrice').innerHTML = per.toLocaleString('ko-KR') + '원<small> ~</small>';
       // 필요 객실 수 = ceil(인원 / 객실 정원) — 인원과 객실 유형의 관계 명확화
@@ -1777,7 +1925,7 @@
       if(!g) return;
       const productType = airOn ? 'golftel-air' : 'golftel';
       const room = g.roomOptions?.[selectedRoomIdx] || { type:'2인 1실', supplement:0 };
-      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
+      const per = g.pricePerPerson + (room.supplement || 0) + airPerPerson();
       const total = per * pax;
 
       // localStorage에 임시 저장 → checkout이 읽음
@@ -1802,7 +1950,16 @@
           // 선택 슬롯들 (각 라운딩별 시간·코스) — ELLIS 백엔드가 골프장에 부킹 요청
           selectedSlots: selectedSlots.map(s => ({
             window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price
-          }))
+          })),
+          // 골프+항공: 선택한 실제 항공편 (미선택 시 null → 추정가 사용)
+          airPerPerson: airPerPerson(),
+          flight: (airOn && selectedAirFlight) ? {
+            code: selectedAirFlight.code, number: selectedAirFlight.number,
+            from: selectedAirFlight.from, to: selectedAirFlight.to,
+            outDep: selectedAirFlight.outDep, outArr: selectedAirFlight.outArr, outDur: selectedAirFlight.outDur,
+            retDep: selectedAirFlight.retDep, retArr: selectedAirFlight.retArr, retDur: selectedAirFlight.retDur,
+            stops: selectedAirFlight.stops, price: selectedAirFlight.price, airline: AIRLINE_NAME(selectedAirFlight.code)
+          } : null
         }));
       } catch(e){}
 
@@ -1814,7 +1971,7 @@
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
       const room = g.roomOptions?.[selectedRoomIdx] || { type:'2인 1실', supplement:0 };
-      const per = g.pricePerPerson + (room.supplement || 0) + (airOn ? getAirEstimate() : 0);
+      const per = g.pricePerPerson + (room.supplement || 0) + airPerPerson();
       const total = per * pax;
       const productType = airOn ? 'golftel-air' : 'golftel';
       const skuLabel = airOn ? 'GOLFTEL_AIR' : 'GOLFTEL';
@@ -1826,7 +1983,7 @@
         orig: D.OWNERSHIP[g.country]?.model === 'direct',
         img: g.images?.[0],
         name: g.name + (airOn ? ' (+ 항공)' : ''),
-        sub: `${g.hotelName} · ⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박 · ${room.type}`,
+        sub: `${g.hotelName} · ⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박 · ${room.type}${airOn && selectedAirFlight ? ' · ✈ ' + AIRLINE_NAME(selectedAirFlight.code) + ' ' + selectedAirFlight.number : ''}`,
         dates: '날짜 미정 · 결제 시 선택',
         pax: '성인 ' + pax + '명',
         paxCount: pax,
@@ -1838,7 +1995,12 @@
         nights: g.nights,
         roomOption: room.type,
         ownership: D.OWNERSHIP[g.country]?.model,
-        selectedSlots: selectedSlots.map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price }))
+        selectedSlots: selectedSlots.map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price })),
+        flight: (airOn && selectedAirFlight) ? {
+          code: selectedAirFlight.code, number: selectedAirFlight.number, from: selectedAirFlight.from, to: selectedAirFlight.to,
+          outDep: selectedAirFlight.outDep, outArr: selectedAirFlight.outArr, outDur: selectedAirFlight.outDur, stops: selectedAirFlight.stops,
+          price: selectedAirFlight.price, airline: AIRLINE_NAME(selectedAirFlight.code)
+        } : null
       });
 
       // 토스트 + 장바구니 이동 옵션
