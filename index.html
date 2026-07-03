@@ -130,6 +130,7 @@
       min-width:0; flex-wrap:nowrap;
     }
     .gnb a{
+      display:inline-flex; align-items:center; gap:6px;
       padding: 8px 11px; border-radius: 10px;
       font-weight: 600; font-size: 14px; color: var(--ink-2);
       white-space:nowrap; flex-shrink:0;
@@ -137,6 +138,9 @@
     }
     .gnb a:hover{background: var(--bg-soft); color: var(--ink);}
     .gnb a.active{color: var(--primary);}
+    .gnb-ico{width:16px;height:16px;flex-shrink:0;}
+    .nav-ico{width:18px;height:18px;flex-shrink:0;vertical-align:-4px;margin-right:9px;}
+    .drawer-list a{display:flex;align-items:center;}
     .header-actions{
       margin-left:auto;
       display:flex; align-items:center; gap:8px;
@@ -857,15 +861,15 @@
       </a>
 
       <nav class="gnb" aria-label="주요 메뉴">
-        <a href="golftels.html" style="color:#0B6E4F;font-weight:900;">⛳ 골프텔</a>
-        <a href="flights.html">✈️ 항공</a>
-        <a href="hotels.html">🏨 호텔</a>
-        <a href="airhotel.html">🧳 항공+호텔</a>
-        <a href="feed.html">▶ 피드</a>
+        <a href="golftels.html" style="color:#0B6E4F;font-weight:900;"><svg class="gnb-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>골프텔</a>
+        <a href="flights.html"><svg class="gnb-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>항공</a>
+        <a href="hotels.html"><svg class="gnb-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>호텔</a>
+        <a href="airhotel.html"><svg class="gnb-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2"/><path d="M8 18V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v14"/><path d="M10 20h4"/><circle cx="9" cy="21" r="1"/><circle cx="15" cy="21" r="1"/></svg>항공+호텔</a>
+        <a href="feed.html"><svg class="gnb-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>피드</a>
       </nav>
 
       <div class="header-actions">
-        <a href="mobile.html" class="btn-ghost" title="모바일 앱 미리보기">📱</a>
+        <a href="mobile.html" class="btn-ghost" title="모바일 앱 미리보기" aria-label="모바일 앱 미리보기"><svg class="no-icon" style="width:18px;height:18px;vertical-align:-4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg></a>
         <a href="ai-planner.html" class="btn-ai">AI 플래너</a>
         <a href="login.html" class="btn-ghost">로그인</a>
         <a href="mypage.html" class="btn-ghost">마이페이지</a>
@@ -899,17 +903,17 @@
       </button>
     </div>
     <nav class="drawer-list">
-      <a href="golftels.html" style="color:#0B6E4F;font-weight:900;">⛳ 골프텔 (메인)</a>
+      <a href="golftels.html" style="color:#0B6E4F;font-weight:900;"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>골프텔 (메인)</a>
       <a href="country.html?c=japan">미식의 나라 · 일본</a>
       <a href="country.html?c=vietnam">휴양의 나라 · 베트남</a>
       <a href="country.html?c=thailand">미소의 나라 · 태국</a>
       <a href="country.html?c=philippines">섬의 나라 · 필리핀</a>
-      <a href="ai-planner.html">✦ AI 여행 플래너</a>
-      <a href="feed.html">▶ 크리에이터 피드</a>
-      <a href="flights.html">✈️ 항공권</a>
-      <a href="hotels.html">🏨 호텔</a>
-      <a href="airhotel.html">🧳 항공+호텔</a>
-      <a href="mypage.html">👤 마이페이지</a>
+      <a href="ai-planner.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>AI 여행 플래너</a>
+      <a href="feed.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>크리에이터 피드</a>
+      <a href="flights.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>항공권</a>
+      <a href="hotels.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>호텔</a>
+      <a href="airhotel.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2"/><path d="M8 18V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v14"/><path d="M10 20h4"/><circle cx="9" cy="21" r="1"/><circle cx="15" cy="21" r="1"/></svg>항공+호텔</a>
+      <a href="mypage.html"><svg class="nav-ico no-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>마이페이지</a>
       <a href="creator.html">크리에이터 파트너 신청</a>
     </nav>
     <div class="drawer-foot">
