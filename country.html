@@ -69,7 +69,7 @@
       border-bottom: 1px solid var(--line);
     }
     .header-inner{height: var(--header-h); display:flex; align-items:center; gap:24px;}
-    .logo{display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; letter-spacing:-0.02em; color: var(--ink);}
+    .logo{display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; letter-spacing:-0.02em; color: var(--ink); white-space:nowrap; flex-shrink:0;}
     .logo-mark{
       width:34px; height:34px; border-radius:10px;
       background: linear-gradient(135deg, var(--primary), #FF9A6C);
@@ -77,8 +77,8 @@
       box-shadow: 0 4px 12px rgba(255,107,53,.35);
     }
     .logo-mark::after{content:"O";}
-    .gnb{display:flex; align-items:center; gap:6px; margin-left:16px;}
-    .gnb a{padding:10px 14px; border-radius:10px; font-weight:600; font-size:15px; color: var(--ink-2); transition: background .15s, color .15s;}
+    .gnb{display:flex; align-items:center; gap:6px; margin-left:16px; flex-wrap:nowrap; min-width:0;}
+    .gnb a{padding:10px 14px; border-radius:10px; font-weight:600; font-size:15px; color: var(--ink-2); white-space:nowrap; flex-shrink:0; transition: background .15s, color .15s;}
     .gnb a:hover{background: var(--bg-soft); color: var(--ink);}
     .gnb a.active{color: var(--primary); background: var(--primary-soft);}
     .header-actions{margin-left:auto; display:flex; align-items:center; gap:8px;}
