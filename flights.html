@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>항공권 검색 | 오마이트립</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <!-- 시트립 스타일 폰트 (Pretendard) -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
@@ -29,7 +29,7 @@
     button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
     input,select,textarea{font-family:inherit;}
     .container{max-width:var(--max-w);margin:0 auto;padding:0 24px;}
-    .mono{font-family:'JetBrains Mono',monospace;}
+    .mono{font-variant-numeric:tabular-nums;letter-spacing:-0.01em;}
 
     .header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
     .header-inner{height:60px;display:flex;align-items:center;gap:20px;}
@@ -79,7 +79,7 @@
     .city-dd .dd-main{font-size:14px;font-weight:800;color:var(--ink);}
     .city-dd .dd-main b{color:var(--primary);}
     .city-dd .dd-sub{font-size:11px;color:var(--ink-3);margin-top:1px;}
-    .city-dd .dd-code{font-size:11px;color:var(--ink-3);font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+    .city-dd .dd-code{font-size:11px;color:var(--ink-3);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;flex-shrink:0;}
     .city-dd .dd-empty{padding:28px 16px;text-align:center;color:var(--ink-3);font-size:13px;}
 
     /* 검색 로딩 오버레이 (시트립 패턴) */
@@ -109,7 +109,7 @@
     .city-btn{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--ink-2);text-align:left;cursor:pointer;transition:background .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease);}
     .city-btn:hover{background:var(--bg-soft);border-color:var(--primary);color:var(--primary);}
     .city-btn.on{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:900;}
-    .city-btn .code{display:block;font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+    .city-btn .code{display:block;font-size:10px;color:var(--ink-3);font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:2px;}
     .city-btn.on .code{color:rgba(255,255,255,.85);}
     .city-search{width:100%;padding:12px 16px;border:2px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;outline:none;margin-bottom:18px;}
     .city-search:focus{border-color:var(--primary);}
@@ -122,7 +122,7 @@
     /* 날짜별 가격 표시 캘린더 (야놀자 패턴) */
     .cal-day{display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 0 4px;cursor:pointer;transition:all .12s;border-radius:8px;min-height:48px;}
     .cal-day .dnum{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-size:13px;font-weight:700;color:var(--ink-2);transition:all .12s;}
-    .cal-day .dprice{font-size:9px;font-weight:700;color:var(--ink-4);font-family:'JetBrains Mono',monospace;line-height:1;}
+    .cal-day .dprice{font-size:9px;font-weight:700;color:var(--ink-4);font-variant-numeric:tabular-nums;letter-spacing:-0.01em;line-height:1;}
     .cal-day:hover .dnum{background:var(--bg-soft);}
     .cal-day.sun .dnum{color:var(--danger);}
     .cal-day.past{cursor:not-allowed;}
@@ -171,7 +171,7 @@
     .pop-card:hover{border-color:var(--primary);transform:translateY(-4px);box-shadow:var(--shadow);}
     .pop-card .route{font-size:13px;font-weight:900;color:var(--ink);display:flex;align-items:center;gap:6px;}
     .pop-card .route .arrow{color:var(--primary);}
-    .pop-card .price{font-size:18px;font-weight:900;color:var(--primary);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+    .pop-card .price{font-size:18px;font-weight:900;color:var(--primary);margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;}
     .pop-card .meta{font-size:11px;color:var(--ink-3);margin-top:4px;}
 
     .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
@@ -457,7 +457,6 @@
         <button class="close" onclick="closeModal('calModal')">×</button>
       </div>
       <div class="modal-body">
-        <div id="calPriceHint" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--bg-soft);border-radius:10px;font-size:12px;color:var(--ink-2);font-weight:700;">💡 출발지·도착지를 먼저 선택하면 날짜별 최저가가 표시돼요.</div>
         <div class="cal-nav">
           <button onclick="calPrev()">‹ 이전</button>
           <button onclick="calNext()">다음 ›</button>
@@ -686,32 +685,8 @@
         return d;
       });
       wrap.innerHTML = months.map(d => renderMonth(d)).join('');
-      const hint = document.getElementById('calPriceHint');
-      if(hint) hint.style.display = (state.from && state.to) ? 'none' : 'block';
       updateDateSummary();
     }
-
-    // 선택된 노선의 실제 최저가 (출발지·도착지 모두 선택돼야 가격 표시)
-    function routeBase(){
-      if(!state.from || !state.to) return null;
-      const fl = (window.OMT?.DATA?.FLIGHTS || []).filter(f => f.from === state.from.code && f.to === state.to.code);
-      if(fl.length) return Math.min(...fl.map(f => f.price));
-      // 노선 직접 매칭 없으면 도착지 기준 최저가로 추정
-      const byTo = (window.OMT?.DATA?.FLIGHTS || []).filter(f => f.to === state.to.code);
-      return byTo.length ? Math.min(...byTo.map(f => f.price)) : 380000;
-    }
-    // 날짜별 mock 최저가 — 노선 최저가(base)를 중심으로 변동 (결정론적)
-    function dayPrice(date, base){
-      const t = new Date(); t.setHours(0,0,0,0);
-      const diff = Math.round((date - t) / 86400000);
-      const wave = Math.sin(diff * 0.5) * (base * 0.16);
-      const dow = date.getDay();
-      const weekend = (dow === 0 || dow === 6) ? base * 0.13 : 0;
-      const noise = (diff % 7 === 0 ? -base * 0.24 : 0) + (diff % 11 === 0 ? base * 0.16 : 0);
-      return Math.max(Math.round((base + wave + weekend + noise) / 100) * 100, Math.round(base * 0.7));
-    }
-    // 만원 단위 축약 (셀 폭 대응): 542,600 → "54.3만"
-    function priceShort(p){ return (p / 10000).toFixed(1) + '만'; }
 
     function renderMonth(d){
       const y = d.getFullYear(), m = d.getMonth();
@@ -720,18 +695,6 @@
       const startDow = first.getDay();
       const daysInMonth = last.getDate();
       const today = new Date(); today.setHours(0,0,0,0);
-      // 노선(출발지·도착지)이 선택돼야 날짜별 요금 표시 (미선택 시 가격 숨김)
-      const base = routeBase();
-      // 이번 달 내 최저가 일자 1건 표시 (노선 선택 시에만)
-      let cheapestKey = null, cheapestVal = Infinity;
-      if(base){
-        for(let day = 1; day <= daysInMonth; day++){
-          const date = new Date(y, m, day);
-          if(date < today) continue;
-          const p = dayPrice(date, base);
-          if(p < cheapestVal){ cheapestVal = p; cheapestKey = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
-        }
-      }
       const dowHtml = ['일','월','화','수','목','금','토'].map((n, i) =>
         `<div class="cal-dow ${i===0?'sun':''}">${n}</div>`
       ).join('');
@@ -749,10 +712,8 @@
         if(state.depDate === dateKey) cls += ' start';
         if(state.retDate === dateKey) cls += ' end';
         if(state.depDate && state.retDate && dateKey > state.depDate && dateKey < state.retDate) cls += ' in-range';
-        if(base && !past && dateKey === cheapestKey) cls += ' cheapest';
         const onclick = past ? '' : `onclick="pickDate('${dateKey}')"`;
-        const priceHtml = (base && !past) ? `<span class="dprice">${priceShort(dayPrice(date, base))}</span>` : '';
-        cells.push(`<div class="${cls}" ${onclick}><span class="dnum">${day}</span>${priceHtml}</div>`);
+        cells.push(`<div class="${cls}" ${onclick}><span class="dnum">${day}</span></div>`);
       }
       return `
         <div class="cal-month">
@@ -947,7 +908,7 @@
         const color = isCheapest ? 'var(--success)' : isWeekend ? 'var(--danger)' : 'var(--primary)';
         return `
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;" onclick="pickTrendDate('${d.date.toISOString().slice(0,10)}')">
-            <div style="font-size:10px;font-weight:800;color:${isCheapest?'var(--success)':'var(--ink-3)'};font-family:'JetBrains Mono',monospace;">${Math.round(d.price/1000)}K</div>
+            <div style="font-size:10px;font-weight:800;color:${isCheapest?'var(--success)':'var(--ink-3)'};font-variant-numeric:tabular-nums;letter-spacing:-0.01em;">${Math.round(d.price/1000)}K</div>
             <div style="width:100%;height:${heightPct}%;min-height:6px;background:${color};border-radius:4px 4px 0 0;transition:all .2s;opacity:${isCheapest?1:.7};"></div>
             <div style="font-size:10px;color:${isCheapest?'var(--success)':'var(--ink-4)'};font-weight:${isCheapest?900:700};">${d.date.getMonth()+1}/${d.date.getDate()}<br><span style="font-size:9px;">${dow}</span></div>
           </div>
@@ -1018,15 +979,15 @@
               <div style="font-size:12px;color:var(--ink-3);font-weight:700;">노선</div>
               <div style="font-size:16px;font-weight:900;color:var(--ink);margin-top:2px;display:flex;align-items:center;gap:8px;">
                 ${fromCity} <span style="color:var(--primary);">→</span> ${toCity}
-                <span style="font-size:11px;color:var(--ink-3);font-weight:700;font-family:'JetBrains Mono',monospace;margin-left:auto;">${state.from?.code || 'ICN'}-${state.to?.code || 'NGO'}</span>
+                <span style="font-size:11px;color:var(--ink-3);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-left:auto;">${state.from?.code || 'ICN'}-${state.to?.code || 'NGO'}</span>
               </div>
-              <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">현재 최저가 <span style="color:var(--primary);font-weight:900;font-family:'JetBrains Mono',monospace;">289,000원</span> · 평균 412,000원</div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">현재 최저가 <span style="color:var(--primary);font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;">289,000원</span> · 평균 412,000원</div>
             </div>
 
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:900;color:var(--ink-2);display:block;margin-bottom:6px;">💸 목표 가격</label>
               <div style="display:flex;align-items:center;gap:6px;">
-                <input type="number" id="paTarget" value="350000" min="100000" step="10000" style="flex:1;padding:12px 14px;border:2px solid var(--line);border-radius:10px;font-size:16px;font-weight:800;outline:none;font-family:'JetBrains Mono',monospace;" />
+                <input type="number" id="paTarget" value="350000" min="100000" step="10000" style="flex:1;padding:12px 14px;border:2px solid var(--line);border-radius:10px;font-size:16px;font-weight:800;outline:none;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;" />
                 <span style="font-size:14px;font-weight:900;color:var(--ink-3);">원 이하</span>
               </div>
               <div style="display:flex;gap:6px;margin-top:8px;">
