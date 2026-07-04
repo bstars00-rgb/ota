@@ -416,6 +416,21 @@
     .opt-check input{width:16px;height:16px;accent-color:var(--golf);}
 
     /* 필터 칩 */
+    /* 라운드 선택 탭 (R1/R2/R3 …) */
+    .tee-round-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .tee-round-tab{flex:1;min-width:130px;text-align:left;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;transition:border-color .2s var(--ease),box-shadow .2s var(--ease);}
+    .tee-round-tab:hover{border-color:var(--golf);}
+    .tee-round-tab.active{border-color:var(--golf,#0B6E4F);box-shadow:0 0 0 3px rgba(11,110,79,.12);}
+    .tee-round-tab .rt-r{font-size:12px;font-weight:900;color:var(--golf-dark,#0B6E4F);}
+    .tee-round-tab .rt-date{font-size:11px;color:var(--ink-3);font-weight:700;margin-left:4px;}
+    .tee-round-tab .rt-pick{font-size:12px;font-weight:800;color:var(--ink);margin-top:3px;}
+    .tee-round-tab .rt-pick.empty{color:var(--ink-4,#B6BAC1);font-weight:700;}
+    .tee-round-tab.done{border-color:rgba(11,110,79,.4);background:#F0FDF4;}
+    /* 코스 필터 */
+    .tee-course-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .tee-course-chip{padding:6px 14px;border-radius:var(--radius-pill);border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:800;color:var(--ink-2);cursor:pointer;transition:all .2s var(--ease);}
+    .tee-course-chip:hover{border-color:var(--golf);color:var(--golf);}
+    .tee-course-chip.on{background:var(--golf,#0B6E4F);border-color:var(--golf,#0B6E4F);color:#fff;}
     .tee-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
     .tw{
       padding:8px 16px;border-radius:var(--radius-pill);border:1.5px solid var(--line);background:#fff;
@@ -891,12 +906,16 @@
             ${(g.teeTimeWindows || []).length ? `
               <section class="tee-section" id="teeSection">
                 <div class="tee-section-head">
-                  <h3>🕐 티오프 선택 <span class="tee-required">선호 ${g.rounds}슬롯 (선택 사항)</span></h3>
+                  <h3>🕐 티오프 선택 <span class="tee-required">라운드별 · ${g.rounds}R (선택 사항)</span></h3>
                   <div class="tee-options">
                     <label class="opt-check"><input type="checkbox" id="optCheapest"> 최저가만</label>
                     <label class="opt-check"><input type="checkbox" id="optRealtime"> 실시간 예약</label>
                   </div>
                 </div>
+                <!-- 라운드 선택 (R1/R2/R3 …) — 라운드별로 티오프 지정 -->
+                <div class="tee-round-tabs" id="teeRoundTabs"></div>
+                <!-- 코스 필터 (전체 / 코스별) — 섞임 방지 -->
+                <div class="tee-course-filter" id="teeCourseFilter"></div>
                 <div class="tee-filter" id="teeFilter">
                   <button type="button" class="tw on" data-w="all">전체</button>
                   ${g.teeTimeWindows.map(t => {
@@ -1518,8 +1537,8 @@
       const teeOff = g.operatingInfo?.teeOff || {};
       const courseIds = g.courseIds || [];
       const slots = [];
-      // 현재 선택된 슬롯 수(=라운딩 인덱스)를 기준으로 다음 라운딩 일자 계산
-      const nextRoundIdx = selectedSlots.length;
+      // 현재 지정 중인 라운드(activeRound)의 일자 기준으로 할증/날짜 계산
+      const nextRoundIdx = activeRound;
       const roundDate = _slotDate(nextRoundIdx);
       const dayKind = roundDate ? _dayKind(roundDate, g) : 'weekday';
       let surcharge = 0;
@@ -1585,9 +1604,13 @@
       // 1. 모든 슬롯 생성
       let allSlots = generateAllSlots(g);
 
-      // 2. 필터 적용
+      // 2. 필터 적용 (시간대)
       if(teeFilter !== 'all'){
         allSlots = allSlots.filter(s => s.window === teeFilter);
+      }
+      // 2-1. 코스 필터 (섞임 방지)
+      if(teeCourse !== 'all'){
+        allSlots = allSlots.filter(s => s.courseId === teeCourse);
       }
 
       // 3. "최저가만" — 코스 중복 제거 후 전체 최저가 슬롯만 노출 (가장 저렴한 시간대)
@@ -1625,17 +1648,18 @@
         : headerDayKind === 'weekend'
         ? `<span style="margin-left:8px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:900;background:#FEE2E2;color:#B91C1C;">📅 주말 +10%</span>`
         : `<span style="margin-left:8px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:900;background:#E0F2FE;color:#0369A1;">📅 주중 기본가</span>`;
-      const nextR = (allSlots[0]?.roundIdx ?? 0) + 1;
-      const roundHint = checkinDate
-        ? `<div style="font-size:12px;color:var(--ink-2);font-weight:700;margin-bottom:10px;">${nextR}라운딩 슬롯 (체크인 +${(allSlots[0]?.roundIdx ?? 0)}일) ${dayBadge}</div>`
-        : '';
+      const rd = _slotDate(activeRound);
+      const dayLabels = ['일','월','화','수','목','금','토'];
+      const rdStr = rd ? `${rd.getMonth()+1}/${rd.getDate()}(${dayLabels[rd.getDay()]})` : '';
+      const roundHint = `<div style="font-size:13px;font-weight:900;color:var(--ink);margin-bottom:10px;"><span style="color:var(--golf-dark,#0B6E4F);">R${activeRound+1}</span> 라운드 티오프 선택 ${rdStr ? `<span style="font-weight:700;color:var(--ink-3);">· ${rdStr}</span>` : ''} ${dayBadge}</div>`;
 
       grid.innerHTML = roundHint + groups.map(([hourLabel, slots]) => `
         <div class="tee-hour-group">
           <div class="th-head">${hourLabel}</div>
           <div class="th-slots">
             ${slots.map(s => {
-              const on = selectedSlots.some(x => x.key === s.key);
+              const cur = selectedSlots[activeRound];
+              const on = !!cur && cur.time === s.time && cur.courseId === s.courseId;
               const discount = s.window !== 'morning';
               const courseClass = s.courseIdx === 0 ? '' : 'alt';
               const dayMarker = s.dayKind === 'holiday' ? 'weekend' : (s.dayKind === 'weekend' ? 'weekend' : '');
@@ -1662,39 +1686,77 @@
         </div>
       `).join('');
 
-      // 6. 슬롯 클릭 → 다중 선택 (rounds 횟수까지)
+      // 6. 슬롯 클릭 → 활성 라운드(R{activeRound+1})에 지정 — 같은 시간도 다른 라운드엔 지정 가능
       grid.querySelectorAll('.ts-card').forEach(card => {
         card.addEventListener('click', () => {
-          const key = card.dataset.key;
-          const existing = selectedSlots.findIndex(x => x.key === key);
-          if(existing >= 0){
-            // 이미 선택됨 → 해제
-            selectedSlots.splice(existing, 1);
+          const slot = allSlots.find(s => s.key === card.dataset.key);
+          if(!slot) return;
+          const cur = selectedSlots[activeRound];
+          if(cur && cur.time === slot.time && cur.courseId === slot.courseId){
+            selectedSlots[activeRound] = undefined;   // 재클릭 → 해당 라운드 해제
           } else {
-            // 새로 선택 — rounds 초과 시 가장 오래된 것 자동 제거 (FIFO)
-            if(selectedSlots.length >= g.rounds){
-              selectedSlots.shift();
-            }
-            const slot = allSlots.find(s => s.key === key);
-            if(slot) selectedSlots.push(slot);
+            selectedSlots[activeRound] = { ...slot, round: activeRound };
+            const next = firstEmptyRound(g);           // 다음 미지정 라운드로 자동 이동
+            if(next !== -1) activeRound = next;
           }
-          renderTeeSlots();   // 재렌더 (선택 상태 반영)
+          renderRoundTabs();
+          renderTeeSlots();
           updateTeeCounter();
           updateTeeMiniSummary();
         });
       });
 
+      renderRoundTabs();
+      renderCourseFilter();
       updateTeeCounter();
       updateTeeMiniSummary();
     }
+
+    function firstEmptyRound(g){
+      for(let i = 0; i < g.rounds; i++){ if(!selectedSlots[i]) return i; }
+      return -1;
+    }
+
+    function renderRoundTabs(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      const wrap = document.getElementById('teeRoundTabs');
+      if(!g || !wrap) return;
+      const dayLabels = ['일','월','화','수','목','금','토'];
+      let html = '';
+      for(let i = 0; i < g.rounds; i++){
+        const d = _slotDate(i);
+        const dstr = d ? `${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]})` : '';
+        const pick = selectedSlots[i];
+        const done = !!pick;
+        html += `
+          <button type="button" class="tee-round-tab ${i===activeRound?'active':''} ${done?'done':''}" onclick="setActiveRound(${i})">
+            <div><span class="rt-r">R${i+1}</span><span class="rt-date">${dstr}</span></div>
+            <div class="rt-pick ${done?'':'empty'}">${done ? `${pick.time} · ${pick.courseName.replace(/^[^가-힣A-Za-z]+/,'')}` : '티오프 미지정'}</div>
+          </button>`;
+      }
+      wrap.innerHTML = html;
+    }
+    window.setActiveRound = (i) => { activeRound = i; renderRoundTabs(); renderTeeSlots(); };
+
+    function renderCourseFilter(){
+      const g = D.GOLFTELS.find(x => x.id === id);
+      const wrap = document.getElementById('teeCourseFilter');
+      if(!g || !wrap) return;
+      const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)).filter(Boolean);
+      if(courses.length < 2){ wrap.innerHTML = ''; return; }   // 코스 1개면 필터 숨김
+      let html = `<button type="button" class="tee-course-chip ${teeCourse==='all'?'on':''}" onclick="setTeeCourse('all')">전체 코스</button>`;
+      html += courses.map(c => `<button type="button" class="tee-course-chip ${teeCourse===c.id?'on':''}" onclick="setTeeCourse('${c.id}')">${c.name.replace(/^[^가-힣A-Za-z]+/,'')}</button>`).join('');
+      wrap.innerHTML = html;
+    }
+    window.setTeeCourse = (cid) => { teeCourse = cid; renderCourseFilter(); renderTeeSlots(); };
 
     function updateTeeCounter(){
       const g = D.GOLFTELS.find(x => x.id === id);
       if(!g) return;
       const el = document.getElementById('teeCounter');
       if(!el) return;
-      const n = selectedSlots.length;
-      el.textContent = `슬롯 ${n}/${g.rounds} 선택`;
+      const n = selectedSlots.filter(Boolean).length;
+      el.textContent = `티오프 ${n}/${g.rounds} 지정`;
       el.classList.toggle('full', n === g.rounds);
     }
 
@@ -1702,26 +1764,30 @@
       const el = document.getElementById('teeMiniSummary');
       if(!el) return;
       const g = D.GOLFTELS.find(x => x.id === id);
-      if(selectedSlots.length === 0){
+      if(!g) return;
+      const picked = selectedSlots.filter(Boolean).length;
+      if(picked === 0){
         el.classList.remove('on');
         el.innerHTML = '';
         return;
       }
       const dayLabels = ['일','월','화','수','목','금','토'];
       el.classList.add('on');
-      // 티오프 = 라운드별(1일 1라운드) 티타임. i번째 선택 = R{i+1} = 체크인+i일
-      el.innerHTML = `<div style="font-weight:900;margin-bottom:5px;">선택된 티오프 <span style="font-weight:700;color:var(--ink-3);font-size:11px;">· 1일 1라운드 (같은 시간도 날짜가 다르면 OK)</span></div>` +
-        selectedSlots.map((s, i) => {
-          const d = _slotDate(i);
-          const dstr = d ? `${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]})` : '';
-          return `
-            <div class="tms-line">
-              <span style="display:inline-block;min-width:78px;font-weight:900;color:var(--golf-dark,#0B6E4F);">R${i+1} · ${dstr}</span>
-              ${WINDOW_LABEL[s.window] || ''} ${s.time} · ${s.courseName.replace(/^[^a-zA-Z가-힣]+/,'')}
-            </div>`;
-        }).join('') +
-        (g && selectedSlots.length < g.rounds
-          ? `<div style="font-size:11px;color:var(--warning,#F59E0B);font-weight:700;margin-top:5px;">R${selectedSlots.length+1}~R${g.rounds} 티오프를 더 선택하세요 (${g.rounds - selectedSlots.length}개 남음)</div>`
+      // 라운드별(1일 1라운드) — R{i+1} = 체크인+i일. 미지정 라운드는 회색 표시
+      let lines = '';
+      for(let i = 0; i < g.rounds; i++){
+        const d = _slotDate(i);
+        const dstr = d ? `${d.getMonth()+1}/${d.getDate()}(${dayLabels[d.getDay()]})` : '';
+        const s = selectedSlots[i];
+        lines += `
+          <div class="tms-line" style="${s?'':'opacity:.5;'}">
+            <span style="display:inline-block;min-width:78px;font-weight:900;color:var(--golf-dark,#0B6E4F);">R${i+1} · ${dstr}</span>
+            ${s ? `${WINDOW_LABEL[s.window] || ''} ${s.time} · ${s.courseName.replace(/^[^a-zA-Z가-힣]+/,'')}` : '<span style="color:var(--ink-4,#B6BAC1);font-weight:700;">티오프 미지정 (OMT가 최적 시간 확정)</span>'}
+          </div>`;
+      }
+      el.innerHTML = `<div style="font-weight:900;margin-bottom:5px;">라운드별 티오프 <span style="font-weight:700;color:var(--ink-3);font-size:11px;">· 1일 1라운드 (같은 시간도 날짜 다르면 OK)</span></div>` + lines +
+        (picked < g.rounds
+          ? `<div style="font-size:11px;color:var(--warning,#F59E0B);font-weight:700;margin-top:5px;">${g.rounds - picked}개 라운드 티오프 미지정 — 위 R탭에서 지정하거나 그대로 두면 OMT가 확정</div>`
           : '');
     }
 
@@ -1756,7 +1822,9 @@
     let airOn = false;
     let selectedAirFlight = null;  // 골프+항공 선택 항공편
     let selectedRoomIdx = 0;  // roomOptions[0] = 기본 (2인 1실)
-    let selectedSlots = [];   // [{ slotKey, window, time, courseId, courseName, price, includesLabel }]
+    let selectedSlots = [];   // 인덱스 = 라운드(0-based). selectedSlots[r] = 해당 라운드 티오프 (없으면 undefined)
+    let activeRound = 0;      // 현재 지정 중인 라운드 (R{activeRound+1})
+    let teeCourse = 'all';    // 코스 필터 ('all' | courseId)
     let teeFilter = 'all';
     let teeOptions = { cheapest:false, realtime:false };
     let checkinDate = null;   // Date object | null
@@ -1948,8 +2016,8 @@
           roomOption: room.type,
           roomSupplement: room.supplement || 0,
           // 선택 슬롯들 (각 라운딩별 시간·코스) — ELLIS 백엔드가 골프장에 부킹 요청
-          selectedSlots: selectedSlots.map(s => ({
-            window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price
+          selectedSlots: selectedSlots.filter(Boolean).map((s, i) => ({
+            round: i + 1, window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price
           })),
           // 골프+항공: 선택한 실제 항공편 (미선택 시 null → 추정가 사용)
           airPerPerson: airPerPerson(),
@@ -1995,7 +2063,7 @@
         nights: g.nights,
         roomOption: room.type,
         ownership: D.OWNERSHIP[g.country]?.model,
-        selectedSlots: selectedSlots.map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price })),
+        selectedSlots: selectedSlots.filter(Boolean).map(s => ({ window: s.window, time: s.time, courseId: s.courseId, courseName: s.courseName, price: s.price })),
         flight: (airOn && selectedAirFlight) ? {
           code: selectedAirFlight.code, number: selectedAirFlight.number, from: selectedAirFlight.from, to: selectedAirFlight.to,
           outDep: selectedAirFlight.outDep, outArr: selectedAirFlight.outArr, outDur: selectedAirFlight.outDur, stops: selectedAirFlight.stops,
