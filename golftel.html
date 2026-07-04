@@ -866,7 +866,7 @@
               <p class="subtitle">${g.tagline || ''}</p>
               <div class="quick-meta">
                 <span class="rating">★ ${(g.rating/2).toFixed(1)}</span>
-                <span>리뷰 ${g.reviews || 0}건</span>
+                <span>리뷰 ${(g.reviewStats?.count ?? (g.reviews || []).length ?? 0).toLocaleString('ko-KR')}건</span>
                 <span>· ${country.name || g.country} ${g.city}</span>
               </div>
             </div>
