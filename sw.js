@@ -3,7 +3,7 @@
 // 전략: data.js / state.js / 페이지는 stale-while-revalidate
 // 외부 (Unsplash 등) 은 network-first
 // ========================================
-const CACHE_NAME = 'omt-v2-2026-06-11';   // 버전 업 (offline 폴백 추가)
+const CACHE_NAME = 'omt-v3-2026-07-09';   // 버전 업 (크리에이터 어트리뷰션 state.js API + 영상으로 예약 페이지)
 const CORE_ASSETS = [
   './',
   './index.html',
