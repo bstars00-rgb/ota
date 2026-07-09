@@ -441,12 +441,26 @@
     .tw.on{background:#000;border-color:#000;color:#fff;}
 
     /* 시 단위 그룹 */
-    .tee-hour-group{margin-bottom:22px;}
+    .tee-hour-group{margin-bottom:10px;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
     .tee-hour-group:last-child{margin-bottom:0;}
-    .th-head{font-size:15px;font-weight:900;color:var(--ink);margin-bottom:10px;padding-left:2px;}
+    .th-head{
+      width:100%;display:flex;align-items:center;gap:10px;
+      font-size:15px;font-weight:900;color:var(--ink);
+      padding:12px 14px;cursor:pointer;text-align:left;
+      background:#FAFAFA;border:none;font-family:inherit;
+      transition:background .15s;
+    }
+    .th-head:hover{background:#F3F4F6;}
+    .th-sum{font-size:12px;font-weight:700;color:var(--ink-3);}
+    .th-sum .th-min{color:var(--golf-dark,#0B6E4F);font-weight:900;}
+    .th-picked{font-size:11px;font-weight:900;color:#fff;background:var(--golf,#0B6E4F);padding:2px 8px;border-radius:999px;}
+    .th-chev{margin-left:auto;font-size:13px;color:var(--ink-3);transition:transform .2s var(--ease);}
+    .tee-hour-group.collapsed .th-chev{transform:rotate(-90deg);}
+    .tee-hour-group.collapsed .th-slots{display:none;}
 
     .th-slots{
       display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;
+      padding:12px 14px;
     }
 
     /* 슬롯 카드 — 몽키 스타일 */
@@ -1658,9 +1672,25 @@
       const rdStr = rd ? `${rd.getMonth()+1}/${rd.getDate()}(${dayLabels[rd.getDay()]})` : '';
       const roundHint = `<div style="font-size:13px;font-weight:900;color:var(--ink);margin-bottom:10px;"><span style="color:var(--golf-dark,#0B6E4F);">R${activeRound+1}</span> 라운드 티오프 선택 ${rdStr ? `<span style="font-weight:700;color:var(--ink-3);">· ${rdStr}</span>` : ''} ${dayBadge}</div>`;
 
-      grid.innerHTML = roundHint + groups.map(([hourLabel, slots]) => `
-        <div class="tee-hour-group">
-          <div class="th-head">${hourLabel}</div>
+      // 아코디언 초기 상태 — 첫 렌더에서는 첫 그룹만 펼침 (스크롤 최소화)
+      if(expandedTeeHours === null){
+        expandedTeeHours = new Set(groups.length ? [groups[0][0]] : []);
+      }
+      const curSel = selectedSlots[activeRound];
+
+      grid.innerHTML = roundHint + groups.map(([hourLabel, slots]) => {
+        const minPrice = Math.min(...slots.map(s => s.price));
+        const rtCount = slots.filter(s => s.realTime).length;
+        const hasSelected = !!curSel && slots.some(s => s.time === curSel.time && s.courseId === curSel.courseId);
+        const open = expandedTeeHours.has(hourLabel) || hasSelected;
+        return `
+        <div class="tee-hour-group ${open ? '' : 'collapsed'}" data-hour="${hourLabel}">
+          <button type="button" class="th-head" onclick="toggleTeeHour(this)" aria-expanded="${open}">
+            ${hourLabel}
+            ${hasSelected ? `<span class="th-picked">✓ ${curSel.time} 선택됨</span>` : ''}
+            <span class="th-sum">${slots.length}개 슬롯 · 최저 <span class="th-min">${minPrice.toLocaleString('ko-KR')}원</span>${rtCount ? ` · ⚡ 실시간 ${rtCount}` : ''}</span>
+            <span class="th-chev" aria-hidden="true">▾</span>
+          </button>
           <div class="th-slots">
             ${slots.map(s => {
               const cur = selectedSlots[activeRound];
@@ -1689,7 +1719,7 @@
             }).join('')}
           </div>
         </div>
-      `).join('');
+      `;}).join('');
 
       // 6. 슬롯 클릭 → 활성 라운드(R{activeRound+1})에 지정 — 같은 시간도 다른 라운드엔 지정 가능
       grid.querySelectorAll('.ts-card').forEach(card => {
@@ -1716,6 +1746,17 @@
       updateTeeCounter();
       updateTeeMiniSummary();
     }
+
+    // 아코디언 토글 — 시(hour) 그룹 접기/펼치기 (재렌더 없이 DOM만, 상태는 Set에 보존)
+    window.toggleTeeHour = function(btn){
+      const grp = btn.closest('.tee-hour-group');
+      if(!grp) return;
+      const label = grp.dataset.hour;
+      const nowCollapsed = grp.classList.toggle('collapsed');
+      btn.setAttribute('aria-expanded', String(!nowCollapsed));
+      if(nowCollapsed) expandedTeeHours?.delete(label);
+      else expandedTeeHours?.add(label);
+    };
 
     function firstEmptyRound(g){
       for(let i = 0; i < g.rounds; i++){ if(!selectedSlots[i]) return i; }
@@ -1832,6 +1873,7 @@
     let teeCourse = 'all';    // 코스 필터 ('all' | courseId)
     let teeFilter = 'all';
     let teeOptions = { cheapest:false, realtime:false };
+    let expandedTeeHours = null;  // 아코디언 펼침 상태 (null = 첫 렌더에서 첫 그룹만 자동 펼침)
     let checkinDate = null;   // Date object | null
     const WEEKEND_SURCHARGE = 0.10;   // 주말 그린피 +10%
     const HOLIDAY_SURCHARGE = 0.15;   // 공휴일 그린피 +15%
