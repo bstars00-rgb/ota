@@ -402,6 +402,22 @@
       transition: background .15s;
     }
     .rec-book:hover{ background: var(--primary-dark); }
+    .rec-actions{ display:flex; gap:6px; align-items:center; }
+    .rec-wish, .rec-cart{
+      height: 38px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    .rec-wish{ width: 38px; font-size: 16px; color: var(--ink-3); }
+    .rec-wish:hover{ border-color: #FF3366; color: #FF3366; }
+    .rec-wish.active{ border-color: #FF3366; background: #FFF0F4; color: #FF3366; }
+    .rec-cart{ padding: 0 12px; color: var(--ink-2); }
+    .rec-cart:hover{ border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
 
     .rec-more{
       margin: 6px 0 14px 44px;
@@ -860,6 +876,18 @@
 
   /* ===== 골프 의도 감지 → GOLFTELS 추천으로 분기 ===== */
   const COUNTRY_SLUG = { '일본':'japan', '베트남':'vietnam', '태국':'thailand', '필리핀':'philippines' };
+
+  /* 티오프 가용 시간대 요약 — 골프 특화 제약을 카드에 노출 */
+  const TEE_WINDOW_LABELS = { morning:'모닝', afternoon:'애프터눈', twilight:'트와일라잇', night:'나이트' };
+  function teeOffSummary(g){
+    const windows = g.teeTimeWindows || [];
+    if(!windows.length) return '티오프 시간 예약 시 지정';
+    const teeOff = g.operatingInfo?.teeOff || {};
+    const first = windows[0];
+    const firstRange = teeOff[first] ? ` ${teeOff[first]}` : '';
+    const rest = windows.length > 1 ? ` 외 ${windows.length - 1}개 시간대` : '';
+    return `${TEE_WINDOW_LABELS[first] || first}${firstRange}${rest} · 라운드별 지정 가능`;
+  }
   function isGolfIntent(){
     const styleText = (state.style || '').toLowerCase();
     if(/골프|라운딩|티오프|⛳/.test(styleText)) return true;
@@ -891,6 +919,7 @@
         img: g.images?.[0],
         hotel: `${g.hotelName} (${g.nights}박)`,
         rounds: `${g.rounds}회 라운딩 · ${courses.join(' · ') || '명문 코스'}`,
+        teeoff: teeOffSummary(g),
         ownership: own.label,
         ownershipModel: own.model,
         price: g.pricePerPerson,
@@ -927,6 +956,7 @@
           <div class="rec-compo">
             <div><strong>🏨 호텔</strong>${r.hotel}</div>
             <div><strong>⛳ 골프</strong>${r.rounds}</div>
+            <div><strong>🕐 티오프</strong>${r.teeoff}</div>
             <div><strong>📦 SKU</strong>골프텔 (호텔 + 라운딩) — 항공 별도</div>
           </div>
           <div class="rec-price-row">
@@ -934,7 +964,11 @@
               <div class="rec-label">1인 (2인 1실)</div>
               <div class="rec-price">${r.price.toLocaleString('ko-KR')}원~</div>
             </div>
-            <button class="rec-book" data-id="${r.id}" data-gt="1">골프텔 상세 보기 →</button>
+            <div class="rec-actions">
+              <button class="rec-wish ${window.OMT?.State?.isWished(r.id) ? 'active' : ''}" data-wish="${r.id}" aria-label="찜하기" title="찜하기">${window.OMT?.State?.isWished(r.id) ? '♥' : '♡'}</button>
+              <button class="rec-cart" data-cart="${r.id}" aria-label="장바구니 담기" title="장바구니 담기">담기</button>
+              <button class="rec-book" data-id="${r.id}" data-gt="1">상세 보기 →</button>
+            </div>
           </div>
         </div>
       </article>
@@ -998,7 +1032,57 @@
       });
     });
 
+    // 찜 토글 — state.js wishlist와 연동 (마이페이지 저장여행과 동일 저장소)
+    group.querySelectorAll('.rec-wish').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(!window.OMT?.State){ showToast('찜 기능을 사용할 수 없어요'); return; }
+        window.OMT.State.toggleWishlist(btn.dataset.wish);
+        const wished = window.OMT.State.isWished(btn.dataset.wish);
+        btn.classList.toggle('active', wished);
+        btn.textContent = wished ? '♥' : '♡';
+        showToast(wished ? '♥ 찜 목록에 담았어요 · 마이페이지에서 확인' : '찜을 해제했어요');
+      });
+    });
+
+    // 장바구니 담기 — 대화에서 바로 결제 여정으로 연결
+    group.querySelectorAll('.rec-cart').forEach(btn => {
+      btn.addEventListener('click', () => addGolftelToCart(btn.dataset.cart));
+    });
+
     scrollToBottom();
+  }
+
+  /* =========================================================================
+     장바구니 담기 — golftel.html과 동일한 카트 아이템 스키마 사용
+     ========================================================================= */
+  function addGolftelToCart(golftelId){
+    const D = window.OMT?.DATA;
+    const g = D?.GOLFTELS?.find(x => x.id === golftelId);
+    if(!g || !window.OMT?.State){ showToast('상품 정보를 불러올 수 없어요'); return; }
+    const room = (g.roomOptions || []).find(r => r.isDefault) || (g.roomOptions || [])[0] || { type:'2인 1실', supplement:0 };
+    const pax = 2;
+    const total = (g.pricePerPerson + (room.supplement || 0)) * pax;
+    window.OMT.State.addToCart({
+      productId: g.id,
+      productType: 'golftel',
+      type: 'GOLFTEL',
+      orig: D.OWNERSHIP[g.country]?.model === 'direct',
+      img: g.images?.[0],
+      name: g.name,
+      sub: `${g.hotelName} · ⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박 · ${room.type}`,
+      dates: '날짜 미정 · 결제 시 선택',
+      pax: '성인 ' + pax + '명',
+      paxCount: pax,
+      price: total,
+      country: g.country,
+      city: g.city,
+      rounds: g.rounds,
+      nights: g.nights,
+      roomOption: room.type,
+      ownership: D.OWNERSHIP[g.country]?.model,
+      source: 'ai-planner'
+    });
+    showToast('🛒 장바구니에 담았어요 (성인 2명 기준) · 티오프는 상세에서 지정');
   }
 
   /* Render post-results follow-up actions */
@@ -1009,11 +1093,15 @@
       <button data-a="compare">⚖️ 3 상품 비교</button>
       <button data-a="refine">🔧 조건 바꾸기</button>
       <button data-a="save">💾 여행 저장</button>
+      <button data-a="cart">🛒 장바구니 가기</button>
       <button data-a="restart">↻ 처음부터</button>
     `;
     chatBody.appendChild(wrap);
     wrap.querySelector('[data-a="compare"]').addEventListener('click', () => {
       openCompareModal();
+    });
+    wrap.querySelector('[data-a="cart"]').addEventListener('click', () => {
+      location.href = 'cart.html';
     });
     wrap.querySelector('[data-a="refine"]').addEventListener('click', async () => {
       wrap.remove();
@@ -1478,7 +1566,7 @@
         await addBotMessage(`안녕하세요! 이전에 ${profile.bookingCount}번 예약하셨네요 ✦`);
         await addBotMessage(`${profile.favoriteCountry}을(를) 즐겨 가시는 것 같은데, 이번에도 비슷한 곳으로 추천드릴까요?`);
         renderQuickReplies([
-          { label:`✨ ${profile.favoriteCountry} 또 가기`, value: profile.favoriteCountry, then: state => { state.destination = profile.favoriteCountry; goTo('style'); } },
+          { label:`✨ ${profile.favoriteCountry} 또 가기`, handler: () => pickChoice(profile.favoriteCountry, 'destination', 'style') },
           ...FLOW.greeting.quickReplies
         ]);
       } else {
