@@ -1178,6 +1178,58 @@ GDPR/개인정보보호법 대응: 30일 후 PII 익명화 스케줄.
 
 ---
 
+### 7.7 크리에이터 어트리뷰션 (매직 링크) — `POST /attribution/touch` · `GET /attribution/conversions`
+
+> 프론트 프로토타입 대응: `state.js`의 `setCreatorRef / recordCreatorConversion / getCreatorConversions`
+> (localStorage 키 `omt_creator_ref_v1`, `omt_creator_conv_v1`). 실서버 전환 시 아래 API로 교체.
+
+**어트리뷰션 모델**: 라스트 클릭 · TTL 7일. 매직 링크 형식 `feed.html?ref={creator_id}&post={post_id}` (골프텔 상세 `golftel.html?id=...&ref=...`도 동일 파라미터).
+
+#### `POST /attribution/touch` (공개 — 세션 쿠키 기반)
+
+방문자가 매직 링크로 유입될 때 터치 기록. 예약 생성 시 서버가 유효 터치를 조회해 전환 귀속.
+
+**Request**:
+```json
+{ "creator_id": "cr-golf-jin", "post_id": "c6", "landing": "feed.html" }
+```
+
+**Response (200)**: `{ "ok": true, "data": { "touch_id": "tch_xxx", "expires_at": "2026-07-16T00:00:00+09:00" } }`
+
+#### `GET /attribution/conversions`
+
+**권한**: VIEWER+ (백오피스) / 크리에이터 본인 (크리에이터 콘솔)
+**Query**: `creator_id`, `from`, `to`, `ownership` (`direct|franchise`)
+
+**Response (200)**:
+```json
+{
+  "ok": true,
+  "data": {
+    "conversions": [
+      {
+        "id": "conv_xxx",
+        "creator_id": "cr-golf-jin",
+        "post_id": "c6",
+        "booking_number": "OMT-XXXXXXXX",
+        "product_id": "gt-th-pattaya-siamcc-4n",
+        "product_type": "golftel",
+        "ownership": "franchise",
+        "amount_krw": 2160000,
+        "commission_rate": 0.05,
+        "commission_krw": 108000,
+        "converted_at": "2026-07-09T14:00:00+09:00"
+      }
+    ],
+    "summary": { "count": 12, "amount_krw": 28400000, "commission_krw": 2130000 }
+  }
+}
+```
+
+**커미션 요율**: 직영(`direct`) 10% / 파트너(`franchise`) 5% — §7.2 정산 배치의 크리에이터 등급 보너스와 합산. 전환 레코드는 §7.1 크리에이터 정산의 원천 데이터.
+
+---
+
 ## 8. CMS API
 
 ### 8.1 `GET /cms/banners`

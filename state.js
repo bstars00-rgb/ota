@@ -33,7 +33,9 @@
     groupBookings: 'omt_group_bookings_v1', // 그룹(단체) 예약 — 4인+ 단체 골프투어
     priceAlerts:   'omt_price_alerts_v1',  // 항공 가격 알리미 (Trip.com 스타일)
     visitCount:    'omt_visit_count_v1',   // 재방문 카운터 (사이클 27)
-    miles:         'omt_miles_v1'          // 마일리지 잔액 + 적립/사용 이력 (단일 리워드)
+    miles:         'omt_miles_v1',         // 마일리지 잔액 + 적립/사용 이력 (단일 리워드)
+    creatorRef:    'omt_creator_ref_v1',   // 크리에이터 매직 링크 유입 (?ref= 라스트 클릭, 7일 유효)
+    creatorConversions: 'omt_creator_conv_v1' // 크리에이터 경유 예약 전환 기록 (커미션 산정용)
   };
 
   // ============================================================
@@ -86,6 +88,59 @@
     if(m.history.length > 50) m.history.length = 50;
     write(KEYS.miles, m);
     return m;
+  }
+
+  // ============================================================
+  // 🔗 크리에이터 어트리뷰션 (매직 링크 ?ref= 추적)
+  //    - 라스트 클릭 · 7일 유효 · 예약 생성 시 자동 전환 기록
+  //    - 커미션 요율: 직영 10% / 파트너 5% (creator-dashboard 표기와 동일, mock)
+  // ============================================================
+  const CREATOR_REF_TTL_DAYS = 7;
+  function setCreatorRef(creatorId, postId){
+    if(!creatorId) return null;
+    const entry = { creatorId, postId: postId || null, at: new Date().toISOString() };
+    write(KEYS.creatorRef, entry);
+    return entry;
+  }
+  function getCreatorRef(){
+    const ref = read(KEYS.creatorRef, null);
+    if(!ref) return null;
+    const ageDays = (Date.now() - new Date(ref.at).getTime()) / 86400000;
+    if(ageDays > CREATOR_REF_TTL_DAYS){ localStorage.removeItem(KEYS.creatorRef); return null; }
+    return ref;
+  }
+  function clearCreatorRef(){
+    localStorage.removeItem(KEYS.creatorRef);
+  }
+  function recordCreatorConversion(booking){
+    const ref = getCreatorRef();
+    if(!ref) return null;
+    const rate = booking.ownership === 'direct' ? 0.10 : 0.05;
+    const entry = {
+      id: 'conv-' + Date.now().toString(36),
+      creatorId: ref.creatorId,
+      postId: ref.postId,
+      bookingId: booking.id || null,
+      bookingNumber: booking.bookingNumber || null,
+      productId: booking.productId || null,
+      productName: booking.productName || null,
+      productType: booking.productType || null,
+      ownership: booking.ownership || null,
+      amount: booking.total || 0,
+      commissionRate: rate,
+      commission: Math.round((booking.total || 0) * rate),
+      at: new Date().toISOString()
+    };
+    const list = read(KEYS.creatorConversions, []);
+    list.unshift(entry);
+    if(list.length > 100) list.length = 100;
+    write(KEYS.creatorConversions, list);
+    notify('creatorConversion', entry);
+    return entry;
+  }
+  function getCreatorConversions(creatorId){
+    const list = read(KEYS.creatorConversions, []);
+    return creatorId ? list.filter(c => c.creatorId === creatorId) : list;
   }
 
   // ============================================================
@@ -608,6 +663,8 @@
     list.unshift(booking);
     write(KEYS.bookings, list);
     notify('bookings', list);
+    // 크리에이터 매직 링크 유입이 있으면 전환 자동 기록 (cart/checkout 공통)
+    try { recordCreatorConversion(booking); } catch(e){ console.warn('creator conversion record failed', e); }
     return booking;
   }
   function cancelBooking(id){
@@ -815,6 +872,9 @@
     addGroupMember, removeGroupMember, payGroupMember,
     // Price alerts (시트립 스타일)
     getPriceAlerts, addPriceAlert, removePriceAlert,
+    // Creator attribution (매직 링크 ?ref= 추적 + 전환 기록)
+    setCreatorRef, getCreatorRef, clearCreatorRef,
+    recordCreatorConversion, getCreatorConversions,
     // 🆕 사이클 27 — 시트립 추가 패턴
     getUserTier, getTierBenefit,
     getMiles, useMiles, earnMiles,

@@ -521,6 +521,7 @@
       title:'필리핀 세부 골프 패키지 완전 비교 - 단독 특가',
       description:'세부 3대 골프장 라운딩 3회 + 샹그릴라 막탄 4박. 경쟁사 대비 28% 저렴.',
       tags:['필리핀','골프'], countries:['philippines'],
+      golftelId:'gt-ph-cebu-alta-vista-4n',
       stats:{ likes:'6.2K', comments:'187', shares:'421', saves:'1.8K' },
       product:{
         type:'ORIGINAL', orig:true,
@@ -555,6 +556,7 @@
       title:'방콕 골프 4박5일 올인클루시브 실제 비용 공개',
       description:'시암 컨트리클럽 + 알파인 + 뉴스프링 3라운드. 캐디팁·그린피·카트 포함 80만원대.',
       tags:['태국','골프'], countries:['thailand'],
+      golftelId:'gt-th-pattaya-siamcc-4n',
       stats:{ likes:'4.2K', comments:'298', shares:'178', saves:'1.1K' },
       product:{
         type:'골프 패키지', orig:false,
@@ -800,13 +802,24 @@
     });
     // TODO: API 연동 - POST /api/creator/{name}/follow
   }
+  /* 크리에이터 매직 링크 — 이 링크 경유 예약은 크리에이터에게 커미션 귀속 */
+  function creatorIdByName(name){
+    return (OMT.DATA?.CREATORS || []).find(cr => cr.name === name)?.id || null;
+  }
+  function magicLinkFor(c){
+    const refId = creatorIdByName(c.creator.name);
+    const base = location.origin + location.pathname;
+    return refId ? `${base}?ref=${refId}&post=${c.id}` : base;
+  }
   function handleShare(c){
+    const url = magicLinkFor(c);
     if(navigator.share){
-      navigator.share({ title:c.title, text:c.description, url:location.href }).catch(()=>{});
+      navigator.share({ title:c.title, text:c.description, url }).catch(()=>{});
     } else {
-      navigator.clipboard?.writeText(location.href);
-      alert('링크가 복사되었습니다');
+      navigator.clipboard?.writeText(url);
+      alert('매직 링크가 복사되었습니다 — 이 링크로 들어온 예약은 크리에이터 수익으로 잡혀요');
     }
+    // TODO: API 연동 - POST /api/creator/magic-link { creatorId, postId }
   }
 
   /* =========================================================================
@@ -925,6 +938,17 @@
     if(!c) return;
     const p = c.product;
     const total = computeSheetTotal();
+    // 골프 포스트 → 골프텔 SKU 직행 (ref 붙여 어트리뷰션 유지)
+    const refId = creatorIdByName(c.creator.name);
+    const golftelCta = c.golftelId ? `
+      <a href="golftel.html?id=${c.golftelId}${refId ? '&ref=' + refId + '&post=' + c.id : ''}"
+         style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:linear-gradient(135deg,#075440,#0B6E4F);border-radius:12px;color:#fff;text-decoration:none;">
+        <span style="font-size:20px;">⛳</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:11px;font-weight:800;opacity:.8;">영상 속 그 골프장, 골프텔로 예약</span>
+          <span style="display:block;font-size:13px;font-weight:900;margin-top:1px;">티오프 직접 지정 + 실시간 객실 옵션 →</span>
+        </span>
+      </a>` : '';
     document.getElementById('sheetBody').innerHTML = `
       <div class="sheet-product">
         <div class="sp-img" style="background-image:url('${p.img}')"></div>
@@ -934,6 +958,7 @@
           <div class="sp-price">1인 ${krw(p.price)}~</div>
         </div>
       </div>
+      ${golftelCta}
 
       <div class="sheet-field">
         <label>출발 날짜</label>
@@ -1030,6 +1055,10 @@
       creatorId: c.creator.name
     };
 
+    // 피드에서 바로 결제 진입 시에도 크리에이터 어트리뷰션 설정 (checkout의 createBooking에서 전환 기록)
+    const shareRefId = creatorIdByName(c.creator.name);
+    if(shareRefId && OMT.State?.setCreatorRef) OMT.State.setCreatorRef(shareRefId, c.id);
+
     // TODO: API 연동 - POST /api/cart { source:'feed', creatorId, product, pax, date }
     sessionStorage.setItem('omt_package', JSON.stringify(payload));
     location.href = 'checkout.html';
@@ -1043,6 +1072,24 @@
       closeBookSheet();
     }
   });
+
+  /* =========================================================================
+     매직 링크 유입 캡처 — ?ref=크리에이터ID(&post=포스트ID)
+     이후 7일 내 예약은 해당 크리에이터 전환으로 기록 (state.js)
+     ========================================================================= */
+  (function captureCreatorRef(){
+    const params = new URLSearchParams(location.search);
+    const refId = params.get('ref');
+    if(!refId || !OMT.State?.setCreatorRef) return;
+    OMT.State.setCreatorRef(refId, params.get('post'));
+    const cr = (OMT.DATA?.CREATORS || []).find(x => x.id === refId);
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(26,26,26,.92);color:#fff;padding:10px 18px;border-radius:999px;font-size:12px;font-weight:700;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.35);';
+    t.textContent = cr ? `✨ ${cr.name}님 추천으로 접속했어요 — 예약 시 크리에이터를 응원하게 돼요` : '✨ 크리에이터 추천 링크로 접속했어요';
+    document.body.appendChild(t);
+    setTimeout(() => t.style.opacity = '0', 3200);
+    setTimeout(() => t.remove(), 3700);
+  })();
 
   /* =========================================================================
      INIT

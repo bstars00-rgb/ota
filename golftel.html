@@ -754,6 +754,11 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
+    // 크리에이터 매직 링크 유입 캡처 (?ref=) — 이후 예약은 해당 크리에이터 전환으로 기록 (state.js)
+    if(params.get('ref') && State?.setCreatorRef){
+      State.setCreatorRef(params.get('ref'), params.get('post'));
+    }
+
     // ===== Render =====
     function render(){
       const g = D.GOLFTELS.find(x => x.id === id);

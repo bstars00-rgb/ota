@@ -538,6 +538,20 @@
           <div id="golftelRecList" style="display:flex;flex-direction:column;gap:8px;"></div>
         </div>
 
+        <!-- 🔗 매직 링크 · 실전 전환 (localStorage 어트리뷰션 데모) -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-head" style="margin-bottom:12px;">
+            <h3 class="card-title">🔗 내 매직 링크</h3>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:10px;line-height:1.5;">이 링크로 들어온 방문자의 예약은 자동으로 내 수익에 귀속돼요 · 유효 7일 (라스트 클릭)</div>
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            <input id="magicLinkInput" readonly value="" aria-label="내 매직 링크" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;font-size:11px;color:rgba(255,255,255,.85);font-family:inherit;" />
+            <button id="magicLinkCopy" style="padding:8px 12px;background:var(--accent);color:#1A1A1A;border:none;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;flex-shrink:0;">복사</button>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:8px;">📈 매직 링크 실전 전환 <span style="font-weight:600;color:rgba(255,255,255,.45);">(이 브라우저 데모)</span></div>
+          <div id="liveConvList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
         <div class="payout-card">
           <div class="payout-title">다음 정산 예정</div>
           <div class="payout-amount" id="payoutAmount">0원</div>
@@ -703,6 +717,48 @@
       `;
     }).join('');
   }
+
+  /* ======================================================
+     🔗 매직 링크 · 실전 전환 (state.js 어트리뷰션)
+     ====================================================== */
+  const MY_CREATOR_ID = 'cr-me';  // 데모 콘솔 페르소나 (홍길동 · 리더보드 '나')
+  const magicLink = new URL('feed.html?ref=' + MY_CREATOR_ID, location.href).href;
+  document.getElementById('magicLinkInput').value = magicLink;
+  document.getElementById('magicLinkCopy').addEventListener('click', () => {
+    navigator.clipboard?.writeText(magicLink);
+    const btn = document.getElementById('magicLinkCopy');
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => btn.textContent = '복사', 1600);
+  });
+
+  function renderLiveConversions(){
+    const el = document.getElementById('liveConvList');
+    const convs = OMT.State.getCreatorConversions ? OMT.State.getCreatorConversions() : [];
+    if(!convs.length){
+      el.innerHTML = `<div style="padding:14px;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.15);border-radius:10px;font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;">아직 전환이 없어요.<br>매직 링크로 피드에 접속해 예약을 완료하면 여기에 실시간으로 잡혀요.</div>`;
+      return;
+    }
+    const nameOf = id => id === MY_CREATOR_ID ? '나' : ((OMT.DATA.CREATORS || []).find(c => c.id === id)?.name || id);
+    el.innerHTML = convs.slice(0, 5).map(v => {
+      const minAgo = Math.max(0, Math.round((Date.now() - new Date(v.at).getTime()) / 60000));
+      const dirTag = v.ownership === 'direct'
+        ? '<span style="padding:1px 5px;background:rgba(255,210,63,.18);color:var(--accent);border-radius:3px;font-weight:800;">⭐ 직영 10%</span>'
+        : '<span style="padding:1px 5px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-radius:3px;font-weight:800;">파트너 5%</span>';
+      return `
+        <div style="display:flex;gap:10px;padding:10px;background:rgba(255,255,255,.04);border-radius:10px;align-items:center;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${v.productName || v.productId || '상품'}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:3px;">${dirTag} · via ${nameOf(v.creatorId)} · ${fmtTime(minAgo)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:900;color:var(--accent);">+${krw(v.commission)}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);">판매 ${krw(v.amount)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  renderLiveConversions();
 
   /* ======================================================
      RECENT SALES
