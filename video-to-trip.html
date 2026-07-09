@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="영상으로 예약 - 골프 유튜브·블로그 링크를 붙여넣으면 영상 속 골프장을 인식해 골프텔 예약까지 연결해드려요" />
+  <title>영상으로 예약 | 오마이트립</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       Design Tokens (shared)
+       ========================================= */
+    :root{
+      --primary: #FF6B35;
+      --primary-dark: #E85826;
+      --primary-soft: #FFF0E8;
+      --secondary: #1E88E5;
+      --secondary-soft: #E3F2FD;
+      --accent: #FFD23F;
+      --ink: #1A1A1A;
+      --ink-2: #4B5563;
+      --ink-3: #9CA3AF;
+      --line: #E5E7EB;
+      --bg: #FFFFFF;
+      --bg-soft: #F7F7F9;
+      --direct: #0B6E4F;
+      --radius: 14px;
+      --radius-lg: 20px;
+      --shadow: 0 6px 20px rgba(0,0,0,.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.12);
+      --header-h: 64px;
+      --max-w: 880px;
+    }
+
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+      font-family:'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background: var(--bg-soft);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a{color:inherit; text-decoration:none;}
+    button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+    img{display:block; max-width:100%;}
+    input{font-family:inherit;}
+
+    .container{max-width: var(--max-w); margin: 0 auto; padding: 0 20px;}
+
+    /* Header */
+    .header{ background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; }
+    .header-inner{ height: var(--header-h); display:flex; align-items:center; gap:16px; }
+    .logo{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:18px; letter-spacing:-0.02em; }
+    .logo-mark{
+      width:30px; height:30px; border-radius:9px;
+      background: linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; display:grid; place-items:center; font-weight:900; font-size:16px;
+      box-shadow: 0 4px 12px rgba(255,107,53,.35);
+    }
+    .logo-mark::after{content:"O";}
+    .header-actions{margin-left:auto; display:flex; align-items:center; gap:6px;}
+    .btn-back{ padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color: var(--ink-2); }
+    .btn-back:hover{background: var(--bg-soft); color: var(--ink);}
+
+    /* Hero */
+    .hero{ padding: 44px 0 28px; text-align:center; }
+    .hero-badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:999px;
+      background: linear-gradient(135deg, var(--secondary-soft), var(--primary-soft));
+      font-size:12px; font-weight:800; color: var(--secondary);
+      margin-bottom:14px;
+    }
+    .hero h1{ margin:0 0 8px; font-size:32px; font-weight:900; letter-spacing:-0.03em; line-height:1.25; }
+    .hero h1 .grad{
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .hero p{ margin:0; font-size:14px; color:var(--ink-2); }
+
+    /* Input dock */
+    .paste-box{
+      max-width:640px; margin: 24px auto 0;
+      display:flex; gap:8px;
+      background:#fff; border:1.5px solid var(--line); border-radius:16px;
+      padding:8px 8px 8px 16px;
+      box-shadow: var(--shadow);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .paste-box:focus-within{ border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(30,136,229,.12), var(--shadow); }
+    .paste-box input{
+      flex:1; min-width:0; border:none; outline:none; background:transparent;
+      font-size:14px; color:var(--ink); padding:10px 0;
+    }
+    .paste-box button{
+      padding: 12px 22px; border-radius:12px;
+      background: var(--primary); color:#fff;
+      font-weight:900; font-size:14px; white-space:nowrap;
+      transition: background .15s;
+    }
+    .paste-box button:hover{ background: var(--primary-dark); }
+    .paste-hint{ margin-top:10px; font-size:11.5px; color:var(--ink-3); }
+
+    /* Sample chips */
+    .samples{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px; }
+    .samples button{
+      padding:10px 14px; background:#fff; border:1.5px solid var(--line); border-radius:999px;
+      font-weight:700; font-size:12.5px; color:var(--ink-2);
+      transition: all .15s;
+    }
+    .samples button:hover{ border-color: var(--secondary); color: var(--secondary); background: var(--secondary-soft); transform: translateY(-1px); }
+
+    /* Steps strip */
+    .how{ display:flex; justify-content:center; gap:22px; margin: 30px 0 10px; flex-wrap:wrap; }
+    .how .step{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--ink-2); }
+    .how .n{
+      width:22px; height:22px; border-radius:50%;
+      background:var(--ink); color:#fff;
+      display:grid; place-items:center; font-size:11px; font-weight:900;
+    }
+
+    /* Analyzing */
+    .analyzing{
+      max-width:560px; margin:26px auto;
+      background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg);
+      padding:22px 24px; box-shadow: var(--shadow);
+      display:none;
+    }
+    .analyzing.show{ display:block; animation: fadeUp .35s ease; }
+    .an-row{ display:flex; align-items:center; gap:12px; font-size:13.5px; color:var(--ink-2); padding:9px 0; }
+    .an-row .spin{
+      width:16px; height:16px; flex-shrink:0;
+      border:2px solid var(--line); border-top-color: var(--primary);
+      border-radius:50%; animation: spin .9s linear infinite;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+    .an-row.done .spin{ border-color:#10B981; border-top-color:#10B981; animation:none; }
+    .an-row.done::after{ content:"✓"; margin-left:auto; color:#10B981; font-weight:900; }
+    @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+    /* Results */
+    .results{ display:none; padding-bottom:70px; }
+    .results.show{ display:block; animation: fadeUp .45s ease; }
+
+    .creator-note{
+      max-width:640px; margin:0 auto 18px;
+      display:flex; align-items:center; gap:12px;
+      background: linear-gradient(135deg, #FFF8E7, #FFF3D6);
+      border:1.5px solid #F5D67B; border-radius:14px;
+      padding:12px 16px; font-size:12.5px; color:#7A5C0E; font-weight:700;
+    }
+    .creator-note .ca{
+      width:36px; height:36px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(135deg, var(--primary), #FF9A6C);
+      color:#fff; display:grid; place-items:center; font-weight:900; font-size:15px;
+    }
+
+    .sec-label{
+      font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--primary); margin: 26px 0 10px;
+    }
+    .entity-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+    .entity-chips span{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 13px; background:#fff; border:1.5px solid var(--line); border-radius:999px;
+      font-size:12.5px; font-weight:800; color:var(--ink);
+    }
+    .entity-chips span.hit{ border-color: var(--direct); background:#EAF5F1; color:var(--direct); }
+
+    /* Golftel match cards */
+    .match-grid{ display:grid; grid-template-columns: 1fr; gap:14px; }
+    .match-card{
+      background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden;
+      display:grid; grid-template-columns: 200px 1fr;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .match-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+    .match-card.primary{ border:2px solid var(--primary); box-shadow: 0 8px 24px rgba(255,107,53,.14); }
+    .mc-img{ background-size:cover; background-position:center; background-color:#eee; min-height:150px; }
+    .mc-body{ padding:16px 18px; display:flex; flex-direction:column; min-width:0; }
+    .mc-tags{ display:flex; gap:6px; margin-bottom:7px; flex-wrap:wrap; }
+    .mc-tag{ padding:3px 8px; border-radius:6px; font-size:10.5px; font-weight:900; }
+    .mc-tag.best{ background: linear-gradient(135deg, var(--primary), #FF9A6C); color:#fff; }
+    .mc-tag.direct{ background: linear-gradient(135deg,#075440,var(--direct)); color:#fff; }
+    .mc-tag.partner{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+    .mc-title{ font-size:16px; font-weight:900; letter-spacing:-0.01em; margin-bottom:8px; line-height:1.35; }
+    .mc-meta{ font-size:12px; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; margin-bottom:10px; flex:1; }
+    .mc-meta strong{ color:var(--ink); margin-right:4px; }
+    .mc-foot{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+      padding-top:10px; border-top:1px dashed var(--line);
+    }
+    .mc-price-lb{ font-size:11px; color:var(--ink-3); }
+    .mc-price{ font-size:19px; font-weight:900; color:var(--primary); letter-spacing:-0.02em; }
+    .mc-actions{ display:flex; gap:6px; align-items:center; }
+    .mc-wish, .mc-cart{
+      height:38px; border:1.5px solid var(--line); border-radius:10px; background:#fff;
+      font-weight:800; font-size:13px; white-space:nowrap; transition: all .15s;
+    }
+    .mc-wish{ width:38px; font-size:16px; color:var(--ink-3); }
+    .mc-wish:hover{ border-color:#FF3366; color:#FF3366; }
+    .mc-wish.active{ border-color:#FF3366; background:#FFF0F4; color:#FF3366; }
+    .mc-cart{ padding:0 12px; color:var(--ink-2); }
+    .mc-cart:hover{ border-color:var(--primary); color:var(--primary); background:var(--primary-soft); }
+    .mc-book{
+      padding:10px 16px; background:var(--primary); color:#fff; border-radius:10px;
+      font-weight:800; font-size:13px; white-space:nowrap; transition: background .15s;
+    }
+    .mc-book:hover{ background: var(--primary-dark); }
+
+    /* Itinerary */
+    .itin{
+      background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px;
+    }
+    .itin-row{ display:flex; gap:14px; padding:11px 0; border-bottom:1px dashed var(--line); }
+    .itin-row:last-child{ border-bottom:none; }
+    .itin-day{
+      width:52px; flex-shrink:0; text-align:center;
+      font-size:11px; font-weight:900; color:var(--primary);
+      background:var(--primary-soft); border-radius:8px;
+      padding:6px 0; height:fit-content;
+    }
+    .itin-info{ min-width:0; }
+    .itin-title{ font-size:13.5px; font-weight:800; }
+    .itin-desc{ font-size:12px; color:var(--ink-2); margin-top:2px; }
+    .itin-note{ margin-top:12px; font-size:11.5px; color:var(--ink-3); }
+
+    /* Bottom CTAs */
+    .next-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+    .next-actions a{
+      padding:12px 18px; border-radius:12px; font-weight:800; font-size:13px;
+      border:1.5px solid var(--line); background:#fff; color:var(--ink-2);
+      transition: all .15s;
+    }
+    .next-actions a:hover{ border-color:var(--secondary); color:var(--secondary); background:var(--secondary-soft); }
+    .next-actions a.primary{ background:var(--ink); color:#fff; border-color:var(--ink); }
+    .next-actions a.primary:hover{ background:#000; }
+
+    @media (max-width: 680px){
+      .hero h1{ font-size:24px; }
+      .paste-box{ flex-direction:column; padding:10px; }
+      .paste-box input{ padding:8px 6px; }
+      .match-card{ grid-template-columns:1fr; }
+      .mc-img{ min-height:150px; }
+      .mc-foot{ flex-direction:column; align-items:stretch; }
+      .mc-actions{ justify-content:stretch; }
+      .mc-actions .mc-book{ flex:1; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.01ms!important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- A11y: Skip link -->
+  <a class="skip-link" href="#omt-main">본문 바로가기</a>
+  <style>.skip-link{position:absolute;left:-9999px;top:0;padding:10px 16px;background:#1A1A1A;color:#fff;z-index:999;font-weight:700;font-size:13px;border-radius:0 0 8px 0;text-decoration:none;}.skip-link:focus{left:0;}</style>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="오마이트립 홈">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>오마이트립</span>
+      </a>
+      <div class="header-actions">
+        <a href="ai-planner.html" class="btn-back">✦ AI 플래너</a>
+        <a href="index.html" class="btn-back">← 홈</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="omt-main">
+    <!-- HERO + INPUT -->
+    <section class="hero container">
+      <span class="hero-badge">🎬 영상으로 예약 — 오마이트립 단독</span>
+      <h1>영상 속 그 골프장,<br><span class="grad">그대로 예약하세요</span></h1>
+      <p>골프 유튜브·블로그 링크를 붙여넣으면 영상 속 골프장을 인식해 골프텔로 연결해드려요</p>
+
+      <form class="paste-box" id="pasteForm">
+        <input id="pasteInput" type="text" placeholder="유튜브 · 블로그 · 인스타 링크 또는 '다낭 골프 브이로그'처럼 붙여넣기" aria-label="콘텐츠 링크 입력" />
+        <button type="submit">골프장 찾기 →</button>
+      </form>
+      <p class="paste-hint">프로토타입 데모 — 아래 샘플을 눌러 바로 체험해보세요</p>
+
+      <div class="samples" id="samples" aria-label="샘플 콘텐츠"></div>
+
+      <div class="how" aria-label="이용 방법">
+        <div class="step"><span class="n">1</span>링크 붙여넣기</div>
+        <div class="step"><span class="n">2</span>골프장·리조트 자동 인식</div>
+        <div class="step"><span class="n">3</span>골프텔 매칭 + 일정 초안</div>
+        <div class="step"><span class="n">4</span>티오프 지정 후 예약</div>
+      </div>
+    </section>
+
+    <!-- ANALYZING -->
+    <section class="analyzing container" id="analyzing" aria-live="polite"></section>
+
+    <!-- RESULTS -->
+    <section class="results container" id="results"></section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script>
+  const D = window.OMT.DATA;
+  const State = window.OMT.State;
+
+  // 크리에이터 매직 링크 유입 캡처 (?ref=) — 예약 시 전환 자동 귀속 (state.js)
+  const pageParams = new URLSearchParams(location.search);
+  if(pageParams.get('ref') && State?.setCreatorRef){
+    State.setCreatorRef(pageParams.get('ref'), pageParams.get('post'));
+  }
+
+  /* =========================================================================
+     샘플 콘텐츠 데이터셋 — 실서비스에선 콘텐츠 파싱 API가 담당 (ELLIS_SPEC 참조)
+     ========================================================================= */
+  const SAMPLES = [
+    { url:'youtu.be/omt-danang-vlog',    label:'🎬 다낭 바나힐스 3라운드 브이로그',
+      creatorId:'cr-vn-live', keywords:['다낭','바나힐'], golftelId:'gt-vn-danang-ba-na-4n' },
+    { url:'youtu.be/omt-siamcc-review',  label:'🎬 파타야 시암CC 라운딩 리뷰 (골프덕후진)',
+      creatorId:'cr-golf-jin', keywords:['시암','파타야'], golftelId:'gt-th-pattaya-siamcc-4n' },
+    { url:'blog.omt.kr/okinawa-kanucha', label:'📝 오키나와 카누차 리조트 골프 후기',
+      creatorId:null, keywords:['오키나와','카누차'], golftelId:'gt-jp-okinawa-kanucha-3n' }
+  ];
+
+  // 자유 입력 키워드 → 도시 슬러그 매핑 (샘플 외 입력 대응)
+  const CITY_KEYWORDS = {
+    '다낭':'danang', '푸꾸옥':'phuquoc',
+    '오키나와':'okinawa', '후쿠오카':'fukuoka', '기타큐슈':'fukuoka',
+    '방콕':'bangkok', '파타야':'pattaya',
+    '세부':'cebu', '클락':'clark'
+  };
+
+  /* =========================================================================
+     분석 (mock) — 입력을 골프텔 SKU로 매칭
+     ========================================================================= */
+  function matchContent(input){
+    const t = String(input || '').trim();
+    // 1) 샘플 URL/키워드 매칭 (크리에이터 귀속 포함)
+    const sample = SAMPLES.find(s => (s.url && t.includes(s.url)) || s.keywords.some(k => t.includes(k)));
+    if(sample){
+      const g = D.GOLFTELS.find(x => x.id === sample.golftelId);
+      if(g) return { golftel: g, creatorId: sample.creatorId, matched: true };
+    }
+    // 2) 도시 키워드 매칭
+    for(const [kw, city] of Object.entries(CITY_KEYWORDS)){
+      if(t.includes(kw)){
+        const g = D.GOLFTELS.find(x => x.city === city);
+        if(g) return { golftel: g, creatorId: null, matched: true };
+      }
+    }
+    // 3) 매칭 실패 — 최고 평점 골프텔 폴백
+    const fallback = [...D.GOLFTELS].sort((a,b) => (b.rating||0) - (a.rating||0))[0];
+    return { golftel: fallback, creatorId: null, matched: false };
+  }
+
+  function alternativesFor(g){
+    return D.GOLFTELS
+      .filter(x => x.id !== g.id && x.country === g.country)
+      .sort((a,b) => (b.rating||0) - (a.rating||0))
+      .slice(0, 2);
+  }
+
+  /* =========================================================================
+     일정 초안 생성 — 골프텔 nights/rounds/operatingInfo 기반
+     ========================================================================= */
+  function buildItinerary(g){
+    const days = g.nights + 1;
+    const teeOff = g.operatingInfo?.teeOff || {};
+    const morning = teeOff.morning || '06:00~10:30';
+    const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean);
+    const courseLine = courses.join(' · ') || '명문 코스';
+    const rows = [];
+    let round = 0;
+    for(let d = 1; d <= days; d++){
+      if(d === 1){
+        rows.push({ day:d, icon:'🛬', title:'도착 · 공항 픽업 · 체크인', desc:`${g.hotelName} 체크인 ${g.operatingInfo?.checkIn || '15:00'} · ${g.distance?.airport || ''}` });
+      } else if(d === days){
+        if(round < g.rounds){
+          round++;
+          rows.push({ day:d, icon:'⛳', title:`라운드 ${round} (얼리 티오프) → 귀국`, desc:`${courseLine} · 라운딩 후 ${g.operatingInfo?.checkOut || '12:00'} 체크아웃 · 공항 샌딩` });
+        } else {
+          rows.push({ day:d, icon:'🛫', title:'체크아웃 · 귀국', desc:`${g.operatingInfo?.checkOut || '12:00'} 체크아웃 · 공항 샌딩` });
+        }
+      } else if(round < g.rounds){
+        round++;
+        rows.push({ day:d, icon:'⛳', title:`라운드 ${round} — 모닝 티오프`, desc:`${courseLine} · ${morning} · ${g.cartPolicy || ''}` });
+      } else {
+        rows.push({ day:d, icon:'🏖', title:'자유 일정', desc:'시내 관광 · 스파 · 쇼핑 — AI 플래너로 채워보세요' });
+      }
+    }
+    return rows;
+  }
+
+  /* =========================================================================
+     RENDER
+     ========================================================================= */
+  const $ = id => document.getElementById(id);
+
+  // 샘플 칩
+  $('samples').innerHTML = SAMPLES.map((s, i) =>
+    `<button type="button" data-i="${i}">${s.label}</button>`
+  ).join('');
+  $('samples').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = SAMPLES[+btn.dataset.i];
+      $('pasteInput').value = 'https://' + s.url;
+      startAnalysis(s.url);
+    });
+  });
+
+  $('pasteForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('pasteInput').value.trim();
+    if(!v) return;
+    startAnalysis(v);
+  });
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function startAnalysis(input){
+    $('results').classList.remove('show');
+    const box = $('analyzing');
+    const steps = ['콘텐츠 자막·본문 분석 중...', '골프장·리조트 장소 인식 중...', '골프텔 SKU 매칭 중...', '일정 초안 구성 중...'];
+    box.innerHTML = steps.map((s, i) => `
+      <div class="an-row" data-idx="${i}"><div class="spin"></div><span>${s}</span></div>
+    `).join('');
+    box.classList.add('show');
+    box.scrollIntoView({ behavior:'smooth', block:'center' });
+    for(let i = 0; i < steps.length; i++){
+      await sleep(550 + Math.random() * 350);
+      box.querySelector(`[data-idx="${i}"]`)?.classList.add('done');
+    }
+    await sleep(350);
+    box.classList.remove('show');
+    renderResults(matchContent(input));
+  }
+
+  function ownershipTag(g){
+    const own = D.OWNERSHIP[g.country] || {};
+    return own.model === 'direct'
+      ? '<span class="mc-tag direct">OMT 직영</span>'
+      : '<span class="mc-tag partner">파트너</span>';
+  }
+
+  function golftelCardHTML(g, isPrimary){
+    const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean);
+    const wished = State?.isWished(g.id);
+    return `
+      <article class="match-card ${isPrimary ? 'primary' : ''}">
+        <div class="mc-img" style="background-image:url('${g.images?.[0] || ''}')" role="img" aria-label="${g.name}"></div>
+        <div class="mc-body">
+          <div class="mc-tags">
+            ${isPrimary ? '<span class="mc-tag best">🎯 영상 매칭</span>' : '<span class="mc-tag partner">같은 지역 대안</span>'}
+            ${ownershipTag(g)}
+          </div>
+          <h3 class="mc-title">${g.name}</h3>
+          <div class="mc-meta">
+            <div><strong>🏨 호텔</strong>${g.hotelName} (${g.nights}박)</div>
+            <div><strong>⛳ 골프</strong>${g.rounds}회 라운딩 · ${courses.join(' · ') || '명문 코스'}</div>
+            <div><strong>📦 SKU</strong>골프텔 (호텔 + 라운딩) — 항공 별도</div>
+          </div>
+          <div class="mc-foot">
+            <div>
+              <div class="mc-price-lb">1인 (2인 1실)</div>
+              <div class="mc-price">${g.pricePerPerson.toLocaleString('ko-KR')}원~</div>
+            </div>
+            <div class="mc-actions">
+              <button class="mc-wish ${wished ? 'active' : ''}" data-wish="${g.id}" aria-label="찜하기" title="찜하기">${wished ? '♥' : '♡'}</button>
+              <button class="mc-cart" data-cart="${g.id}" aria-label="장바구니 담기">담기</button>
+              <a class="mc-book" href="golftel.html?id=${g.id}">티오프 지정 →</a>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderResults({ golftel: g, creatorId, matched }){
+    const alts = alternativesFor(g);
+    const cr = creatorId ? (D.CREATORS || []).find(c => c.id === creatorId) : null;
+    if(cr && State?.setCreatorRef){
+      // 영상 크리에이터에게 수익 귀속 — 매직 링크와 동일 어트리뷰션
+      State.setCreatorRef(cr.id, 'video-to-trip');
+    }
+    const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)?.name).filter(Boolean);
+    const countryName = { japan:'일본', vietnam:'베트남', thailand:'태국', philippines:'필리핀' }[g.country] || g.country;
+    const itin = buildItinerary(g);
+
+    $('results').innerHTML = `
+      ${cr ? `
+        <div class="creator-note">
+          <div class="ca">${cr.initial}</div>
+          <div>이 콘텐츠는 <strong>${cr.name}</strong>님의 추천이에요 — 여기서 예약하면 크리에이터에게 수익이 공유돼요 (구독자 ${cr.subs})</div>
+        </div>` : ''}
+      ${matched ? '' : `
+        <div class="creator-note" style="background:#FDF2F2;border-color:#F5B5B5;color:#8A2E2E;">
+          <div class="ca" style="background:#E85826;">!</div>
+          <div>콘텐츠에서 골프장을 특정하지 못했어요 — 대신 <strong>지금 가장 평점 높은 골프텔</strong>을 보여드려요. '다낭', '오키나와'처럼 지역명을 함께 넣으면 더 정확해요.</div>
+        </div>`}
+
+      <div class="sec-label">인식된 장소</div>
+      <div class="entity-chips">
+        ${courses.map(c => `<span class="hit">⛳ ${c}</span>`).join('')}
+        <span class="hit">🏨 ${g.hotelName}</span>
+        <span>📍 ${countryName} · ${g.city}</span>
+        <span>🕐 티오프 ${(g.teeTimeWindows || []).length}개 시간대</span>
+      </div>
+
+      <div class="sec-label">골프텔 매칭 결과</div>
+      <div class="match-grid">
+        ${golftelCardHTML(g, true)}
+        ${alts.map(a => golftelCardHTML(a, false)).join('')}
+      </div>
+
+      <div class="sec-label">일정 초안 (${g.nights}박 ${g.nights + 1}일 · ${g.rounds}라운딩)</div>
+      <div class="itin">
+        ${itin.map(r => `
+          <div class="itin-row">
+            <div class="itin-day">DAY ${r.day}</div>
+            <div class="itin-info">
+              <div class="itin-title">${r.icon} ${r.title}</div>
+              <div class="itin-desc">${r.desc}</div>
+            </div>
+          </div>
+        `).join('')}
+        <div class="itin-note">※ 초안이에요 — 티오프 시간은 상세 페이지에서 라운드별로 직접 지정할 수 있어요.</div>
+      </div>
+
+      <div class="next-actions">
+        <a class="primary" href="golftel.html?id=${g.id}">이 골프텔로 예약 진행 →</a>
+        <a href="ai-planner.html?q=${encodeURIComponent(countryName + ' 골프')}">✦ AI 플래너로 조건 다듬기</a>
+        <a href="golftels.html">⛳ 골프텔 전체 보기</a>
+      </div>
+    `;
+    $('results').classList.add('show');
+    wireCardActions($('results'));
+    $('results').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  /* =========================================================================
+     카드 액션 — 찜 / 장바구니 (ai-planner와 동일 카트 스키마)
+     ========================================================================= */
+  function wireCardActions(root){
+    root.querySelectorAll('.mc-wish').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(!State){ return; }
+        State.toggleWishlist(btn.dataset.wish);
+        const wished = State.isWished(btn.dataset.wish);
+        btn.classList.toggle('active', wished);
+        btn.textContent = wished ? '♥' : '♡';
+        showToast(wished ? '♥ 찜 목록에 담았어요 · 마이페이지에서 확인' : '찜을 해제했어요');
+      });
+    });
+    root.querySelectorAll('.mc-cart').forEach(btn => {
+      btn.addEventListener('click', () => addGolftelToCart(btn.dataset.cart));
+    });
+  }
+
+  function addGolftelToCart(golftelId){
+    const g = D.GOLFTELS.find(x => x.id === golftelId);
+    if(!g || !State){ showToast('상품 정보를 불러올 수 없어요'); return; }
+    const room = (g.roomOptions || []).find(r => r.isDefault) || (g.roomOptions || [])[0] || { type:'2인 1실', supplement:0 };
+    const pax = 2;
+    const total = (g.pricePerPerson + (room.supplement || 0)) * pax;
+    State.addToCart({
+      productId: g.id,
+      productType: 'golftel',
+      type: 'GOLFTEL',
+      orig: D.OWNERSHIP[g.country]?.model === 'direct',
+      img: g.images?.[0],
+      name: g.name,
+      sub: `${g.hotelName} · ⛳ ${g.rounds}라운딩 · 🏨 ${g.nights}박 · ${room.type}`,
+      dates: '날짜 미정 · 결제 시 선택',
+      pax: '성인 ' + pax + '명',
+      paxCount: pax,
+      price: total,
+      country: g.country,
+      city: g.city,
+      rounds: g.rounds,
+      nights: g.nights,
+      roomOption: room.type,
+      ownership: D.OWNERSHIP[g.country]?.model,
+      source: 'video-to-trip'
+    });
+    showToast('🛒 장바구니에 담았어요 (성인 2명 기준) · 티오프는 상세에서 지정');
+  }
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:1000;box-shadow:0 12px 32px rgba(0,0,0,.3);max-width:88vw;text-align:center;';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.style.opacity = '0', 2400);
+    setTimeout(() => t.remove(), 2800);
+  }
+
+  // ?q= 파라미터로 진입 시 자동 분석 (다른 페이지에서 연결용)
+  const autoQ = pageParams.get('q');
+  if(autoQ){
+    $('pasteInput').value = autoQ;
+    startAnalysis(autoQ);
+  }
+  </script>
+  <script src="icons.js"></script>
+</body>
+</html>

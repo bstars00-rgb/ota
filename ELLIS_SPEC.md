@@ -456,6 +456,46 @@ CREATE TABLE creator_commissions (
 );
 ```
 
+### 7.1 매직 링크 어트리뷰션 (2026-07-09 추가)
+
+프론트 프로토타입: `state.js` `omt_creator_ref_v1`(유입 터치) / `omt_creator_conv_v1`(전환) — 라스트 클릭, TTL 7일.
+API 명세: `ELLIS_API_BACKOFFICE.md` §7.7 (`POST /attribution/touch`, `GET /attribution/conversions`).
+
+```sql
+CREATE TABLE attribution_touches (
+  id VARCHAR(64) PRIMARY KEY,
+  session_id VARCHAR(64),                -- 비로그인 방문자 식별 (쿠키)
+  creator_id VARCHAR(64) REFERENCES creators(id),
+  post_id VARCHAR(64),                   -- feed 포스트 / 'video-to-trip' 등 유입 소스
+  landing TEXT,                          -- feed.html | golftel.html | video-to-trip.html
+  touched_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ                 -- touched_at + 7일
+);
+
+CREATE TABLE attribution_conversions (
+  id VARCHAR(64) PRIMARY KEY,
+  touch_id VARCHAR(64) REFERENCES attribution_touches(id),
+  creator_id VARCHAR(64) REFERENCES creators(id),
+  booking_id VARCHAR(64) REFERENCES bookings(id),
+  product_id VARCHAR(64),
+  ownership VARCHAR(20),                 -- 'direct' | 'franchise'
+  amount_krw BIGINT,
+  commission_rate NUMERIC(5,4),          -- 직영 0.10 / 파트너 0.05
+  commission_krw INT,
+  converted_at TIMESTAMPTZ
+);
+-- creator_commissions 생성 시 attribution_conversions를 원천 데이터로 사용
+```
+
+### 7.2 콘텐츠 파싱 — "영상으로 예약" (2026-07-09 추가)
+
+프론트 프로토타입: `video-to-trip.html` — 유튜브/블로그 URL·텍스트에서 골프장·리조트를 인식해 골프텔 SKU로 매칭 (현재 키워드 mock).
+실서비스 전환 시 ELLIS에 콘텐츠 파싱 서비스 필요:
+
+- `POST /content/parse` — `{ url | text }` 입력 → 자막/본문 추출 → NER(장소 인식) → `golf_courses`/`hotels` 매칭 → `golftels` SKU 후보 반환
+- 응답: `{ entities:[{type:'golf_course'|'hotel'|'city', id, name}], golftel_matches:[{golftel_id, confidence}], creator_id? }`
+- 콘텐츠가 등록 크리에이터의 것이면 `creator_id` 반환 → 어트리뷰션 터치 자동 생성 (§7.1)
+
 ---
 
 ## 8. 마이그레이션 체크리스트
