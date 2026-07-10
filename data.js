@@ -1416,7 +1416,7 @@
     { id:'pt-3', date:'2026-03-20', label:'리뷰 작성 보너스',       delta:+5000  },
     { id:'pt-4', date:'2026-02-28', label:'도쿄 패키지 적립',       delta:+11780 },
     { id:'pt-5', date:'2026-02-25', label:'회원가입 축하',          delta:+10000 },
-    { id:'pt-6', date:'2026-01-15', label:'생일 축하 포인트',       delta:+5000  }
+    { id:'pt-6', date:'2026-01-15', label:'생일 축하 마일리지',     delta:+5000  }
   ];
 
   /* =====================================================================
@@ -1509,9 +1509,9 @@
       link:'golftel.html?id=gt-vn-danang-ba-na-4n', actionLabel:'할인 상품 →' },
     { id:'n4', type:'coupon',    icon:'🎟️', title:'쿠폰 만료 임박',     body:'10% 할인 쿠폰이 3일 후 만료됩니다. 예약 시 자동 적용 가능.',           date:'2026-05-17', daysAgo:3,  read:true,
       link:'mypage.html#coupons', actionLabel:'쿠폰함 보기 →' },
-    { id:'n5', type:'points',    icon:'💰', title:'포인트 적립',         body:'결제 1% 적립 — 12,890P가 적립되었어요. 다음 예약 시 사용 가능.',      date:'2026-05-12', daysAgo:8,  read:true,
-      link:'mypage.html#points', actionLabel:'포인트 내역 →' },
-    { id:'n6', type:'review',    icon:'✏️', title:'리뷰 작성 요청',     body:'세부 알타비스타 골프 4박5일 잘 다녀오셨어요? 리뷰 작성 시 5,000P 적립.',date:'2026-05-11', daysAgo:9,  read:true,
+    { id:'n5', type:'points',    icon:'💰', title:'마일리지 적립',       body:'결제 1% 적립 — 12,890 마일이 적립되었어요. 다음 예약 시 사용 가능.',   date:'2026-05-12', daysAgo:8,  read:true,
+      link:'mypage.html#points', actionLabel:'마일리지 내역 →' },
+    { id:'n6', type:'review',    icon:'✏️', title:'리뷰 작성 요청',     body:'세부 알타비스타 골프 4박5일 잘 다녀오셨어요? 리뷰 작성 시 5,000 마일 적립.',date:'2026-05-11', daysAgo:9,  read:true,
       link:'mypage.html#bookings', actionLabel:'리뷰 작성 →' },
     { id:'n7', type:'system',    icon:'📢', title:'시스템 공지',         body:'5/22(목) 02:00~05:00 정기점검으로 예약 시스템이 일시 중단됩니다.',   date:'2026-05-10', daysAgo:10, read:true  },
     { id:'n8', type:'booking',   icon:'⛳', title:'티타임 확정',         body:'다낭 바나힐스 골프 첫 라운딩 시간이 06:00로 확정되었습니다.',          date:'2026-05-19', daysAgo:1,  read:true,

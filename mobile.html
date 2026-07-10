@@ -741,7 +741,7 @@
             <div class="profile-menu">
               <div class="pm-item" onclick="location.href='mypage.html#wishlist'"><div class="pm-ico">❤️</div><div class="pm-t">찜한 상품</div><span class="pm-badge" id="wishBadge">0</span><span class="pm-arrow">›</span></div>
               <div class="pm-item" onclick="location.href='mypage.html#coupons'"><div class="pm-ico">🎟️</div><div class="pm-t">쿠폰함</div><span class="pm-badge" id="couponBadge">0</span><span class="pm-arrow">›</span></div>
-              <div class="pm-item" onclick="location.href='mypage.html#points'"><div class="pm-ico">💰</div><div class="pm-t">포인트</div><span class="pm-arrow" id="pointsSum">-</span></div>
+              <div class="pm-item" onclick="location.href='mypage.html#points'"><div class="pm-ico">💰</div><div class="pm-t">마일리지</div><span class="pm-arrow" id="pointsSum">-</span></div>
               <div class="pm-item" onclick="location.href='mypage.html#reviews'"><div class="pm-ico">✏️</div><div class="pm-t">작성한 리뷰</div><span class="pm-arrow">›</span></div>
             </div>
             <div class="profile-section-h">설정</div>
@@ -1179,7 +1179,7 @@
       { key:'booking', icon:'🎫', label:'예약', desc:'예약 확정·D-day·취소 안내' },
       { key:'payment', icon:'💳', label:'결제', desc:'결제 완료·실패·환불' },
       { key:'promotion', icon:'🎁', label:'특가·이벤트', desc:'할인·쿠폰·프로모션' },
-      { key:'system', icon:'⚙️', label:'시스템', desc:'공지·업데이트·포인트 적립' },
+      { key:'system', icon:'⚙️', label:'시스템', desc:'공지·업데이트·마일리지 적립' },
       { key:'social', icon:'❤️', label:'소셜', desc:'팔로우·좋아요·댓글' }
     ];
 
@@ -1288,12 +1288,12 @@
     const bookings = OMT.State.getBookings();
     const activeCount = bookings.filter(b => b.status==='confirmed'||b.status==='pending').length;
     const wish = OMT.State.getWishlist();
-    const points = OMT.State.getPointsBalance();
+    const points = OMT.State.getMiles().balance;
 
     document.getElementById('profStats').innerHTML = `
       <div class="p-stat-cell"><div class="v">${bookings.length}</div><div class="l">전체 여행</div></div>
       <div class="p-stat-cell"><div class="v">${activeCount}</div><div class="l">진행 중</div></div>
-      <div class="p-stat-cell"><div class="v">${Math.round(points/1000)}K</div><div class="l">포인트</div></div>
+      <div class="p-stat-cell"><div class="v">${Math.round(points/1000)}K</div><div class="l">마일리지</div></div>
     `;
 
     // Booking mini list (top 3 active) — 골프텔 SKU 인식
@@ -1347,7 +1347,7 @@
     document.getElementById('cartBadge').textContent = OMT.State.cartCount();
     document.getElementById('wishBadge').textContent = wish.length;
     document.getElementById('couponBadge').textContent = OMT.State.getAvailableCoupons().length;
-    document.getElementById('pointsSum').textContent = points.toLocaleString('ko-KR') + ' P ›';
+    document.getElementById('pointsSum').textContent = points.toLocaleString('ko-KR') + ' 마일 ›';
 
     // 크리에이터 CTA: 승인되었으면 대시보드, 아니면 지원하기
     const stats = OMT.DATA.CREATOR_MOCK_STATS;

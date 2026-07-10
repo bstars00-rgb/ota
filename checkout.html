@@ -1180,8 +1180,8 @@
       if(milesUsed > 0 && OMT.State.useMiles) OMT.State.useMiles(milesUsed, '예약 사용');
     } catch(e){}
 
-    // Award points (1% of total)
-    OMT.State.addPoints(Math.round(total * 0.01), '예약 적립');
+    // Award miles (1% of total) — 단일 리워드
+    OMT.State.earnMiles(Math.round(total * 0.01), '예약 적립');
 
     // Mark coupon as used if applied
     if(pkg.couponCode) OMT.State.useCoupon(pkg.couponCode);

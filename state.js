@@ -17,7 +17,6 @@
     savedPosts:    'omt_saved_posts',
     myReviews:     'omt_my_reviews',
     couponsUsed:   'omt_coupons_used',
-    points:        'omt_points_balance',
     searchHistory: 'omt_search_history',
     recentlyViewed:'omt_recently_viewed',
     user:          'omt_user_session',
@@ -55,7 +54,7 @@
     const t = tier || getUserTier();
     const tiers = {
       bronze:   { label:'🥉 브론즈', discount:0,  benefits:['기본 예약'], color:'#CD7F32' },
-      silver:   { label:'🥈 실버',   discount:0.02, benefits:['1박 무료 와이파이 업그레이드','리뷰 보너스 +500P'], color:'#B0B7C3' },
+      silver:   { label:'🥈 실버',   discount:0.02, benefits:['1박 무료 와이파이 업그레이드','리뷰 보너스 +500 마일'], color:'#B0B7C3' },
       gold:     { label:'🥇 골드',   discount:0.03, benefits:['조식 무료 (1박 1인)','우선 체크인','늦은 체크아웃 14:00'], color:'#FFD23F' },
       platinum: { label:'💎 플래티넘', discount:0.05, benefits:['룸 업그레이드 (가용 시)','조식 무료 (전 인원)','VIP 라운지','늦은 체크아웃 16:00'], color:'#58A6FF' },
       vip:      { label:'⭐ VIP',     discount:0.07, benefits:['1:1 전담 매니저','전 객실 업그레이드','전 메뉴 무료','얼리 체크인','전 일정 카톡 동행'], color:'#DA70D6' }
@@ -754,18 +753,6 @@
     const used = getUsedCoupons();
     return (root.DATA?.COUPONS || []).filter(c => !used.includes(c.code));
   }
-  function getPointsBalance(){
-    const stored = read(KEYS.points, null);
-    return stored !== null ? stored : (root.DATA?.USER?.points || 0);
-  }
-  function addPoints(delta, label){
-    const cur = getPointsBalance();
-    const next = cur + delta;
-    write(KEYS.points, next);
-    notify('points', next);
-    return next;
-  }
-
   /* =====================================================================
      SEARCH HISTORY & RECENTLY VIEWED
      ===================================================================== */
@@ -849,9 +836,8 @@
     isPostSaved, togglePostSave,
     // Reviews
     getMyReviews, addReview, getReviewsForProduct,
-    // Coupons / Points
+    // Coupons
     getUsedCoupons, useCoupon, getAvailableCoupons,
-    getPointsBalance, addPoints,
     // Search / Recents
     getSearchHistory, addSearchHistory,
     getRecentlyViewed, addRecentlyViewed,

@@ -238,7 +238,7 @@
       <div class="sn-item" data-tab="recent"><span class="ic">👀</span><span>최근 본 상품</span></div>
       <div class="sn-divider"></div>
       <div class="sn-item" data-tab="coupons"><span class="ic">🎟️</span><span>쿠폰함</span><span class="badge" id="badgeCoupons">0</span></div>
-      <div class="sn-item" data-tab="points"><span class="ic">💰</span><span>포인트</span></div>
+      <div class="sn-item" data-tab="points"><span class="ic">💰</span><span>마일리지</span></div>
       <div class="sn-item" data-tab="reviews"><span class="ic">✏️</span><span>리뷰</span></div>
       <div class="sn-item" data-tab="inquiries"><span class="ic">💬</span><span>문의 내역</span></div>
       <div class="sn-divider"></div>
@@ -260,12 +260,12 @@
           <div id="upcomingList"></div>
         </div>
 
-        <!-- 빠른 통계 카드 (포인트/쿠폰/등급) -->
+        <!-- 빠른 통계 카드 (마일리지/쿠폰/등급) -->
         <div class="dash-stats">
           <div class="dash-stat" onclick="goTab('points')">
             <div class="ds-ic">💰</div>
-            <div class="ds-val" id="dashPoints">0 P</div>
-            <div class="ds-lb">사용 가능 포인트</div>
+            <div class="ds-val" id="dashPoints">0 마일</div>
+            <div class="ds-lb">사용 가능 마일리지</div>
           </div>
           <div class="dash-stat" onclick="goTab('coupons')">
             <div class="ds-ic">🎟️</div>
@@ -402,10 +402,10 @@
 
       <div class="tab-panel" data-panel="points" hidden>
         <div class="panel-card">
-          <div class="panel-head"><h2 class="panel-title">💰 포인트</h2></div>
+          <div class="panel-head"><h2 class="panel-title">💰 마일리지</h2></div>
           <div style="padding:20px;background:linear-gradient(135deg,var(--ink),#2C2C2C);color:#fff;border-radius:14px;margin-bottom:16px;">
-            <div style="font-size:12px;opacity:.7;margin-bottom:4px;">사용 가능 포인트</div>
-            <div style="font-size:32px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;" id="pointsBalance">0 P</div>
+            <div style="font-size:12px;opacity:.7;margin-bottom:4px;">사용 가능 마일리지</div>
+            <div style="font-size:32px;font-weight:900;color:var(--accent);letter-spacing:-0.02em;" id="pointsBalance">0 마일</div>
             <div style="font-size:11px;opacity:.6;margin-top:4px;">여행 1회 완료 시 결제액의 1% 자동 적립</div>
           </div>
           <div id="pointsHistory"></div>
@@ -500,7 +500,7 @@
 
       <div class="modal-actions">
         <button class="cancel" onclick="closeReviewModal()">취소</button>
-        <button class="submit" onclick="submitReview()">작성 완료 (+5,000P)</button>
+        <button class="submit" onclick="submitReview()">작성 완료 (+5,000 마일)</button>
       </div>
     </div>
   </div>
@@ -521,12 +521,12 @@
   function renderProfileStats(){
     const bookings = OMT.State.getBookings();
     const wish = OMT.State.getWishlist();
-    const points = OMT.State.getPointsBalance();
+    const points = OMT.State.getMiles().balance;
     document.getElementById('profileStats').innerHTML = `
       <div class="ps"><span class="ps-val">${bookings.length}</span><span class="ps-lb">총 여행 횟수</span></div>
       <div class="ps"><span class="ps-val">${bookings.filter(b => b.status==='confirmed'||b.status==='pending').length}</span><span class="ps-lb">진행 중 예약</span></div>
       <div class="ps"><span class="ps-val">${wish.length}</span><span class="ps-lb">찜한 상품</span></div>
-      <div class="ps"><span class="ps-val">${points.toLocaleString('ko-KR')}P</span><span class="ps-lb">사용 가능 포인트</span></div>
+      <div class="ps"><span class="ps-val">${points.toLocaleString('ko-KR')}</span><span class="ps-lb">사용 가능 마일리지</span></div>
     `;
 
     const bookActiveCount = bookings.filter(b => b.status==='confirmed'||b.status==='pending').length;
@@ -650,7 +650,7 @@
       if(b.status === 'completed' && b.productId){
         const hasReview = OMT.State.getMyReviews().some(r => r.bookingId === b.id);
         if(!hasReview){
-          actions.push(`<button class="bc-action" onclick="openReviewModal('${b.id}')">리뷰 쓰기 (+5,000P)</button>`);
+          actions.push(`<button class="bc-action" onclick="openReviewModal('${b.id}')">리뷰 쓰기 (+5,000 마일)</button>`);
         } else {
           actions.push(`<button class="bc-action ghost">리뷰 완료됨</button>`);
         }
@@ -751,8 +751,8 @@
 
   /* ===== Points ===== */
   function renderPoints(){
-    const balance = OMT.State.getPointsBalance();
-    document.getElementById('pointsBalance').textContent = balance.toLocaleString('ko-KR') + ' P';
+    const balance = OMT.State.getMiles().balance;
+    document.getElementById('pointsBalance').textContent = balance.toLocaleString('ko-KR') + ' 마일';
     const history = OMT.DATA.POINTS_HISTORY;
     document.getElementById('pointsHistory').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -766,7 +766,7 @@
             <tr style="border-bottom:1px solid var(--line);">
               <td style="padding:10px;">${h.date}</td>
               <td style="padding:10px;">${h.label}</td>
-              <td style="padding:10px;text-align:right;color:${h.delta>0?'var(--success)':'var(--danger)'};font-weight:800;">${h.delta>0?'+ ':'- '}${Math.abs(h.delta).toLocaleString('ko-KR')}P</td>
+              <td style="padding:10px;text-align:right;color:${h.delta>0?'var(--success)':'var(--danger)'};font-weight:800;">${h.delta>0?'+ ':'- '}${Math.abs(h.delta).toLocaleString('ko-KR')} 마일</td>
             </tr>
           `).join('')}
         </tbody>
@@ -866,10 +866,10 @@
       images: reviewState.photos,
       travelType: '구매 확인', duration: ''
     });
-    OMT.State.addPoints(5000 + (reviewState.photos.length > 0 ? 2000 : 0), '리뷰 작성 보너스' + (reviewState.photos.length > 0 ? ' (사진 보너스 +2,000P)' : ''));
+    OMT.State.earnMiles(5000 + (reviewState.photos.length > 0 ? 2000 : 0), '리뷰 작성 보너스' + (reviewState.photos.length > 0 ? ' (사진 보너스 +2,000 마일)' : ''));
     closeReviewModal();
     renderMyReviews(); renderBookings(); renderProfileStats();
-    toast(`리뷰 등록 완료! +${(5000 + (reviewState.photos.length > 0 ? 2000 : 0)).toLocaleString('ko-KR')}P 적립`);
+    toast(`리뷰 등록 완료! +${(5000 + (reviewState.photos.length > 0 ? 2000 : 0)).toLocaleString('ko-KR')} 마일 적립`);
   };
 
   document.querySelectorAll('.star-input span').forEach((s,i) => {
@@ -941,7 +941,7 @@
     }
 
     // 통계 카드
-    document.getElementById('dashPoints').textContent = OMT.State.getPointsBalance().toLocaleString('ko-KR') + ' P';
+    document.getElementById('dashPoints').textContent = OMT.State.getMiles().balance.toLocaleString('ko-KR') + ' 마일';
     document.getElementById('dashCoupons').textContent = OMT.State.getAvailableCoupons().length + '장';
     document.getElementById('dashTrips').textContent = OMT.State.getBookings().filter(b => b.status === 'completed').length + '회';
 
@@ -960,8 +960,8 @@
     document.getElementById('travelStatsGrid').innerHTML = `
       <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
         <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">💎 누적 적립</div>
-        <div style="font-size:22px;font-weight:900;color:var(--accent);margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${(totalPoints/1000).toFixed(1)}<span style="font-size:13px;opacity:.7;">K P</span></div>
-        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">현재 잔액 ${OMT.State.getPointsBalance().toLocaleString('ko-KR')}P</div>
+        <div style="font-size:22px;font-weight:900;color:var(--accent);margin-top:6px;letter-spacing:-0.02em;font-family:'JetBrains Mono',monospace;">${(totalPoints/1000).toFixed(1)}<span style="font-size:13px;opacity:.7;">K 마일</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px;">현재 잔액 ${OMT.State.getMiles().balance.toLocaleString('ko-KR')} 마일</div>
       </div>
       <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px;backdrop-filter:blur(4px);">
         <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">💰 총 절감액</div>

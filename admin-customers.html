@@ -326,7 +326,7 @@
             <th style="width:90px;">등급</th>
             <th style="width:130px;">총 결제액</th>
             <th style="width:80px;">예약</th>
-            <th style="width:100px;">포인트</th>
+            <th style="width:100px;">마일리지</th>
             <th style="width:120px;">가입일</th>
             <th style="width:120px;">마지막 접속</th>
             <th style="width:170px;">액션</th>
@@ -364,8 +364,8 @@
     <div class="slideout-body" id="slideoutBody"></div>
     <div class="slideout-foot">
       <button class="btn btn-primary" onclick="alert('등급 수동 변경 모달 → audit_logs 기록')">⬆️ 등급 변경</button>
-      <button class="btn btn-success" onclick="alert('포인트 적립 (사유 필수)')">+ 포인트 적립</button>
-      <button class="btn btn-warning" onclick="alert('포인트 차감 (사유 필수)')">− 포인트 차감</button>
+      <button class="btn btn-success" onclick="alert('마일리지 적립 (사유 필수)')">+ 마일리지 적립</button>
+      <button class="btn btn-warning" onclick="alert('마일리지 차감 (사유 필수)')">− 마일리지 차감</button>
       <button class="btn btn-ghost" onclick="alert('쿠폰 발급 모달')">🎟️ 쿠폰</button>
       <button class="btn btn-ghost" onclick="alert('메모 추가')">📝 메모</button>
       <button class="btn btn-danger" onclick="alert('SUPER_ADMIN 권한 필요')">⛔ 계정 정지</button>
@@ -374,18 +374,18 @@
 
   <script>
     const USERS = [
-      {id:'user-12418', name:'한○○', email:'h***@gmail.com', phone:'010-XXXX-4444', grade:'vip', amount:'132,840,000원', bookings:'48', points:'1,284,000P', joined:'2023-08-22', last:'1h 전', initial:'한'},
-      {id:'user-12017', name:'서○○', email:'s***@naver.com', phone:'010-XXXX-2345', grade:'platinum', amount:'14,820,000원', bookings:'12', points:'148,200P', joined:'2024-05-18', last:'3h 전', initial:'서'},
-      {id:'user-11842', name:'박○○', email:'p***@kakao.com', phone:'010-XXXX-1234', grade:'gold', amount:'4,840,000원', bookings:'7', points:'48,400P', joined:'2024-09-12', last:'오늘 12:48', initial:'박'},
-      {id:'user-11618', name:'김○○', email:'k***@gmail.com', phone:'010-XXXX-5678', grade:'gold', amount:'3,920,000원', bookings:'5', points:'39,200P', joined:'2024-11-04', last:'오늘 10:22', initial:'김'},
-      {id:'user-11420', name:'정○○', email:'j***@naver.com', phone:'010-XXXX-7890', grade:'silver', amount:'1,890,000원', bookings:'3', points:'18,900P', joined:'2025-02-08', last:'어제', initial:'정'},
-      {id:'user-11218', name:'최○○', email:'c***@gmail.com', phone:'010-XXXX-3456', grade:'silver', amount:'1,540,000원', bookings:'2', points:'15,400P', joined:'2025-04-14', last:'어제', initial:'최'},
-      {id:'user-11018', name:'윤○○', email:'y***@kakao.com', phone:'010-XXXX-9012', grade:'platinum', amount:'8,420,000원', bookings:'9', points:'84,200P', joined:'2024-03-18', last:'2일 전', initial:'윤'},
-      {id:'user-10918', name:'강○○', email:'g***@naver.com', phone:'010-XXXX-1111', grade:'gold', amount:'2,920,000원', bookings:'4', points:'29,200P', joined:'2025-01-22', last:'2일 전', initial:'강'},
-      {id:'user-10818', name:'오○○', email:'o***@gmail.com', phone:'010-XXXX-2222', grade:'gold', amount:'2,840,000원', bookings:'4', points:'28,400P', joined:'2025-03-08', last:'3일 전', initial:'오'},
-      {id:'user-10718', name:'송○○', email:'s***@kakao.com', phone:'010-XXXX-3333', grade:'silver', amount:'1,780,000원', bookings:'3', points:'17,800P', joined:'2025-05-12', last:'4일 전', initial:'송'},
-      {id:'user-10618', name:'이○○', email:'l***@naver.com', phone:'010-XXXX-6789', grade:'bronze', amount:'480,000원', bookings:'1', points:'4,800P', joined:'2026-01-08', last:'오늘 09:14', initial:'이'},
-      {id:'user-10518', name:'유○○', email:'u***@gmail.com', phone:'010-XXXX-5555', grade:'silver', amount:'1,420,000원', bookings:'2', points:'14,200P', joined:'2025-08-22', last:'5일 전', initial:'유'},
+      {id:'user-12418', name:'한○○', email:'h***@gmail.com', phone:'010-XXXX-4444', grade:'vip', amount:'132,840,000원', bookings:'48', points:'1,284,000 마일', joined:'2023-08-22', last:'1h 전', initial:'한'},
+      {id:'user-12017', name:'서○○', email:'s***@naver.com', phone:'010-XXXX-2345', grade:'platinum', amount:'14,820,000원', bookings:'12', points:'148,200 마일', joined:'2024-05-18', last:'3h 전', initial:'서'},
+      {id:'user-11842', name:'박○○', email:'p***@kakao.com', phone:'010-XXXX-1234', grade:'gold', amount:'4,840,000원', bookings:'7', points:'48,400 마일', joined:'2024-09-12', last:'오늘 12:48', initial:'박'},
+      {id:'user-11618', name:'김○○', email:'k***@gmail.com', phone:'010-XXXX-5678', grade:'gold', amount:'3,920,000원', bookings:'5', points:'39,200 마일', joined:'2024-11-04', last:'오늘 10:22', initial:'김'},
+      {id:'user-11420', name:'정○○', email:'j***@naver.com', phone:'010-XXXX-7890', grade:'silver', amount:'1,890,000원', bookings:'3', points:'18,900 마일', joined:'2025-02-08', last:'어제', initial:'정'},
+      {id:'user-11218', name:'최○○', email:'c***@gmail.com', phone:'010-XXXX-3456', grade:'silver', amount:'1,540,000원', bookings:'2', points:'15,400 마일', joined:'2025-04-14', last:'어제', initial:'최'},
+      {id:'user-11018', name:'윤○○', email:'y***@kakao.com', phone:'010-XXXX-9012', grade:'platinum', amount:'8,420,000원', bookings:'9', points:'84,200 마일', joined:'2024-03-18', last:'2일 전', initial:'윤'},
+      {id:'user-10918', name:'강○○', email:'g***@naver.com', phone:'010-XXXX-1111', grade:'gold', amount:'2,920,000원', bookings:'4', points:'29,200 마일', joined:'2025-01-22', last:'2일 전', initial:'강'},
+      {id:'user-10818', name:'오○○', email:'o***@gmail.com', phone:'010-XXXX-2222', grade:'gold', amount:'2,840,000원', bookings:'4', points:'28,400 마일', joined:'2025-03-08', last:'3일 전', initial:'오'},
+      {id:'user-10718', name:'송○○', email:'s***@kakao.com', phone:'010-XXXX-3333', grade:'silver', amount:'1,780,000원', bookings:'3', points:'17,800 마일', joined:'2025-05-12', last:'4일 전', initial:'송'},
+      {id:'user-10618', name:'이○○', email:'l***@naver.com', phone:'010-XXXX-6789', grade:'bronze', amount:'480,000원', bookings:'1', points:'4,800 마일', joined:'2026-01-08', last:'오늘 09:14', initial:'이'},
+      {id:'user-10518', name:'유○○', email:'u***@gmail.com', phone:'010-XXXX-5555', grade:'silver', amount:'1,420,000원', bookings:'2', points:'14,200 마일', joined:'2025-08-22', last:'5일 전', initial:'유'},
     ];
     const GRADE_LABEL = {bronze:'🥉 브론즈', silver:'🥈 실버', gold:'🥇 골드', platinum:'💎 플래티넘', vip:'⭐ VIP'};
 
@@ -413,7 +413,7 @@
             <div class="action-row">
               <button class="action-btn" onclick="event.stopPropagation();openUser('${u.id}')">상세</button>
               <button class="action-btn" onclick="event.stopPropagation();alert('등급 변경 모달')">등급</button>
-              <button class="action-btn" onclick="event.stopPropagation();alert('포인트 조정 모달')">포인트</button>
+              <button class="action-btn" onclick="event.stopPropagation();alert('마일리지 조정 모달')">마일리지</button>
             </div>
           </td>
         </tr>
@@ -445,8 +445,8 @@
             <div class="vl">${u.bookings}회</div>
           </div>
           <div class="so-stat">
-            <div class="lb">포인트</div>
-            <div class="vl">${u.points.replace(',000','K').replace('P','')}</div>
+            <div class="lb">마일리지</div>
+            <div class="vl">${u.points.replace(',000',' 마일').replace(' 마일 마일',' 마일')}</div>
           </div>
           <div class="so-stat">
             <div class="lb">리뷰</div>
@@ -495,10 +495,10 @@
         </div>
 
         <div class="so-section">
-          <div class="h">💰 포인트·쿠폰 활동 <span class="count">최근 6건</span></div>
+          <div class="h">💰 마일리지·쿠폰 활동 <span class="count">최근 6건</span></div>
           <div class="timeline-item">
             <span class="when">2h 전</span>
-            <span class="what">예약 적립 <strong style="color:var(--success);">+24,000P</strong></span>
+            <span class="what">예약 적립 <strong style="color:var(--success);">+24,000 마일</strong></span>
             <span class="ref">OMT-VN8K3M</span>
           </div>
           <div class="timeline-item">
@@ -508,12 +508,12 @@
           </div>
           <div class="timeline-item">
             <span class="when">2026-04-22</span>
-            <span class="what">예약 사용 <strong style="color:var(--danger);">-12,000P</strong></span>
+            <span class="what">예약 사용 <strong style="color:var(--danger);">-12,000 마일</strong></span>
             <span class="ref">OMT-JP3K7L</span>
           </div>
           <div class="timeline-item">
             <span class="when">2026-03-08</span>
-            <span class="what">리뷰 보너스 <strong style="color:var(--success);">+1,000P</strong></span>
+            <span class="what">리뷰 보너스 <strong style="color:var(--success);">+1,000 마일</strong></span>
             <span class="ref">REV-2418</span>
           </div>
         </div>
@@ -527,7 +527,7 @@
           </div>
           <div class="timeline-item">
             <span class="when">2026-02-18</span>
-            <span class="what"><strong>박CS</strong> 포인트 보너스 적립 <strong style="color:var(--success);">+5,000P</strong></span>
+            <span class="what"><strong>박CS</strong> 마일리지 보너스 적립 <strong style="color:var(--success);">+5,000 마일</strong></span>
             <span class="ref">audit-#27284</span>
           </div>
           <div class="timeline-item">
