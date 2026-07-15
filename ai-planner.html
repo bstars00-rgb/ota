@@ -546,9 +546,6 @@
           <span>오마이트립</span>
         </a>
         <div class="header-actions">
-          <a href="video-to-trip.html" class="btn-back" aria-label="영상으로 예약" title="유튜브·블로그 링크로 골프텔 찾기">
-            🎬 <span>영상으로 예약</span>
-          </a>
           <button class="btn-restart" id="restartBtn" aria-label="대화 처음부터 다시">
             ↻ <span>처음부터</span>
           </button>
@@ -951,7 +948,7 @@
     group.className = 'rec-group';
     group.innerHTML = recs.map((r, i) => isGT ? `
       <article class="rec-card">
-        <div class="rec-img" style="background-image:url('${r.img}')" role="img" aria-label="${r.title}"></div>
+        <div class="rec-img" style="background-image:url('${r.img}'), url('https://picsum.photos/seed/omt-${encodeURIComponent(r.title)}/600/400')" role="img" aria-label="${r.title}"></div>
         <div class="rec-body">
           <span class="rec-tier ${r.tier}">${r.tierLabel}</span>
           <span style="display:inline-block;font-size:10px;font-weight:900;padding:2px 7px;border-radius:5px;margin-left:4px;background:${r.ownershipModel==='direct'?'linear-gradient(135deg,#075440,#0B6E4F);color:#fff':'#fff;color:#1A1A1A;border:1px solid #E5E7EB'};">${r.ownership}</span>
@@ -977,7 +974,7 @@
       </article>
     ` : `
       <article class="rec-card">
-        <div class="rec-img" style="background-image:url('${r.img}')" role="img" aria-label="${r.title}"></div>
+        <div class="rec-img" style="background-image:url('${r.img}'), url('https://picsum.photos/seed/omt-${encodeURIComponent(r.title)}/600/400')" role="img" aria-label="${r.title}"></div>
         <div class="rec-body">
           <span class="rec-tier ${r.tier}">${r.tierLabel}</span>
           <h3 class="rec-title">${r.title}</h3>
