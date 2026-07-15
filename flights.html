@@ -226,7 +226,7 @@
       <form class="search-form" onsubmit="goSearch();return false;">
         <div class="sf-cell sf-city">
           <div class="lb">출발지</div>
-          <input type="text" class="sf-input" id="fromInput" autocomplete="off" placeholder="도시·공항 검색"
+          <input type="text" class="sf-input" id="fromInput" autocomplete="off" placeholder="도시명 또는 공항명 입력"
                  onfocus="openCityDD('from')" oninput="onCityInput('from',this.value)" />
           <div class="sub" id="fromSub"></div>
           <div class="city-dd" id="fromDD"></div>
@@ -234,7 +234,7 @@
         <button type="button" class="sf-swap" onclick="swapCities()" aria-label="출발지·도착지 교환">⇄</button>
         <div class="sf-cell sf-city">
           <div class="lb">도착지</div>
-          <input type="text" class="sf-input" id="toInput" autocomplete="off" placeholder="도시·공항 검색"
+          <input type="text" class="sf-input" id="toInput" autocomplete="off" placeholder="도시명 또는 공항명 입력"
                  onfocus="openCityDD('to')" oninput="onCityInput('to',this.value)" />
           <div class="sub" id="toSub"></div>
           <div class="city-dd" id="toDD"></div>
@@ -249,7 +249,7 @@
           <div class="val" id="paxLabel">성인 1명 / 일반석</div>
           <div class="sub" id="paxSub">탑승객 정보</div>
         </div>
-        <button type="submit" class="sf-search">검색</button>
+        <button type="submit" class="sf-search">항공 검색</button>
       </form>
 
       <!-- 항공+호텔 동적 결합 진입 (시트립 패턴) -->
@@ -827,20 +827,51 @@
       closeModal('paxModal');
     };
 
+    // 오마이트립 스키마 매핑: 공항코드→도시IATA, 좌석등급→cabinClassCode, 여정타입→tripTypeCode
+    const AIRPORT_CITY = {
+      ICN:'SEL', GMP:'SEL', HND:'TYO', NRT:'TYO', KIX:'OSA', ITM:'OSA',
+      NGO:'NGO', FUK:'FUK', OKA:'OKA', CTS:'SPK',
+      BKK:'BKK', DMK:'BKK', CNX:'CNX', HKT:'HKT',
+      SGN:'SGN', HAN:'HAN', DAD:'DAD', PQC:'PQC', CXR:'CXR',
+      MNL:'MNL', CEB:'CEB', KLO:'KLO'
+    };
+    const cityIata = ap => AIRPORT_CITY[ap] || ap;
+    const CABIN_CODE = { economy:'Y', premium:'W', business:'C', first:'F' };
+    const TRIP_CODE = { roundtrip:'RT', oneway:'OW', multicity:'MC' };
+
     window.goSearch = () => {
       if(!state.from){ alert('출발지를 선택해주세요'); return; }
       if(!state.to){ alert('도착지를 선택해주세요'); return; }
       if(!state.depDate){ alert('여행일정을 선택해주세요'); return; }
-      const params = new URLSearchParams({
-        from: state.from.code, to: state.to.code,
-        dep: state.depDate, type: state.tripType,
-        nonstop: state.nonstop ? '1' : '0', cls: state.seatClass,
-        adult: state.pax.adult, child: state.pax.child, infant: state.pax.infant
-      });
-      if(state.retDate) params.set('ret', state.retDate);
-      // 검색 로딩 오버레이 → 결과로 이동 (시트립 패턴)
+      if(state.tripType === 'roundtrip' && !state.retDate){ alert('오는날을 선택해주세요'); return; }
+      const rt = state.tripType !== 'oneway' && state.retDate;
+      const oap = state.from.code, dap = state.to.code;
+      // 오마이트립 검색결과 URL 스키마 (itineraries-N-*, tripTypeCode, cabinClassCode, *Count, sortOrder)
+      const p = new URLSearchParams();
+      p.set('adultCount', state.pax.adult);
+      p.set('childCount', state.pax.child);
+      p.set('infantCount', state.pax.infant);
+      p.set('cabinClassCode', CABIN_CODE[state.seatClass] || 'Y');
+      p.set('tripTypeCode', TRIP_CODE[state.tripType] || 'RT');
+      p.set('dynamicSearchYn', 'false');
+      p.set('itineraries-0-departureDate', state.depDate);
+      p.set('itineraries-0-originCityCodeIata', cityIata(oap));
+      p.set('itineraries-0-destinationCityCodeIata', cityIata(dap));
+      p.set('itineraries-0-originAirportCode', oap);
+      p.set('itineraries-0-destinationAirportCode', dap);
+      if(rt){
+        p.set('itineraries-1-departureDate', state.retDate);
+        p.set('itineraries-1-originCityCodeIata', cityIata(dap));
+        p.set('itineraries-1-destinationCityCodeIata', cityIata(oap));
+        p.set('itineraries-1-originAirportCode', dap);
+        p.set('itineraries-1-destinationAirportCode', oap);
+      }
+      p.set('sortOrder', 'RecommendDesc');
+      p.set('limits-0', '0'); p.set('limits-1', '10');
+      p.set('nonstop', state.nonstop ? '1' : '0');
+      p.set('page', '1');
       showSearchLoading(state.from.name, state.to.name, state.depDate, state.retDate, state.pax);
-      setTimeout(() => { location.href = 'flights-results.html?' + params.toString(); }, 1100);
+      setTimeout(() => { location.href = 'flights-results.html?' + p.toString(); }, 1100);
     };
 
     window.goAirHotel = () => {

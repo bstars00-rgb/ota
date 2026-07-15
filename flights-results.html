@@ -300,6 +300,7 @@
       <div class="title-block">
         <h1 id="routeTitle">로딩 중...</h1>
         <div class="dates" id="dateRange"></div>
+        <button type="button" onclick="editSearch()" style="margin-top:8px;padding:7px 14px;background:#fff;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;">🔎 검색 변경</button>
       </div>
       <div class="stepper">
         <div class="step">
@@ -416,32 +417,38 @@
           <div class="note">표시된 금액은 항공권 + 유류할증료 + 제세공과금 + 발권 수수료가 포함된 금액입니다. <span style="display:inline-block;margin-left:6px;padding:2px 8px;background:rgba(16,185,129,.15);color:var(--success);border-radius:5px;font-weight:900;font-size:11px;">✓ 총액 표시</span></div>
           <div class="actions">
             <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
-              <option value="recommend">추천순</option>
-              <option value="cheapest">최저가순</option>
-              <option value="fastest">최단 시간순</option>
-              <option value="earliest">빠른 출발순</option>
+              <option value="RecommendDesc">추천순</option>
+              <option value="DurationAsc">최단 여행 시간 순</option>
+              <option value="DurationDesc">최장 여행 시간순</option>
+              <option value="AmountAsc">최저가순</option>
+              <option value="AmountDesc">최고가순</option>
+              <option value="DepartureTimeAsc">빠른 출발 순</option>
+              <option value="DepartureTimeDesc">늦은 출발순</option>
+              <option value="ArrivalTimeAsc">빠른 도착순</option>
+              <option value="ArrivalTimeDesc">늦은 도착순</option>
+              <option value="ViaCountAsc">직항만 우선, 경유 적은 순</option>
             </select>
           </div>
         </div>
 
         <!-- 정렬 chips (4종 가격/시간 미리보기) -->
         <div class="sort-chips" id="sortChips">
-          <div class="sort-chip on" data-sort="recommend" onclick="setSortChip('recommend', this)">
+          <div class="sort-chip on" data-sort="RecommendDesc" onclick="setSortChip('RecommendDesc', this)">
             <div class="nm">추천순</div>
             <div class="pr" id="chip-recommend-pr">-</div>
             <div class="du" id="chip-recommend-du">-</div>
           </div>
-          <div class="sort-chip" data-sort="fastest" onclick="setSortChip('fastest', this)">
+          <div class="sort-chip" data-sort="DurationAsc" onclick="setSortChip('DurationAsc', this)">
             <div class="nm">최단 여행 시간 순</div>
             <div class="pr" id="chip-fastest-pr">-</div>
             <div class="du" id="chip-fastest-du">-</div>
           </div>
-          <div class="sort-chip" data-sort="cheapest" onclick="setSortChip('cheapest', this)">
+          <div class="sort-chip" data-sort="AmountAsc" onclick="setSortChip('AmountAsc', this)">
             <div class="nm">최저가순</div>
             <div class="pr" id="chip-cheapest-pr">-</div>
             <div class="du" id="chip-cheapest-du">-</div>
           </div>
-          <div class="sort-chip" data-sort="earliest" onclick="setSortChip('earliest', this)">
+          <div class="sort-chip" data-sort="DepartureTimeAsc" onclick="setSortChip('DepartureTimeAsc', this)">
             <div class="nm">빠른 출발 순</div>
             <div class="pr" id="chip-earliest-pr">-</div>
             <div class="du" id="chip-earliest-du">-</div>
@@ -492,20 +499,25 @@
   <script src="state.js"></script>
   <script>
     const params = new URLSearchParams(location.search);
+    // 오마이트립 URL 스키마 파싱 (itineraries-0/1-*·tripTypeCode·cabinClassCode·*Count·sortOrder) + 구파라미터 폴백
+    const TRIP_FROM_CODE = { RT:'roundtrip', OW:'oneway', MC:'multicity' };
+    const CLS_FROM_CODE = { Y:'economy', W:'premium', C:'business', F:'first' };
     const SQ = {
-      from: params.get('from') || 'ICN',
-      to: params.get('to') || 'NGO',
-      dep: params.get('dep') || '',
-      ret: params.get('ret') || '',
-      type: params.get('type') || 'roundtrip',
+      from: params.get('itineraries-0-originAirportCode') || params.get('from') || 'ICN',
+      to: params.get('itineraries-0-destinationAirportCode') || params.get('to') || 'NGO',
+      dep: params.get('itineraries-0-departureDate') || params.get('dep') || '',
+      ret: params.get('itineraries-1-departureDate') || params.get('ret') || '',
+      type: TRIP_FROM_CODE[params.get('tripTypeCode')] || params.get('type') || 'roundtrip',
       nonstop: params.get('nonstop') === '1',
-      cls: params.get('cls') || 'economy',
-      adult: parseInt(params.get('adult') || '1'),
-      child: parseInt(params.get('child') || '0'),
-      infant: parseInt(params.get('infant') || '0')
+      cls: CLS_FROM_CODE[params.get('cabinClassCode')] || params.get('cls') || 'economy',
+      adult: parseInt(params.get('adultCount') || params.get('adult') || '1'),
+      child: parseInt(params.get('childCount') || params.get('child') || '0'),
+      infant: parseInt(params.get('infantCount') || params.get('infant') || '0'),
+      originCity: params.get('itineraries-0-originCityCodeIata') || '',
+      destCity: params.get('itineraries-0-destinationCityCodeIata') || ''
     };
 
-    let currentSort = 'recommend';
+    let currentSort = params.get('sortOrder') || 'RecommendDesc';
     let activeFilters = {
       stops: [],
       airlines: [],
@@ -550,9 +562,18 @@
       window._allFlights = flights;
       renderAirlineFilters();
       renderSortChips();
+      // URL sortOrder → 드롭다운·칩 동기화
+      const ss = document.getElementById('sortSelect');
+      if(ss) ss.value = currentSort;
+      document.querySelectorAll('.sort-chip').forEach(c => c.classList.toggle('on', c.dataset.sort === currentSort));
       applyFilters();
       updatePromo(flights, toCity);
     }
+
+    // 오마이트립 "검색 변경" — 현재 조건 유지하며 검색 폼으로
+    window.editSearch = () => {
+      location.href = 'flights.html' + location.search;
+    };
 
     /* 즉시할인 프로모 배너 — 노선 최저가 기준 (야놀자 패턴) */
     function updatePromo(flights, toCity){
@@ -698,14 +719,20 @@
       if(activeFilters.priceMin !== null) flights = flights.filter(f => f.price >= activeFilters.priceMin);
       if(activeFilters.priceMax !== null) flights = flights.filter(f => f.price <= activeFilters.priceMax);
 
-      // Apply sort
-      if(currentSort === 'cheapest' || currentSort === 'recommend'){
-        flights.sort((a,b) => a.price - b.price);
-      } else if(currentSort === 'fastest'){
-        flights.sort((a,b) => parseDuration(a.outDur) - parseDuration(b.outDur));
-      } else if(currentSort === 'earliest'){
-        flights.sort((a,b) => a.outDep.localeCompare(b.outDep));
-      }
+      // Apply sort (오마이트립 정렬 코드 10종)
+      const SORT_CMP = {
+        RecommendDesc:     (a,b) => a.price - b.price,        // 추천순(mock: 저가 우선)
+        AmountAsc:         (a,b) => a.price - b.price,        // 최저가순
+        AmountDesc:        (a,b) => b.price - a.price,        // 최고가순
+        DurationAsc:       (a,b) => parseDuration(a.outDur) - parseDuration(b.outDur),  // 최단 시간
+        DurationDesc:      (a,b) => parseDuration(b.outDur) - parseDuration(a.outDur),  // 최장 시간
+        DepartureTimeAsc:  (a,b) => (a.outDep||'').localeCompare(b.outDep||''),  // 빠른 출발
+        DepartureTimeDesc: (a,b) => (b.outDep||'').localeCompare(a.outDep||''),  // 늦은 출발
+        ArrivalTimeAsc:    (a,b) => (a.outArr||'').localeCompare(b.outArr||''),  // 빠른 도착
+        ArrivalTimeDesc:   (a,b) => (b.outArr||'').localeCompare(a.outArr||''),  // 늦은 도착
+        ViaCountAsc:       (a,b) => (a.stops - b.stops) || (a.price - b.price)   // 직항 우선, 경유 적은 순
+      };
+      flights.sort(SORT_CMP[currentSort] || SORT_CMP.RecommendDesc);
 
       const list = document.getElementById('flightList');
       if(flights.length === 0){
