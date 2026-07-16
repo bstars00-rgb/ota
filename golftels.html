@@ -405,8 +405,9 @@
       const cities = country
         ? [...new Set(D.GOLFTELS.filter(g => g.country === country).map(g => g.city))]
         : [...new Set(D.GOLFTELS.map(g => g.city))];
+      const cityKo = D.GOLF_CITY_NAMES || {};
       fCity.innerHTML = '<option value="">전체 도시</option>' +
-        cities.map(c => `<option value="${c}">${c}</option>`).join('');
+        cities.map(c => `<option value="${c}">${cityKo[c] || c}</option>`).join('');
     }
     fCountry.addEventListener('change', populateCities);
 
@@ -567,7 +568,7 @@
               ${badge}
             </div>
             <div class="card-body">
-              <div class="card-country">${country.name || g.country} · ${g.city}</div>
+              <div class="card-country">${country.name || g.country} · ${(D.GOLF_CITY_NAMES || {})[g.city] || g.city}</div>
               <h2 class="card-title">${g.name}</h2>
               <p class="card-tagline">${g.tagline || ''}</p>
               <div class="card-specs">

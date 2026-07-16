@@ -797,7 +797,7 @@
       const courses = (g.courseIds || []).map(cid => D.GOLF_COURSES.find(c => c.id === cid)).filter(Boolean);
       const inc = g.inclusions || {};
       document.title = `${g.name} | 오마이트립 골프텔`;
-      document.getElementById('bcCountry').textContent = `${country.name || g.country} · ${g.city}`;
+      document.getElementById('bcCountry').textContent = `${country.name || g.country} · ${(D.GOLF_CITY_NAMES || {})[g.city] || g.city}`;
 
       const badgeHtml = own.model === 'direct'
         ? `<span class="badge badge-direct">${own.label}</span>`
