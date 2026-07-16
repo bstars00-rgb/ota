@@ -256,7 +256,19 @@
     // Korea → Japan (Okinawa) — 인기 노선
     { id:'f-7C1383', code:'7C', number:'7C1383', from:'ICN', to:'OKA', outDep:'08:40', outArr:'11:10', outDur:'2h 30m', retDep:'12:10', retArr:'14:50', retDur:'2h 40m', stops:0, price:259000, class:'economy', depTime:'morning' },
     { id:'f-TW289',  code:'TW', number:'TW289',  from:'ICN', to:'OKA', outDep:'14:30', outArr:'17:00', outDur:'2h 30m', retDep:'18:00', retArr:'20:40', retDur:'2h 40m', stops:0, price:279000, class:'economy', depTime:'afternoon' },
-    { id:'f-KE757O', code:'KE', number:'KE757',  from:'ICN', to:'OKA', outDep:'10:20', outArr:'12:50', outDur:'2h 30m', retDep:'14:00', retArr:'16:40', retDur:'2h 40m', stops:0, price:359000, class:'economy', depTime:'morning' }
+    { id:'f-KE757O', code:'KE', number:'KE757',  from:'ICN', to:'OKA', outDep:'10:20', outArr:'12:50', outDur:'2h 30m', retDep:'14:00', retArr:'16:40', retDur:'2h 40m', stops:0, price:359000, class:'economy', depTime:'morning' },
+
+    // Korea → Japan (Tokyo Haneda) — ohmytrip 실측 정합 · 직항 10편 (대한1/아시아나1/일본항공4/ANA4)
+    { id:'f-OZ1085', code:'OZ', number:'OZ1085', from:'ICN', to:'HND', outDep:'21:10', outArr:'23:30', outDur:'2h 20m', retDep:'10:30', retArr:'13:00', retDur:'2h 30m', stops:0, price:443400,  class:'economy', depTime:'evening',   operatedBy:'NH' }, // 아시아나 최저 · ANA 공동운항
+    { id:'f-KE2001', code:'KE', number:'KE2001', from:'ICN', to:'HND', outDep:'08:00', outArr:'10:20', outDur:'2h 20m', retDep:'12:00', retArr:'14:30', retDur:'2h 30m', stops:0, price:488300,  class:'economy', depTime:'morning',   operatedBy:'JL' }, // 대한항공 · JAL 공동운항
+    { id:'f-JL092',  code:'JL', number:'JL092',  from:'ICN', to:'HND', outDep:'09:30', outArr:'11:50', outDur:'2h 20m', retDep:'13:30', retArr:'16:00', retDur:'2h 30m', stops:0, price:686500,  class:'economy', depTime:'morning' },
+    { id:'f-JL094',  code:'JL', number:'JL094',  from:'ICN', to:'HND', outDep:'12:40', outArr:'15:00', outDur:'2h 20m', retDep:'16:40', retArr:'19:10', retDur:'2h 30m', stops:0, price:724000,  class:'economy', depTime:'afternoon' },
+    { id:'f-JL096',  code:'JL', number:'JL096',  from:'ICN', to:'HND', outDep:'15:20', outArr:'17:40', outDur:'2h 20m', retDep:'19:20', retArr:'21:50', retDur:'2h 30m', stops:0, price:812000,  class:'economy', depTime:'afternoon' },
+    { id:'f-JL090',  code:'JL', number:'JL090',  from:'ICN', to:'HND', outDep:'18:10', outArr:'20:30', outDur:'2h 20m', retDep:'08:30', retArr:'11:00', retDur:'2h 30m', stops:0, price:905000,  class:'economy', depTime:'evening' },
+    { id:'f-NH862',  code:'NH', number:'NH862',  from:'ICN', to:'HND', outDep:'07:40', outArr:'10:00', outDur:'2h 20m', retDep:'11:30', retArr:'14:00', retDur:'2h 30m', stops:0, price:1004200, class:'economy', depTime:'morning' },
+    { id:'f-NH864',  code:'NH', number:'NH864',  from:'ICN', to:'HND', outDep:'11:20', outArr:'13:40', outDur:'2h 20m', retDep:'15:10', retArr:'17:40', retDur:'2h 30m', stops:0, price:1058000, class:'economy', depTime:'morning' },
+    { id:'f-NH866',  code:'NH', number:'NH866',  from:'ICN', to:'HND', outDep:'14:30', outArr:'16:50', outDur:'2h 20m', retDep:'18:20', retArr:'20:50', retDur:'2h 30m', stops:0, price:1102000, class:'economy', depTime:'afternoon' },
+    { id:'f-NH868',  code:'NH', number:'NH868',  from:'ICN', to:'HND', outDep:'19:40', outArr:'22:00', outDur:'2h 20m', retDep:'09:00', retArr:'11:30', retDur:'2h 30m', stops:0, price:1187000, class:'economy', depTime:'evening' }
   ];
 
   /* =====================================================================
@@ -1546,6 +1558,44 @@
 
   // NAGOYA_FLIGHTS를 FLIGHTS에 병합
   Array.prototype.push.apply(FLIGHTS, NAGOYA_FLIGHTS);
+
+  /* =====================================================================
+     3-b) 항공편 정합 강화 (ohmytrip 카드 모델)
+       실제운항사(코드셰어) · 무료 위탁수하물(PC) · 잔여 좌석 · 운임 옵션
+       — 47편을 수동 재작성하지 않고 파생 필드를 일괄 주입
+     ===================================================================== */
+  const LCC_SET = new Set(Object.values(AIRLINES).filter(a => a.tier === 'LCC').map(a => a.code));
+  // 마케팅 편명 ↔ 실제 운항 항공사 (코드셰어) — HND편은 인라인 operatedBy로 지정, 그 외 소수 지정
+  const CODESHARE = { 'f-OZ174':'NH', 'f-TG747':'KE', 'f-NH158':'OZ' };
+  // 잔여 좌석 — id 해시로 안정적 산출 (1~9석)
+  const seatHash = (id) => { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return (h % 9) + 1; };
+  const round1k = (n) => Math.round(n / 1000) * 1000;
+  FLIGHTS.forEach(f => {
+    const isLCC = LCC_SET.has(f.code);
+    // 무료 위탁수하물 (PC 단위) — 비즈니스 2PC, FSC 일반석 1PC, LCC 0PC
+    if (f.baggage == null) f.baggage = f.class === 'business' ? 2 : (isLCC ? 0 : 1);
+    // 잔여 좌석
+    if (f.seats == null) f.seats = seatHash(f.id);
+    // 실제운항사(코드셰어) — 인라인 미지정 시 맵에서 보강
+    if (!f.operatedBy && CODESHARE[f.id]) f.operatedBy = CODESHARE[f.id];
+    // 운임 옵션 (요금 비교 모달용)
+    if (!f.fares) {
+      const base = f.price;
+      if (f.class === 'business') {
+        f.fares = [
+          { key:'biz-saver', name:'비즈니스 세이버', price:base,               baggage:2, refundable:false, changeable:true,  seat:'비즈니스', desc:'비즈니스석 · 라운지 이용' },
+          { key:'biz-flex',  name:'비즈니스 플렉스', price:round1k(base * 1.18), baggage:2, refundable:true,  changeable:true,  seat:'비즈니스', desc:'환불 가능 · 무료 일정 변경' }
+        ];
+      } else {
+        const bag = isLCC ? 0 : 1;
+        f.fares = [
+          { key:'eco-saver', name:isLCC?'스탠다드':'일반석 세이버',   price:base,               baggage:bag,   refundable:false, changeable:false, seat:'일반석', desc: isLCC ? '위탁수하물 미포함 · 최저가' : '위탁수하물 1PC · 최저가' },
+          { key:'eco-plus',  name:isLCC?'플러스':'일반석 스탠다드',   price:round1k(base*1.12), baggage:bag+1, refundable:false, changeable:true,  seat:'일반석', desc:'위탁수하물 '+(bag+1)+'PC · 좌석지정 무료' },
+          { key:'eco-flex',  name:isLCC?'플렉스':'일반석 플렉스',     price:round1k(base*1.24), baggage:bag+1, refundable:true,  changeable:true,  seat:'일반석', desc:'환불 가능 · 무료 일정 변경' }
+        ];
+      }
+    }
+  });
 
   root.DATA = {
     COUNTRIES, CITIES, CITY_GRID, AIRLINES, FLIGHTS, HOTELS, ACTIVITIES,
