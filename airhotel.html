@@ -309,7 +309,13 @@
       }
       dd.innerHTML = html; dd.classList.add('on');
     }
-    window.airOpenDD = (t) => { abRenderDD(t, document.getElementById(abInputId(t)).value.trim()); };
+    window.airOpenDD = (t) => {
+      // 포커스 시: 기존 도시명 전체 선택(타이핑 즉시 교체) + 전체 목록 표시 (인기 도시·대륙별)
+      // — 현재 값으로 필터하면 이미 선택된 도시 1개만 보여 "도시가 이것뿐"으로 오해
+      const inp = document.getElementById(abInputId(t));
+      inp.select();
+      abRenderDD(t, '');
+    };
     window.airInput = (t,v) => abRenderDD(t, v.trim());
     window.airPick = (t, code) => {
       const c = CITIES[code] || {code,name:code};

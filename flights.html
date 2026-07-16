@@ -586,7 +586,11 @@
     window.openCityDD = (target) => {
       currentCityTarget = target;
       closeAllDD(target);
-      renderCityDD(target, document.getElementById(target + 'Input').value.trim());
+      // 포커스 시: 기존 도시명 전체 선택(타이핑 즉시 교체) + 전체 목록 표시 (최근 검색·인기 도시·대륙별)
+      // — 현재 값으로 필터하면 이미 선택된 도시 1개만 보여 "도시가 이것뿐"으로 오해
+      const inp = document.getElementById(target + 'Input');
+      inp.select();
+      renderCityDD(target, '');
     };
     window.onCityInput = (target, val) => { renderCityDD(target, val.trim()); };
 
