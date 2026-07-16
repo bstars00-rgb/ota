@@ -371,7 +371,7 @@
 
   <script src="data.js"></script>
   <script>
-    const D = window.OMT.DATA;
+    const D = window.OMT?.DATA;   // data.js 로드 실패 시 null (아래 init 가드에서 안내)
     const fCountry = document.getElementById('fCountry');
     const fCity = document.getElementById('fCity');
     const fRounds = document.getElementById('fRounds');
@@ -384,7 +384,7 @@
     let cartFilter = null;     // '1-1' or '2-1'
     let facFilters = new Set(); // 'korean-staff' etc.
     let checkinDate = null;    // 선택 시 카드에 가산률 미리보기 표시
-    let workingList = [...D.GOLFTELS];
+    let workingList = D ? [...D.GOLFTELS] : [];
 
     // 체크인 → 라운딩별 주말 카운트 → 평균 가산률 계산
     function _previewSurcharge(g){
@@ -649,7 +649,19 @@
       document.querySelector('.chip[data-quick="all"]').classList.add('active');
       applyFilters();
     }
-    init();
+    if(D && Array.isArray(D.GOLFTELS)){
+      init();
+    } else {
+      // data.js 미로딩 — "총 0개"로 오해하지 않도록 명확히 안내
+      if(resCount) resCount.textContent = '0';
+      if(grid) grid.innerHTML = `
+        <div class="empty">
+          <div class="icon">⚠️</div>
+          <div class="title">상품 정보를 불러오지 못했어요</div>
+          <div>네트워크 상태를 확인한 뒤 새로고침 해주세요.</div>
+          <button onclick="location.reload()" style="margin-top:14px;padding:11px 22px;background:var(--ink,#15161B);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">↻ 새로고침</button>
+        </div>`;
+    }
   </script>
   <script src="icons.js"></script>
 </body>
