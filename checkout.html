@@ -542,6 +542,7 @@
   <script src="data.js"></script>
   <script src="state.js"></script>
   <script>
+  (function(){  // IIFE — 패키지 없을 때 return으로 안전 종료 (미처리 예외 없이)
   /* =========================================================================
      Load package or golftel booking from sessionStorage
      - omt_pending_booking (NEW): set by golftel.html for golftel / golftel-air
@@ -691,7 +692,7 @@
     document.getElementById('emptyState').hidden = false;
     document.getElementById('checkoutMain').style.display = 'none';
     document.querySelector('.m-pay-bar').style.display = 'none';
-    throw new Error('No package in session');
+    return;  // 빈 상태 UI 표시 후 종료 — throw 시 미처리 예외로 콘솔 오염
   }
 
   const krw = n => n.toLocaleString('ko-KR') + '원';
@@ -1304,6 +1305,9 @@
     console.error('[Checkout] Tier/miles init error:', err);
   }
   updatePayButton();
+
+  window.submitPayment = submitPayment;  // 인라인 onclick용 — IIFE 내부 선언이라 명시 노출 필수
+  })();
   </script>
   <script src="icons.js"></script>
 </body>
