@@ -3,7 +3,7 @@
 // 전략: data.js / state.js / 페이지는 stale-while-revalidate
 // 외부 (Unsplash 등) 은 network-first
 // ========================================
-const CACHE_NAME = 'omt-v4-2026-07-14';   // 버전 업 (영상으로 예약 페이지 제거 반영 — 재방문자 캐시 갱신)
+const CACHE_NAME = 'omt-20260718-1524';   // pre-commit 훅이 자동 범프 (.githooks/pre-commit)
 const CORE_ASSETS = [
   './',
   './index.html',

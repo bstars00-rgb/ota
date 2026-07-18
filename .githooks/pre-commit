@@ -1,0 +1,13 @@
+#!/bin/sh
+# ============================================================
+# pre-commit: 프론트 자산(html/js/css) 변경 커밋 시
+# sw.js CACHE_NAME을 자동 범프 — 재방문자 캐시 갱신 누락 방지
+# 활성화: git config core.hooksPath .githooks (1회)
+# ============================================================
+CHANGED=$(git diff --cached --name-only | grep -vE '^(test/|\.githooks/)' | grep -E '\.(html|js|css)$')
+if [ -n "$CHANGED" ]; then
+  STAMP=$(date +%Y%m%d-%H%M)
+  sed -i "s/const CACHE_NAME = '[^']*'/const CACHE_NAME = 'omt-$STAMP'/" sw.js
+  git add sw.js
+  echo "[pre-commit] SW 캐시 버전 범프 → omt-$STAMP"
+fi
