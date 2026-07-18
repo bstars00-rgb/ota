@@ -3,7 +3,7 @@
 // 전략: data.js / state.js / 페이지는 stale-while-revalidate
 // 외부 (Unsplash 등) 은 network-first
 // ========================================
-const CACHE_NAME = 'omt-20260718-1524';   // pre-commit 훅이 자동 범프 (.githooks/pre-commit)
+const CACHE_NAME = 'omt-20260718-1532';   // pre-commit 훅이 자동 범프 (.githooks/pre-commit)
 const CORE_ASSETS = [
   './',
   './index.html',

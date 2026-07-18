@@ -175,6 +175,21 @@
     .empty .nm{font-size:16px;font-weight:900;color:var(--ink);margin-bottom:6px;}
     .empty .desc{font-size:13px;color:var(--ink-3);}
 
+    /* 선택한 가는편 요약 바 (왕복 2단계 — 오는편 선택 중 표시) */
+    .sel-out-bar{
+      display:none;align-items:center;gap:14px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);
+      border:1.5px solid var(--success);border-radius:var(--radius);padding:14px 18px;margin-bottom:12px;box-shadow:var(--shadow-sm);
+    }
+    .sel-out-bar.on{display:flex;flex-wrap:wrap;}
+    .sel-out-bar .tag{background:var(--success);color:#fff;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;flex-shrink:0;}
+    .sel-out-bar .info{flex:1;min-width:200px;font-size:13px;font-weight:800;color:var(--ink);}
+    .sel-out-bar .info small{display:block;font-size:11px;color:var(--ink-3);font-weight:700;margin-top:2px;}
+    .sel-out-bar .chg{
+      padding:8px 14px;background:#fff;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);
+      flex-shrink:0;transition:border-color .2s var(--ease),color .2s var(--ease);
+    }
+    .sel-out-bar .chg:hover{border-color:var(--primary);color:var(--primary);}
+
     /* 즉시할인 프로모 배너 (야놀자 패턴) */
     .promo-strip{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#FFF5F0,#FFEDE0);border:1px solid #FECACA;border-radius:var(--radius);padding:12px 18px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
     .promo-strip .badge{background:var(--primary);color:#fff;font-weight:900;font-size:13px;padding:6px 12px;border-radius:8px;flex-shrink:0;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;}
@@ -305,17 +320,17 @@
         <button type="button" onclick="editSearch()" style="margin-top:8px;padding:7px 14px;background:#fff;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;">🔎 검색 변경</button>
       </div>
       <div class="stepper">
-        <div class="step">
+        <div class="step" id="stepOut">
           <div class="num">01</div>
           <div class="label">가는편 선택</div>
         </div>
-        <div class="step-line"></div>
-        <div class="step inactive">
+        <div class="step-line" id="stepRetLine"></div>
+        <div class="step inactive" id="stepRet">
           <div class="num">02</div>
           <div class="label">오는편 선택</div>
         </div>
         <div class="step-line"></div>
-        <div class="step inactive">
+        <div class="step inactive" id="stepPay">
           <div class="num">03</div>
           <div class="label">결제하기</div>
         </div>
@@ -401,6 +416,13 @@
             이 노선 인당 <b>10만원 즉시할인</b> 단독 혜택!
             <small>항공권 구매 시 해외숙소·투어·액티비티 추가 할인 쿠폰을 드려요</small>
           </div>
+        </div>
+
+        <!-- 왕복 2단계: 오는편 선택 중일 때 선택한 가는편 표시 -->
+        <div class="sel-out-bar" id="selOutBar">
+          <span class="tag">✓ 가는편 선택됨</span>
+          <div class="info" id="selOutInfo"></div>
+          <button class="chg" onclick="changeOutbound()">가는편 변경</button>
         </div>
 
         <div class="results-head">
@@ -516,13 +538,43 @@
       priceMax: null
     };
 
+    /* ===== 왕복 2단계 페어링 상태 (01 가는편 → 02 오는편 → 03 결제) ===== */
+    let step = 1;              // 1: 가는편 선택, 2: 오는편 선택
+    let selectedOut = null;    // 1단계에서 선택한 가는편 flight 객체
+    const isRoundTrip = () => SQ.type !== 'oneway' && !!SQ.ret;
+
+    const timeBand = (t) => {
+      const h = parseInt(String(t || '12:00').split(':')[0]);
+      return h < 6 ? 'evening' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+    };
+    const retNumberOf = (f) => {
+      const n = parseInt(String(f.number || '0').replace(/\D/g, '')) || 100;
+      return (f.code || '') + (n + 1);   // 관례: 귀국편은 +1 편명
+    };
+    // 페어링 총액 (1인 왕복): 동일 편 왕복 = 원래 가격, 교차 페어링 = 각 왕복가의 절반 합
+    const pairTotal = (out, retSrc) => {
+      if (!out || out.id === retSrc.id) return retSrc.price;
+      return Math.round((out.price / 2 + retSrc.price / 2) / 1000) * 1000;
+    };
+    // 오는편 레그 목록 합성 — 각 항공편 레코드의 귀국 정보(retDep/retArr)를 정규 필드로 매핑해
+    // 기존 필터·정렬·카드 렌더 코드를 그대로 재사용한다
+    const buildReturnLegs = (baseFlights, out) => baseFlights.map(f => ({
+      ...f,
+      id: f.id + '-R', _srcId: f.id,
+      number: retNumberOf(f),
+      from: f.to, to: f.from,
+      outDep: f.retDep || f.outDep, outArr: f.retArr || f.outArr, outDur: f.retDur || f.outDur,
+      depTime: timeBand(f.retDep),
+      price: pairTotal(out, f)
+    }));
+
     function init(){
       const data = window.OMT?.DATA || {};
       const cities = data.CITIES || {};
       const fromCity = cities[SQ.from] || { name: SQ.from };
       const toCity = cities[SQ.to] || { name: SQ.to };
 
-      document.getElementById('routeTitle').innerHTML = `<span style="font-size:30px;">${toCity.name}<span style="font-size:18px;color:var(--ink-3);font-weight:700;">(으)로 가는 항공편을 선택해 주세요.</span></span>`;
+      window._routeCities = { fromCity, toCity };   // 단계별 제목 갱신용
       const fmtDate = key => {
         if(!key) return '';
         const [y, m, d] = key.split('-');
@@ -548,8 +600,18 @@
         flights = flights.filter(f => f.stops === 0);
       }
 
-      // 추가 noise: 가격을 약간 흔들어 27건 정도 보여주기 (mock)
+      window._outboundFlights = flights;   // 1단계(가는편) 기준 목록 — 2단계는 여기서 귀국 레그 합성
       window._allFlights = flights;
+
+      // 편도: 오는편 스텝 숨김 → 01 가는편 / 02 결제
+      if(!isRoundTrip()){
+        const sr = document.getElementById('stepRet'), sl = document.getElementById('stepRetLine');
+        if(sr) sr.style.display = 'none';
+        if(sl) sl.style.display = 'none';
+        const payNum = document.querySelector('#stepPay .num');
+        if(payNum) payNum.textContent = '02';
+      }
+
       renderAirlineFilters();
       renderSortChips();
       // URL sortOrder → 드롭다운·칩 동기화
@@ -557,8 +619,60 @@
       if(ss) ss.value = currentSort;
       document.querySelectorAll('.sort-chip').forEach(c => c.classList.toggle('on', c.dataset.sort === currentSort));
       applyFilters();
+      applyStepUI();
       updatePromo(flights, toCity);
     }
+
+    /* ===== 왕복 2단계 전환 ===== */
+    function applyStepUI(){
+      const { fromCity, toCity } = window._routeCities || { fromCity:{name:SQ.from}, toCity:{name:SQ.to} };
+      const title = document.getElementById('routeTitle');
+      const dest = step === 1 ? toCity.name : fromCity.name;
+      const verb = step === 1 ? '(으)로 가는' : '(으)로 돌아오는';
+      title.innerHTML = `<span style="font-size:30px;">${dest}<span style="font-size:18px;color:var(--ink-3);font-weight:700;">${verb} 항공편을 선택해 주세요.</span></span>`;
+
+      // 스텝퍼 활성화 상태
+      const stepRet = document.getElementById('stepRet');
+      if(stepRet) stepRet.classList.toggle('inactive', step < 2);
+      const outNum = document.querySelector('#stepOut .num');
+      if(outNum) outNum.textContent = step === 2 ? '✓' : '01';
+
+      // 선택한 가는편 요약 바
+      const bar = document.getElementById('selOutBar');
+      if(bar){
+        bar.classList.toggle('on', step === 2 && !!selectedOut);
+        if(step === 2 && selectedOut){
+          const a = window.OMT?.DATA?.AIRLINES?.[selectedOut.code] || { name: selectedOut.code };
+          document.getElementById('selOutInfo').innerHTML =
+            `${a.name} ${selectedOut.number} · ${selectedOut.outDep} ${selectedOut.from} → ${selectedOut.outArr} ${selectedOut.to}` +
+            `<small>${SQ.dep} 출발 · ${selectedOut.stops === 0 ? '직항' : selectedOut.stops + '회 경유'} ${selectedOut.outDur} · 아래 가격은 가는편 포함 1인 왕복 총액입니다</small>`;
+        }
+      }
+    }
+
+    function setStep(n){
+      step = n;
+      window._allFlights = (n === 1)
+        ? window._outboundFlights
+        : buildReturnLegs(window._outboundFlights, selectedOut);
+      renderAirlineFilters();
+      resetFilters();          // 단계 전환 시 필터 초기화 (레그별 시간대·가격이 다름)
+      applyStepUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 카드 [선택] — 왕복 1단계면 가는편 확정 후 2단계로, 그 외엔 운임 모달
+    window.onLegSelect = (fid) => {
+      const f = (window._allFlights || []).find(x => x.id === fid);
+      if(!f) return;
+      if(isRoundTrip() && step === 1){
+        selectedOut = f;
+        setStep(2);
+      } else {
+        openFareModal(fid);
+      }
+    };
+    window.changeOutbound = () => { selectedOut = null; setStep(1); };
 
     // 오마이트립 "검색 변경" — 현재 조건 유지하며 검색 폼으로
     window.editSearch = () => {
@@ -762,6 +876,7 @@
         const cancelPrice = Math.round(f.price * 0.05 / 1000) * 1000;  // 5% 취소보장
         const opName = f.operatedBy ? (airlines[f.operatedBy]?.name || f.operatedBy) : '';
         const bagTxt = (f.baggage > 0) ? `무료 수하물 ${f.baggage} PC` : '위탁수하물 미포함';
+        const legDate = step === 2 ? SQ.ret : SQ.dep;   // 2단계는 귀국일 기준
         return `
           <div class="flight-card">
             <div class="airline">
@@ -774,7 +889,7 @@
             </div>
             <div class="flight-route">
               <div class="col">
-                <div class="date">${fmtDate(SQ.dep)}</div>
+                <div class="date">${fmtDate(legDate)}</div>
                 <div class="time">${f.outDep}</div>
                 <div class="airport">${f.from}</div>
               </div>
@@ -783,7 +898,7 @@
                 <div class="dur">${f.outDur}</div>
               </div>
               <div class="col">
-                <div class="date">${fmtDate(SQ.dep)}</div>
+                <div class="date">${fmtDate(legDate)}</div>
                 <div class="time">${f.outArr}</div>
                 <div class="airport">${f.to}</div>
               </div>
@@ -791,7 +906,7 @@
             <div class="flight-extras">
               <div class="baggage">${bagTxt}${isBusiness ? ' · 기내식 포함' : ''}</div>
               <div class="price ${isBusiness ? 'business' : ''}">${f.price.toLocaleString('ko-KR')}원</div>
-              <div class="card-hint">${CARD_FARES[0].name} 외 ${CARD_FARES.length - 1}종 · 세금·유류할증료 포함</div>
+              <div class="card-hint">${step === 2 ? '선택한 가는편 포함 · 1인 왕복 총액' : `${CARD_FARES[0].name} 외 ${CARD_FARES.length - 1}종 · 세금·유류할증료 포함`}</div>
               <button class="fare-link" onclick="openRuleModal('${f.id}')">운임규정 ›</button>
               <label style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:6px;cursor:pointer;font-size:11px;color:var(--ink-2);font-weight:700;">
                 <input type="checkbox" onchange="toggleCancelGuard(this, '${f.id}', ${cancelPrice})" style="accent-color:var(--success);" />
@@ -799,7 +914,7 @@
               </label>
             </div>
             <div class="flight-cta">
-              <button class="select-btn" onclick="openFareModal('${f.id}')">선택</button>
+              <button class="select-btn" onclick="onLegSelect('${f.id}')">선택</button>
               <div class="seats-left ${seats <= 3 ? 'seats-low' : ''}">잔여 ${seats}석</div>
             </div>
           </div>
@@ -916,24 +1031,7 @@
       const dow = ['일','월','화','수','목','금','토'][dt.getDay()];
       return `${m}월 ${d}일(${dow})`;
     };
-    const parseDur = s => {
-      s = String(s||'');
-      const h = (s.match(/(\d+)\s*h/)||s.match(/(\d+)\s*시간/)||[])[1];
-      const mn = (s.match(/(\d+)\s*m/)||s.match(/(\d+)\s*분/)||[])[1];
-      return (parseInt(h||0))*60 + parseInt(mn||0);
-    };
-    const addMin = (t, add) => {
-      const [hh,mm] = String(t||'00:00').split(':').map(x=>parseInt(x)||0);
-      let tot = ((hh*60+mm+add)%1440+1440)%1440;
-      return `${String(Math.floor(tot/60)).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`;
-    };
-    // 오는편 (결정론적으로 합성 — 편명 숫자 기반)
-    function buildReturn(f){
-      const n = parseInt(String(f.number||'0').replace(/\D/g,'')) || 100;
-      const dep = `${String(9+(n%9)).padStart(2,'0')}:${['05','20','35','50'][n%4]}`;
-      const durMin = parseDur(f.outDur) || 300;
-      return { dep, arr: addMin(dep, durMin), dur: f.outDur, no: (f.code||'') + String(n+7) };
-    }
+    // (buildReturn 합성 로직 제거 — 오는편은 2단계에서 실제 레그 선택)
     function isLcc(name, price){
       return /jin|air ?busan|t'?way|티웨이|제주|진에어|에어부산|에어서울|피치|비엣젯|스쿠트|세부|에어아시아/i.test(name||'') || (price||0) < 300000;
     }
@@ -941,47 +1039,49 @@
     window.openFareModal = (fid) => {
       const f = (window._allFlights || []).find(x => x.id === fid);
       if(!f) return;
-      fareCtx = { flight: f, selectedIdx: 1 };
+      const rt = isRoundTrip();
+      // 왕복: f는 2단계 오는편 레그(price = 가는편 포함 왕복 총액), out은 1단계에서 확정한 편
+      const out = rt ? (selectedOut || window._outboundFlights.find(x => x.id === f._srcId) || f) : f;
+      const ret = rt ? f : null;
+      fareCtx = { flight: f, out, ret, selectedIdx: 1 };
       const cities = window.OMT?.DATA?.CITIES || {};
-      const fromN = cities[f.from]?.name || SQ.from;
-      const toN = cities[f.to]?.name || SQ.to;
-      const rt = SQ.type !== 'oneway' && SQ.ret;
+      const fromN = cities[out.from]?.name || SQ.from;
+      const toN = cities[out.to]?.name || SQ.to;
       document.getElementById('fareRouteTitle').innerHTML = `${fromN} <span style="color:var(--ink-3);font-weight:800;">${rt?'⇌':'→'}</span> ${toN}`;
       document.getElementById('fareSub').textContent = `성인 ${SQ.adult}명${SQ.child?` · 아동 ${SQ.child}명`:''}${SQ.infant?` · 유아 ${SQ.infant}명`:''} · 세금·유류할증료·발권수수료 포함`;
-      renderFareSegments(f);
+      renderFareSegments();
       renderFareModal();
       document.getElementById('fareModal').classList.add('on');
     };
 
-    function renderFareSegments(f){
+    // 선택한 실제 레그(가는편·오는편)로 세그먼트 렌더 — 합성(buildReturn) 제거
+    function renderFareSegments(){
       const cities = window.OMT?.DATA?.CITIES || {};
       const airlines = window.OMT?.DATA?.AIRLINES || {};
-      const aName = (airlines[f.code] || {}).name || f.code;
-      const opN = f.operatedBy ? (airlines[f.operatedBy]?.name || f.operatedBy) : '';
-      const fromN = cities[f.from]?.name || f.from;
-      const toN = cities[f.to]?.name || f.to;
-      const lcc = isLcc(aName, f.price);
-      const seg = (badge, cls, dateStr, dur, dep, arr, fromC, fromNm, toC, toNm, airNm, no) => `
+      const nameOf = c => cities[c]?.name || c;
+      const seg = (badge, cls, dateStr, leg) => {
+        const aName = (airlines[leg.code] || {}).name || leg.code;
+        const opN = leg.operatedBy ? (airlines[leg.operatedBy]?.name || leg.operatedBy) : '';
+        const lcc = isLcc(aName, leg.price);
+        return `
         <div class="fseg">
           <div class="fseg-top">
             <span class="fseg-badge ${cls}">${badge}</span>
-            <span class="fseg-meta">${dateStr} · 소요 ${dur||'—'}${lcc?' · <span class="lcc">저비용 항공사</span>':''}</span>
+            <span class="fseg-meta">${dateStr} · 소요 ${leg.outDur||'—'}${lcc?' · <span class="lcc">저비용 항공사</span>':''}</span>
           </div>
           <div class="fseg-line-row">
-            <span class="fseg-time">${dep}</span>
-            <div><div class="fseg-air">${fromNm} <span style="color:var(--ink-3);">(${fromC})</span></div><div class="fseg-sub">${airNm} ${no} · 일반석${opN?` · 실제운항사 ${opN}`:''}</div></div>
+            <span class="fseg-time">${leg.outDep}</span>
+            <div><div class="fseg-air">${nameOf(leg.from)} <span style="color:var(--ink-3);">(${leg.from})</span></div><div class="fseg-sub">${aName} ${leg.number} · 일반석${opN?` · 실제운항사 ${opN}`:''}</div></div>
           </div>
           <div class="fseg-line-row">
-            <span class="fseg-time">${arr}</span>
-            <div><div class="fseg-air">${toNm} <span style="color:var(--ink-3);">(${toC})</span></div></div>
+            <span class="fseg-time">${leg.outArr}</span>
+            <div><div class="fseg-air">${nameOf(leg.to)} <span style="color:var(--ink-3);">(${leg.to})</span></div></div>
           </div>
         </div>`;
-      const rt = SQ.type !== 'oneway' && SQ.ret;
-      let html = seg('가는편','', fareDateFmt(SQ.dep), f.outDur, f.outDep, f.outArr, f.from, fromN, f.to, toN, aName, f.number);
-      if(rt){
-        const r = buildReturn(f);
-        html += seg('오는편','ret', fareDateFmt(SQ.ret), r.dur, r.dep, r.arr, f.to, toN, f.from, fromN, aName, r.no);
-      }
+      };
+      const rt = !!fareCtx.ret;
+      let html = seg('가는편', '', fareDateFmt(SQ.dep), fareCtx.out);
+      if(rt) html += seg('오는편', 'ret', fareDateFmt(SQ.ret), fareCtx.ret);
       document.getElementById('fareSegments').innerHTML = `<div class="fseg-wrap ${rt?'two':'one'}">${html}</div>`;
     }
 
@@ -1035,18 +1135,24 @@
     window.closeFare = () => document.getElementById('fareModal').classList.remove('on');
     window.confirmFare = () => {
       if(!fareCtx) return;
-      const f = fareCtx.flight;
+      const f = fareCtx.flight;               // 왕복이면 price = 페어링 총액
       const c = FARE_CLASSES[fareCtx.selectedIdx];
       const per = farePriceOf(f, c);
       const paxTotal = Math.max(1, SQ.adult + SQ.child + SQ.infant);
       const p = new URLSearchParams({
-        type:'flight', id:f.id,
+        type:'flight', id:(fareCtx.out || f).id,
         adult:SQ.adult, child:SQ.child, infant:SQ.infant,
         cls:SQ.cls, dep:SQ.dep,
         fare:per, fareClass:c.name, fareKey:c.key,
         bag:(c.checked||'미포함'), mile:Math.round(per*paxTotal*c.mileRate)
       });
       if(SQ.ret) p.set('ret', SQ.ret);
+      if(fareCtx.ret){                        // 오는편 실선택 정보 (checkout·바우처 표기용)
+        p.set('retFlight', fareCtx.ret._srcId || fareCtx.ret.id);
+        p.set('retNo', fareCtx.ret.number);
+        p.set('retDep', fareCtx.ret.outDep);
+        p.set('retArr', fareCtx.ret.outArr);
+      }
       location.href = 'checkout.html?' + p.toString();
     };
 
