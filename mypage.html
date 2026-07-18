@@ -478,6 +478,13 @@
   </div>
 
   <!-- Review Modal -->
+  <!-- 예약 취소·환불 모달 (위약금 자동 계산) -->
+  <div class="modal-overlay" id="cancelModal">
+    <div class="modal" style="max-width:520px;">
+      <div id="cancelBody"><!-- 동적 렌더: 신청 화면 ↔ 완료 화면 --></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="reviewModal">
     <div class="modal">
       <h3>리뷰 작성</h3>
@@ -669,6 +676,7 @@
             <div class="bc-meta">${b.dates} · 성인 ${b.paxCount}명 · ${PAY_LABELS[b.paymentMethod]||b.paymentMethod}</div>
             ${golftelExtra}
             <div class="bc-num">예약번호: ${b.bookingNumber}</div>
+            ${b.status === 'cancelled' && b.refund != null ? `<div class="bc-tee" style="color:var(--danger);margin-top:4px;">↩ 환불 ${krw(b.refund)} · 위약금 ${krw(b.penalty || 0)} — ${PAY_LABELS[b.refundMethod || b.paymentMethod] || '원결제수단'} 3~5영업일 내</div>` : ''}
           </div>
           <div class="bc-right">
             <div class="bc-price">${krw(b.total)}</div>
@@ -680,12 +688,143 @@
   }
 
   window.viewBooking = (bn) => { location.href = 'complete.html?bk=' + bn; };
-  window.cancelBooking = (id) => {
-    if(confirm('예약을 취소하시겠습니까?\n(출발 3일 전 이후는 환불 불가)')){
-      OMT.State.cancelBooking(id);
-      renderBookings(); renderProfileStats(); renderHomeDashboard();
-      toast('예약이 취소되었어요');
+  /* =========================================================================
+     예약 취소·환불 플로우 — 위약금 자동 계산 → 환불 내역 → 접수 완료
+     정책: 골프텔·호텔 % 위약금 (출발 D-day 기준), 항공은 인당 정액 (운임규정 표와 동일)
+     ========================================================================= */
+  const PCT_TIERS = [
+    { min:21, pct:0,   label:'출발 21일 전' },
+    { min:14, pct:30,  label:'20 ~ 14일 전' },
+    { min:7,  pct:50,  label:'13 ~ 7일 전' },
+    { min:4,  pct:80,  label:'6 ~ 4일 전' },
+    { min:-Infinity, pct:100, label:'3일 이내' }
+  ];
+  const FLIGHT_TIERS = [
+    { min:91, fee:0,      label:'출발 91일 전' },
+    { min:61, fee:20000,  label:'90 ~ 61일 전' },
+    { min:31, fee:40000,  label:'60 ~ 31일 전' },
+    { min:6,  fee:60000,  label:'30 ~ 6일 전' },
+    { min:1,  fee:90000,  label:'5 ~ 1일 전' },
+    { min:-Infinity, fee:120000, label:'출발 당일 이후' }
+  ];
+  function cancelCalc(b){
+    const startStr = (b.dates || '').split(' - ')[0].replace(/\./g, '-');
+    const start = new Date(startStr + 'T00:00:00');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const dday = isNaN(start.getTime()) ? 999 : Math.round((start - today) / 86400000);
+    const total = b.total || 0;
+    if(b.productType === 'flight'){
+      const tier = FLIGHT_TIERS.find(t => dday >= t.min);
+      const penalty = Math.min(total, tier.fee * (b.paxCount || 1));
+      return { dday, tier, tiers:FLIGHT_TIERS, isFlight:true, total, penalty, refund: total - penalty };
     }
+    const tier = PCT_TIERS.find(t => dday >= t.min);
+    const penalty = Math.round(total * tier.pct / 100 / 100) * 100;
+    return { dday, tier, tiers:PCT_TIERS, isFlight:false, total, penalty, refund: total - penalty };
+  }
+
+  let cancelCtx = null;
+  window.cancelBooking = (id) => {
+    const b = OMT.State.getBooking(id);
+    if(!b) return;
+    cancelCtx = { booking: b, calc: cancelCalc(b) };
+    renderCancelModal();
+    document.getElementById('cancelModal').classList.add('open');
+  };
+  window.closeCancelModal = () => {
+    document.getElementById('cancelModal').classList.remove('open');
+    cancelCtx = null;
+  };
+
+  function renderCancelModal(){
+    const { booking: b, calc: c } = cancelCtx;
+    const rows = c.tiers.map(t => {
+      const on = t === c.tier;
+      const val = c.isFlight ? (t.fee ? t.fee.toLocaleString('ko-KR') + '원/인' : '무료') : (t.pct ? t.pct + '%' : '무료');
+      return `<tr style="${on ? 'background:#FFF1EA;font-weight:900;color:var(--primary);' : 'color:var(--ink-2);'}">
+        <td style="padding:7px 10px;border-bottom:1px solid var(--bg-soft);">${on ? '▶ ' : ''}${t.label}</td>
+        <td style="padding:7px 10px;border-bottom:1px solid var(--bg-soft);text-align:right;font-variant-numeric:tabular-nums;">${val}</td>
+      </tr>`;
+    }).join('');
+    const ddayTxt = c.dday >= 0 ? `출발 D-${c.dday}` : `출발 ${-c.dday}일 경과`;
+    document.getElementById('cancelBody').innerHTML = `
+      <h3>😢 예약 취소</h3>
+      <p class="sub">취소 전 위약금과 환불 금액을 확인해 주세요.</p>
+
+      <div style="background:var(--bg-soft);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:900;color:var(--ink);">${b.productName}</div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-top:3px;">
+          ${b.bookingNumber} · ${b.dates} · 성인 ${b.paxCount}명 · <b style="color:var(--ink-2);">${ddayTxt}</b>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:900;color:var(--ink-2);margin-bottom:6px;">취소 위약금 규정 ${c.isFlight ? '(항공 · 인당)' : '(골프텔·호텔)'}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px;">${rows}</table>
+
+      <div style="border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--ink-2);padding:3px 0;">
+          <span>결제 금액</span><span style="font-variant-numeric:tabular-nums;">${krw(c.total)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--danger);padding:3px 0;">
+          <span>취소 위약금 ${c.isFlight ? `(${(c.tier.fee||0).toLocaleString('ko-KR')}원 × ${b.paxCount}인)` : `(${c.tier.pct}%)`}</span>
+          <span style="font-variant-numeric:tabular-nums;">- ${krw(c.penalty)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:8px;">
+          <span>환불 예정 금액</span><span style="color:var(--primary);font-variant-numeric:tabular-nums;">${krw(c.refund)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:700;margin-top:6px;">
+          ${PAY_LABELS[b.paymentMethod] || '원결제수단'}(으)로 3~5영업일 내 환불 · 적립 예정 마일리지는 회수됩니다
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:800;color:var(--ink-2);display:block;margin-bottom:6px;">취소 사유</label>
+        <select id="cancelReason" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;">
+          <option value="schedule">📅 일정 변경</option>
+          <option value="price">💰 더 저렴한 상품 발견</option>
+          <option value="personal">🙏 개인 사정</option>
+          <option value="weather">🌧️ 기상·천재지변 우려</option>
+          <option value="other">❓ 기타</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel" onclick="closeCancelModal()">돌아가기</button>
+        <button class="submit" style="background:var(--danger);" onclick="confirmCancelBooking()">${krw(c.refund)} 환불받고 취소</button>
+      </div>
+    `;
+  }
+
+  window.confirmCancelBooking = () => {
+    if(!cancelCtx) return;
+    const { booking: b, calc: c } = cancelCtx;
+    const reasonSel = document.getElementById('cancelReason');
+    OMT.State.cancelBooking(b.id, {
+      cancelReason: reasonSel ? reasonSel.value : 'other',
+      penalty: c.penalty,
+      refund: c.refund,
+      refundMethod: b.paymentMethod
+    });
+    // 완료 화면
+    document.getElementById('cancelBody').innerHTML = `
+      <div style="text-align:center;padding:22px 6px 8px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#E8F5E9;display:grid;place-items:center;font-size:26px;margin:0 auto 12px;">✓</div>
+        <h3 style="margin:0 0 6px;">취소 접수 완료</h3>
+        <p class="sub" style="margin-bottom:16px;">${b.bookingNumber} · ${b.productName}</p>
+        <div style="background:var(--bg-soft);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:var(--ink);">
+            <span>환불 예정 금액</span><span style="color:var(--primary);font-variant-numeric:tabular-nums;">${krw(c.refund)}</span>
+          </div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-top:6px;line-height:1.6;">
+            ${PAY_LABELS[b.refundMethod || b.paymentMethod] || '원결제수단'}(으)로 <b>3~5영업일 내</b> 환불됩니다.<br>
+            위약금 ${krw(c.penalty)} 차감 · 적립 예정 마일리지 회수 완료
+          </div>
+        </div>
+        <button class="submit" style="width:100%;padding:13px;border-radius:10px;font-weight:900;background:var(--ink);color:#fff;font-family:inherit;font-size:14px;cursor:pointer;border:none;" onclick="closeCancelModal()">확인</button>
+      </div>
+    `;
+    renderBookings(); renderProfileStats(); renderHomeDashboard();
+    toast('예약이 취소되었어요 · 환불 접수 완료');
   };
   window.rebook = (pid, pt) => {
     if(pid && pid.startsWith('gt-')) location.href = 'golftel.html?id=' + pid;

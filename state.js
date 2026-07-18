@@ -666,9 +666,12 @@
     try { recordCreatorConversion(booking); } catch(e){ console.warn('creator conversion record failed', e); }
     return booking;
   }
-  function cancelBooking(id){
+  function cancelBooking(id, extra){
+    // extra: { cancelReason, penalty, refund, refundMethod } — 취소·환불 플로우가 기록
     const list = getBookings().map(b =>
-      (b.id === id || b.bookingNumber === id) ? {...b, status:'cancelled', cancelledAt:new Date().toISOString()} : b
+      (b.id === id || b.bookingNumber === id)
+        ? {...b, status:'cancelled', cancelledAt:new Date().toISOString(), ...(extra || {})}
+        : b
     );
     write(KEYS.bookings, list);
     notify('bookings', list);
